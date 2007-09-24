@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link:
-Tags: anonymous, posting, users, post, form
+Tags: anonymous, posting, users, post, form, ajax
 Requires at least: 2.1.2
 Tested up to: 2.1.2
 Stable Tag: 0.6
