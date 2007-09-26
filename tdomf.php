@@ -2,7 +2,7 @@
 /*
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
-Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts. You can configure who can post and other details via the options and manage menus. <a href="options-general.php?page=TDOMiniForms/OptionsMenu.php">Configure Plugin.</a>
+Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
 Version: 0.7
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
@@ -86,12 +86,17 @@ Author URI: http://thedeadone.net
 // - "Your Submissions" page for all users. Form is included on this page.
 // - Form should be XHTML valid (unless a new widget breaks it!)
 // - Handle magic quotes properly
-// - Allow YouTube embedded code to be posted (version 0.6 couldn't do this. Yet
-//     another reason to forget AJAX)
+// - Allow YouTube embedded code to be posted, though this option is only 
+//    allowable if moderation is enabled! Otherwise Wordpress' kses filters will
+//    pull it out.
 // - Reject Notifications as well as Approved Notifications
 // - Can now restrict tags on posted content
 // - Can uninstall the plugin completely. Also removes v0.6 unused options too.
-// - TODO: new widgets and move core widgets out of widget hell
+// - New Template Tag: tdomf_can_current_user_see_form() returns true if current
+//     user can access the form
+// - Simple question-captcha widget: user must answer a simple question before
+//     post will be accepted.
+// - "I agree" widget: user must check a checkbox before post will be accepted.
 // - TODO: Documenation: Help, About and Widgets
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +120,8 @@ Author URI: http://thedeadone.net
 //    * File-uploading widget
 //    * Custom Field widgets: one for each HTML element in the rainbow!
 //    * Simple Text
+//    * Select Category
+//    * Tags
 // - Improvements for current widgets
 //    * More options
 //    * QuickTags, TinyMCE, etc. for content box
@@ -127,6 +134,8 @@ Author URI: http://thedeadone.net
 //    * Integration with Spam Karma?
 //    * Integration with Aksimet?
 // - Force Preview (user must preview first before submission)
+// - Allow newly submitted posts be set to "Post ready for review" with the 
+//    Wordpress 2.3
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
@@ -251,9 +260,6 @@ function tdomf_add_menus()
     // Uninstall
     add_submenu_page( TDOMF_FOLDER , __('Uninstall', 'tdomf'), __('Uninstall', 'tdomf'), 'manage_options', 'tdomf_show_uninstall_menu', 'tdomf_show_uninstall_menu');
     //
-    // Help Page
-    add_submenu_page( TDOMF_FOLDER , __('Help', 'tdomf'), __('Help', 'tdomf'), 'edit_others_posts', 'tdomf_show_help_page', 'tdomf_show_help_page');
-    //
     // About Page
     add_submenu_page( TDOMF_FOLDER , __('About', 'tdomf'), __('About', 'tdomf'), 'edit_others_posts', 'tdomf_show_about_page', 'tdomf_show_about_page');
     
@@ -273,7 +279,6 @@ require_once('include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-help.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-about.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');

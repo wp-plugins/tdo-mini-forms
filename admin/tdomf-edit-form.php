@@ -174,7 +174,7 @@ function tdomf_show_form_menu() {
 <div class="wrap">
 		<h2>Form Arrangement</h2>
 
-		<p><?php _e('You can drag and drop and order "widgets" for your form below. For more information about widgets, read the <a href="#">help</a>.',"tdomf"); ?></p>
+		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below.',"tdomf"); ?></p>
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
 			<div id="zones">

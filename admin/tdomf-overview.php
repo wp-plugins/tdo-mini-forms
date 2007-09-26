@@ -86,34 +86,23 @@ function tdomf_overview_menu()  {
                 $stat_sub_cur   = tdomf_get_submitted_posts_count();
                 $stat_mod       = $stat_sub_cur - $stat_unmod; ?>
 
-    	  <p><?php printf(__("There has been %d posts submitted and %d posts approved.","tdomf"),$stat_sub_ever,$stat_mod); ?>
+    	  <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved.","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_mod); ?>
+        
+        <?php /* TODO: Latest from thedeadone.net forum. Current forum plugin does not yet support RSS! */ ?>
+        
+        <?php $rss = fetch_rss('http://wordpress.org/support/rss/tags/tdo-mini-forms');
+               if ( isset($rss->items) && 0 != count($rss->items) ) {
+                 $rss->items = array_slice($rss->items, 0, 5); 
+                 echo "<h3>".__('Latest Wordpress.org Comments','tdomf')."</h3><ul>";
+                 foreach ($rss->items as $item) { ?>
+                 <li><a href='<?php echo wp_filter_kses($item['link']); ?>'><?php echo wp_specialchars($item['title']); ?></a></li>
+        <?php    }
+                 echo "</ul>";
+              } ?>
+        
     </div>
 
-    <?php if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
-          $test_see_form = false;
-          foreach($roles as $role) {
-          if(!isset($role->capabilities['publish_posts']) && isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM])){
-            $test_see_form = true;
-          }
-          }
-          if($test_see_form == false) {
-            $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can already publish posts, can see the form!")."</font><br/>";
-            tdomf_log_message("Option Allow Everyone not set and no roles set to see the form",TDOMF_LOG_BAD);
-          }
-        }
-
-        if(get_option(TDOMF_DEFAULT_AUTHOR) == false) {
-          $message .= "<font color=\"red\">".__("<b>Warning</b>: No default author set!")."</font><br/>";
-          tdomf_log_message("Option Default Author not set!",TDOMF_LOG_BAD);
-        } else {
-          $def_aut = new WP_User(get_option(TDOMF_DEFAULT_AUTHOR));
-          if($def_aut->has_cap("publish_posts")) {
-          $message .= "<font color=\"red\">".__("<b>Warning</b>: Default author can publish posts. Default author should not be able to publish posts!")."</font><br/>";
-          tdomf_log_message("Option Default Author is set to an author who can publish posts.",TDOMF_LOG_BAD);
-          }
-        }
-        echo "<p>$message</p>";
-    ?>
+    <?php echo "<p>".$message = tdomf_get_error_messages()."</p>";  ?>
     
     <p><?php _e("Use these links to get started:","tdomf"); ?></p>
 
@@ -131,16 +120,15 @@ function tdomf_overview_menu()  {
     <?php _e("TDO Mini Forms plugin allows you to provide a form to your readers and users so that they can submit posts to your blog, even if they don't have rights to do so. You can control what type of users, such as unregistered users and subscribers, can access and use the form. Posts are submitted as draft so that you can approve them before they are published. (You can optionally turn this off so that submissions are automatically published). As of version 0.7, you can now also customise the form using widgets.","tdomf"); ?>
     </p>
 
-
     <div id="devnews">
-    <h3><?php _e('TDO Mini Forms Blog',  'tdomf') ?></h3>
+    <h3><?php _e('Latest TDO Mini Forms News!',  'tdomf') ?></h3>
 
     <?php
       $rss = fetch_rss('http://thedeadone.net/index.php?tag=tdomf&feed=rss2');
 
       if ( isset($rss->items) && 0 != count($rss->items) )
       {
-        $rss->items = array_slice($rss->items, 0, 3);
+        $rss->items = array_slice($rss->items, 0, 1);
         foreach ($rss->items as $item)
         {
         ?>

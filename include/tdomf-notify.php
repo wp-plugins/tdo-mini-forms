@@ -114,6 +114,7 @@ function tdomf_notify_admins($post_ID){
   //
   $email_msg  = sprintf(__("A new post with title \"%s\" from %s is awaiting your approval.\r\n\r\n","tdomf"),$title,$submitter_string);
   $email_msg .= sprintf(__("This was submitted from IP %s.\r\n\r\n","tdomf"),$ip);
+  $email_msg .= sprintf(__("You can moderate this submission from %s.\r\n\r\n","tdomf"),$moderate_all_link);
   $email_msg .= sprintf(__("Content of the post: \r\n\r\n %s \r\n\r\n","tdomf"),$content);
   $email_msg .= sprintf(__("Best Regards\r\n\r\nTDOMF @ %s","tdomf"),get_bloginfo("title"));
 

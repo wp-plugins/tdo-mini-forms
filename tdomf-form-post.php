@@ -1,3 +1,4 @@
+#!/usr/local/bin/php
 <?php
 
 //////////////////////////
@@ -41,6 +42,18 @@ if($message == NULL) {
 
     tdomf_log_message("Someone is attempting to submit something");
 
+    /*if (get_magic_quotes_gpc()) {
+      tdomf_log_message("Magic quotes is enabled. Stripping slashes for preview...");
+      function stripslashes_array($array) {
+          return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
+      }
+      $_COOKIE = stripslashes_array($_COOKIE);
+      #$_FILES = stripslashes_array($_FILES);
+      #$_GET = stripslashes_array($_GET);
+      $_POST = stripslashes_array($_POST);
+      $_REQUEST = stripslashes_array($_REQUEST);
+    }*/   
+    
 	   $message = tdomf_validate_form($_POST);
 	   if($message == NULL) {
 	    $args = $_POST;
@@ -55,10 +68,10 @@ if($message == NULL) {
 	    $save_post_info = TRUE;
 	   }
 	} else if(isset($_POST['tdomf_form1_preview'])) {
-
+    
     // For preview, remove magic quote slashes!
     if (get_magic_quotes_gpc()) {
-      tdomf_log_message("Magic quotes is enabled. Stripping slashes for preview...");
+      #tdomf_log_message("Magic quotes is enabled. Stripping slashes for preview...");
       function stripslashes_array($array) {
           return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
       }
@@ -68,7 +81,7 @@ if($message == NULL) {
       $_POST = stripslashes_array($_POST);
       $_REQUEST = stripslashes_array($_REQUEST);
     }
-
+    
        $save_post_info = TRUE;
 	   $message = tdomf_validate_form($_POST);
 	   if($message == NULL) {

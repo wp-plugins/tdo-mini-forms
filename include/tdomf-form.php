@@ -162,6 +162,14 @@ function tdomf_create_post($args) {
 
    tdomf_log_message("Let the widgets do their work on newly created $post_ID");
 
+   // Disable kses protection! It seems to get over-protective of non-registered
+   // posts! If the post is going to be moderated, then we don't have an issue
+   // as an admin will verify it... I think. Hope to god this is not a
+   // security risk!
+   if(get_option(TDOMF_OPTION_MODERATION)){
+     kses_remove_filters();
+   }
+   
    // Widgets:post
    //
    $widget_args = array_merge( array( "post_ID"=>$post_ID ),
@@ -206,6 +214,12 @@ function tdomf_create_post($args) {
       tdomf_notify_admins($post_ID);
    }
 
+   // Renable filters so we dont' break anything else!
+   //
+   if(get_option(TDOMF_OPTION_MODERATION) && current_user_can('unfiltered_html') == false){
+     kses_init_filters();
+   }
+   
    return $post_ID;
 }
 

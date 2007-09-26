@@ -159,17 +159,17 @@ function tdomf_show_uninstall_menu() {
             </p>  
     <?php } else { ?>
             
-            <p><?php _e("From here you can uninstall and remove some or all of TDO Mini Form's options.","tdomf"); ?></p>
+            <p><?php _e("From here you can uninstall and remove some or all of TDO Mini Form's options and information.","tdomf"); ?></p>
             </div>
             
             <div class="wrap">
             <p><?php _e("You can simply remove just the settings/options. This will preserve submitter information on posts and users if you re-enable TDO Mini Forms later.","tdomf"); ?></p>
-            <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=reset_options",'tdomf-reset-options'); ?>" class='delete' >Remove Options</a><br/>
+            <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=reset_options",'tdomf-reset-options'); ?>" class='delete' ><?php _e("Remove Options","tdomf"); ?></a><br/>
             </div>
             
             <div class="wrap">
-            <p><?php _e("This removes <b>everything</b>. If you re-enable the plugin, posts previousily submitted will not turn up as submitted posts.","tdomf"); ?></p>
-            <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=uninstall",'tdomf-uninstall'); ?>" class='delete' >Uninstall Everything!</a>
+            <p><?php _e("This removes nearly <b>everything</b>. Any posts submitted, users created or pages created are not removed. However submitted posts are stripped of any information about TDO Mini Forms. If you re-enable TDO Mini Forms, posts previousily submitted will not turn up as submitted posts any more.","tdomf"); ?></p>
+            <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=uninstall",'tdomf-uninstall'); ?>" class='delete' ><?php _e("Uninstall Nearly Everything!","tdomf"); ?></a>
             </div>
             
     <?php } ?>

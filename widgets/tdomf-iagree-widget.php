@@ -1,4 +1,13 @@
 <?php
+/*
+Name: "I Agree"
+URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
+Description: This widget provides a checkbox that the user must click before a post will be accept such as the classic "I Agree" buttons.
+Version: 1
+Author: Mark Cunningham
+Author URI: http://thedeadone.net
+*/
+
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
 function tdomf_widget_iagree_get_options() {

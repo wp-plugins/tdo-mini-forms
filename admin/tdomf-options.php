@@ -173,8 +173,7 @@ function tdomf_show_options_menu() {
           foreach($users as $user) {
             $status = get_usermeta($user->ID,TDOMF_KEY_STATUS);
             $user_obj = new WP_User($user->ID);
-            #var_dump($user_obj);
-            if($user->ID == $def_aut || !$user_obj->has_cap("publish_posts")) {
+            if($user->ID == $def_aut || (!$user_obj->has_cap("publish_posts") && !$user_obj->has_cap(TDOMF_CAPABILITY_CAN_SEE_FORM))) {
                $cnt_users++;
                ?>
               <option value="<?php echo $user->ID; ?>" <?php if($user->ID == $def_aut) { ?> selected <?php } ?> ><?php if($user_obj->has_cap("publish_posts")) {?><font color="red"><?php }?><?php echo $user->user_login; ?><?php if(!empty($status) && $status == TDOMF_USER_STATUS_BANNED) { ?> (Banned User) <?php } ?><?php if($user_obj->has_cap("publish_posts")) { $def_aut_bad = true; ?> (Error) </font><?php }?></option>
@@ -185,7 +184,7 @@ function tdomf_show_options_menu() {
 
     <?php if($def_aut_bad || $cnt_users <= 0) { ?>
 
-    <?php $create_user_link = "admin.php?page=tdomf_show_options_menu&action=create_form_page";
+    <?php $create_user_link = "admin.php?page=tdomf_show_options_menu&action=create_dummy_user";
 	      if(function_exists('wp_nonce_url')){
 	          $create_user_link = wp_nonce_url($create_user_link, 'tdomf-create-dummy-user');
           } ?>
@@ -334,6 +333,7 @@ function tdomf_show_options_menu() {
 function tdomf_create_dummy_user() {
    $rand_username = "tdomf_".tdomf_random_string(5);
    $rand_password = tdomf_random_string(8);
+   tdomf_log_message("Attempting to create dummy user $rand_username");
    $user_id = wp_create_user($rand_username,$rand_password);
    $user = new WP_User($user_id);
    if($user->has_cap("publish_posts")) {
@@ -397,11 +397,11 @@ function tdomf_handle_options_actions() {
   if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create_dummy_user') {
      check_admin_referer('tdomf-create-dummy-user');
      tdomf_create_dummy_user();
-     $message = "Dummy user created!";
+     $message = "Dummy user created for Default Author!<br/>";
   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create_form_page') {
      check_admin_referer('tdomf-create-form-page');
      $page_id = tdomf_create_form_page();
-     $message = sprintf(__("A page with the form has been created. <a href='%s'>View page &raquo;</a>","tdomf"),get_permalink($page_id));
+     $message = sprintf(__("A page with the form has been created. <a href='%s'>View page &raquo;</a><br/>","tdomf"),get_permalink($page_id));
   } else if(isset($_REQUEST['save_settings'])) {
 
       check_admin_referer('tdomf-options-save');
@@ -508,36 +508,59 @@ function tdomf_handle_options_actions() {
 
    // Warnings
 
-   if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
-      $test_see_form = false;
-	  foreach($roles as $role) {
- 		if(!isset($role->capabilities['publish_posts']) && isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM])){
- 			$test_see_form = true;
- 		}
- 	  }
- 	  if($test_see_form == false) {
- 	    $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can already publish posts, can see the form!")."</font><br/>";
-	  	tdomf_log_message("Option Allow Everyone not set and no roles set to see the form",TDOMF_LOG_BAD);
- 	  }
-   }
-
- 	  if(get_option(TDOMF_DEFAULT_AUTHOR) == false) {
-	 	  $message .= "<font color=\"red\">".__("<b>Warning</b>: No default author set!")."</font><br/>";
-	 	  tdomf_log_message("Option Default Author not set!",TDOMF_LOG_BAD);
- 	  } else {
- 	  	$def_aut = new WP_User(get_option(TDOMF_DEFAULT_AUTHOR));
- 	  	if($def_aut->has_cap("publish_posts")) {
-	 	  $message .= "<font color=\"red\">".__("<b>Warning</b>: Default author can publish posts. Default author should not be able to publish posts!")."</font><br/>";
-	 	  tdomf_log_message("Option Default Author is set to an author who can publish posts.",TDOMF_LOG_BAD);
- 	  	}
- 	  }
-
+   $message .= tdomf_get_error_messages(false);
 
    if(!empty($message)) { ?>
    <div id="message" class="updated fade"><p><?php echo $message; ?></p></div>
    <?php }
 }
 
+function tdomf_get_error_messages($show_links=true) {
+  global $wpdb, $wp_roles;
+  if(!isset($wp_roles)) {
+  	$wp_roles = new WP_Roles();
+  }
+  $roles = $wp_roles->role_objects;
+  $message = "";
+  if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
+          $test_see_form = false;
+          foreach($roles as $role) {
+          if(!isset($role->capabilities['publish_posts']) && isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM])){
+            $test_see_form = true;
+          }
+          }
+          if($test_see_form == false) {
+            if($show_links) {
+              $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"admin.php?page=tdomf_show_options_menu\">Configure on Options Page &raquo;</a>")."</font><br/>";
+            } else {
+              $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form!")."</font><br/>";
+            }
+            tdomf_log_message("Option Allow Everyone not set and no roles set to see the form",TDOMF_LOG_BAD);
+          }
+        }
+
+       $create_user_link = "admin.php?page=tdomf_show_options_menu&action=create_dummy_user";
+	    if(function_exists('wp_nonce_url')){
+	          $create_user_link = wp_nonce_url($create_user_link, 'tdomf-create-dummy-user');
+    }
+	  if(get_option(TDOMF_DEFAULT_AUTHOR) == false) {
+	 	  $message .= "<font color=\"red\">".sprintf(__("<b>Error</b>: No default author set! <a href=\"%s\">Create dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";
+	 	  tdomf_log_message("Option Default Author not set!",TDOMF_LOG_BAD);
+ 	  } else {
+ 	  	$def_aut = new WP_User(get_option(TDOMF_DEFAULT_AUTHOR));
+      if(empty($def_aut->data->ID)) {
+        // User does not exist! Deleting option
+        delete_option(TDOMF_DEFAULT_AUTHOR);
+        $message .= "<font color=\"red\">".sprintf(__("<b>Error</b>: Current Default Author does not exist! <a href=\"%s\">Create dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";
+	 	    tdomf_log_message("Current Default Author does not exist! Deleting option.",TDOMF_LOG_BAD);
+      }      
+ 	  	if($def_aut->has_cap("publish_posts")) {
+	 	  $message .= "<font color=\"red\">".sprintf(__("<b>Error1</b>: Default author can publish posts. Default author should not be able to publish posts! <a href=\"%s\">Create a dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";
+	 	  tdomf_log_message("Option Default Author is set to an author who can publish posts.",TDOMF_LOG_BAD);
+ 	  	}
+    }
+    return $message;
+}
 
 
 ?>

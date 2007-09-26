@@ -3,6 +3,44 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 /* Template Tags */
 
+/////////////////////////////////////////////
+// Check if current user can access the form!
+//
+function tdomf_can_current_user_see_form() {
+   global $current_user;
+   get_currentuserinfo();
+
+   if(is_user_logged_in()) {
+       $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
+       if($user_status == TDOMF_USER_STATUS_BANNED) {
+         // User Banned
+         return false;
+       }
+   }
+
+  $ip =  $_SERVER['REMOTE_ADDR'];
+  $banned_ips = get_option(TDOMF_BANNED_IPS);
+  if($banned_ips != false) {
+  	$banned_ips = split(";",$banned_ips);
+  	foreach($banned_ips as $banned_ip) {
+		if($banned_ip == $ip) {
+      // IP banned
+      return false;
+		}
+	 }
+  }
+  
+  if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
+  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM)) {
+      // User doesn't have capability to see form
+      return false;
+  	}
+  }
+  
+  // all other conditions passed!
+  return true;
+}
+
 //////////////////////////////////////
 // Get the form 
 //
