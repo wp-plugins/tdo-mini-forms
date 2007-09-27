@@ -21,7 +21,7 @@ function tdomf_log_handle_actions() {
    }
 }
 
-// Display a help page
+// Display the log!
 //
 function tdomf_show_log_menu() {
 

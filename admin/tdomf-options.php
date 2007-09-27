@@ -5,8 +5,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for the options menu //
 ///////////////////////////////
 
-// TODO: Save Settings >> See Form
-
 // Display the menu to configure options for this plugin
 //
 function tdomf_show_options_menu() {
@@ -347,6 +345,7 @@ function tdomf_create_dummy_user() {
    return $user_id;
 }
 
+// Create a random string!
 // Taken from http://www.tutorialized.com/view/tutorial/PHP-Random-String-Generator/13903
 //
 function tdomf_random_string($length)
@@ -515,6 +514,8 @@ function tdomf_handle_options_actions() {
    <?php }
 }
 
+// Check for error messages with options and return a message
+//
 function tdomf_get_error_messages($show_links=true) {
   global $wpdb, $wp_roles;
   if(!isset($wp_roles)) {

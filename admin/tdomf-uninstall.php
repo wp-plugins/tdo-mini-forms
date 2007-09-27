@@ -83,6 +83,8 @@ function tdomf_reset_options() {
   echo "</span><br/>";
 }
 
+// Uninstall everything else!
+//
 function tdomf_uninstall() {
   tdomf_reset_options();
   

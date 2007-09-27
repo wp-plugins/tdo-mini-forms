@@ -15,7 +15,7 @@ require_once($wp_config);
 
 global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 
-session_start();
+if (!$_SESSION) session_start();
 
 // Security Check
 //
@@ -26,13 +26,13 @@ if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key
 }
 unset($_SESSION['tdomf_key']);
 
-// Double check user permissions
-//
-$message = tdomf_check_permissions_form();
-
 // loading text domain for language translation
 //
 load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
+
+// Double check user permissions
+//
+$message = tdomf_check_permissions_form();
 
 // Now either generate a preview or create a post
 //
@@ -42,18 +42,6 @@ if($message == NULL) {
 
     tdomf_log_message("Someone is attempting to submit something");
 
-    /*if (get_magic_quotes_gpc()) {
-      tdomf_log_message("Magic quotes is enabled. Stripping slashes for preview...");
-      function stripslashes_array($array) {
-          return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
-      }
-      $_COOKIE = stripslashes_array($_COOKIE);
-      #$_FILES = stripslashes_array($_FILES);
-      #$_GET = stripslashes_array($_GET);
-      $_POST = stripslashes_array($_POST);
-      $_REQUEST = stripslashes_array($_REQUEST);
-    }*/   
-    
 	   $message = tdomf_validate_form($_POST);
 	   if($message == NULL) {
 	    $args = $_POST;

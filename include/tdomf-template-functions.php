@@ -1,7 +1,9 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/* Template Tags */
+///////////////////////////////////////
+// Template Tags and other functions //
+///////////////////////////////////////
 
 /////////////////////////////////////////////
 // Check if current user can access the form!

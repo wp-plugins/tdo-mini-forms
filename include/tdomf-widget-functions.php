@@ -5,9 +5,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Manage Widgets //
 ////////////////////
 
-// TODO: default widgets should be included directly
-// TODO: notifyme can check if whoami widget is installed...
-
 // Load widgets from widget directory
 //
 function tdomf_load_widgets() {
@@ -38,7 +35,8 @@ function tdomf_get_widget_order() {
   return $widget_order;
 }
 
-// Preview avaliable
+// Is a preview avaliable
+// Currently selected widgets must provide a preview and preview must be enabled.
 //
 function tdomf_widget_is_preview_avaliable() {
    global $tdomf_form_widgets_preview;
@@ -54,7 +52,7 @@ function tdomf_widget_is_preview_avaliable() {
    return false;
 }
 
-// AJAX allowed
+// AJAX allowed (Not currently supported)
 //
 function tdomf_widget_is_ajax_avaliable() {
    global $tdomf_form_widgets_preview, $tdomf_form_widgets_validate, $tdomf_form_widgets_post;
@@ -130,6 +128,8 @@ function tdomf_register_form_widget_control($name, $control_callback, $width = 3
    $tdomf_form_widgets_control[$id]['height'] = $height;
 }
 
+// Widgets that provide a preview must register with this function
+//
 function tdomf_register_form_widget_preview($name, $preview_callback, $ajax = true) {
    global $tdomf_form_widgets_preview,$tdomf_form_widgets;
    $id = sanitize_title($name);
@@ -146,7 +146,8 @@ function tdomf_register_form_widget_preview($name, $preview_callback, $ajax = tr
    $tdomf_form_widgets_preview[$id]['ajax'] = $ajax;
 }
 
-
+// Widgets that vaidate input *before* input
+//
 function tdomf_register_form_widget_validate($name, $validate_callback, $ajax = true) {
    global $tdomf_form_widgets_validate,$tdomf_form_widgets;
    $id = sanitize_title($name);
@@ -163,6 +164,8 @@ function tdomf_register_form_widget_validate($name, $validate_callback, $ajax = 
    $tdomf_form_widgets_validate[$id]['ajax'] = $ajax;
 }
 
+// Widgets that modify the post *after* submission 
+//
 function tdomf_register_form_widget_post($name, $post_callback, $ajax = true) {
    global $tdomf_form_widgets_post,$tdomf_form_widgets;
    $id = sanitize_title($name);
@@ -186,8 +189,12 @@ function tdomf_get_form_widget_default_order() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//                                                          Default Widgets   //
+//                                Default Widgets: "Content" and "Who Am I"   //
 ////////////////////////////////////////////////////////////////////////////////
+
+////////////////////
+// Content Widget //
+////////////////////
 
 #TODO: QuickTags and/or FckEditor
 
@@ -299,14 +306,11 @@ function tdomf_widget_content_post($args) {
   } else {
     $post_content = $content_content;
   }
-  #tdomf_log_message($post_content);
   
   $post = array (
       "ID"                      => $post_ID,
       "post_content"            => $post_content,
-#      "post_content_filtered"   => $post_content,
       "post_title"              => $content_title,
-#      "update"                  => true
   );
   $post_ID = wp_insert_post($post);
 }
@@ -362,7 +366,7 @@ function tdomf_widget_content_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('Content', 'tdomf_widget_content_control', 300, 400);
+tdomf_register_form_widget_control('Content', 'tdomf_widget_content_control', 300, 430);
 
 ///////////////////////////////////////
 // Validate title and content from form 
@@ -390,6 +394,10 @@ function tdomf_widget_content_validate($args) {
   }
 }
 tdomf_register_form_widget_validate('Content', 'tdomf_widget_content_validate');
+
+///////////////////////
+// "Who Am I" Widget //
+///////////////////////
 
 // Simple regex check to validate a URL
 //

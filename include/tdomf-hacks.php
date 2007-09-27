@@ -1,7 +1,9 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/* Workarounds and hacks required by TDOMF to work */
+/////////////////////////////////////////////////////
+// Workarounds and hacks required by TDOMF to work // 
+/////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////
 // There is a "bug" in wordpress if you publish a post using the
@@ -57,7 +59,7 @@ function tdomf_start_session() {
 }
 add_action("get_header","tdomf_start_session");
 //
-// Add session_start to admin menus where we allow logged in users submit!
+// Add session_start to admin menus where we allow logged in users to submit!
 //
 add_action("load-users_page_tdomf_your_submissions","tdomf_start_session");
 add_action("load-profile_page_tdomf_your_submissions","tdomf_start_session");

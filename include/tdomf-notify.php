@@ -5,8 +5,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for Email Notifications //
 /////////////////////////////////
 
+// This includes the core "Notify Me" widget
 
-/* taken from http://www.ilovejackdaniels.com/php/email-address-validation/ */
+// Validate email address
+// Taken from http://www.ilovejackdaniels.com/php/email-address-validation/
+//
 function tdomf_check_email_address($email) {
   // First, we check that there's one @ symbol, and that the lengths are right
   if (!ereg("^[^@]{1,64}@[^@]{1,255}$", $email)) {
@@ -134,7 +137,7 @@ function tdomf_notify_admins($post_ID){
   }
 }
 
-// Notify Poster
+// Notify Poster of approved post
 //
 function tdomf_notify_poster_approved($post_id) {
    global $wpdb;
@@ -173,6 +176,8 @@ function tdomf_notify_poster_approved($post_id) {
    delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
    return $post_id;
 }
+// Notify Poster of rejected post
+//
 function tdomf_notify_poster_rejected($post_id) {
    global $wpdb;
    
@@ -214,6 +219,10 @@ function tdomf_notify_poster_rejected($post_id) {
 add_action('publish_post', 'tdomf_notify_poster_approved');
 add_action('delete_post', 'tdomf_notify_poster_rejected');
 
+////////////////////////////////////////////////////////////////////////////////
+//                                             Default Widgets: "Notify Me"   //
+////////////////////////////////////////////////////////////////////////////////
+
 // Do we need to display a email input?
 //
 function tdomf_widget_notifyme_show_email_input(){
@@ -236,6 +245,8 @@ function tdomf_widget_notifyme_show_email_input(){
   return $show_email_input;
 }
 
+// Widget core
+//
 function tdomf_widget_notifyme($args) {
   global $current_user;
   get_currentuserinfo();
@@ -274,6 +285,8 @@ function tdomf_widget_notifyme($args) {
 }
 tdomf_register_form_widget('Notify Me', 'tdomf_widget_notifyme');
 
+// Widget validate input
+//
 function tdomf_widget_notifyme_validate($args) {
   extract($args);
   if(tdomf_widget_notifyme_show_email_input()) {
@@ -285,6 +298,8 @@ function tdomf_widget_notifyme_validate($args) {
 }
 tdomf_register_form_widget_validate('Notify Me', 'tdomf_widget_notifyme_validate');
 
+// Widget post submitted post-op
+//
 function tdomf_widget_notifyme_post($args) {
   global $current_user;
   get_currentuserinfo();
