@@ -1,6 +1,10 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+/////////////////////////
+// Moderate Posts page //
+/////////////////////////
+
 // make a post draft
 //
 function tdomf_unpublish_post($post_id) {

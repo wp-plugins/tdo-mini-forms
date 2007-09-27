@@ -72,13 +72,12 @@ Author URI: http://thedeadone.net
 // - Move the various admin pages to it's own submenu
 // - Updated Edit Post Panel (uses built in AJAX-SACK)
 // - Updated options menu
-// - Code refactored
+// - Code refactored, renamed files and restructured directories
 // - Logging feature
-// - Delete Plugin Settings feature (see About page)
+// - Can uninstall the plugin completely. Also removes v0.6 unused options too
 // - "Create Dummy User" link on options page
 // - "Create Page with Form" from options page
 // - Properly implemented form POST and dropped AJAX support
-// - Renamed files and restructured directories
 // - Can now automatically updates "the_author" template tag with submitter info
 // - Can now automatically add "This post submitted by..." to end of post content
 // - Bulk moderation of submitted posts, users and IPs
@@ -91,7 +90,6 @@ Author URI: http://thedeadone.net
 //    pull it out.
 // - Reject Notifications as well as Approved Notifications
 // - Can now restrict tags on posted content
-// - Can uninstall the plugin completely. Also removes v0.6 unused options too.
 // - New Template Tag: tdomf_can_current_user_see_form() returns true if current
 //     user can access the form
 // - Simple question-captcha widget: user must answer a simple question before

@@ -1,16 +1,9 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/*function get_a_post_modified_time( $post_id = 0, $d = 'U', $gmt = false ) {
-    if ( $gmt )
-            $time = $post->post_modified_gmt;
-    else
-            $time = $post->post_modified;
-    $time = mysql2date($d, $time);
-
-    return apply_filters('get_the_modified_time', $time, $d, $gmt);
-}*/
-
+/////////////////////////////////
+// User "Your Submission" page //
+/////////////////////////////////
 
 // Grab a list of published submitted posts for user
 //
@@ -52,7 +45,8 @@ function tdomf_get_user_draft_posts($user_id = 0, $offset = 0, $limit = 0) {
 	return $wpdb->get_results( $query );
 }
 
-
+// Show the page!
+//
 function tdomf_show_your_submissions_menu() {
   global $current_user;
 

@@ -10,6 +10,8 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+// Get Options for this widget
+//
 function tdomf_widget_iagree_get_options() {
   $options = get_option('tdomf_iagree_widget');
     if($options == false) {
@@ -90,7 +92,7 @@ function tdomf_widget_iagree_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('I Agree', 'tdomf_widget_iagree_control', 350, 300);
+tdomf_register_form_widget_control('I Agree', 'tdomf_widget_iagree_control', 400, 300);
 
 
 ?>

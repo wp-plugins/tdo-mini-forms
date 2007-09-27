@@ -1,19 +1,17 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/* Logging function */
+/////////////////////////////////////////////////////////////
+// Logging function to aid debugging and tracking activity //
+/////////////////////////////////////////////////////////////
 
-// Some pre-defined types
+// Some pre-defined types/colours
 //
 define('TDOMF_LOG_ERROR',   "red");
 define('TDOMF_LOG_GENERAL', "gray");
 define('TDOMF_LOG_SYSTEM',  "blue");
 define('TDOMF_LOG_GOOD',    "green");
 define('TDOMF_LOG_BAD',     "black");
-
-/////////////////////
-// Local functions //
-/////////////////////
 
 // Returns a formatted date and time stamp for log messages
 //
@@ -44,7 +42,7 @@ function tdomf_get_log_userstamp(){
 
 }
 
-/////////////////////
+//////////////////////////////
 // The actual logging function
 //
 function tdomf_log_message($message,$color=TDOMF_LOG_GENERAL){
@@ -67,10 +65,6 @@ function tdomf_log_message($message,$color=TDOMF_LOG_GENERAL){
       add_option(TDOMF_LOG,$msg);
    }
 }
-
-////////////////////
-// Log Management //
-////////////////////
 
 // Clear/Empty the log
 //

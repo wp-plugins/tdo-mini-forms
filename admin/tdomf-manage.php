@@ -1,6 +1,10 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+///////////////////////////////
+// Manage Users and IPs Page //
+///////////////////////////////
+
 // Return count of submitted posts from specific user
 //
 function tdomf_get_users_submitted_posts_count($user_id = 0) {
@@ -57,6 +61,8 @@ function tdomf_get_ips_count() {
     return count(tdomf_get_ips());
 }
 
+// Get banned ips list
+//
 function tdomf_get_ips_banned($offset = 0, $limit = 0) {
     $banned_ips = get_option(TDOMF_BANNED_IPS);
     if($banned_ips == false) { $banned_ips = array(); }
@@ -74,6 +80,8 @@ function tdomf_get_ips_banned($offset = 0, $limit = 0) {
     return $banned_ips;
 }
 
+// Get count of banned ips
+//
 function tdomf_get_ips_banned_count() {
     return count(tdomf_get_ips_banned(0,0));
 }
@@ -169,6 +177,8 @@ function tdomf_get_users_trusted_count() {
     return intval($wpdb->get_var( $query ));
 }
 
+// Show page
+//
 function tdomf_show_manage_user_menu() {
   global $wp_roles;
  
@@ -371,6 +381,8 @@ function getNumChecked(form)
    <?php
 }
 
+// Show Manage IP page
+//
 function tdomf_show_manage_ip_menu() {
   
   $limit = 15;
@@ -735,7 +747,7 @@ function tdomf_manage_handler() {
    <?php }
 }
 
-// Auto-trust user
+// Auto-trust user (should this be in this file?)
 //
 function tdomf_auto_trust_user($post_id) {
    global $wpdb;

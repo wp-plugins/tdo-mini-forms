@@ -7,7 +7,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 # TODO: nonce support
 
-
 // Grab a list of user ids of all users, to use in the drop-down menu
 //
 function tdomf_get_all_users() {

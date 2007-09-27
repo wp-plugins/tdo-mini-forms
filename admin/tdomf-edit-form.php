@@ -7,6 +7,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // Hacked the drag and drop from the widget admin menu in WP2.2!
 
+// Only load edit scripts as needed!
+//
 function tdomf_load_edit_form_scripts() {
   // Need these scripts for drag and drop but only on this page, not every page!
   wp_enqueue_script( 'scriptaculous-effects' );
@@ -14,7 +16,8 @@ function tdomf_load_edit_form_scripts() {
 }
 add_action("load-tdomf_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
 
-add_action( 'admin_head', 'tdomf_form_admin_head' );
+// Stuff to do in the header of the page
+//
 function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
@@ -160,8 +163,10 @@ function tdomf_form_admin_head() {
 <?php
    }
 }
+add_action( 'admin_head', 'tdomf_form_admin_head' );
 
-
+// Show the page!
+//
 function tdomf_show_form_menu() {
   global $wpdb, $wp_roles, $tdomf_form_widgets, $tdomf_form_widgets_control;
 
@@ -260,6 +265,8 @@ function tdomf_show_form_menu() {
   <?php
 }
 
+// Handle actions
+//
 function tdomf_handle_editformmenu_actions() {
   
   if (get_magic_quotes_gpc()) {

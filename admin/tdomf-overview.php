@@ -1,7 +1,9 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-// TODO: Tidy up warnings!
+/////////////////////////
+// Admin Overview Page //
+/////////////////////////
 
 // Return a count of posts from unregistered users
 //
@@ -21,6 +23,8 @@ function tdomf_get_unregistered_users_posts_count() {
   return 0;
 }
 
+// Show the page
+//
 function tdomf_overview_menu()  {
 	global $wpdb,$wp_roles;
 
