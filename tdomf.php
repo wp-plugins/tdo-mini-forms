@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.7
+Version: 0.71
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -67,7 +67,7 @@ Author URI: http://thedeadone.net
 // - Options Menu: Default author is now chosen by login name instead of username
 // - Javascript code only included as necessary (i.e. not in every header)
 //
-// v0.7: TBD
+// v0.7: 26th September 2007
 // - Overview page
 // - Move the various admin pages to it's own submenu
 // - Updated Edit Post Panel (uses built in AJAX-SACK)
@@ -96,6 +96,10 @@ Author URI: http://thedeadone.net
 //     post will be accepted.
 // - "I agree" widget: user must check a checkbox before post will be accepted.
 // - TODO: Documenation: Help, About and Widgets
+//
+// v0.71: 28th September 2007
+// - Two small mistakes seemed to have wiggled into the files before 0.7 
+//     was released. Still getting the hang of SVN I guess.
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,9 +156,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "7");
+define("TDOMF_BUILD", "8");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.7");
+define("TDOMF_VERSION", "0.71");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
