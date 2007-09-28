@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, ajax, admin, submit, submissions, unregistered users
 Requires at least: 2.2
 Tested up to: 2.3
-Stable Tag: 0.7
+Stable Tag: 0.71
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
@@ -177,3 +177,7 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 * New Template Tag: tdomf_can_current_user_see_form() returns true if current user can access the form
 * Simple question-captcha widget: user must answer a simple question before post will be accepted.
 * "I agree" widget: user must check a checkbox before post will be accepted.
+
+= v0.71: 28 September 20076 =
+
+* Two small mistakes seemed to have wiggled into the files before 0.7 was released. Still getting the hang of SVN I guess.

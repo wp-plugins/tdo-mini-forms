@@ -321,16 +321,11 @@ EOT;
                           "after_title"=>"</legend>" );
   }
   $widget_order = tdomf_get_widget_order();
-  try {
-	  foreach($widget_order as $w) {
-		if(isset($tdomf_form_widgets[$w])) {
-			$form .= $tdomf_form_widgets[$w]['cb']($widget_args);
-			#$form .= "<br/>";
-		}
-	  }
-  } catch (Exception $e) {
-    tdomf_log_message("Error during form widgets $e->getMessage()",TDOMF_LOG_ERROR);
-    $form .= "\n<font color='red'>".sprintf(__("Error during processing of widgets: %s","tdomf"),$e->getMessage())."</font><br/><br/>\n";
+  foreach($widget_order as $w) {
+	if(isset($tdomf_form_widgets[$w])) {
+		$form .= $tdomf_form_widgets[$w]['cb']($widget_args);
+		#$form .= "<br/>";
+	}
   }
 
   // Form buttons
