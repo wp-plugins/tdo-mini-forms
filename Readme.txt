@@ -1,8 +1,8 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, ajax, admin, submit, submissions, unregistered users
-Requires at least: 2.2
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users
+Requires at least: 2.3
 Tested up to: 2.3
 Stable Tag: 0.71
 
@@ -104,13 +104,22 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
+<<<<<<< .mine
+2. The Moderation page (v0.6)
+3. "Your Submissions" page for registered users
+4. The Moderation page (v0.7) for approved submissions
+5. The overview page
+6. Constructing your form using "widgets"
+=======
 2. The Moderation page (v0.6)
 3. "Your Submissions" page for registered users
 4. Admin overview page
+>>>>>>> .r20253
 
 == Known Bugs == 
 
-* v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7.
+* v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
+* v0.71 has some issues with 2.3: Edit Form Page messed up. The "default category" option lists no categories. The "remove options" button the uninstall page seriously messed up my install.
 
 == Version History ==
 

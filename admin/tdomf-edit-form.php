@@ -22,7 +22,7 @@ function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
 ?>
-   <link rel="stylesheet" href="widgets.css?version=<?php bloginfo('version'); ?>" type="text/css" />
+   <link rel="stylesheet" href="css/widgets.css?version=<?php bloginfo('version'); ?>" type="text/css" />
 	<!--[if IE 7]>
 	<style type="text/css">
 	#palette {float:left;}
@@ -268,7 +268,7 @@ function tdomf_show_form_menu() {
 // Handle actions
 //
 function tdomf_handle_editformmenu_actions() {
-  
+
   if (get_magic_quotes_gpc()) {
       function stripslashes_array($array) {
           return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
@@ -279,7 +279,7 @@ function tdomf_handle_editformmenu_actions() {
       $_POST = stripslashes_array($_POST);
       #$_REQUEST = stripslashes_array($_REQUEST);
     }
-  
+
 	if ( isset( $_POST['action'] ) ) {
 		switch( $_POST['action'] ) {
 			case 'save_widget_order' :
