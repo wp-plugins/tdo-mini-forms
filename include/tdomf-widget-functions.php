@@ -312,7 +312,7 @@ function tdomf_widget_content_post($args) {
       "post_content"            => $post_content,
       "post_title"              => $content_title,
   );
-  $post_ID = wp_insert_post($post);
+  $post_ID = wp_update_post($post);
 }
 tdomf_register_form_widget_post('Content', 'tdomf_widget_content_post');
 

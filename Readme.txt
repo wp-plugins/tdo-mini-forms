@@ -69,12 +69,15 @@ If thats not good enough for you, you can use the template tag:
 = What template tags are available? =
 
 `<?php if(tdomf_can_current_user_see_form()) { ?> Link to form <?php } ?>`
+
 `<?php echo tdomf_get_the_form(); ?>`
+
 `<?php tdomf_the_form(); ?>`
 
 These tags must be used within the loop:
 
 `<?php echo tdomf_get_the_submitter(); ?>`
+
 `<?php tdomf_the_submitter(); ?>`
 
 = I want to add custom fields! =
@@ -104,17 +107,11 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
-<<<<<<< .mine
 2. The Moderation page (v0.6)
 3. "Your Submissions" page for registered users
 4. The Moderation page (v0.7) for approved submissions
 5. The overview page
 6. Constructing your form using "widgets"
-=======
-2. The Moderation page (v0.6)
-3. "Your Submissions" page for registered users
-4. Admin overview page
->>>>>>> .r20253
 
 == Known Bugs == 
 
@@ -190,3 +187,7 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 = v0.71: 28 September 20076 =
 
 * Two small mistakes seemed to have wiggled into the files before 0.7 was released. Still getting the hang of SVN I guess.
+
+= v0.72: TBD = 
+
+*

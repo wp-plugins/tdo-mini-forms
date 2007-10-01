@@ -100,6 +100,15 @@ Author URI: http://thedeadone.net
 // v0.71: 28th September 2007
 // - Two small mistakes seemed to have wiggled into the files before 0.7 
 //     was released. Still getting the hang of SVN I guess.
+//
+// v0.72: TBD
+// - Date is not set when post is published. This was okay in WP2.2.
+// - Comments are getting automatically closed (even if default is open).
+//     This was okay in WP2.2.
+// - widget.css in admin menu has moved in WP2.3. This is no longer compatible 
+//     with WP2.2.
+// - TODO: Widget page is mucked up a bit!
+// - TODO: "Remove Options"
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,9 +165,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "8");
+define("TDOMF_BUILD", "9");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.71");
+define("TDOMF_VERSION", "0.72");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)

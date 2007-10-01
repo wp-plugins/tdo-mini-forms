@@ -124,19 +124,25 @@ function tdomf_create_post($args) {
    //
    $def_title = tdomf_get_log_timestamp();
 
+   // Submission date
+   //
+   $post_date = current_time('mysql');
+	$post_date_gmt = get_gmt_from_date($post_date);
+   
    // Build post and post it as draft
    //
    $post = array (
-	   "post_content"   => "",
-	   "post_excerpt"   => "",
+#	   "post_content"   => "",
+#	   "post_excerpt"   => "",
 	   "post_title"     => $def_title,
 	   "post_category"  => $post_cats,
 	   "post_author"    => $user_id,
 	   "post_status"    => 'draft',
-	   "post_name"      => "",
-	   "post_date"      => "",
-	   "comment_status" => "",
-	   "ping_status"    => ""
+#	   "post_name"      => "",
+#	   "post_date"      => $post_date,
+#     "post_date_gmt"  => $post_date_gmt,
+#	   "comment_status" => get_option('default_comment_status'),
+#	   "ping_status"    => get_option('default_ping_status')
    );
    $post_ID = wp_insert_post($post);
 
@@ -196,14 +202,33 @@ function tdomf_create_post($args) {
    $send_moderator_email = true;
    if(!get_option(TDOMF_OPTION_MODERATION)){
       tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
-      wp_publish_post($post_ID);
+      // Use update post instead of publish post because in WP2.3, 
+      // update_post doesn't seem to add the date correctly!
+      // Also when it updates a post, if comments aren't set, sets them to
+      // empty! (Not so in WP2.2!)
+      $post = array (
+        "ID"             => $post_ID,
+        "post_status"    => 'publish',
+        "comment_status" => get_option('default_comment_status'),
+        );
+      wp_update_post($post);
       $send_moderator_email = false;
    } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
         $testuser = new WP_User($user_id,$user->user_login);
         $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
         if(current_user_can('publish_posts') || $user_status == TDOMF_USER_STATUS_TRUSTED) {
            tdomf_log_message("Publishing post $post_ID!");
-           wp_publish_post($post_ID);
+           // Use update post instead of publish post because in WP2.3, 
+           // update_post doesn't seem to add the date correctly!
+           // Also when it updates a post, if comments aren't set, sets them to
+           // empty! (Not so in WP2.2!)
+           $post = array (
+              "ID"             => $post_ID,
+              "post_status"    => 'publish',
+              "comment_status" => get_option('default_comment_status'),
+              );
+           wp_update_post($post);
+           #wp_publish_post($post_ID);
            $send_moderator_email = false;
         }
    }

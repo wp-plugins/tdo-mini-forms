@@ -323,7 +323,19 @@ function tdomf_moderation_handler() {
       check_admin_referer('tdomf-moderate-bulk');
       $posts = $_REQUEST['moderateposts'];
       $list = "";
+      $post_date = current_time('mysql');
+	   $post_date_gmt = get_gmt_from_date($post_date);
       foreach($posts as $p) {
+         // Use update post instead of publish post because in WP2.3, 
+         // update_post doesn't seem to add the date correctly! 
+         // Also when it updates a post, if comments aren't set, sets them to
+         // empty! (Not so in WP2.2!)
+         $post = array (
+           "ID"             => $post_ID,
+           "post_status"    => 'publish',
+           "comment_status" => get_option('default_comment_status'),
+           );
+         wp_update_post($post);
          wp_publish_post($p);
          $list .= "<a href=\"".get_permalink($p)."\">".$p."</a>,";
       }
