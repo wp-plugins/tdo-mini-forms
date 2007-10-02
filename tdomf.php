@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.71
+Version: 0.72
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -101,14 +101,21 @@ Author URI: http://thedeadone.net
 // - Two small mistakes seemed to have wiggled into the files before 0.7 
 //     was released. Still getting the hang of SVN I guess.
 //
-// v0.72: TBD
+// v0.72: 2nd October 2007
 // - Date is not set when post is published. This was okay in WP2.2.
 // - Comments are getting automatically closed (even if default is open).
 //     This was okay in WP2.2.
 // - widget.css in admin menu has moved in WP2.3. This is no longer compatible 
 //     with WP2.2.
-// - TODO: Widget page is mucked up a bit!
-// - TODO: "Remove Options"
+// - Can now again select a default category for submissions and new submissions
+//     will pick that category up. With WP2.3, tags and categories have changed
+//     to a new "taxonomy" structure.
+// - Added a "tdomf_widget_page" action hook
+// - Fixed Widget page to work in WP2.3. WP2.3 now uses jQuery for a lot of its
+//    javascript needs
+// - If you happen to use as your database prefix "tdomf_", and then you 
+//    uninstall on WP2.3, it would delete critical options and bugger up
+//    your wordpress install.
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////

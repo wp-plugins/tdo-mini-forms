@@ -11,8 +11,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 //
 function tdomf_load_edit_form_scripts() {
   // Need these scripts for drag and drop but only on this page, not every page!
-  wp_enqueue_script( 'scriptaculous-effects' );
-  wp_enqueue_script( 'scriptaculous-dragdrop' );
+  wp_enqueue_script( 'interface' );
 }
 add_action("load-tdomf_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
 
@@ -22,142 +21,123 @@ function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
 ?>
-   <link rel="stylesheet" href="css/widgets.css?version=<?php bloginfo('version'); ?>" type="text/css" />
-	<!--[if IE 7]>
-	<style type="text/css">
-	#palette {float:left;}
-	</style>
-	<![endif]-->
-   <!-- TODO: how do you calculate w&h? -->
-	<style type="text/css">
-		.dropzone ul { height: 385px; }
-		#sbadmin #zones { width: 263px; }
-	</style>
+        <?php wp_admin_css( 'css/widgets' ); ?>
+        <!--[if IE 7]>
+        <style type="text/css">
+                #palette { float: <?php echo ( get_bloginfo( 'text_direction' ) == 'rtl' ) ? 'right' : 'left'; ?>; }
+        </style>
+        <![endif]-->
    <script type="text/javascript">
    // <![CDATA[
 	var cols = ['tdomf_form-1'];
 	var widgets = [<?php foreach($tdomf_form_widgets as $id => $w) { ?>'<?php echo $id; ?>',<?php } ?> ];
 	var controldims = new Array;
 	<?php foreach($tdomf_form_widgets_control as $id => $w) { ?>
-	    controldims['<?php echo $id; ?>control'] = new Array();
-    	controldims['<?php echo $id; ?>control']['width'] = <?php echo $w['width']; ?>;
-	    controldims['<?php echo $id; ?>control']['height'] = <?php echo $w['height']; ?>;
+      controldims['#<?php echo $id; ?>control'] = new Array;
+      controldims['#<?php echo $id; ?>control']['width'] = <?php echo $w['width']; ?>;
+      controldims['#<?php echo $id; ?>control']['height'] = <?php echo $w['height']; ?>;
 	<?php } ?>
 
       function initWidgets() {
         <?php foreach($tdomf_form_widgets_control as $id => $w) { ?>
-		$('<?php echo $id; ?>popper').onclick = function() {popControl('<?php echo $id; ?>control');};
-		$('<?php echo $id; ?>closer').onclick = function() {unpopControl('<?php echo $id; ?>control');};
-		new Draggable('<?php echo $id; ?>control', {revert:false,handle:'controlhandle',starteffect:function(){},endeffect:function(){},change:function(o){dragChange(o);}});
-		if ( true && window.opera )
-			$('<?php echo $id; ?>control').style.border = '1px solid #bbb';
-
+          jQuery('#<?php echo $id; ?>popper').click(function() {popControl('#<?php echo $id; ?>control');});
+          jQuery('#<?php echo $id; ?>closer').click(function() {unpopControl('#<?php echo $id; ?>control');});
+          jQuery('#<?php echo $id; ?>control').Draggable({handle: '.controlhandle', zIndex: 1000});
+          if ( true && window.opera )
+            jQuery('#<?php echo $id; ?>control').css('border','1px solid #bbb');
         <?php } ?>
 
-		if ( true && window.opera )
-			$('shadow').style.background = 'transparent';
-		new Effect.Opacity('shadow', {to:0.0});
-		widgets.map(function(o) {o='widgetprefix-'+o; Position.absolutize(o); Position.relativize(o);} );
-		$A(Draggables.drags).map(function(o) {o.startDrag(null); o.finishDrag(null);});
-		for ( var n in Draggables.drags ) {
-			if ( Draggables.drags[n].element.id == 'lastmodule' ) {
-				Draggables.drags[n].destroy();
-				break;
-			}
-		}
-		resetPaletteHeight();
+        jQuery('#shadow').css('opacity','0');
+        jQuery(widgets).each(function(o) {o='#widgetprefix-'+o; jQuery(o).css('position','relative');} );
 	}
 	function resetDroppableHeights() {
 		var max = 6;
-		cols.map(function(o) {var c = $(o).childNodes.length; if ( c > max ) max = c;} );
-		var height = 35 * ( max + 1);
-		cols.map(function(o) {h = (($(o).childNodes.length + 1) * 35); $(o).style.height = (h > 280 ? h : 280) + 'px';} );
-	}
-	function resetPaletteHeight() {
-		var p = $('palette'), pd = $('palettediv'), last = $('lastmodule');
-		p.appendChild(last);
-		if ( Draggables.activeDraggable && last.id == Draggables.activeDraggable.element.id )
-			last = last.previousSibling;
-		var y1 = Position.cumulativeOffset(last)[1] + last.offsetHeight;
-		var y2 = Position.cumulativeOffset(pd)[1] + pd.offsetHeight;
-		var dy = y1 - y2;
-		pd.style.height = (pd.offsetHeight + dy + 9) + "px";
+		jQuery.map(cols, function(o) {
+			var c = jQuery('#' + o + ' li').length;
+			if ( c > max ) max = c;
+		});
+		var maxheight = 35 * ( max + 1);
+		jQuery.map(cols, function(o) {
+			height = 0 == jQuery('#' + o + ' li').length ? maxheight - jQuery('#' + o + 'placemat').height() : maxheight;
+			jQuery('#' + o).height(height);
+		});
 	}
 	function maxHeight(elm) {
 		htmlheight = document.body.parentNode.clientHeight;
 		bodyheight = document.body.clientHeight;
 		var height = htmlheight > bodyheight ? htmlheight : bodyheight;
-		$(elm).style.height = height + 'px';
+		jQuery(elm).height(height);
+	}
+	function getViewportDims() {
+		var x,y;
+		if (self.innerHeight) { // all except Explorer
+			x = self.innerWidth;
+			y = self.innerHeight;
+		} else if (document.documentElement && document.documentElement.clientHeight) { // Explorer 6 Strict Mode
+			x = document.documentElement.clientWidth;
+			y = document.documentElement.clientHeight;
+		} else if (document.body) { // other Explorers
+			x = document.body.clientWidth;
+			y = document.body.clientHeight;
+		}
+		return new Array(x,y);
 	}
 	function dragChange(o) {
-		el = o.element ? o.element : $(o);
-		var p = Position.page(el);
-		var right = p[0];
-		var top = p[1];
-		var left = $('shadow').offsetWidth - (el.offsetWidth + right);
-		var bottom = $('shadow').offsetHeight - (el.offsetHeight + top);
-		if ( right < 1 ) el.style.left = 0;
-		if ( top < 1 ) el.style.top = 0;
-		if ( left < 1 ) el.style.left = (left + right) + 'px';
-		if ( bottom < 1 ) el.style.top = (top + bottom) + 'px';
+		var p = getViewportDims();
+		var screenWidth = p[0];
+		var screenHeight = p[1];
+		var elWidth = parseInt( jQuery(o).css('width') );
+		var elHeight = parseInt( jQuery(o).css('height') );
+		var elLeft = parseInt( jQuery(o).css('left') );
+		var elTop = parseInt( jQuery(o).css('top') );
+		if ( screenWidth < ( parseInt(elLeft) + parseInt(elWidth) ) )
+			jQuery(o).css('left', ( screenWidth - elWidth ) + 'px' );
+		if ( screenHeight < ( parseInt(elTop) + parseInt(elHeight) ) )
+			jQuery(o).css('top', ( screenHeight - elHeight ) + 'px' );
+		if ( elLeft < 1 )
+			jQuery(o).css('left', '1px');
+		if ( elTop < 1 )
+			jQuery(o).css('top', '1px');
 	}
 	function popControl(elm) {
-		el = $(elm);
-		el.style.width = controldims[elm]['width'] + 'px';
-		el.style.height = controldims[elm]['height'] + 'px';
 		var x = ( document.body.clientWidth - controldims[elm]['width'] ) / 2;
 		var y = ( document.body.parentNode.clientHeight - controldims[elm]['height'] ) / 2;
-		el.style.position = 'absolute';
-		el.style.right = '' + x + 'px';
-		el.style.top = '' + y + 'px';
-		el.style.zIndex = 1000;
-		el.className='control';
-		$('shadow').onclick = function() {unpopControl(elm);};
-	    window.onresize = function(){maxHeight('shadow');dragChange(elm);};
+		jQuery(elm).css({display: 'block', width: controldims[elm]['width'] + 'px', height: controldims[elm]['height'] + 'px', position: 'absolute', right: x + 'px', top: y + 'px', zIndex: '1000' });
+		jQuery(elm).attr('class','control');
+		jQuery('#shadow').click(function() {unpopControl(elm);});
+		window.onresize = function(){maxHeight('#shadow');dragChange(elm);};
 		popShadow();
 	}
 	function popShadow() {
-		maxHeight('shadow');
-		var shadow = $('shadow');
-		shadow.style.zIndex = 999;
-		shadow.style.display = 'block';
-	    new Effect.Opacity('shadow', {duration:0.5, from:0.0, to:0.2});
+		maxHeight('#shadow');
+		jQuery('#shadow').css({zIndex: '999', display: 'block'});
+		jQuery('#shadow').fadeTo('fast', 0.2);
 	}
 	function unpopShadow() {
-	    new Effect.Opacity('shadow', {to:0.0});
-		$('shadow').style.display = 'none';
+		jQuery('#shadow').fadeOut('fast', function() {jQuery('#shadow').hide()});
 	}
 	function unpopControl(el) {
-		$(el).className='hidden';
+		jQuery(el).attr('class','hidden');
+		jQuery(el).hide();
 		unpopShadow();
 	}
 	function serializeAll() {
-			$('tdomf_form-1order').value = Sortable.serialize('tdomf_form-1');
+			var serial1 = jQuery.SortSerialize('tdomf_form-1');
+		jQuery('#tdomf_form-1order').attr('value',serial1.hash.replace(/widgetprefix-/g, ''));
 		}
 	function updateAll() {
-		resetDroppableHeights();
-		resetPaletteHeight();
-		cols.map(function(o){
-			var pm = $(o+'placematt');
-			if ( $(o).childNodes.length == 0 ) {
-				pm.style.display = 'block';
-				Position.absolutize(o+'placematt');
-			} else {
-				pm.style.display = 'none';
-			}
+		jQuery.map(cols, function(o) {
+			if ( jQuery('#' + o + ' li').length )
+				jQuery('#'+o+'placemat span.handle').hide();
+			else
+				jQuery('#'+o+'placemat span.handle').show();
 		});
+		resetDroppableHeights();
 	}
-	function noSelection(event) {
-		if ( document.selection ) {
-			var range = document.selection.createRange();
-			range.collapse(false);
-			range.select();
-			return false;
-		}
-	}
-	addLoadEvent(updateAll);
-	addLoadEvent(initWidgets);
-	Event.observe(window, 'resize', resetPaletteHeight);
+	jQuery(document).ready( function() {
+		updateAll();
+		initWidgets();
+	});
 // ]]>
 </script>
 <?php
@@ -182,13 +162,16 @@ function tdomf_show_form_menu() {
 		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below.',"tdomf"); ?></p>
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
+			<p class="submit">
+				<input type="submit" value="Save Changes &raquo;" />
+			</p>
 			<div id="zones">
 							<input type="hidden" id="tdomf_form-1order" name="tdomf_form-1order" value="" />
 
 				<div class="dropzone">
 					<h3>Your Form</h3>
 
-					<div id="tdomf_form-1placematt" class="module placematt">
+					<div id="tdomf_form-1placemat" class="placemat">
 						<span class="handle">
 							<h4>Default Form</h4>
 							<?php _e("Your form will be displayed using the default widget order. Dragging widgets into this box will replace the default with your customized form.","tdomf"); ?></span>
@@ -206,36 +189,33 @@ function tdomf_show_form_menu() {
 					</ul>
 				</div>
 
-			<br class="clear" />
-
-			</div>
+  		</div>
 
 			<div id="palettediv">
 				<h3>Available Widgets</h3>
 
 				<ul id="palette">
+        				
 				<?php foreach($tdomf_form_widgets as $id => $w) {
 					if ( !is_array( $widget_order ) || !in_array($id,$widget_order)) {?>
 					<li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $w['name']; ?> <?php if(isset($tdomf_form_widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
 				<?php } } ?>
-             <li id="lastmodule"><span></span></li>
 				</ul>
 			</div>
 
 			<script type="text/javascript">
 			// <![CDATA[
-							Sortable.create("palette", {
-					dropOnEmpty: true, containment: ["palette","tdomf_form-1"],
-					handle: 'handle', constraint: false, onUpdate: updateAll,
-					format: /^widgetprefix-(.*)$/
-				});
-							Sortable.create("tdomf_form-1", {
-					dropOnEmpty: true, containment: ["palette","tdomf_form-1"],
-					handle: 'handle', constraint: false, onUpdate: updateAll,
-					format: /^widgetprefix-(.*)$/
-				});
-						// ]]>
+				jQuery(document).ready(function(){
+								jQuery('ul#palette').Sortable({
+						accept: 'module', activeclass: 'activeDraggable', opacity: 0.8, revert: true, onStop: updateAll
+					});
+								jQuery('ul#tdomf_form-1').Sortable({
+						accept: 'module', activeclass: 'activeDraggable', opacity: 0.8, revert: true, onStop: updateAll
+					});
+							});
+			// ]]>
 			</script>
+
 
 			<p class="submit">
 			<?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-save-widget-order'); } ?>
@@ -262,6 +242,8 @@ function tdomf_show_form_menu() {
 
 	<div id="shadow"> </div>
 
+  <?php do_action( 'tdomf_widget_page' ); ?>
+  
   <?php
 }
 

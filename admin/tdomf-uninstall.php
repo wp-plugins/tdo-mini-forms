@@ -69,17 +69,25 @@ function tdomf_reset_options() {
   _e("DONE","tdomf"); 
   echo "</span><br/>";
   
-   echo "<span style='width:200px;'>";
+  echo "<span style='width:200px;'>";
   _e("Deleting Widget Options (or at least the ones I can find!)... ","tdomf");
   echo "</span>";
-  $alloptions = wp_load_alloptions();
-  foreach($alloptions as $id => $val) {
-    if(preg_match('#^tdomf_.+#',$id)) {
-      delete_option($id);
+  // Danger will robinson! If the table prefix is "tdomf_", you may end up
+  // deleting critical Wordpress core options!
+  if($table_prefix == "tdomf_") {
+    $alloptions = wp_load_alloptions();
+    foreach($alloptions as $id => $val) {
+      if(preg_match('#^tdomf_.+#',$id)) {
+        delete_option($id);
+        echo "<!-- $id -->";
+      }
     }
+    echo "<span style='color:green;'>";
+    _e("DONE","tdomf");
+  } else {
+    echo "<span style='color:red;'>";
+    _e("FAIL","tdomf");
   }
-  echo "<span style='color:green;'>";
-  _e("DONE","tdomf");
   echo "</span><br/>";
 }
 

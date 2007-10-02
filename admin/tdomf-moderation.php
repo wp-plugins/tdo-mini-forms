@@ -323,15 +323,13 @@ function tdomf_moderation_handler() {
       check_admin_referer('tdomf-moderate-bulk');
       $posts = $_REQUEST['moderateposts'];
       $list = "";
-      $post_date = current_time('mysql');
-	   $post_date_gmt = get_gmt_from_date($post_date);
       foreach($posts as $p) {
          // Use update post instead of publish post because in WP2.3, 
          // update_post doesn't seem to add the date correctly! 
          // Also when it updates a post, if comments aren't set, sets them to
          // empty! (Not so in WP2.2!)
          $post = array (
-           "ID"             => $post_ID,
+           "ID"             => $p,
            "post_status"    => 'publish',
            "comment_status" => get_option('default_comment_status'),
            );
@@ -354,7 +352,17 @@ function tdomf_moderation_handler() {
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'publish') {
       $post_id = $_REQUEST['post'];
       check_admin_referer('tdomf-publish_'.$post_id);
-      wp_publish_post($post_id);
+       // Use update post instead of publish post because in WP2.3, 
+       // update_post doesn't seem to add the date correctly! 
+       // Also when it updates a post, if comments aren't set, sets them to
+       // empty! (Not so in WP2.2!)
+       $post = array (
+         "ID"             => $post_id,
+         "post_status"    => 'publish',
+         "comment_status" => get_option('default_comment_status'),
+         );
+       wp_update_post($post);      
+      #wp_publish_post($post_id);
       tdomf_log_message("Published post $post_id");
       $message = sprintf(__("Published post <a href=\"%s\">%d</a>.","tdomf"),get_permalink($post_id),$post_id);
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'unpublish') {

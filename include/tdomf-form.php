@@ -126,8 +126,8 @@ function tdomf_create_post($args) {
 
    // Submission date
    //
-   $post_date = current_time('mysql');
-	$post_date_gmt = get_gmt_from_date($post_date);
+#  $post_date = current_time('mysql');
+#  $post_date_gmt = get_gmt_from_date($post_date);
    
    // Build post and post it as draft
    //
@@ -140,7 +140,7 @@ function tdomf_create_post($args) {
 	   "post_status"    => 'draft',
 #	   "post_name"      => "",
 #	   "post_date"      => $post_date,
-#     "post_date_gmt"  => $post_date_gmt,
+#    "post_date_gmt"  => $post_date_gmt,
 #	   "comment_status" => get_option('default_comment_status'),
 #	   "ping_status"    => get_option('default_ping_status')
    );

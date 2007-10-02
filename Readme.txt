@@ -14,6 +14,8 @@ This plugin allows you to add a form to your website that allows non-registered 
 
 **Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
 
+**This version is specifically to address issues on Wordpress 2.3. It is not backwards compatible with previous versions.**
+
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. 
 
 It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.
@@ -27,8 +29,6 @@ Registered users now have access to a "Your Submissions" page which lists their 
 * [Demo Site]( http://thedeadone.net/tdomf/ )
 * [Plugin News]( http://thedeadone.net/index.php?tag=tdomf ), [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 )
 * [Plugin Support Forum]( http://thedeadone.net/forum )
-
-I've tested the plugin on a Windows and Unix host and from Firefox, IE and Opera browsers with no issues.
 
 == Installation ==
 
@@ -116,7 +116,6 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 == Known Bugs == 
 
 * v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
-* v0.71 has some issues with 2.3: Edit Form Page messed up. The "default category" option lists no categories. The "remove options" button the uninstall page seriously messed up my install.
 
 == Version History ==
 
@@ -184,10 +183,16 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 * Simple question-captcha widget: user must answer a simple question before post will be accepted.
 * "I agree" widget: user must check a checkbox before post will be accepted.
 
-= v0.71: 28 September 20076 =
+= v0.71: 28 September 2007 =
 
 * Two small mistakes seemed to have wiggled into the files before 0.7 was released. Still getting the hang of SVN I guess.
 
-= v0.72: TBD = 
+= v0.72: 2 October 2007 = 
 
-*
+* Date is not set when post is published. This was okay in WP2.2.
+* Comments are getting automatically closed (even if default is open). This was okay in WP2.2.
+* widget.css in admin menu has moved in WP2.3. This is no longer compatible with WP2.2.
+* Can now again select a default category for submissions and new submissions will pick that category up. With WP2.3, tags and categories have changed to a new "taxonomy" structure, which messed up how TDOMF works.
+* Added a "tdomf_widget_page" action hook
+* Fixed Widget page to work in WP2.3. WP2.3 now uses jQuery for a lot of its javascript needs
+* If you happen to use as your database prefix "tdomf_", and then if you uninstall on WP2.3, it would delete critical options and bugger up your wordpress install.

@@ -137,22 +137,16 @@ function tdomf_show_options_menu() {
 	   <b><?php _e("Default Category","tdomf"); ?></b>
 
 	   <SELECT NAME="tdomf_def_cat" id="tdomf_def_cat">
-	   <?php
-           // display categories
-        $query  = "SELECT cat_ID, cat_name, category_nicename ";
-        $query .= "FROM $wpdb->categories ";
-        $query .= "WHERE cat_ID > 0 ";
-        $query .= "ORDER BY cat_ID DESC";
-        $cats = $wpdb->get_results($query);
+	   <?php $cats = get_categories("get=all");
         if(!empty($cats)) {
            foreach($cats as $c) {
-		   if($c->cat_ID == $def_cat ) {
-	             echo "<OPTION VALUE=\"$c->cat_ID\" selected>$c->category_nicename\n";
-		   } else {
-                      echo "<OPTION VALUE=\"$c->cat_ID\">$c->category_nicename\n";
-		   }
+             if($c->term_id == $def_cat ) {
+               echo "<OPTION VALUE=\"$c->term_id\" selected>$c->category_nicename\n";
+             } else {
+               echo "<OPTION VALUE=\"$c->term_id\">$c->category_nicename\n";
+             }
           }
-        } ?>
+        }?>
 	</select>
 	</p>
 
