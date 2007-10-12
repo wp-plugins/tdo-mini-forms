@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags
 Requires at least: 2.3
 Tested up to: 2.3
-Stable Tag: 0.72
+Stable Tag: 0.8
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
@@ -16,15 +16,13 @@ This plugin allows you to add a form to your website that allows non-registered 
 
 **This version is specifically to address issues on Wordpress 2.3. It is not backwards compatible with previous versions.**
 
-The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. 
+The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
-It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.
+Administrators can configure the form using drag and drop "widgets". They are based on the same model as Wordpress' built-in Theme widgets and it is possible to write your own. With 0.7, more options are available and it is now much easier to integrate with your theme. You don't even need to modify your theme any more to display submitter information!
 
-The big feature of 0.7 is that Administrators can configure the form using drag and drop "widgets". They are based on the same model as Wordpress' built-in Theme widgets and it is possible to write your own.
+Registered users have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
 
-With 0.7, more options are available and it is now much easier to integrate with your theme. You don't even need to modify your theme any more to display submitter information!
-
-Registered users now have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
+**Version 0.8 introduces the ability to allow users submit files, set categories and add tags to their submissions.**
 
 * [Demo Site]( http://thedeadone.net/tdomf/ )
 * [Plugin News]( http://thedeadone.net/index.php?tag=tdomf ), [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 )
@@ -82,11 +80,13 @@ These tags must be used within the loop:
 
 = I want to add custom fields! =
 
-v0.8, I swear! With v0.7, the widget interface was added. This allows a simple and neat way to add custom fields. 
+v0.9, I swear! With v0.7, the widget interface was added. This allows a simple and neat way to add custom fields. 
 
 = I want to allow my readers to attach a image to a submission? =
 
-v0.8, I swear! With v0.7, the widget interface was added. The new widget feature has been designed to specifically support file uploading. However the widget won't be available till v0.8.
+With v0.8, you can allow users to upload files. You can specify what files can be uploaded and how big. You can also optionally have the upload files automatically added to the post as an image, link or a Wordpress attachment. 
+
+To add the option to upload files, as admin, go into the TDOMF menu and then the widgets menu. On that page you can drap and drop widgets. Just drag and drop the "Upload Files" widget.
 
 = I want to allow only certain people to access the form =
 
@@ -196,3 +196,10 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 * Added a "tdomf_widget_page" action hook
 * Fixed Widget page to work in WP2.3. WP2.3 now uses jQuery for a lot of its javascript needs
 * If you happen to use as your database prefix "tdomf_", and then if you uninstall on WP2.3, it would delete critical options and bugger up your wordpress install.
+
+= v0.8: 12th October 2007 =
+
+* Upload Feature added
+* Widgets can now append information to the email sent to moderators
+* Tag Widget: allow submitters to add tags to their submissions
+* Categories Widget: First run of the categories widget.

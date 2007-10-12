@@ -178,15 +178,29 @@ function tdomf_create_post($args) {
    
    // Widgets:post
    //
-   $widget_args = array_merge( array( "post_ID"=>$post_ID ),
-                               $args);
+   $message = "";
+   $widget_args = array_merge( array( "post_ID"=>$post_ID,
+                                      "before_widget"=>"",
+                                      "after_widget"=>"<br/>\n",
+                                      "before_title"=>"<b>",
+                                      "after_title"=>"</b><br/>"),
+                                      $args);
    $widget_order = tdomf_get_widget_order();
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_post[$w])) {
-		$tdomf_form_widgets_post[$w]['cb']($widget_args);
+      $temp_message = $tdomf_form_widgets_post[$w]['cb']($widget_args);
+      if($temp_message != NULL && trim($temp_message) != ""){
+        $message .= $temp_message;
+      }
 	  }
    }
-
+   // Oh dear! Errors after submission!
+   if(trim($message) != "") {
+     tdomf_log_message("Post widgets report error! Attempting to delete $post_ID post...");
+     wp_delete_post($post_ID);
+     return "<font color='red'>$message</font>\n";
+   }
+   
    // Submitted post count!
    //
    $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
@@ -245,7 +259,7 @@ function tdomf_create_post($args) {
      kses_init_filters();
    }
    
-   return $post_ID;
+   return intval($post_ID);
 }
 
 // Create the form!
@@ -324,7 +338,7 @@ EOT;
   if($use_ajax) {
   	$form .= "<div id='tdomf_form1_msg_div'></div>\n<form>";
   } else {
-    $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form1" name="tdomf_form1" class="tdomf_form">';
+    $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form1" name="tdomf_form1" class="tdomf_form" >';
     $form .= "<input type='hidden' id='redirect' name='redirect' value='$_SERVER[REQUEST_URI]' />";
     $random_string = tdomf_random_string(100);
     $_SESSION["tdomf_key"] = $random_string;
@@ -356,9 +370,6 @@ EOT;
   // Form buttons
   //
   $form .= '<table border="0" align="left"><tr>';
-  //
-  //TODO: Clear and/or Reset buttons
-  //
   if($use_ajax) {
     if(tdomf_widget_is_preview_avaliable()) {
 	    	$form .= '<td width="10px"><input type="button" value="'.__("Preview","tdomf").'" name="tdomf_form1_preview" id="tdomf_form1_preview" onclick="tdomf_preview_post(); return false;" /></td>';

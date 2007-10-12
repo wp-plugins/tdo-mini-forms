@@ -69,7 +69,7 @@ function tdomf_get_admin_emails() {
 // Notify Admins to tell them that a post is awaiting moderation
 //
 function tdomf_notify_admins($post_ID){
-  global $wpdb;
+  global $wpdb,$tdomf_form_widgets_adminemail;
 
   // grab email addresses
   $email_list = tdomf_get_admin_emails();
@@ -119,6 +119,24 @@ function tdomf_notify_admins($post_ID){
   $email_msg .= sprintf(__("This was submitted from IP %s.\r\n\r\n","tdomf"),$ip);
   $email_msg .= sprintf(__("You can moderate this submission from %s.\r\n\r\n","tdomf"),$moderate_all_link);
   $email_msg .= sprintf(__("Content of the post: \r\n\r\n %s \r\n\r\n","tdomf"),$content);
+  
+   // Widgets:adminemail
+   //
+   $widget_args = array( "post_ID"=>$post_ID,
+                         "before_widget" => "",
+                         "after_widget"  => "\r\n\r\n\n",
+                         "before_title"  => "",
+                         "after_title"   => "\r\n\r\n");
+   $widget_order = tdomf_get_widget_order();
+   foreach($widget_order as $w) {
+	  if(isset($tdomf_form_widgets_adminemail[$w])) {
+      $temp_message = $tdomf_form_widgets_adminemail[$w]['cb']($widget_args);
+      if($temp_message != NULL && trim($temp_message) != ""){
+        $email_msg .= $temp_message;
+      }
+	  }
+   }
+   
   $email_msg .= sprintf(__("Best Regards\r\n\r\nTDOMF @ %s","tdomf"),get_bloginfo("title"));
 
   // Use custom from field
@@ -317,6 +335,7 @@ function tdomf_widget_notifyme_post($args) {
     setcookie("tdomf_notify_widget_email",$notifyme_email, time() + 30000000, COOKIEPATH, COOKIE_DOMAIN);
     add_post_meta($post_ID, TDOMF_KEY_NOTIFY_EMAIL, $notifyme_email, true);    
   }
+  return NULL;
 }
 tdomf_register_form_widget_post('Notify Me', 'tdomf_widget_notifyme_post');
 
