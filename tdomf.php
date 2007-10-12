@@ -28,7 +28,7 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 // Note for translators
 //
-// See http://codex.wordpress.org/Translating_WordPress for details of 
+// See http://codex.wordpress.org/Translating_WordPress for details of
 // translating wordpress plugins. All printed text is outputted using _e and __
 // and the text domain "tdomf".
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ Author URI: http://thedeadone.net
 // - "Your Submissions" page for all users. Form is included on this page.
 // - Form should be XHTML valid (unless a new widget breaks it!)
 // - Handle magic quotes properly
-// - Allow YouTube embedded code to be posted, though this option is only 
+// - Allow YouTube embedded code to be posted, though this option is only
 //    allowable if moderation is enabled! Otherwise Wordpress' kses filters will
 //    pull it out.
 // - Reject Notifications as well as Approved Notifications
@@ -95,17 +95,16 @@ Author URI: http://thedeadone.net
 // - Simple question-captcha widget: user must answer a simple question before
 //     post will be accepted.
 // - "I agree" widget: user must check a checkbox before post will be accepted.
-// - TODO: Documenation: Help, About and Widgets
 //
 // v0.71: 28th September 2007
-// - Two small mistakes seemed to have wiggled into the files before 0.7 
+// - Two small mistakes seemed to have wiggled into the files before 0.7
 //     was released. Still getting the hang of SVN I guess.
 //
 // v0.72: 2nd October 2007
 // - Date is not set when post is published. This was okay in WP2.2.
 // - Comments are getting automatically closed (even if default is open).
 //     This was okay in WP2.2.
-// - widget.css in admin menu has moved in WP2.3. This is no longer compatible 
+// - widget.css in admin menu has moved in WP2.3. This is no longer compatible
 //     with WP2.2.
 // - Can now again select a default category for submissions and new submissions
 //     will pick that category up. With WP2.3, tags and categories have changed
@@ -113,9 +112,15 @@ Author URI: http://thedeadone.net
 // - Added a "tdomf_widget_page" action hook
 // - Fixed Widget page to work in WP2.3. WP2.3 now uses jQuery for a lot of its
 //    javascript needs
-// - If you happen to use as your database prefix "tdomf_", and then you 
+// - If you happen to use as your database prefix "tdomf_", and then you
 //    uninstall on WP2.3, it would delete critical options and bugger up
 //    your wordpress install.
+//
+// v0.8: 12th October 2007
+// - Upload Feature added
+// - Widgets can now append information to the email sent to moderators
+// - Tag Widget: allow submitters to add tags to their submissions
+// - Categories Widget: First run of the categories widget.
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,11 +140,8 @@ Author URI: http://thedeadone.net
 //    * Info about loaded widgets
 //    * Disable loaded widgets?
 // - More and more widgets!
-//    * File-uploading widget
 //    * Custom Field widgets: one for each HTML element in the rainbow!
 //    * Simple Text
-//    * Select Category
-//    * Tags
 // - Improvements for current widgets
 //    * More options
 //    * QuickTags, TinyMCE, etc. for content box
@@ -152,8 +154,10 @@ Author URI: http://thedeadone.net
 //    * Integration with Spam Karma?
 //    * Integration with Aksimet?
 // - Force Preview (user must preview first before submission)
-// - Allow newly submitted posts be set to "Post ready for review" with the 
+// - Allow newly submitted posts be set to "Post ready for review" with the
 //    Wordpress 2.3
+// - A "manage download" menu
+// - Documentation on creating your own widgets
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
@@ -165,7 +169,7 @@ load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 // Defines and other global vars for this Plugin //
 ///////////////////////////////////////////////////
 
-// Older versions of PHP may not define DIRECTORY_SEPARATOR so define it here, 
+// Older versions of PHP may not define DIRECTORY_SEPARATOR so define it here,
 // just in case.
 if(!defined('DIRECTORY_SEPARATOR')) {
   define('DIRECTORY_SEPARATOR','/');
@@ -246,6 +250,17 @@ define('TDOMF_USER_STATUS_BANNED', "Banned");
 define('TDOMF_USER_STATUS_TRUSTED', "Trusted");
 define('TDOMF_KEY_NOTIFY_EMAIL', "_tdomf_notify_email");
 
+/////////////////
+// 0.8 Settings
+//
+define('TDOMF_UPLOAD_PERMS',0777);
+define('TDOMF_UPLOAD_TIMEOUT',(60 * 60)); // 1 hour
+define('TDOMF_KEY_DOWNLOAD_COUNT',"_tdomf_download_count_");
+define('TDOMF_KEY_DOWNLOAD_TYPE',"_tdomf_download_type_");
+define('TDOMF_KEY_DOWNLOAD_PATH',"_tdomf_download_path_");
+define('TDOMF_KEY_DOWNLOAD_NAME',"_tdomf_download_name_");
+define('TDOMF_KEY_DOWNLOAD_CMD_OUTPUT',"_tdomf_download_cmd_output_");
+
 ///////////////////////////////////
 // Configure Backend Admin Menus //
 ///////////////////////////////////
@@ -280,7 +295,7 @@ function tdomf_add_menus()
     //
     // About Page
     add_submenu_page( TDOMF_FOLDER , __('About', 'tdomf'), __('About', 'tdomf'), 'edit_others_posts', 'tdomf_show_about_page', 'tdomf_show_about_page');
-    
+
     //
     // Your submissions
     add_submenu_page('profile.php', 'Your Submissions', 'Your Submissions', 0, 'tdomf_your_submissions', 'tdomf_show_your_submissions_menu');
@@ -306,6 +321,7 @@ require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
 
 /////////////////////////
 // Start/Init/Upgrade //
@@ -316,7 +332,7 @@ function tdomf_init(){
   if(get_option(TDOMF_VERSION_CURRENT) == false)
   {
     add_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
-    
+
     // Some defaults for new options!
     add_option(TDOMF_OPTION_MODERATION,true);
     add_option(TDOMF_OPTION_PREVIEW,true);

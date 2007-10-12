@@ -37,25 +37,33 @@ $message = tdomf_check_permissions_form();
 //
 $save_post_info = FALSE;
 if($message == NULL) {
-	if(isset($_POST['tdomf_form1_send'])) {
+  if(isset($_POST['tdomf_form1_send'])) {
 
     tdomf_log_message("Someone is attempting to submit something");
 
-	   $message = tdomf_validate_form($_POST);
-	   if($message == NULL) {
-	    $args = $_POST;
-	    $args['ip'] = $_SERVER['REMOTE_ADDR'];
-		$post_id = tdomf_create_post($args);
-		if(get_post_status($post_id) == 'publish') {
-		   $message = sprintf(__("Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service.","tdomf"),get_permalink($post_id));
-		} else {
-		   $message = sprintf(__("Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service.","tdomf"),get_bloginfo('admin_email'));
-		}
-	   } else {
-	    $save_post_info = TRUE;
-	   }
-	} else if(isset($_POST['tdomf_form1_preview'])) {
-    
+    $message = tdomf_validate_form($_POST);
+    if($message == NULL) {
+      $args = $_POST;
+      $args['ip'] = $_SERVER['REMOTE_ADDR'];
+      $retVal = tdomf_create_post($args);
+      // If retVal is an int it's a post id
+      if(is_int($retVal)) {
+        $post_id = $retVal;
+        if(get_post_status($post_id) == 'publish') {
+          $message = sprintf(__("Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service.","tdomf"),get_permalink($post_id));
+        } else {
+          $message = sprintf(__("Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service.","tdomf"),get_bloginfo('admin_email'));
+        }
+      // If retVal is a string, something went wrong!
+      } else {
+        $message = sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$retVal);
+        $save_post_info = TRUE;
+      }
+    } else {
+      $save_post_info = TRUE;
+    }
+  } else if(isset($_POST['tdomf_form1_preview'])) {
+
     // For preview, remove magic quote slashes!
     if (get_magic_quotes_gpc()) {
       #tdomf_log_message("Magic quotes is enabled. Stripping slashes for preview...");
@@ -68,7 +76,7 @@ if($message == NULL) {
       $_POST = stripslashes_array($_POST);
       $_REQUEST = stripslashes_array($_REQUEST);
     }
-    
+
        $save_post_info = TRUE;
 	   $message = tdomf_validate_form($_POST);
 	   if($message == NULL) {

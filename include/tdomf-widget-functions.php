@@ -95,6 +95,11 @@ $tdomf_form_widgets_validate = array();
 // Post actions for Widgets
 //
 $tdomf_form_widgets_post = array();
+//
+// Admin email notifications for Widgets
+//
+$tdomf_form_widgets_adminemail = array();
+
 
 // All Widgets need to register with this function
 //
@@ -180,6 +185,22 @@ function tdomf_register_form_widget_post($name, $post_callback, $ajax = true) {
    $tdomf_form_widgets_post[$id]['name'] = $name;
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
    $tdomf_form_widgets_post[$id]['ajax'] = $ajax;
+}
+
+// Widgets that create info for the admin notification
+//
+function tdomf_register_form_widget_adminemail($name, $post_callback) {
+   global $tdomf_form_widgets_adminemail,$tdomf_form_widgets;
+   $id = sanitize_title($name);
+	if(!isset($tdomf_form_widgets[$id])) {
+   		 tdomf_log_message("Admin Email: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 return;
+   }
+   if(isset($tdomf_form_widgets_adminemail[$id])) {
+      tdomf_log_message("tdomf_register_form_widget_adminemail: Widget $id already exists. Overwriting...");
+   }
+   $tdomf_form_widgets_adminemail[$id]['name'] = $name;
+   $tdomf_form_widgets_adminemail[$id]['cb'] = $post_callback;
 }
 
 // Return the default widget order!
@@ -300,19 +321,30 @@ tdomf_register_form_widget_preview('Content', 'tdomf_widget_content_preview');
 function tdomf_widget_content_post($args) {
   extract($args);
   $options = tdomf_widget_content_get_options();
+  
+  // Grab existing data
+  $post = wp_get_single_post($post_ID, ARRAY_A);
+  $post = add_magic_quotes($post); 
+  $post_content = $post['post_content'];
+  if(!isset($content_title)) {
+    $content_title = $post['post_title'];
+  }
+  
   if($options['allowable-tags'] != "" && $options['restrict-tags']) {
     tdomf_log_message("Content Widget: Stripping tags from post!");
-    $post_content = strip_tags($content_content,$options['allowable-tags']);
+    $post_content .= strip_tags($content_content,$options['allowable-tags']);
   } else {
-    $post_content = $content_content;
+    $post_content .= $content_content;
   }
   
   $post = array (
       "ID"                      => $post_ID,
       "post_content"            => $post_content,
       "post_title"              => $content_title,
+      "post_name"               => sanitize_title($content_title),
   );
   $post_ID = wp_update_post($post);
+  return NULL;
 }
 tdomf_register_form_widget_post('Content', 'tdomf_widget_content_post');
 
@@ -670,6 +702,7 @@ function tdomf_widget_whoami_post($args) {
     }
   }
   tdomf_widget_whoami_store_cookies($whoami_name,$whoami_email,$whoami_webpage);
+  return NULL;
 }
 tdomf_register_form_widget_post('Who Am I', 'tdomf_widget_whoami_post');
 
