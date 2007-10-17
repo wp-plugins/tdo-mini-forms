@@ -21,7 +21,7 @@ if (!$_SESSION) session_start();
 if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key']) {
    tdomf_log_message("Form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
    unset($_SESSION['tdomf_key']);
-   exit("TDOMF: Bad data submitted");
+   exit("TDOMF: Bad data submitted. Please return to the previous page and reload. Then try submitting your form again.");
 }
 unset($_SESSION['tdomf_key']);
 

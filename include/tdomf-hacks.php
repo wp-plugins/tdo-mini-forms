@@ -55,7 +55,24 @@ add_action("wp_head","tdomf_auto_fix_authors");
 // if it's already been started
 //
 function tdomf_start_session() {
-	if (!$_SESSION) session_start();
+  if(!headers_sent() && !$_SESSION) {
+    session_start();
+    return;
+  } 
+  
+  if(headers_sent($filename,$linenum) && !$_SESSION) { 
+    ?>
+      <p><font color="red">
+      <b><?php printf(__('TDOMF ERROR: Headers have already been sent in file %s on line %d before <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> could be called.',"tdomf"),$filename,$linenum); ?></b>
+      <?php _e('This may be due to...','tdomf'); ?>
+      <ul>
+        <li><?php _e('Your current wordpress theme inserting HTML before calling the template tag "get_header". This may be as simple as a blank new line. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. You can also check your theme where it calls "get_header".',"tdomf"); ?></li>
+        <li><?php _e("Another plugin inserting HTML before TDOMF's get_header action is activated. You can confirm this by disabling all your other plugins and checking if this error is still reported.","tdomf"); ?></li>
+      </ul>
+      </font>
+    <?php 
+    tdomf_log_message("Headers are already sent before TDOMF could call session_start in file $filename on line $linenum",TDOMF_LOG_ERROR);
+  }
 }
 add_action("get_header","tdomf_start_session");
 //
@@ -64,5 +81,24 @@ add_action("get_header","tdomf_start_session");
 add_action("load-users_page_tdomf_your_submissions","tdomf_start_session");
 add_action("load-profile_page_tdomf_your_submissions","tdomf_start_session");
 
+////////////////////////////////////////////////////////////////////////////////
+// While you can modify the URL of an attachment to a post, you can't modify
+// the URL to the thumbnail (if avaliable). Instead it tries to generate it by
+// modifying the basename of the attachment URL and the filename! Bah. So have
+// use filters to grab the right thumbnail!
+//
+function tdomf_upload_attachment_thumb_url($url,$post_ID) {
+   $post_ID = intval($post_ID);
+   if ( !$post =& get_post( $post_ID ) ) {
+      return $url;
+   }
+   $parent_ID = $post->post_parent;
+   $file_ID = $post->menu_order;
+   if( !$thumb_path = get_post_meta($parent_ID,TDOMF_KEY_DOWNLOAD_THUMB.$file_ID,true)) {
+      return $url;
+   }
+   return get_bloginfo('wpurl').'/?tdomf_download='.$parent_ID.'&id='.$file_ID.'&thumb';
+}
+add_filter( 'wp_get_attachment_thumb_url', 'tdomf_upload_attachment_thumb_url', 10, 2);
 
 ?>

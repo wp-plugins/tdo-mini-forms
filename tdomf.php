@@ -121,6 +121,19 @@ Author URI: http://thedeadone.net
 // - Widgets can now append information to the email sent to moderators
 // - Tag Widget: allow submitters to add tags to their submissions
 // - Categories Widget: First run of the categories widget.
+//
+// v0.x: TBD
+// - Updated Upload Files: if a file is added as attachment, Wordpress will 
+//    generate a thumbnail if the file is an image.
+// - New Upload File Options: You can now automatically have a link added to 
+//    your post that goes to the attachment page (can even use the thumbnail
+//    if it exists). Additionally, if the thumbnail exists, can insert a 
+//    direct link to file using the thumbnail.
+// - Uploads added as attachments will inherit the categories of the post (but
+//    remember the order of widgets is important so if the categories get 
+//    modified after the upload widget has done it's biz, these changes won't
+//    be affected to the attachments)
+// - More info and error checking!
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +143,7 @@ Author URI: http://thedeadone.net
 //    (not that hard to do, store the message as a postmeta, notification code
 //     grabs the message from postmeta, uses it and then deletes it from post
 //     meta)
-// - Allow admis to modify messages to user for...
+// - Allow admins to modify messages to user for...
 //    * Submitted post awaiting moderation
 //    * Submitted post automatically published
 //    * Banned IP, Banned user and other insufficent priviliges messages
@@ -142,6 +155,8 @@ Author URI: http://thedeadone.net
 // - More and more widgets!
 //    * Custom Field widgets: one for each HTML element in the rainbow!
 //    * Simple Text
+//    * URL Submission
+//    * Multiple/Random Question Captcha
 // - Improvements for current widgets
 //    * More options
 //    * QuickTags, TinyMCE, etc. for content box
@@ -158,6 +173,7 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
+// - Better Error Messages ("TDOMF: Bad Data Submitted"
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////

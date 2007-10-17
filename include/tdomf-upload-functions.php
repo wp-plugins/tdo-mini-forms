@@ -78,6 +78,7 @@ function tdomf_upload_download_handler(){
    global $current_user;
    $post_ID = $_GET['tdomf_download'];
    $file_ID = $_GET['id'];
+   $use_thumb = isset($_GET['thumb']);
    
    // Security check
    get_currentuserinfo();   
@@ -88,10 +89,16 @@ function tdomf_upload_download_handler(){
      }
    }
    
-   $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_PATH.$file_ID, true);
+   if($use_thumb) {
+      $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_THUMB.$file_ID, true);   
+   } else {
+      $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_PATH.$file_ID, true);
+   }
    if(!empty($filepath)) {
 
-     $type = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_TYPE.$file_ID, true);
+     if(!$use_thumb) {
+        $type = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_TYPE.$file_ID, true);
+     }
      $name = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_NAME.$file_ID, true);
 
      // Check if file exists
@@ -109,6 +116,8 @@ function tdomf_upload_download_handler(){
           $mimetype = 'application/octet-stream';         
        }
       
+       if(!$use_thumb) {       
+
        // Other stuff we could track...
        //
        //$referer = $_SERVER['HTTP_REFERER'];
@@ -124,6 +133,8 @@ function tdomf_upload_download_handler(){
        $count++;
        update_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$file_ID,$count);
        
+       }
+
        // Pass file       
        $handle = fopen($filepath, "rb"); // now let's get the file!
        header("Pragma: "); // Leave blank for issues with IE
@@ -258,6 +269,10 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
 //                                           Default Widget: "Upload Files"   //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Required for creating images using attachments
+//
+include_once(ABSPATH . 'wp-admin/includes/admin.php');
+
 // Get Options for this widget
 //
 function tdomf_widget_upload_get_options() {
@@ -277,6 +292,9 @@ function tdomf_widget_upload_get_options() {
        $options['custom'] = true;
        $options['custom-key'] = __("Download Link","tdomf");
        $options['post-title'] = false;
+       $options['attach-a'] = false;
+       $options['attach-thumb-a'] = false;
+       $options['thumb-a'] = false;
     }
   return $options;
 }
@@ -317,6 +335,7 @@ function tdomf_widget_upload_post($args) {
     //$post = add_magic_quotes($post); 
     $content = $post['post_content'];
     $title = $post['post_title'];
+    $cats = $post['post_category'];
   }
   
   $filecount = 0;
@@ -373,8 +392,11 @@ function tdomf_widget_upload_post($args) {
           add_post_meta($post_ID,$options['custom-key'],$uri);
         }
 
-        // Insert upload as an attachment to post!        
+        // Insert upload as an attachment to post!
         if($options['attach']) {
+          
+          // Create the attachment (not sure if these values are correct)
+          //
           $attachment = array (
            "post_content"   => "",
            "post_title"     => $theirfiles[$i]['name'],
@@ -382,11 +404,59 @@ function tdomf_widget_upload_post($args) {
            "post_status"    => 'inherit',
            "post_parent"    => $post_ID,
            "guid"           => $uri,
-           "post_type"      => 'attachment',
+           "post_type"      => 'attachment',          
            "post_mime_type" => $theirfiles[$i]['type'],
-           "menu_order"     => $i
+           "menu_order"     => $i,
+           "post_category"  => $cats,
           );
-          $attachement_ID = wp_insert_attachment($attachment);
+          $attachment_ID = wp_insert_attachment($attachment, $newpath, $post_ID);
+          
+          // Generate meta data (which includes thumbnail!)
+          // 
+          $attachment_metadata = wp_generate_attachment_metadata( $attachment_ID, $newpath );
+
+          // add link to attachment page
+          if($options['attach-a']) {
+            $content .= "<p><a href=\"".get_permalink($attachment_ID)."\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")</a></p>";
+          }
+          
+          // Did Wordpress generate a thumbnail?
+          if(isset($attachment_metadata['thumb'])) {
+             // Wordpress 2.3 uses basename and generates only the "name" of the thumb,
+             // in general it creates it in the same place as the file!
+             $thumbpath = $postdir.$attachment_metadata['thumb'];
+             if(file_exists($thumbpath)) {
+                
+                add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                
+                // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
+                // if there is a thumb by using basename and the file path of the actual file
+                // attachment
+                //
+                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                
+                //$attachment_metadata['thumb'] = $thumb_uri;
+                //$attachment_metadata['thumb'] = $thumbpath;
+                
+                // add thumbnail link to attachment page
+                if($options['attach-thumb-a']) {
+                  $modifypost = true;
+                  $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                }
+                // add thumbnail link directly to file
+                if($options['thumb-a']) {
+                  $modifypost = true;
+                  $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                }
+             } else {
+                tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
+             }
+          } 
+
+          // Add meta data
+          // 
+          wp_update_attachment_metadata( $attachment_ID, $attachment_metadata );
+
           tdomf_log_message("Added " . $theirfiles[$i]['name'] . " as attachment");
         }
         
@@ -520,6 +590,10 @@ function tdomf_widget_upload_control() {
       $newoptions['custom'] = isset($_POST['upload-files-custom']);
       $newoptions['custom-key'] = $_POST['upload-files-custom-key'];
       $newoptions['post-title'] = isset($_POST['upload-files-post-title']);
+      $newoptions['attach-a'] = isset($_POST['upload-files-attach-a']);
+      $newoptions['attach-thumb-a'] = isset($_POST['upload-files-attach-thumb-a']);
+      $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a']);      
+      
       if ( $options != $newoptions ) {
         $options = $newoptions;
         update_option('tdomf_upload_widget', $options);
@@ -572,19 +646,41 @@ function tdomf_widget_upload_control() {
 
 <label for="upload-files-attach">
 <input type="checkbox" name="upload-files-attach" id="upload-files-attach" <?php if($options['attach']) echo "checked"; ?> >
-<?php _e("Insert Download Link as Attachment on post","tdomf"); ?>
+<?php _e("Insert Uploaded Files as Attachments on post (this will also generate a thumbnail using Wordpress core if upload is an image)","tdomf"); ?>
 </label><br/>
 
+&nbsp;&nbsp;&nbsp;
+
+<label for="upload-files-attach-a">
+<input type="checkbox" name="upload-files-attach-a" id="upload-files-attach-a" <?php if($options['attach-a']) echo "checked"; ?> >
+<?php _e("Add link to Attachment page to post content","tdomf"); ?>
+</label><br/>
+
+&nbsp;&nbsp;&nbsp;
+
+<label for="upload-files-attach-thumb-a">
+<input type="checkbox" name="upload-files-attach-thumb-a" id="upload-files-attach-thumb-a" <?php if($options['attach-thumb-a']) echo "checked"; ?> >
+<?php _e("Add thumbnail link to Attachment page to post content (if thumbnail avaliable)","tdomf"); ?>
+</label><br/>
+
+&nbsp;&nbsp;&nbsp;
+
+<label for="upload-files-thumb-a">
+<input type="checkbox" name="upload-files-thumb-a" id="upload-files-thumb-a" <?php if($options['thumb-a']) echo "checked"; ?> >
+<?php _e("Add thumbnail as download link to post content (if thumbnail avaliable)","tdomf"); ?>
+</label><br/>
+
+       
 <br/>
 
 <label for="upload-files-a">
 <input type="checkbox" name="upload-files-a" id="upload-files-a" <?php if($options['a']) echo "checked"; ?> >
-<?php _e("Add Download Link (A) to post content","tdomf"); ?>
+<?php _e("Add download link to post content","tdomf"); ?>
 </label><br/>
 
 <label for="upload-files-img">
 <input type="checkbox" name="upload-files-img" id="upload-files-img" <?php if($options['img']) echo "checked"; ?> >
-<?php _e("Add Download Link as Image tag (IMG) to post content","tdomf"); ?>
+<?php _e("Add download link as image tag to post content","tdomf"); ?>
 </label><br/>
 
 <br/>
@@ -601,6 +697,6 @@ function tdomf_widget_upload_control() {
 </p>
         <?php 
 }
-tdomf_register_form_widget_control('Upload Files', 'tdomf_widget_upload_control', 450, 650);
+tdomf_register_form_widget_control('Upload Files', 'tdomf_widget_upload_control', 500, 700);
 
 ?>
