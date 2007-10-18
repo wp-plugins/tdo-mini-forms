@@ -69,7 +69,7 @@ function tdomf_start_session() {
         <li><?php _e('Your current wordpress theme inserting HTML before calling the template tag "get_header". This may be as simple as a blank new line. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. You can also check your theme where it calls "get_header".',"tdomf"); ?></li>
         <li><?php _e("Another plugin inserting HTML before TDOMF's get_header action is activated. You can confirm this by disabling all your other plugins and checking if this error is still reported.","tdomf"); ?></li>
       </ul>
-      </font>
+      </font></p>
     <?php 
     tdomf_log_message("Headers are already sent before TDOMF could call session_start in file $filename on line $linenum",TDOMF_LOG_ERROR);
   }

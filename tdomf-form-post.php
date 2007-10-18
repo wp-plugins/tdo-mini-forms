@@ -16,18 +16,18 @@ global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 
 if (!$_SESSION) session_start();
 
+// loading text domain for language translation
+//
+load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
+
 // Security Check
 //
 if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key']) {
    tdomf_log_message("Form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
    unset($_SESSION['tdomf_key']);
-   exit("TDOMF: Bad data submitted. Please return to the previous page and reload. Then try submitting your form again.");
+   exit(__("TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again.","tdomf"));
 }
 unset($_SESSION['tdomf_key']);
-
-// loading text domain for language translation
-//
-load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 
 // Double check user permissions
 //

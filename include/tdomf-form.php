@@ -287,7 +287,7 @@ function tdomf_generate_form() {
     $form .= "</b> ".__('This may be due to...','tdomf');
     $form .= "<ul><li>";
     $form .= sprintf(__('Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s.',"tdomf"),$filename);
-    $form .= "</li></ul></p>";
+    $form .= "</li></ul></font></p>";
   }
   
   if(!$use_ajax) {
