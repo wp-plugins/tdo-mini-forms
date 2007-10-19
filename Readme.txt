@@ -25,12 +25,25 @@ Registered users have access to a "Your Submissions" page which lists their curr
 **Version 0.8 introduces the ability to allow users submit files, set categories and add tags to their submissions.**
 
 * [Demo Site]( http://thedeadone.net/tdomf/ )
-* [Plugin News]( http://thedeadone.net/index.php?tag=tdomf ), [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 )
-* [Plugin Support Forum]( http://thedeadone.net/forum )
+
+= Features =
+
+* Create your form using a Widget interface
+* Simple Captcha Widget
+* Posting Policy Widget
+* Upload Files and can be attached to posts. Uses Wordpress' core to create thumbnails if applicable
+* Submitters can be notified if post approved or rejected
+* Allow users to select category and tags
+* Ban users and IPs
+* Control what roles can access the form
+* Can automatically create a page with form for you
+* Can automatically modified author template tag with info about submitter
+* Can, optionally, automatically allow submissions to be published
+* And many more...
 
 == Installation ==
 
-Download the zip and extract the files to a subdirectory, called tdo-mini-forms, of your plugin directory. i.e. `/path_to_wordpress/wp-content/plugins/tdo-mini-forms`. Make sure the path and, at least, the files "tdomf-form-post.php" and "tdomf-style-form.css" can be seen from a web browser.
+Download the zip and extract the files to a subdirectory, called tdo-mini-forms, of your plugin directory. i.e. `/path_to_wordpress/wp-content/plugins/tdo-mini-forms`. 
 
 Once you've got it installed, active the plugin via the usual Wordpress plugin menu. Make sure you then configure it via the main TDOMF menu in the Wordpress Administration backend.
 
@@ -38,11 +51,19 @@ You must assign a user as the "Default Author". This user must not have rights t
 
 On the options menu, there is a button to automatically create a page with the necessary tag to display your form. There are also other options to help integrate with your theme on this page. For more information on Theme integration, please refer to the Frequently Asked Questions of this readme.
 
-= Upgrade Instructions =
+= Upgrade Instructions from versions previous to 0.7 =
 
 Before installing the new version of TDO Mini Forms, delete the TDOMiniForms from your `.../wp-content/plugins/` folder. Now simply follow the installation instructions above. You will need to re-configure the plugin again, however previously submitted posts and other user information will be retained from your previous installation of the plugin.
 
 == Frequently Asked Questions ==
+
+= Where do I get the latest updates on TDO Mini Forms? =
+
+[TDO Mini Forms News]( http://thedeadone.net/index.php?tag=tdomf ) and here is the [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 ).
+
+= Where is the best place to get support for this plugin? =
+
+You can use the [TDOMF Support Forum]( http://thedeadone.net/forum ) or you can post on [Wordpress.org's Support Form]( http://wordpress.org/tags/tdo-mini-forms#postform ).
 
 = How do I add a form to a page or post? =
 
@@ -103,6 +124,24 @@ Why? It opens your site up to spammers and other nefarious uses. However, people
 = When people submit posts with YouTube embedded code, it gets stripped! =
 
 Enable moderation and it'll work. If you disable moderation, posts get passed through kses to remove nasty scripts before being published. This removes YouTube code. If you have to approve posts, you can make sure no-one has snuck in something tricky.
+
+= I get an error: "TDOMF ERROR: Headers have already been sent in file..." =
+
+TDO Mini Forms tries to call the PHP function session_start() by adding an action to the "get_header" template tag. The session variable is used to hold security information and to confirm a submission comes from an actual form (and not some bot). But, if you see this error, it means that some where the headers have already been sent and so the session cannot start. If you try to submit a form with this error, you'll only get another error "TDOMF: Bad data submitted".
+
+The error message gives you details of the file that has already sent the headers. This could be something as simple as an empty blank line before everything else in the file or another plugin prints some HTML out using a "get_header" tag (if this is the case, it should really use "wp_head"). You can alternativily call session_start before anything else to remove this error. Just insert  `<?php session_start(); ?>` at the top of the offending file or before any HTML is printed out.
+
+= In my form I get an error saying: "ERROR: session_start() has not been called yet!" = 
+
+TDO Mini Forms tries to call the PHP function session_start() by adding an action to the "get_header" template tag. The session variable is used to hold security information and to confirm a submission comes from an actual form (and not some bot). But, if you see this error (and you do not see the "TDOMF ERROR: Headers have already been sent..."), it probably means that your theme does not use the "get_header" template tag. If you try to submit a form with this error, you'll only get another error "TDOMF: Bad data submitted". You can confirm this by temporarily switching your theme to the classic or default Wordpress theme. The errors should disappear.
+
+To resolve this, you need to insert a call to session_start at the top of template file. Normally the form is added to a page and your theme should have a "page.php" template file. At the very top, first line, add this line:
+
+`<?php session_start(); ?>`
+
+= I get "TDOMF: Bad data submitted..." error when I submit a post! =
+
+I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." and/or "ERROR: session_start() has not been called yet!..." errors, this error means you've tried to submit your post from an invalid form. Try returning to the submission form, reloading it and then reenter/submit it.
 
 == Screenshots ==
 
