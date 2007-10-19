@@ -107,10 +107,10 @@ function tdomf_upload_download_handler(){
        
        @ignore_user_abort();
        @set_time_limit(600);
-       if(function_exists('mime_content_type')) { // set mime-type
-          $mimetype = mime_content_type($filepath);
-       } else if(!empty($type)) {
+       if(!empty($type)) {
           $mimetype = $type;
+       } else if(function_exists('mime_content_type')) { // set mime-type
+          $mimetype = mime_content_type($filepath);
        } else {
           // default
           $mimetype = 'application/octet-stream';         
@@ -137,10 +137,10 @@ function tdomf_upload_download_handler(){
 
        // Pass file       
        $handle = fopen($filepath, "rb"); // now let's get the file!
-       header("Pragma: "); // Leave blank for issues with IE
-       header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+       #header("Pragma: "); // Leave blank for issues with IE
+       #header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
        header("Content-Type: $mimetype");
-       header("Content-Disposition: attachment; filename=\"".basename($filepath)."\"");
+       #header("Content-Disposition: attachment; filename=\"".basename($filepath)."\"");
        header("Content-Length: " . (filesize($filepath)));
        sleep(1);
        fpassthru($handle);
@@ -215,10 +215,10 @@ function tdomf_upload_preview_handler(){
       
        // Pass file       
        $handle = fopen($filepath, "rb"); // now let's get the file!
-       header("Pragma: "); // Leave blank for issues with IE
-       header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+       #header("Pragma: "); // Leave blank for issues with IE
+       #header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
        header("Content-Type: $mimetype");
-       header("Content-Disposition: attachment; filename=\"".basename($filepath)."\"");
+       #header("Content-Disposition: attachment; filename=\"".basename($filepath)."\"");
        header("Content-Length: " . (filesize($filepath)));
        sleep(1);
        fpassthru($handle);
@@ -357,6 +357,8 @@ function tdomf_widget_upload_post($args) {
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,$theirfiles[$i]['type'],true);
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,$newpath,true);
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,$theirfiles[$i]['name'],true);
+        
+        tdomf_log_message( "File ".$theirfiles[$i]['name']." saved from tmp area to ".$newpath." with type ".$theirfiles[$i]['type']." for post $post_ID" );
         
         // Execute user command
         //
