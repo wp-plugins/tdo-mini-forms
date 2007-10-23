@@ -179,7 +179,7 @@ Author URI: http://thedeadone.net
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
+load_plugin_textdomain('tdomf','wp-content/plugins/tdo-mini-forms');
 
 ///////////////////////////////////////////////////
 // Defines and other global vars for this Plugin //
@@ -194,7 +194,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 // Build Number (must be a integer)
 define("TDOMF_BUILD", "9");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.72");
+define("TDOMF_VERSION", "0.8");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
