@@ -55,12 +55,12 @@ add_action("wp_head","tdomf_auto_fix_authors");
 // if it's already been started
 //
 function tdomf_start_session() {
-  if(!headers_sent() && !$_SESSION) {
+  if(!headers_sent() && !isset($_SESSION)) {
     session_start();
     return;
   } 
   
-  if(headers_sent($filename,$linenum) && !$_SESSION) { 
+  if(headers_sent($filename,$linenum) && !isset($_SESSION)) { 
     ?>
       <p><font color="red">
       <b><?php printf(__('TDOMF ERROR: Headers have already been sent in file %s on line %d before <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> could be called.',"tdomf"),$filename,$linenum); ?></b>

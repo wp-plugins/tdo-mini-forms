@@ -181,7 +181,7 @@ function tdomf_upload_preview_handler(){
 
    // Session start
    //
-   if (!$_SESSION) session_start();
+   if (!isset($_SESSION)) session_start();
    
    // Security check   
    if($_SESSION['tdomf_upload_preview_key'] != $key) {

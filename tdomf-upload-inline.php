@@ -14,6 +14,10 @@
 // * No direct links to files are exposed (as long as the admins specify a
 //   location not directly exposed to the web)
 
+// Session start
+//
+if (!isset($_SESSION) session_start();
+
 // Load up Wordpress
 //
 $wp_config = realpath("../../../wp-config.php");
@@ -28,10 +32,6 @@ load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 
 // URL for this form
 $tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';
-
-// Session start
-//
-if (!$_SESSION) session_start();
 
 // First pass security check
 //
