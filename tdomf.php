@@ -134,6 +134,9 @@ Author URI: http://thedeadone.net
 //    modified after the upload widget has done it's biz, these changes won't
 //    be affected to the attachments)
 // - More info and error checking!
+// - "Notified" instead of "notify" in Notify Me widget
+// - Added quicktags to the post "Content" widget (restrict tags option hides 
+//    illegal tags from toolbar)
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////

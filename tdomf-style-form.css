@@ -43,3 +43,32 @@
 .tdomf_upload_inline_errors {
  color: red;
 }
+
+/* Formatting the QuickTag toolbar */
+
+#ed_toolbar input {
+ /*padding: 0px;
+ margin: 2px;
+ margin-bottom: 0px;
+ margin-top: 10px;*/
+}
+#ed_toolbar input:hover {
+ /*padding: 0px;*/
+}
+#ed_bold {
+ font-weight:bold;
+}
+#ed_italic {
+ font-style:italic;
+}
+#ed_link, #ed_ext_link {
+ color:blue;
+ text-decoration: underline;
+}
+#ed_under {
+ text-decoration: underline;
+}
+#ed_strike {
+ text-decoration: line-through;
+}
+

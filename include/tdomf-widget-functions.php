@@ -234,8 +234,9 @@ function tdomf_widget_content_get_options() {
        $options['text-required'] = true;
        $options['text-cols'] = 40;
        $options['text-rows'] = 10; 
-       $options['restrict-tags'] = false;
-       $options['allowable-tags'] = "<p><b><i><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br>";
+       $options['quicktags'] = false;
+       $options['restrict-tags'] = true;
+       $options['allowable-tags'] = "<p><b><i><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
     }
   return $options;
 }
@@ -273,7 +274,19 @@ function tdomf_widget_content($args) {
     if($options['allowable-tags'] != "" && $options['restrict-tags']) {
       $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['allowable-tags']))."<br/>";
     }
+    if($options['quicktags']) {
+      $qt_path = TDOMF_URLPATH."js/tdomf-quicktags.js.php?postfix=content_widget";
+      if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+        $qt_path = TDOMF_URLPATH."js/tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
+      }
+      $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
+      $output .= "\n<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
+    }
     $output .= '<textarea title="true" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >'.$content_content.'</textarea>';
+    if($options['quicktags']) {
+      $output .= "\n<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>\n";
+    }
+    
   }
   $output .= $after_widget;
   return $output;
@@ -365,6 +378,7 @@ function tdomf_widget_content_control() {
      $newoptions['text-rows'] = intval($_POST['content-text-rows']); 
      $newoptions['restrict-tags'] = isset($_POST['content-restrict-tags']);
      $newoptions['allowable-tags'] = $_POST['content-allowable-tags'];
+     $newoptions['quicktags'] = $_POST['content-quicktags'];
      if ( $options != $newoptions ) {
         $options = $newoptions;
         update_option('tdomf_content_widget', $options);
@@ -388,6 +402,8 @@ function tdomf_widget_content_control() {
 <h4><?php _e("Content of Post","tdomf"); ?></h4>
 <label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> ></label>
 <label for="content-text-required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="content-text-required" id="content-text-required" <?php if($options['text-required']) echo "checked"; ?> ></label>
+<br/>
+<label for="content-quicktags" style="line-height:35px;"><?php _e("Use Quicktags","tdomf"); ?> <input type="checkbox" name="content-quicktags" id="content-quicktags" <?php if($options['quicktags']) echo "checked"; ?> ></label>
 <br/>
 <label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo $options['text-cols']; ?>" size="3" /></label>
 <label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo $options['text-rows']; ?>" size="3" /></label>

@@ -128,7 +128,7 @@ function tdomf_overview_menu()  {
     <h3><?php _e('Latest TDO Mini Forms News!',  'tdomf') ?></h3>
 
     <?php
-      $rss = fetch_rss('http://thedeadone.net/index.php?tag=tdomf&feed=rss2');
+      $rss = fetch_rss('http://thedeadone.net/tag/tdomf/feed');
 
       if ( isset($rss->items) && 0 != count($rss->items) )
       {

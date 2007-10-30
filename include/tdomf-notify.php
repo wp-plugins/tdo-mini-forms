@@ -292,7 +292,7 @@ function tdomf_widget_notifyme($args) {
 
   $output .= "<label for='notifyme'><input type='checkbox' name='notifyme' id='notifyme'";
   if(isset($notifyme)) $output .= " checked "; 
-  $output .= " /> ".__("Do you wish to be notify when your post is approved (or rejected)?","tdomf")."</label>";
+  $output .= " /> ".__("Do you wish to be notified when your post is approved (or rejected)?","tdomf")."</label>";
   
   if($show_email_input) {
     $output .=  "<br/><label for='notifyme_email'>".__("Email for notification:","tdomf").' <input type="text" value="'.$notifyme_email.'" name="notifyme_email" id="notifyme_email" size="40" /></label>';
