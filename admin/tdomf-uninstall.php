@@ -74,7 +74,7 @@ function tdomf_reset_options() {
   echo "</span>";
   // Danger will robinson! If the table prefix is "tdomf_", you may end up
   // deleting critical Wordpress core options!
-  if($table_prefix == "tdomf_") {
+  if($table_prefix != "tdomf_") {
     $alloptions = wp_load_alloptions();
     foreach($alloptions as $id => $val) {
       if(preg_match('#^tdomf_.+#',$id)) {

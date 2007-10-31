@@ -45,6 +45,7 @@ function tdomf_overview_menu()  {
     <h2><?php _e('Welcome to TDO Mini Forms', 'tdomf') ?></h2>
 
     <div id="zeitgeist">
+        
     	  <h2><?php _e('Latest Activity', 'tdomf') ?></h2>
 
     	  <h3><?php _e('Log', 'tdomf') ?><?php if(current_user_can('manage_options')) { ?><a href="admin.php?page=tdomf_show_log_menu" title="Full Log...">&raquo;</a><?php } ?></h3>
@@ -94,7 +95,7 @@ function tdomf_overview_menu()  {
         
         <?php /* TODO: Latest from thedeadone.net forum. Current forum plugin does not yet support RSS! */ ?>
         
-        <?php $rss = fetch_rss('http://wordpress.org/support/rss/tags/tdo-mini-forms');
+        <?php /* $rss = fetch_rss('http://wordpress.org/support/rss/tags/tdo-mini-forms');
                if ( isset($rss->items) && 0 != count($rss->items) ) {
                  $rss->items = array_slice($rss->items, 0, 5); 
                  echo "<h3>".__('Latest Wordpress.org Comments','tdomf')."</h3><ul>";
@@ -102,11 +103,27 @@ function tdomf_overview_menu()  {
                  <li><a href='<?php echo wp_filter_kses($item['link']); ?>'><?php echo wp_specialchars($item['title']); ?></a></li>
         <?php    }
                  echo "</ul>";
-              } ?>
+              } */ ?>
         
     </div>
 
     <?php echo "<p>".$message = tdomf_get_error_messages()."</p>";  ?>
+
+    <table style="margin:0px;padding:0px">
+      <tr>
+        <td>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" >
+          <input type="hidden" name="cmd" value="_s-xclick">
+          <input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but21.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!" style="border:0px;" >
+          <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+          <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+">
+          </form>
+        </td><td>
+          <?php printf(__("<a href='%s'>My Amazon Wishlist</a>","tdomf"),"http://www.amazon.co.uk/gp/registry/23S7OL9W6Q4JT"); ?></li>
+        </td>
+      </tr>
+    </table>
     
     <p><?php _e("Use these links to get started:","tdomf"); ?></p>
 
@@ -116,14 +133,14 @@ function tdomf_overview_menu()  {
       <li><a href="users.php?page=tdomf_your_submissions#tdomf_form1">See the form</a></li>
     </ul>
 
-<p><?php _e('Need help with TDO Mini Forms? Please see the <a href="admin.php?page=tdomf_show_help_page">help page</a> or visit the <a href="http://thedeadone.net/forum">support forums</a>.',"tdomf"); ?></p>
+<p><?php _e('Need help with TDO Mini Forms? Please see the <a href="admin.php?page=tdomf_show_help_page">help page</a> or visit the <a href="http://thedeadone.net/forum">support forums on thedeadone.net</a> or the <a href="http://wordpress.org/tags/tdo-mini-forms">support forums on wordpress.org</a>.',"tdomf"); ?></p>
 
     <h3><?php _e('Welcome', 'tdomf') ?></h3>
 
     <p>
     <?php _e("TDO Mini Forms plugin allows you to provide a form to your readers and users so that they can submit posts to your blog, even if they don't have rights to do so. You can control what type of users, such as unregistered users and subscribers, can access and use the form. Posts are submitted as draft so that you can approve them before they are published. (You can optionally turn this off so that submissions are automatically published). As of version 0.7, you can now also customise the form using widgets.","tdomf"); ?>
     </p>
-
+        
     <div id="devnews">
     <h3><?php _e('Latest TDO Mini Forms News!',  'tdomf') ?></h3>
 

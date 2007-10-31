@@ -26,7 +26,7 @@ function tdomf_widget_tags($args) {
   $output .= $after_widget;
   return $output;
   }
-tdomf_register_form_widget('Tags', 'tdomf_widget_tags');
+tdomf_register_form_widget('tags','Tags', 'tdomf_widget_tags');
 
 ////////////////////////
 // Preview tags
@@ -43,7 +43,7 @@ function tdomf_widget_tags_preview($args) {
   
   return "";
 }
-tdomf_register_form_widget_preview('Tags', 'tdomf_widget_tags_preview');
+tdomf_register_form_widget_preview('tags','Tags', 'tdomf_widget_tags_preview');
 
 
 ////////////////////////
@@ -59,7 +59,7 @@ function tdomf_widget_tags_post($args) {
  
   return NULL;
 }
-tdomf_register_form_widget_post('Tags', 'tdomf_widget_tags_post');
+tdomf_register_form_widget_post('tags','Tags', 'tdomf_widget_tags_post');
 
 ///////////////////////////////////////////////////////////
 // Show what tags are on the post to admins for moderating
@@ -81,6 +81,6 @@ function tdomf_widget_tags_adminemail($args) {
   
   return "";
 }
-tdomf_register_form_widget_adminemail('Tags', 'tdomf_widget_tags_adminemail');
+tdomf_register_form_widget_adminemail('tags','Tags', 'tdomf_widget_tags_adminemail');
 
 ?>

@@ -65,7 +65,7 @@ function tdomf_preview_form($args) {
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_preview[$w])) {
 		#tdomf_log_message("Looking at preview widget $w");
-		$message .= $tdomf_form_widgets_preview[$w]['cb']($widget_args);
+		$message .= $tdomf_form_widgets_preview[$w]['cb']($widget_args,$tdomf_form_widgets_preview[$w]['params']);
 	  }
    }
    if($message == "") {
@@ -88,7 +88,7 @@ function tdomf_validate_form($args) {
    $widget_order = tdomf_get_widget_order();
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_validate[$w])) {
-		$temp_message = $tdomf_form_widgets_validate[$w]['cb']($widget_args);
+		$temp_message = $tdomf_form_widgets_validate[$w]['cb']($widget_args,$tdomf_form_widgets_validate[$w]['params']);
 		if($temp_message != NULL && trim($temp_message) != ""){
 		   $message .= $temp_message;
 		}
@@ -188,7 +188,7 @@ function tdomf_create_post($args) {
    $widget_order = tdomf_get_widget_order();
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_post[$w])) {
-      $temp_message = $tdomf_form_widgets_post[$w]['cb']($widget_args);
+      $temp_message = $tdomf_form_widgets_post[$w]['cb']($widget_args,$tdomf_form_widgets_post[$w]['params']);
       if($temp_message != NULL && trim($temp_message) != ""){
         $message .= $temp_message;
       }
@@ -376,7 +376,7 @@ EOT;
   $widget_order = tdomf_get_widget_order();
   foreach($widget_order as $w) {
 	if(isset($tdomf_form_widgets[$w])) {
-		$form .= $tdomf_form_widgets[$w]['cb']($widget_args);
+		$form .= $tdomf_form_widgets[$w]['cb']($widget_args,$tdomf_form_widgets[$w]['params']);
 		#$form .= "<br/>";
 	}
   }

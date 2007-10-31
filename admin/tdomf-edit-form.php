@@ -156,6 +156,9 @@ function tdomf_show_form_menu() {
 
   ?>
 
+  <?php do_action( 'tdomf_widget_page_top' ); ?>
+
+
 <div class="wrap">
 		<h2>Form Arrangement</h2>
 
@@ -230,7 +233,7 @@ function tdomf_show_form_menu() {
 				   <span class="controlhandle"><?php echo $tdomf_form_widgets_control[$id]['name']; ?></span>
 					<span id="<?php echo $id; ?>closer" class="controlcloser">&#215;</span>
 					<div class="controlform">
-						<?php $w['cb'](); ?>
+						<?php $w['cb']($tdomf_form_widgets_control[$id]['params']); ?>
                   <input type="hidden" id="<?php echo $id; ?>-submit" name="<?php echo $id; ?>-submit" value="1" />
 					</div>
 				</div>
@@ -242,7 +245,7 @@ function tdomf_show_form_menu() {
 
 	<div id="shadow"> </div>
 
-  <?php do_action( 'tdomf_widget_page' ); ?>
+  <?php do_action( 'tdomf_widget_page_bottom' ); ?>
   
   <?php
 }

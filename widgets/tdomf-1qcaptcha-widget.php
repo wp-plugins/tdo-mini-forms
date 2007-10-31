@@ -3,7 +3,7 @@
 Name: "1 Question Captcha"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: The user must answer a simple question before a post is submitted
-Version: 1
+Version: 2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -36,7 +36,7 @@ function tdomf_widget_1qcaptcha($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('1 Question Captcha', 'tdomf_widget_1qcaptcha');
+tdomf_register_form_widget('1-question-captcha','1 Question Captcha', 'tdomf_widget_1qcaptcha');
 
 //////////////////////////////////////
 // Validate answer
@@ -52,7 +52,7 @@ function tdomf_widget_1qcaptcha_validate($args) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('1 Question Captcha', 'tdomf_widget_1qcaptcha_validate');
+tdomf_register_form_widget_validate('1-question-captcha','1 Question Captcha', 'tdomf_widget_1qcaptcha_validate');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -86,7 +86,7 @@ function tdomf_widget_1qcaptcha_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('1 Question Captcha', 'tdomf_widget_1qcaptcha_control', 350, 150);
+tdomf_register_form_widget_control('1-question-captcha','1 Question Captcha', 'tdomf_widget_1qcaptcha_control', 350, 150);
 
 
 ?>

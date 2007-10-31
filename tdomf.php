@@ -137,6 +137,8 @@ Author URI: http://thedeadone.net
 // - "Notified" instead of "notify" in Notify Me widget
 // - Added quicktags to the post "Content" widget (restrict tags option hides 
 //    illegal tags from toolbar)
+// - Uninstall was broken! Was not deleting option settings.
+// - Removed "About" menu
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,14 +152,11 @@ Author URI: http://thedeadone.net
 //    * Submitted post awaiting moderation
 //    * Submitted post automatically published
 //    * Banned IP, Banned user and other insufficent priviliges messages
-// - Multiple copies of the same widget (it exists in the current WP theme
-//    widget impl.)
 // - Widget Manager Menu
 //    * Info about loaded widgets
 //    * Disable loaded widgets?
 // - More and more widgets!
 //    * Custom Field widgets: one for each HTML element in the rainbow!
-//    * Simple Text
 //    * URL Submission
 //    * Multiple/Random Question Captcha
 // - Improvements for current widgets
@@ -176,7 +175,6 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
-// - Better Error Messages ("TDOMF: Bad Data Submitted"
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
@@ -311,9 +309,6 @@ function tdomf_add_menus()
     //
     // Uninstall
     add_submenu_page( TDOMF_FOLDER , __('Uninstall', 'tdomf'), __('Uninstall', 'tdomf'), 'manage_options', 'tdomf_show_uninstall_menu', 'tdomf_show_uninstall_menu');
-    //
-    // About Page
-    add_submenu_page( TDOMF_FOLDER , __('About', 'tdomf'), __('About', 'tdomf'), 'edit_others_posts', 'tdomf_show_about_page', 'tdomf_show_about_page');
 
     //
     // Your submissions
@@ -331,7 +326,6 @@ require_once('include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-about.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-form.php');

@@ -3,7 +3,7 @@
 Name: "I Agree"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget provides a checkbox that the user must click before a post will be accept such as the classic "I Agree" buttons.
-Version: 1
+Version: 2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -38,7 +38,7 @@ function tdomf_widget_iagree($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('I Agree', 'tdomf_widget_iagree');
+tdomf_register_form_widget('i-agree','I Agree', 'tdomf_widget_iagree');
 
 //////////////////////////////////////
 // User must Agree! 
@@ -52,7 +52,7 @@ function tdomf_widget_iagree_validate($args) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('I Agree', 'tdomf_widget_iagree_validate');
+tdomf_register_form_widget_validate('i-agree','I Agree', 'tdomf_widget_iagree_validate');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -92,7 +92,7 @@ function tdomf_widget_iagree_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('I Agree', 'tdomf_widget_iagree_control', 400, 300);
+tdomf_register_form_widget_control('i-agree','I Agree', 'tdomf_widget_iagree_control', 400, 300);
 
 
 ?>

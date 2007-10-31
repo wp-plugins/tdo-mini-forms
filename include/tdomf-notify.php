@@ -130,7 +130,7 @@ function tdomf_notify_admins($post_ID){
    $widget_order = tdomf_get_widget_order();
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_adminemail[$w])) {
-      $temp_message = $tdomf_form_widgets_adminemail[$w]['cb']($widget_args);
+      $temp_message = $tdomf_form_widgets_adminemail[$w]['cb']($widget_args,$tdomf_form_widgets_adminemail[$w]['params']);
       if($temp_message != NULL && trim($temp_message) != ""){
         $email_msg .= $temp_message;
       }
@@ -301,7 +301,7 @@ function tdomf_widget_notifyme($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('Notify Me', 'tdomf_widget_notifyme');
+tdomf_register_form_widget('notifyme', 'Notify Me', 'tdomf_widget_notifyme');
 
 // Widget validate input
 //
@@ -314,7 +314,7 @@ function tdomf_widget_notifyme_validate($args) {
   }
   return NULL;
 }
-tdomf_register_form_widget_validate('Notify Me', 'tdomf_widget_notifyme_validate');
+tdomf_register_form_widget_validate('notifyme', 'Notify Me', 'tdomf_widget_notifyme_validate');
 
 // Widget post submitted post-op
 //
@@ -337,6 +337,6 @@ function tdomf_widget_notifyme_post($args) {
   }
   return NULL;
 }
-tdomf_register_form_widget_post('Notify Me', 'tdomf_widget_notifyme_post');
+tdomf_register_form_widget_post('notifyme', 'Notify Me', 'tdomf_widget_notifyme_post');
 
 ?>

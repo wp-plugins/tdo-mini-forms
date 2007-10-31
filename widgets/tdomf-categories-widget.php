@@ -3,7 +3,7 @@
 Name: "Categories"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget allows users to select categories for their submissions
-Version: 0.1
+Version: 0.2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -77,7 +77,7 @@ function tdomf_widget_categories($args) {
   $output .= $after_widget;
   return $output;
   }
-tdomf_register_form_widget('Categories', 'tdomf_widget_categories');
+tdomf_register_form_widget('categories','Categories', 'tdomf_widget_categories');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -153,7 +153,7 @@ function tdomf_widget_categories_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('Categories', 'tdomf_widget_categories_control', 350, 510);
+tdomf_register_form_widget_control('categories','Categories', 'tdomf_widget_categories_control', 350, 510);
 
 
 ////////////////////////
@@ -166,7 +166,7 @@ function tdomf_widget_categories_preview($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview('Categories', 'tdomf_widget_categories_preview');
+tdomf_register_form_widget_preview('categories','Categories', 'tdomf_widget_categories_preview');
 
 
 ////////////////////////
@@ -196,7 +196,7 @@ function tdomf_widget_categories_post($args) {
  
   return NULL;
 }
-tdomf_register_form_widget_post('Categories', 'tdomf_widget_categories_post');
+tdomf_register_form_widget_post('categories','Categories', 'tdomf_widget_categories_post');
 
 ///////////////////////////////////////////////////////////
 // Show what categories are on the post to admins for moderating
@@ -216,6 +216,6 @@ function tdomf_widget_categories_adminemail($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_adminemail('Categories', 'tdomf_widget_categories_adminemail');
+tdomf_register_form_widget_adminemail('categories','Categories', 'tdomf_widget_categories_adminemail');
 
 ?>

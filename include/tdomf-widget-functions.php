@@ -103,22 +103,23 @@ $tdomf_form_widgets_adminemail = array();
 
 // All Widgets need to register with this function
 //
-function tdomf_register_form_widget($name, $callback) {
+function tdomf_register_form_widget($id, $name, $callback) {
    global $tdomf_form_widgets,$tdomf_form_widgets;
-   $id = sanitize_title($name);
+   $id = sanitize_title($id);
    if(isset($tdomf_form_widgets[$id])) {
       tdomf_log_message("tdomf_register_form_widget: Widget $id already exists. Overwriting...");
    }
    #tdomf_log_message("Loading Widget $id...");
    $tdomf_form_widgets[$id]['name'] = $name;
    $tdomf_form_widgets[$id]['cb'] = $callback;
+   $tdomf_form_widgets[$id]['params'] = array_slice(func_get_args(), 3);
 }
 
 // Widgets that require configuration must register with this function
 //
-function tdomf_register_form_widget_control($name, $control_callback, $width = 360, $height = 130) {
+function tdomf_register_form_widget_control($id, $name, $control_callback, $width = 360, $height = 130) {
    global $tdomf_form_widgets_control,$tdomf_form_widgets;
-   $id = sanitize_title($name);
+   $id = sanitize_title($id);
    if(!isset($tdomf_form_widgets[$id])) {
    		 tdomf_log_message("Control: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
@@ -131,13 +132,14 @@ function tdomf_register_form_widget_control($name, $control_callback, $width = 3
    $tdomf_form_widgets_control[$id]['cb'] = $control_callback;
    $tdomf_form_widgets_control[$id]['width'] = $width;
    $tdomf_form_widgets_control[$id]['height'] = $height;
+   $tdomf_form_widgets_control[$id]['params'] = array_slice(func_get_args(), 5);
 }
 
 // Widgets that provide a preview must register with this function
 //
-function tdomf_register_form_widget_preview($name, $preview_callback, $ajax = true) {
+function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax = true) {
    global $tdomf_form_widgets_preview,$tdomf_form_widgets;
-   $id = sanitize_title($name);
+   $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
    		 tdomf_log_message("Preview: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
@@ -149,13 +151,14 @@ function tdomf_register_form_widget_preview($name, $preview_callback, $ajax = tr
    $tdomf_form_widgets_preview[$id]['name'] = $name;
    $tdomf_form_widgets_preview[$id]['cb'] = $preview_callback;
    $tdomf_form_widgets_preview[$id]['ajax'] = $ajax;
+   $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 4);
 }
 
 // Widgets that vaidate input *before* input
 //
-function tdomf_register_form_widget_validate($name, $validate_callback, $ajax = true) {
+function tdomf_register_form_widget_validate($id, $name, $validate_callback, $ajax = true) {
    global $tdomf_form_widgets_validate,$tdomf_form_widgets;
-   $id = sanitize_title($name);
+   $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
    		 tdomf_log_message("Validate: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
@@ -167,13 +170,14 @@ function tdomf_register_form_widget_validate($name, $validate_callback, $ajax = 
    $tdomf_form_widgets_validate[$id]['name'] = $name;
    $tdomf_form_widgets_validate[$id]['cb'] = $validate_callback;
    $tdomf_form_widgets_validate[$id]['ajax'] = $ajax;
+   $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 4);
 }
 
 // Widgets that modify the post *after* submission 
 //
-function tdomf_register_form_widget_post($name, $post_callback, $ajax = true) {
+function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = true) {
    global $tdomf_form_widgets_post,$tdomf_form_widgets;
-   $id = sanitize_title($name);
+   $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
    		 tdomf_log_message("Post: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
@@ -185,13 +189,14 @@ function tdomf_register_form_widget_post($name, $post_callback, $ajax = true) {
    $tdomf_form_widgets_post[$id]['name'] = $name;
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
    $tdomf_form_widgets_post[$id]['ajax'] = $ajax;
+   $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 4);
 }
 
 // Widgets that create info for the admin notification
 //
-function tdomf_register_form_widget_adminemail($name, $post_callback) {
+function tdomf_register_form_widget_adminemail($id, $name, $post_callback) {
    global $tdomf_form_widgets_adminemail,$tdomf_form_widgets;
-   $id = sanitize_title($name);
+   $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
    		 tdomf_log_message("Admin Email: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
@@ -201,6 +206,7 @@ function tdomf_register_form_widget_adminemail($name, $post_callback) {
    }
    $tdomf_form_widgets_adminemail[$id]['name'] = $name;
    $tdomf_form_widgets_adminemail[$id]['cb'] = $post_callback;
+   $tdomf_form_widgets_adminemail[$id]['params'] = array_slice(func_get_args(), 3);
 }
 
 // Return the default widget order!
@@ -291,7 +297,7 @@ function tdomf_widget_content($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('Content', 'tdomf_widget_content');
+tdomf_register_form_widget('content','Content', 'tdomf_widget_content');
 
 ///////////////////////////////////////
 // Preview the post's content and title
@@ -326,7 +332,7 @@ function tdomf_widget_content_preview($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview('Content', 'tdomf_widget_content_preview');
+tdomf_register_form_widget_preview('content','Content', 'tdomf_widget_content_preview');
 
 ///////////////////////////////////////
 // Add the title and content to the post 
@@ -359,7 +365,7 @@ function tdomf_widget_content_post($args) {
   $post_ID = wp_update_post($post);
   return NULL;
 }
-tdomf_register_form_widget_post('Content', 'tdomf_widget_content_post');
+tdomf_register_form_widget_post('content','Content', 'tdomf_widget_content_post');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -414,7 +420,7 @@ function tdomf_widget_content_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('Content', 'tdomf_widget_content_control', 300, 430);
+tdomf_register_form_widget_control('content','Content', 'tdomf_widget_content_control', 300, 430);
 
 ///////////////////////////////////////
 // Validate title and content from form 
@@ -441,7 +447,7 @@ function tdomf_widget_content_validate($args) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('Content', 'tdomf_widget_content_validate');
+tdomf_register_form_widget_validate('content','Content', 'tdomf_widget_content_validate');
 
 ///////////////////////
 // "Who Am I" Widget //
@@ -568,7 +574,7 @@ function tdomf_widget_whoami($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('Who Am I', 'tdomf_widget_whoami');
+tdomf_register_form_widget('who-am-i','Who Am I', 'tdomf_widget_whoami');
 
 //////////////////////////////////////////
 // Display and handle widget control panel 
@@ -613,7 +619,7 @@ function tdomf_widget_whoami_control() {
 </div>
         <?php
 }
-tdomf_register_form_widget_control('Who Am I', 'tdomf_widget_whoami_control', 200, 380);
+tdomf_register_form_widget_control('who-am-i','Who Am I', 'tdomf_widget_whoami_control', 200, 380);
 
 ///////////////////////////////////////
 // Generate a simple preview for widget
@@ -640,7 +646,7 @@ extract($args);
     return $before_widget.sprintf(__("Submitted by %s.","tdomf"),$link).$after_widget;
   }
 }
-tdomf_register_form_widget_preview('Who Am I', 'tdomf_widget_whoami_preview');
+tdomf_register_form_widget_preview('who-am-i','Who Am I', 'tdomf_widget_whoami_preview');
 
 //////////////////////////////////
 // Validate input for this widget
@@ -689,7 +695,7 @@ function tdomf_widget_whoami_validate($args) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('Who Am I', 'tdomf_widget_whoami_validate');
+tdomf_register_form_widget_validate('who-am-i','Who Am I', 'tdomf_widget_whoami_validate');
 
 ///////////////////////////////////
 // Update post after form submitted 
@@ -720,6 +726,6 @@ function tdomf_widget_whoami_post($args) {
   tdomf_widget_whoami_store_cookies($whoami_name,$whoami_email,$whoami_webpage);
   return NULL;
 }
-tdomf_register_form_widget_post('Who Am I', 'tdomf_widget_whoami_post');
+tdomf_register_form_widget_post('who-am-i','Who Am I', 'tdomf_widget_whoami_post');
 
 ?>

@@ -317,7 +317,7 @@ function tdomf_widget_upload($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('Upload Files', 'tdomf_widget_upload');
+tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload');
 
 //////////////////////////////
 // Post-post stuff
@@ -483,7 +483,7 @@ function tdomf_widget_upload_post($args) {
  
   return NULL;
 }
-tdomf_register_form_widget_post('Upload Files', 'tdomf_widget_upload_post');
+tdomf_register_form_widget_post('upload-files','Upload Files', 'tdomf_widget_upload_post');
 
 ////////////////////////////////
 // Validate uploads if possible
@@ -511,7 +511,7 @@ function tdomf_widget_upload_validate($args) {
   }
   return NULL;
 }
-tdomf_register_form_widget_validate('Upload Files', 'tdomf_widget_upload_validate');
+tdomf_register_form_widget_validate('upload-files','Upload Files', 'tdomf_widget_upload_validate');
 
 //////////////////////////////
 // Preview uplaods if possible
@@ -539,7 +539,7 @@ function tdomf_widget_upload_preview($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview('Upload Files', 'tdomf_widget_upload_preview');
+tdomf_register_form_widget_preview('upload-files','Upload Files', 'tdomf_widget_upload_preview');
 
 ////////////////////////////////////
 // Add info on files to admin email 
@@ -568,7 +568,7 @@ function tdomf_widget_upload_adminemail($args) {
   }
   return  $before_widget.__("No files uploaded with this post!","tdomf").$after_widget;
 }
-tdomf_register_form_widget_adminemail('Upload Files', 'tdomf_widget_upload_adminemail');
+tdomf_register_form_widget_adminemail('upload-files','Upload Files', 'tdomf_widget_upload_adminemail');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -699,6 +699,6 @@ function tdomf_widget_upload_control() {
 </p>
         <?php 
 }
-tdomf_register_form_widget_control('Upload Files', 'tdomf_widget_upload_control', 500, 700);
+tdomf_register_form_widget_control('upload-files','Upload Files', 'tdomf_widget_upload_control', 500, 700);
 
 ?>
