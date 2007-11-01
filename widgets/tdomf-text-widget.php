@@ -10,14 +10,16 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-#function tdomf_widget_text_number_top(){
-  if ( $_POST['text-number-submit'] ) {
-    $count = $_POST['text-number'];
-    if($count > 0){ update_option('tdomf_text_widget_count',$count); }
-  }
-#}
-#add_action('tdomf_widget_page_top','tdomf_widget_text_number_top');
+// Check if the number of text widgets has changed before setting up the widget!
+//
+if ( $_POST['tdomf-widget-text-number-submit'] ) {
+  $count = $_POST['tdomf-widget-text-number'];
+  if($count > 0){ update_option('tdomf_text_widget_count',$count); }
+}
 
+// Add a menu option to control the number of text widgets to the bottom of the 
+// tdomf widget page
+//
 function tdomf_widget_text_number_bottom(){
   $count = get_option('tdomf_text_widget_count');
   if($count <= 0){ $count = 1; } 
@@ -27,13 +29,13 @@ function tdomf_widget_text_number_bottom(){
     <form method="post">
       <h2><?php _e("Text Widgets","tdomf"); ?></h2>
       <p style="line-height: 30px;"><?php _e("How many text widgets would you like?","tdomf"); ?>
-      <select id="text-number" name="text-number" value="<?php echo $count; ?>">
+      <select id="tdomf-widget-text-number" name="tdomf-widget-text-number" value="<?php echo $count; ?>">
       <?php for($i = 1; $i < 10; $i++) { ?>
         <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
       <?php } ?>
       </select>
       <span class="submit">
-        <input type="submit" value="Save" id="text-number-submit" name="text-number-submit" />
+        <input type="submit" value="Save" id="tdomf-widget-text-number-submit" name="tdomf-widget-text-number-submit" />
       </span>
       </p>
     </form>
