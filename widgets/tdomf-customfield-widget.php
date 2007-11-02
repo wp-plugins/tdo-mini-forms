@@ -10,6 +10,9 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+// TODO: Add a box to allow customised formatting of custom field and 
+// automatically added it to the post content
+
 // Add a menu option to control the number of cf widgets to the bottom of the 
 // tdomf widget page
 //
@@ -56,7 +59,8 @@ function tdomf_widget_customfields_get_options($index) {
        // textarea specific
        $options['ta-restrict-tags'] = false;
        $options['ta-allowable-tags'] = "<p><b><i><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
-       $options['ta-quicktags'] = true;       
+       $options['ta-quicktags'] = true;
+       $options['ta-content-filter'] = true;       
     }
   return $options;
 }
@@ -418,6 +422,7 @@ function tdomf_widget_customfields_textarea_control_handler($number,$options) {
   $options['ta-quicktags'] = isset($_POST["customfields-ta-quicktags-$number"]);
   $options['ta-restrict-tags'] = isset($_POST["customfields-ta-restrict-tags-$number"]);
   $options['ta-allowable-tags'] = $_POST["customfields-ta-allowable-tags-$number"];
+  $options['ta-content-filter'] = isset($_POST["customfields-ta-content-filter-$number"]);
   return $options;
 }
 
@@ -442,6 +447,12 @@ function tdomf_widget_customfields_textarea_control($number,$options){
   $output .=  __("Use Quicktags","tdomf"); 
   $output .= " <input type=\"checkbox\" name=\"customfields-ta-quicktags-$number\" id=\"customfields-ta-quicktags-$number\"";
   if($options['ta-quicktags']){ $output .= " checked "; }
+  $output .= "></label><br/><br/>";
+  
+  $output .= "<label for=\"customfields-ta-content-filter-$number\">";
+  $output .=  __("Format like Post Content <i>(convert new lines to paragraphs, etc.)</i>","tdomf"); 
+  $output .= " <input type=\"checkbox\" name=\"customfields-ta-content-filter-$number\" id=\"customfields-ta-content-filter-$number\"";
+  if($options['ta-content-filter']){ $output .= " checked "; }
   $output .= "></label><br/><br/>";
   
   $output .= "<label for=\"customfields-cols-$number\" >";
@@ -520,8 +531,14 @@ function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
 
 function tdomf_widget_customfields_textarea_post($args,$number,$options) {
   extract($args);
-  // TODO: optionally pass it through "apply_filters('the_content'"
-  add_post_meta($post_ID,$options['key'],strip_tags($args["customfields-textarea-$number"],$options['ta-allowable-tags']));
+  $text = $args["customfields-textarea-$number"];
+  if($options['ta-restrict-tags']) {
+    $text = strip_tags($text,$options['ta-allowable-tags']);
+  }
+  if($options['ta-content-filter']) {
+    $text = apply_filters('the_content', $text);
+  }
+  add_post_meta($post_ID,$options['key'],$text);
   return NULL;
 }
 
@@ -545,8 +562,16 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   if($options['title'] != "") {
     $output .= $before_title.$options['title'].$after_title;
   }
-  // TODO: optionally pass it through "apply_filters('the_content'"
-  $output .= strip_tags($args["customfields-textarea-$number"],$options['ta-allowable-tags']);
+  
+  $text = $args["customfields-textarea-$number"];
+  if($options['ta-restrict-tags']) {
+    $text = strip_tags($text,$options['ta-allowable-tags']);
+  }
+  if($options['ta-content-filter']) {
+    $text = apply_filters('the_content', $text);
+  }
+  
+  $output .= $text;
   $output .= $after_widget;
   return $output;
 }

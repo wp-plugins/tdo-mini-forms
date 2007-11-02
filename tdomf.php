@@ -122,7 +122,7 @@ Author URI: http://thedeadone.net
 // - Tag Widget: allow submitters to add tags to their submissions
 // - Categories Widget: First run of the categories widget.
 //
-// v0.x: TBD
+// v0.9: TBD
 // - Updated Upload Files: if a file is added as attachment, Wordpress will 
 //    generate a thumbnail if the file is an image.
 // - New Upload File Options: You can now automatically have a link added to 
@@ -139,11 +139,16 @@ Author URI: http://thedeadone.net
 //    illegal tags from toolbar)
 // - Uninstall was broken! Was not deleting option settings.
 // - Removed "About" menu
+// - Added first draft of custom fields (only textfield and textarea supported)
+// - Updated 1 Question Captcha and Categories widgets to support multiple 
+//    instances
+// - Added a "Text" widget
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
+// - Multiple form support (doable)
 // - Allow moderators append a message to the approved/rejected notification
 //    (not that hard to do, store the message as a postmeta, notification code
 //     grabs the message from postmeta, uses it and then deletes it from post
@@ -155,21 +160,20 @@ Author URI: http://thedeadone.net
 // - Widget Manager Menu
 //    * Info about loaded widgets
 //    * Disable loaded widgets?
-// - More and more widgets!
-//    * Custom Field widgets: one for each HTML element in the rainbow!
-//    * URL Submission
-//    * Multiple/Random Question Captcha
 // - Improvements for current widgets
-//    * More options
-//    * QuickTags, TinyMCE, etc. for content box
+//    * TinyMCE and/or FckEditr for content box (and custom field textarea)
+//    * Custom Fields: Radio groups, drop down lists, checkbox
+//    * Custom Fields: Automatically add to post
+//    * Randoming questions for Captcha
+//    * Email verification of non-registered users
+//    * Finish category widget
 // - Add/select custom styles for form
-// - Multiple form support (very big)
-// - Edit post support (surprisingly not that big)
+// - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
 // - AJAX support (maybe, maybe not)
-// - Spam Protection (is spam a problem, yet?)
+// - Spam Protection
 //    * Integration with Spam Karma?
-//    * Integration with Aksimet?
+//    * Integration with Aksimet
 // - Force Preview (user must preview first before submission)
 // - Allow newly submitted posts be set to "Post ready for review" with the
 //    Wordpress 2.3
@@ -193,9 +197,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "9");
+define("TDOMF_BUILD", "10");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.8");
+define("TDOMF_VERSION", "0.9");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)

@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields
 Requires at least: 2.3
 Tested up to: 2.3
 Stable Tag: 0.8
@@ -22,23 +22,25 @@ Administrators can configure the form using drag and drop "widgets". They are ba
 
 Registered users have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
 
-**Version 0.8 introduces the ability to allow users submit files, set categories and add tags to their submissions.**
+**Version 0.9 introduces the ability to add custom fields and use multiple instances of some widgets**
 
 * [Demo Site]( http://thedeadone.net/tdomf/ )
 
 = Features =
 
-* Create your form using a Widget interface
-* Simple Captcha Widget
-* Posting Policy Widget
-* Upload Files and can be attached to posts. Uses Wordpress' core to create thumbnails if applicable
-* Submitters can be notified if post approved or rejected
-* Allow users to select category and tags
-* Ban users and IPs
-* Control what roles can access the form
-* Can automatically create a page with form for you
-* Can automatically modified author template tag with info about submitter
-* Can, optionally, automatically allow submissions to be published
+* Highly customisable: Create your form using a Widget interface.
+* Simple Captcha Widget.
+* Posting Policy Widget.
+* Add Custom Fields to your widget.
+* QuickTags support for Forms.
+* Upload Files and can be attached to posts. Uses Wordpress' core to create thumbnails if applicable.
+* Submitters can be notified if post approved or rejected.
+* Allow users to select category and tags.
+* Ban users and IPs.
+* Control what roles can access the form.
+* Can automatically create a page with form for you.
+* Can automatically modified author template tag with info about submitter.
+* Can, optionally, automatically allow submissions to be published.
 * And many more...
 
 == Installation ==
@@ -155,6 +157,7 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 == Known Bugs == 
 
 * v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
+* It has been found that theire is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
 
 == Version History ==
 
@@ -242,3 +245,17 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 * Widgets can now append information to the email sent to moderators
 * Tag Widget: allow submitters to add tags to their submissions
 * Categories Widget: First run of the categories widget.
+
+= v0.9: TBD =
+
+* Updated Upload Files: if a file is added as attachment, Wordpress will generate a thumbnail if the file is an image.
+* New Upload File Options: You can now automatically have a link added to your post that goes to the attachment page (can even use the thumbnail if it exists). Additionally, if the thumbnail exists, can insert a direct link to file using the thumbnail).
+* Uploads added as attachments will inherit the categories of the post (but remember the order of widgets is important so if the categories get modified after the upload widget has done it's biz, these changes won't be affected to the attachments)
+* More info on error checking!
+* "Notified" instead of "notify" in Notify Me widget
+* Added quicktags to the post "Content" widget (restrict tags option hides restricted tags from toolbar)
+* Uninstall was broken! Was not deleting option settings.
+* Removed "About" menu and reorgainsed the overview page a bit. 
+* Added first draft of custom fields (only textfield and textarea supported)
+* Updated "1 Question Captcha" and "Categories widgets" to support multiple instances
+* Added a "Text" widget
