@@ -1,4 +1,3 @@
-#!/usr/local/bin/php
 <?php
   /* 
    * This is a modified copy of Alex King's JS QuickTags. 

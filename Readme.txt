@@ -127,6 +127,10 @@ Why? It opens your site up to spammers and other nefarious uses. However, people
 
 Enable moderation and it'll work. If you disable moderation, posts get passed through kses to remove nasty scripts before being published. This removes YouTube code. If you have to approve posts, you can make sure no-one has snuck in something tricky.
 
+= Can we use TinyMCE or FckEditor for writing posts? =
+
+I have spent some time exploring the use of TinyMCE (and to a lesser degree FckEditor) for TDO Mini Forms. Both libraries provide a WYSIWYG or "Rich Text" editors in place of your bog-standard text area. Wordpress' write screen using a heavily modified version of TinyMCE. I haven't settled on the right method to do this yet. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. Grab the latest copy and installed it somewhere on your website and then follow the directions on how to replace a text area with TinyMCE. This can be used to even change your comment input field.
+
 = I get an error: "TDOMF ERROR: Headers have already been sent in file..." =
 
 TDO Mini Forms tries to call the PHP function session_start() by adding an action to the "get_header" template tag. The session variable is used to hold security information and to confirm a submission comes from an actual form (and not some bot). But, if you see this error, it means that some where the headers have already been sent and so the session cannot start. If you try to submit a form with this error, you'll only get another error "TDOMF: Bad data submitted".

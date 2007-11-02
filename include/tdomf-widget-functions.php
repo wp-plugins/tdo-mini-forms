@@ -281,9 +281,9 @@ function tdomf_widget_content($args) {
       $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['allowable-tags']))."<br/>";
     }
     if($options['quicktags']) {
-      $qt_path = TDOMF_URLPATH."js/tdomf-quicktags.js.php?postfix=content_widget";
+      $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget";
       if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-        $qt_path = TDOMF_URLPATH."js/tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
+        $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
       }
       $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
       $output .= "\n<script type='text/javascript'>edToolbarcontent_widget();</script>\n";

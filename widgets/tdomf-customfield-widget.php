@@ -262,7 +262,7 @@ function tdomf_widget_customfields_init(){
   if($count <= 0){ $count = 1; } 
   for($i = 1; $i <= $count; $i++) {
     tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
-    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 400, 500, $i);
+    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 400, 550, $i);
     tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', true, $i);
     tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', true, $i);
     tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', true, $i);
@@ -496,9 +496,9 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
     $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags']))."<br/>";
   }
   if($options['ta-quicktags']) {
-    $qt_path = TDOMF_URLPATH."js/tdomf-quicktags.js.php?postfix=cfta$number";
+    $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number";
     if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-      $qt_path = TDOMF_URLPATH."js/tdomf-quicktags.js.php?postfix=cfta$number&allowed_tags=".urlencode($options['ta-allowable-tags']);
+      $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number&allowed_tags=".urlencode($options['ta-allowable-tags']);
     }
     $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
     $output .= "\n<script type='text/javascript'>edToolbarcfta$number();</script>\n";
