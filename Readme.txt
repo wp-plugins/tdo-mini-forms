@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields
 Requires at least: 2.3
 Tested up to: 2.3
-Stable Tag: 0.8
+Stable Tag: 0.9
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
@@ -13,8 +13,6 @@ This plugin allows you to add a form to your website that allows your readers (i
 This plugin allows you to add a form to your website that allows non-registered users and/or subscribers (configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
 **Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
-
-**This version is specifically to address issues on Wordpress 2.3. It is not backwards compatible with previous versions.**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -250,7 +248,7 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 * Tag Widget: allow submitters to add tags to their submissions
 * Categories Widget: First run of the categories widget.
 
-= v0.9: TBD =
+= v0.9: 2nd November 2007 =
 
 * Updated Upload Files: if a file is added as attachment, Wordpress will generate a thumbnail if the file is an image.
 * New Upload File Options: You can now automatically have a link added to your post that goes to the attachment page (can even use the thumbnail if it exists). Additionally, if the thumbnail exists, can insert a direct link to file using the thumbnail).
@@ -263,3 +261,4 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 * Added first draft of custom fields (only textfield and textarea supported)
 * Updated "1 Question Captcha" and "Categories widgets" to support multiple instances
 * Added a "Text" widget
+* Fixed a bug when deleting a post with uploaded files on PHP4 or less

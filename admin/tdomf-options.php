@@ -201,7 +201,7 @@ function tdomf_show_options_menu() {
 	<h3><?php _e('Auto Trust Submitter Count',"tdomf"); ?></h3>
 
 	<p>
-	<?php _e('This only counts for submitters who register with your blog and submit using a user account. You can have the user automatically changed to "trusted" after a configurable number of approved submissions. Setting it the value to 0, means that a registered user is automatically trusted. Settign it to -1, disables the feature. A trusted user can still be banned.',"tdomf"); ?>
+	<?php _e('This only counts for submitters who register with your blog and submit using a user account. You can have the user automatically changed to "trusted" after a configurable number of approved submissions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned.',"tdomf"); ?> <?php printf(__('You can change a users status (to/from trusted or banned) using the <a href="%s">Manage</a> menu',"tdomf"),"admin.php?page=tdomf_show_manage_menu"); ?>
 	</p>
 
 	<p>
@@ -453,7 +453,12 @@ function tdomf_handle_options_actions() {
 
       //Auto Trust Submitter Count
 
-      $cnt = (int)$_POST['tdomf_trust_count'];
+      $cnt = -1;
+      if(isset($_POST['tdomf_trust_count']) 
+       && !empty($_POST['tdomf_trust_count']) 
+       && is_numeric($_POST['tdomf_trust_count'])){ 
+         $cnt = intval($_POST['tdomf_trust_count']);
+      }
       update_option(TDOMF_OPTION_TRUST_COUNT,$cnt);
 
       //Turn On/Off Moderation

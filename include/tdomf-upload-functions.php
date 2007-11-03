@@ -80,6 +80,10 @@ function tdomf_upload_download_handler(){
    $file_ID = $_GET['id'];
    $use_thumb = isset($_GET['thumb']);
    
+   // Session start
+   //
+   if (!isset($_SESSION)) session_start();
+   
    // Security check
    get_currentuserinfo();   
    if(!current_user_can("publish_posts")) {
@@ -241,7 +245,15 @@ if(isset($_GET['tdomf_upload_preview'])) {
 //
 function tdomf_deltree($path) {
   if (is_dir($path)) {
-    $entries = scandir($path);
+     if(function_exists('scandir')) {
+        $entries = scandir($path);
+     } else {
+        // PHP 4 version
+        $dh  = opendir($path);
+        while (false !== ($filename = readdir($dh))) {
+           $entries[] = $filename;
+        }
+     }
     foreach ($entries as $entry) {
       if ($entry != '.' && $entry != '..') {
         tdomf_deltree($path.DIRECTORY_SEPARATOR.$entry);
