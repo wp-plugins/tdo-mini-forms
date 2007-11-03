@@ -21,7 +21,13 @@ function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
 ?>
-        <?php wp_admin_css( 'css/widgets' ); ?>
+   <?php if(function_exists('wp_admin_css')) {
+            wp_admin_css( 'css/widgets' ); 
+         } else { 
+            // pre-Wordpress 2.3
+            ?>
+            <link rel="stylesheet" href="widgets.css?version=<?php bloginfo('version'); ?>" type="text/css" />
+   <?php } ?>
         <!--[if IE 7]>
         <style type="text/css">
                 #palette { float: <?php echo ( get_bloginfo( 'text_direction' ) == 'rtl' ) ? 'right' : 'left'; ?>; }

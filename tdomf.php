@@ -122,7 +122,7 @@ Author URI: http://thedeadone.net
 // - Tag Widget: allow submitters to add tags to their submissions
 // - Categories Widget: First run of the categories widget.
 //
-// v0.9: TBD
+// v0.9: 2nd November 2007
 // - Updated Upload Files: if a file is added as attachment, Wordpress will 
 //    generate a thumbnail if the file is an image.
 // - New Upload File Options: You can now automatically have a link added to 
@@ -143,6 +143,7 @@ Author URI: http://thedeadone.net
 // - Updated 1 Question Captcha and Categories widgets to support multiple 
 //    instances
 // - Added a "Text" widget
+// - Fixed a bug when deleting a post with uploaded files on PHP4 or less
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -353,6 +354,7 @@ function tdomf_init(){
     // Some defaults for new options!
     add_option(TDOMF_OPTION_MODERATION,true);
     add_option(TDOMF_OPTION_PREVIEW,true);
+    add_option(TDOMF_OPTION_TRUST_COUNT,-1);
   }
 }
 
