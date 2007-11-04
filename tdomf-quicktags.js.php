@@ -592,23 +592,23 @@ function edInsertTag<?php echo $postfix; ?>(myField, i) {
 		var scrollTop = myField.scrollTop;
 		if (startPos != endPos) {
 			myField.value = myField.value.substring(0, startPos)
-			              + edButtons[i].tagStart
+			              + edButtons<?php echo $postfix; ?>[i].tagStart
 			              + myField.value.substring(startPos, endPos)
-			              + edButtons[i].tagEnd
+			              + edButtons<?php echo $postfix; ?>[i].tagEnd
 			              + myField.value.substring(endPos, myField.value.length);
 			cursorPos += edButtons<?php echo $postfix; ?>[i].tagStart.length + edButtons<?php echo $postfix; ?>[i].tagEnd.length;
 		}
 		else {
 			if (!edCheckOpenTags<?php echo $postfix; ?>(i) || edButtons<?php echo $postfix; ?>[i].tagEnd == '') {
 				myField.value = myField.value.substring(0, startPos)
-				              + edButtons[i].tagStart
+				              + edButtons<?php echo $postfix; ?>[i].tagStart
 				              + myField.value.substring(endPos, myField.value.length);
 				edAddTag<?php echo $postfix; ?>(i);
 				cursorPos = startPos + edButtons<?php echo $postfix; ?>[i].tagStart.length;
 			}
 			else {
 				myField.value = myField.value.substring(0, startPos)
-				              + edButtons[i].tagEnd
+				              + edButtons<?php echo $postfix; ?>[i].tagEnd
 				              + myField.value.substring(endPos, myField.value.length);
 				edRemoveTag<?php echo $postfix; ?>(i);
 				cursorPos = startPos + edButtons<?php echo $postfix; ?>[i].tagEnd.length;

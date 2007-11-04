@@ -94,7 +94,7 @@ function tdomf_show_your_submissions_menu() {
 
     <?php if($tdomf_flag && ($sub_total > 0 || $app_total > 0)) { ?>
        <?php if($app_total > 0) { ?>
-         <h3><?php printf(__('Your Last %d Approved Sumissions','tdomf'),5); ?></h3>
+         <h3><?php printf(__('Your Last %d Approved Submissions','tdomf'),5); ?></h3>
          <ul>
          <?php foreach($app_posts as $p) { ?>
           <li><a href="<?php echo get_permalink($p->ID); ?>">"<?php echo $p->post_title; ?>"</a> approved on <?php echo mysql2date("jS F, g:iA", $p->post_modified); ?></li>
