@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.8
+Version: 0.9
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
