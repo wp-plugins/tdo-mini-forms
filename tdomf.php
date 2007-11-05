@@ -144,6 +144,15 @@ Author URI: http://thedeadone.net
 //    instances
 // - Added a "Text" widget
 // - Fixed a bug when deleting a post with uploaded files on PHP4 or less
+//
+// v0.9.1: 5th November 2007
+// - Fixed a javascript error in Quicktags that blocked it from working on 
+//    Mozilla
+// - Fixed the admin notification email as the Wordpress cache for the custom 
+//    fields for posts was being forgotten so the admin email did not contain
+//    information about IP and uploaded files.
+// - A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
+// - Spelling mistake fixed in "Your Submissions"
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -282,6 +291,11 @@ define('TDOMF_KEY_DOWNLOAD_TYPE',"_tdomf_download_type_");
 define('TDOMF_KEY_DOWNLOAD_PATH',"_tdomf_download_path_");
 define('TDOMF_KEY_DOWNLOAD_NAME',"_tdomf_download_name_");
 define('TDOMF_KEY_DOWNLOAD_CMD_OUTPUT',"_tdomf_download_cmd_output_");
+
+/////////////////
+// 0.9 Settings
+//
+define('TDOMF_KEY_DOWNLOAD_THUMB',"_tdomf_download_thumb_");
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //

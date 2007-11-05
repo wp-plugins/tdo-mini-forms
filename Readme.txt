@@ -12,7 +12,7 @@ This plugin allows you to add a form to your website that allows your readers (i
 
 This plugin allows you to add a form to your website that allows non-registered users and/or subscribers (configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
+**Version 0.9 introduces the ability to add custom fields and use multiple instances of some widgets**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -20,11 +20,9 @@ Administrators can configure the form using drag and drop "widgets". They are ba
 
 Registered users have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
 
-**Version 0.9 introduces the ability to add custom fields and use multiple instances of some widgets**
-
 * [Demo Site]( http://thedeadone.net/tdomf/ )
 
-= Features =
+**Features**
 
 * Highly customisable: Create your form using a Widget interface.
 * Simple Captcha Widget.
@@ -40,6 +38,8 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Can automatically modified author template tag with info about submitter.
 * Can, optionally, automatically allow submissions to be published.
 * And many more...
+
+**Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
 
 == Installation ==
 
@@ -159,7 +159,8 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 == Known Bugs == 
 
 * v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
-* It has been found that theire is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
+* It has been found that there is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
+* Sometimes, on first login, the "Your Submissions" page displays an error about headers already sent, however the form still works and subsequent loads of the page do not reveal this error. I have not reproduced this locally yet so I haven't got to the core of the issue yet.
 
 == Version History ==
 
@@ -262,3 +263,10 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 * Updated "1 Question Captcha" and "Categories widgets" to support multiple instances
 * Added a "Text" widget
 * Fixed a bug when deleting a post with uploaded files on PHP4 or less
+
+= v0.9.1: 5th November 2007 =
+* Fixed a javascript error in Quicktags that blocked it from working on Mozilla
+* Fixed the admin notification email as the Wordpress cache for the custom fields for posts was being forgotten so the admin email did not contain information about IP and uploaded files.
+* A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
+* Spelling mistake fixed in "Your Submissions"
+
