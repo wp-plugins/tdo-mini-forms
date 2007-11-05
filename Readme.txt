@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields
 Requires at least: 2.3
 Tested up to: 2.3
-Stable Tag: 0.9
+Stable Tag: 0.9.1
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
