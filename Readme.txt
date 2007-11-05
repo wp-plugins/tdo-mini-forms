@@ -101,7 +101,7 @@ These tags must be used within the loop:
 
 = I want to add custom fields! =
 
-v0.9, I swear! With v0.7, the widget interface was added. This allows a simple and neat way to add custom fields. 
+With v0.9, you can! There is now a Custom Field widget avaliable to add to your form. Currenly only text fields and text areas are supported but future versions will support check boxes, drop down lists, radio groups, etc.
 
 = I want to allow my readers to attach a image to a submission? =
 
@@ -125,6 +125,8 @@ Why? It opens your site up to spammers and other nefarious uses. However, people
 
 Enable moderation and it'll work. If you disable moderation, posts get passed through kses to remove nasty scripts before being published. This removes YouTube code. If you have to approve posts, you can make sure no-one has snuck in something tricky.
 
+Alternativily you can use a custom field. Add the Custom Field widget to your form, set it as a URL and ask your submitters to add the URL of the YouTube video they want to include. Then in your theme, you can use the Custom Fields template tags to automatically display the YouTube video underneath the submitted post! 
+
 = Can we use TinyMCE or FckEditor for writing posts? =
 
 I have spent some time exploring the use of TinyMCE (and to a lesser degree FckEditor) for TDO Mini Forms. Both libraries provide a WYSIWYG or "Rich Text" editors in place of your bog-standard text area. Wordpress' write screen using a heavily modified version of TinyMCE. I haven't settled on the right method to do this yet. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. Grab the latest copy and installed it somewhere on your website and then follow the directions on how to replace a text area with TinyMCE. This can be used to even change your comment input field.
@@ -147,6 +149,34 @@ To resolve this, you need to insert a call to session_start at the top of templa
 
 I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." and/or "ERROR: session_start() has not been called yet!..." errors, this error means you've tried to submit your post from an invalid form. Try returning to the submission form, reloading it and then reenter/submit it.
 
+= I want to add add tags to QuickTags such as embed video, etc.? =
+
+Right now there is no user interface for adding your own tags to quicktags. Feel free, however, to modify `tdomf-quicktags.js.php` to add any tags you want.
+
+= I want to display some information about the upload files? =
+
+In later versions, proper template tag support will be added. However, for the moment you can use:
+
+`// Gets the name of the first uploaded file for post $post_ID
+get_post_meta($post_ID, "_tdomf_download_name_0"); 
+
+// Gets the type of the first uploaded file for post $post_ID
+get_post_meta($post_ID, "_tdomf_download_type_0"); 
+
+// Gets the download count of the first uploaded file for post $post_ID
+get_post_meta($post_ID, "_tdomf_download_count_0"); 
+
+// Gets the path to the first uploaded file for post $post_ID
+get_post_meta($post_ID, "_tdomf_download_path_0"); 
+
+// Gets the command output for the first uploaded file for post $post_ID (if avaliable)
+get_post_meta($post_ID, "_tdomf_download_cmd_output_0"); 
+
+// Gets the name of the second uploaded file for post $post_ID
+get_post_meta($post_ID, "_tdomf_download_name_1");
+
+// And so on...`
+
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
@@ -161,6 +191,7 @@ I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." an
 * v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
 * It has been found that there is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
 * Sometimes, on first login, the "Your Submissions" page displays an error about headers already sent, however the form still works and subsequent loads of the page do not reveal this error. I have not reproduced this locally yet so I haven't got to the core of the issue yet.
+* If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). 
 
 == Version History ==
 
