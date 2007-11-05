@@ -22,7 +22,7 @@ Registered users have access to a "Your Submissions" page which lists their curr
 
 * [Demo Site]( http://thedeadone.net/tdomf/ )
 
-**Features**
+= Features =
 
 * Highly customisable: Create your form using a Widget interface.
 * Simple Captcha Widget.
