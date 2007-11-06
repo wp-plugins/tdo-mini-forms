@@ -24,7 +24,7 @@ load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 //
 if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key']) {
    if(!isset($_SESSION) || !isset($_SESSION['tdomf_key') || trim($_SESSION['tdomf_key']) == "") {
-     tdomf_log_message('Contents of $_SESSION:<pre>'.var_export($_SESSION,true)."</pre>",TDOMF_LOG_BAD);
+     tdomf_log_message('Key is missing from $_SESSION: contents of $_SESSION:<pre>'.var_export($_SESSION,true)."</pre>",TDOMF_LOG_BAD);
    }
    $session_key = $_SESSION['tdomf_key'];
    $post_key = $_POST['tdomf_key'];
