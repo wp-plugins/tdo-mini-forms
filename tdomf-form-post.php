@@ -24,9 +24,9 @@ load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 //
 tdomf_log_message('register_globals is '.ini_get('register_globals'));
 if(ini_get('register_globals')){
-   tdomf_log_message('register_globals equates to true => wp_unregister_GLOBALS will be called');
+   tdomf_log_message('register_globals equates to true => wp_unregister_GLOBALS will be called',TDOMF_LOG_BAD);
 } else {
-   tdomf_log_message('register_globals equates to false => wp_unregister_GLOBALS will not be called');
+   tdomf_log_message('register_globals equates to false => wp_unregister_GLOBALS will not be called',TDOMF_LOG_GOOD);
 }
 
 // Security Check
