@@ -357,6 +357,7 @@ EOT;
     $random_string = tdomf_random_string(100);
     $_SESSION["tdomf_key"] = $random_string;
     $form .= "<input type='hidden' id='tdomf_key' name='tdomf_key' value='$random_string' />";
+    #tdomf_log_message('Placing key '.$random_string.' in $_SESSION: <pre>'.var_export($_SESSION,true)."</pre>");
   }
 
   // Process widgets

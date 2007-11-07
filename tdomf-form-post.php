@@ -20,6 +20,15 @@ global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 //
 load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 
+// Debugging
+//
+tdomf_log_message('register_globals is '.ini_get('register_globals'));
+if(ini_get('register_globals')){
+   tdomf_log_message('register_globals equates to true => wp_unregister_GLOBALS will be called');
+} else {
+   tdomf_log_message('register_globals equates to false => wp_unregister_GLOBALS will not be called');
+}
+
 // Security Check
 //
 if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key']) {
