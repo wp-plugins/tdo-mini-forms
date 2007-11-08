@@ -55,26 +55,41 @@ add_action("wp_head","tdomf_auto_fix_authors");
 // if it's already been started
 //
 function tdomf_start_session() {
+  // No need to start session for these templates
+  if(is_robots() || is_feed() || is_trackback()) {
+    return;
+  }
   if(!headers_sent() && !isset($_SESSION)) {
     session_start();
     return;
   } 
   
   if(headers_sent($filename,$linenum) && !isset($_SESSION)) { 
+    if(!get_option(TDOMF_OPTION_DISABE_ERROR_MESSAGES)) {
     ?>
       <p><font color="red">
       <b><?php printf(__('TDOMF ERROR: Headers have already been sent in file %s on line %d before <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> could be called.',"tdomf"),$filename,$linenum); ?></b>
       <?php _e('This may be due to...','tdomf'); ?>
       <ul>
-        <li><?php _e('Your current wordpress theme inserting HTML before calling the template tag "get_header". This may be as simple as a blank new line. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. You can also check your theme where it calls "get_header".',"tdomf"); ?></li>
+      <?php if ( !defined('WP_USE_THEMES') || !constant('WP_USE_THEMES') ) { ?>
         <li><?php _e("Another plugin inserting HTML before TDOMF's get_header action is activated. You can confirm this by disabling all your other plugins and checking if this error is still reported.","tdomf"); ?></li>
+      <?php } ?>
+        <li><?php _e('Your current wordpress theme inserting HTML before calling the template tag "get_header". This may be as simple as a blank new line. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. You can also check your theme where it calls "get_header".',"tdomf"); ?></li>
       </ul>
       </font></p>
     <?php 
+    }
     tdomf_log_message("Headers are already sent before TDOMF could call session_start in file $filename on line $linenum",TDOMF_LOG_ERROR);
   }
 }
-add_action("get_header","tdomf_start_session");
+// Depending on "get_header" was a nightmare. "template_redirect" is called 
+// before any theme file is excuted, so technically it should work with *any*
+// theme. But if themes aren't enabled, fall back to "get_header"?
+if ( defined('WP_USE_THEMES') && constant('WP_USE_THEMES') ) {
+   add_action("template_redirect","tdomf_start_session");
+} else {
+   add_action("get_header","tdomf_start_session");
+}
 //
 // Add session_start to admin menus where we allow logged in users to submit!
 //

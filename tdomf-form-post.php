@@ -20,19 +20,13 @@ global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 //
 load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
 
-// Debugging
-//
-tdomf_log_message('register_globals is '.ini_get('register_globals'));
-if(ini_get('register_globals')){
-   tdomf_log_message('register_globals equates to true => wp_unregister_GLOBALS will be called',TDOMF_LOG_BAD);
-} else {
-   tdomf_log_message('register_globals equates to false => wp_unregister_GLOBALS will not be called',TDOMF_LOG_GOOD);
-}
-
 // Security Check
 //
 if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key']) {
-   if(!isset($_SESSION) || !isset($_SESSION['tdomf_key']) || trim($_SESSION['tdomf_key']) == "") {
+   if(ini_get('register_globals')){
+     tdomf_log_message('register_globals is enabled. This will prevent TDOMF from operating.',TDOMF_LOG_ERROR);
+     exit(__("TDOMF: Bad data submitted. <i>register_globals</i> is enabled. This must be set to disabled.","tdomf"));
+   } else  if(!isset($_SESSION) || !isset($_SESSION['tdomf_key']) || trim($_SESSION['tdomf_key']) == "") {
      tdomf_log_message('Key is missing from $_SESSION: contents of $_SESSION:<pre>'.var_export($_SESSION,true)."</pre>",TDOMF_LOG_BAD);
    }
    $session_key = $_SESSION['tdomf_key'];

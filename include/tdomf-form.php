@@ -279,19 +279,38 @@ function tdomf_generate_form() {
   // Okay, all checks pass! Now create form
   $form = "";
 
+  // Error checks
+  
   if(!isset($_SESSION)) {
     headers_sent($filename,$linenum);
     tdomf_log_message( "session_start() has not been called before generating form! Form will not work.",TDOMF_LOG_ERROR);
-    $form .= "<p><font color=\"red\"><b>";
-    $form .= __('ERROR: <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> has not been called yet!',"tdomf");
-    $form .= "</b> ".__('This may be due to...','tdomf');
-    $form .= "<ol><li>";
-    $form .= sprintf(__('Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s.',"tdomf"),$filename);
-    $form .= "<li>";
-    $form .= sprintf(__('Another Plugin conflicts with TDOMF. To confirm this, disable all your plugins and then renable only TDOMF. If this error disappears than another plugin is causing the problem.',"tdomf"),$filename);
-    $form .= "</li>";
-    $form .= "</li></ol></font></p>";
+    if(!get_option(TDOMF_OPTION_DISABE_ERROR_MESSAGES)) {
+      $form .= "<p><font color=\"red\"><b>";
+      $form .= __('ERROR: <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> has not been called yet!',"tdomf");
+      $form .= "</b> ".__('This may be due to...','tdomf');
+      $form .= "<ol>";
+      if ( !defined('WP_USE_THEMES') || !constant('WP_USE_THEMES') ) {
+        $form .= "<li>";
+        $form .= sprintf(__('Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s.',"tdomf"),$filename);
+        $form .= "</li>";
+      }
+      $form .= "<li>";    
+      $form .= sprintf(__('Another Plugin conflicts with TDOMF. To confirm this, disable all your plugins and then renable only TDOMF. If this error disappears than another plugin is causing the problem.',"tdomf"),$filename);
+      $form .= "</li>";
+      $form .= "</li></ol></font></p>";
+    }
   }
+  
+  if(ini_get('register_globals')){
+    if(!get_option(TDOMF_OPTION_DISABE_ERROR_MESSAGES)) {
+      $form .= "<p><font color=\"red\"><b>";
+      $form .= __('ERROR: <a href="http://ie2.php.net/register_globals"><i>register_globals</i></a> is enabled in your PHP environment!',"tdomf");
+      $form .= "</font></p>";
+    }
+   tdomf_log_message('register_globals is enabled!',TDOMF_LOG_ERROR);
+  } 
+  
+  // AJAX or normal POST headers...
   
   if(!$use_ajax) {
      $post_args = array();

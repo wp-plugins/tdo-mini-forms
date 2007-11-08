@@ -291,7 +291,19 @@ function tdomf_show_options_menu() {
 	<input type="checkbox" name="tdomf_add_submitter" id="tdomf_add_submitter"  <?php if($on_add_submitter) echo "checked"; ?> >
 	</p>
 
+  <h3><?php _e('Disable Error Messages','tdomf'); ?></h3>
+  
+  <p>
+  <?php _e('You can disable the display of errors to the user when they use this form. This does not stop errors being reported to the log or enable forms to be submitted with "Bad Data"','tdomf'); ?>
+  </p>
+  
+  <?php $disable_errors = get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES); ?>
 
+	</p>
+	<b><?php _e("Disable error messages being show to user","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_disable_errors" id="tdomf_disable_errors"  <?php if($disable_errors) echo "checked"; ?> >
+	</p>
+  
     <br/><br/>
 
     <table border="0"><tr>
@@ -499,6 +511,12 @@ function tdomf_handle_options_actions() {
       if(isset($_POST['tdomf_add_submitter'])) { $add_submitter = true; }
       update_option(TDOMF_OPTION_ADD_SUBMITTER,$add_submitter);
 
+      //disable errors
+      
+      $disable_errors = false;
+      if(isset($_POST['tdomf_disable_errors'])) { $disable_errors = true; }
+      update_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES,$disable_errors);
+      
       $message .= "Options Saved!<br/>";
       tdomf_log_message("Options Saved");
 
@@ -522,6 +540,11 @@ function tdomf_get_error_messages($show_links=true) {
   }
   $roles = $wp_roles->role_objects;
   $message = "";
+  
+  if(ini_get('register_globals')){
+    $message .= "<font color=\"red\"><strong>".__("ERROR: <em>register_globals</em> is enabled. This is a security risk and also prevents TDO Mini Forms from working.")."</strong></font>";
+  }
+  
   if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
           $test_see_form = false;
           foreach($roles as $role) {
@@ -555,7 +578,7 @@ function tdomf_get_error_messages($show_links=true) {
 	 	    tdomf_log_message("Current Default Author does not exist! Deleting option.",TDOMF_LOG_BAD);
       }      
  	  	if($def_aut->has_cap("publish_posts")) {
-	 	  $message .= "<font color=\"red\">".sprintf(__("<b>Error1</b>: Default author can publish posts. Default author should not be able to publish posts! <a href=\"%s\">Create a dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";
+	 	  $message .= "<font color=\"red\">".sprintf(__("<b>Error</b>: Default author can publish posts. Default author should not be able to publish posts! <a href=\"%s\">Create a dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";
 	 	  tdomf_log_message("Option Default Author is set to an author who can publish posts.",TDOMF_LOG_BAD);
  	  	}
     }

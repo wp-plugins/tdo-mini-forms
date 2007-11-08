@@ -127,6 +127,7 @@ if(isset($_SESSION['tdomf_upload_key'])) {
           #tdomf_log_message("Saving uploaded file to $uploaded_file");
           // Save the file
           if(move_uploaded_file($upload_temp_file_name,$uploaded_file)) {
+            $uploaded_file = realpath($uploaded_file);
             // Remember the file
             $myfiles[$i] = array( "name" => $upload_file_name, "path" => $uploaded_file, "size" => $upload_size, "type" => $upload_type );
             $count++;

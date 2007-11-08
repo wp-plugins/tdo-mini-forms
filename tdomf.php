@@ -153,6 +153,12 @@ Author URI: http://thedeadone.net
 //    information about IP and uploaded files.
 // - A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
 // - Spelling mistake fixed in "Your Submissions"
+//
+// v0.X: TBD
+// - Potential fix for the never-ending "session_start" problem. Using 
+//     template_redirect instead of get_header. 
+// - New Suppress Error Messages (works to a point)
+// - Warnings about register_globals added
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -296,6 +302,7 @@ define('TDOMF_KEY_DOWNLOAD_CMD_OUTPUT',"_tdomf_download_cmd_output_");
 // 0.9 Settings
 //
 define('TDOMF_KEY_DOWNLOAD_THUMB',"_tdomf_download_thumb_");
+define('TDOMF_OPTION_DISABLE_ERROR_MESSAGES',"tdomf_disable_error_messages");
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //

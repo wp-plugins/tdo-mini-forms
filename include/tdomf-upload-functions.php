@@ -32,7 +32,7 @@ function tdomf_create_tmp_storage_path() {
     #mkdir($storagepath,'0777',true); <-- the permissions do not get set correctly with this method
     tdomf_recursive_mkdir($storagepath,TDOMF_UPLOAD_PERMS);
   } 
-  return $storagepath;
+  return realpath($storagepath);
 }
 
 // Turn file size in bytes to an intelligable format 
@@ -165,12 +165,14 @@ if(isset($_GET['tdomf_download'])) {
 // Create path recursivily
 //
 function tdomf_recursive_mkdir($path, $mode = 0777) {
+    $path = trim($path);
     $dirs = explode(DIRECTORY_SEPARATOR , $path);
     $count = count($dirs);
     $path = '';
     for ($i = 0; $i < $count; ++$i) {
         $path .= DIRECTORY_SEPARATOR . $dirs[$i];
-        if (!is_dir($path) && !mkdir($path, $mode)) {
+        tdomf_log_message("Creating directory $path");
+        if (!is_dir($path) && !mkdir(trim($path), $mode)) {
             return false;
         }
     }
@@ -358,11 +360,13 @@ function tdomf_widget_upload_post($args) {
     } else {
       $filecount++;
       // move file
-      $postdir = $options['path'].DIRECTORY_SEPARATOR.$post_ID.DIRECTORY_SEPARATOR;
-      $newpath = $postdir.$theirfiles[$i]['name'];
+      $postdir = $options['path'].DIRECTORY_SEPARATOR.$post_ID;
       tdomf_recursive_mkdir($postdir,TDOMF_UPLOAD_PERMS);
+      $newpath = $postdir.DIRECTORY_SEPARATOR.$theirfiles[$i]['name'];
       if(rename($theirfiles[$i]['path'], $newpath)) {
-       
+        
+        $newpath = realpath($newpath);
+        
         // store info about files on post
         //        
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$i,0,true);
@@ -438,7 +442,7 @@ function tdomf_widget_upload_post($args) {
           if(isset($attachment_metadata['thumb'])) {
              // Wordpress 2.3 uses basename and generates only the "name" of the thumb,
              // in general it creates it in the same place as the file!
-             $thumbpath = $postdir.$attachment_metadata['thumb'];
+             $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['thumb'];
              if(file_exists($thumbpath)) {
                 
                 add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
