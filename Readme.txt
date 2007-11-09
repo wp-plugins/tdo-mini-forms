@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields
 Requires at least: 2.3
 Tested up to: 2.3
-Stable Tag: 0.9.1
+Stable Tag: 0.9.2
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
@@ -12,7 +12,7 @@ This plugin allows you to add a form to your website that allows your readers (i
 
 This plugin allows you to add a form to your website that allows non-registered users and/or subscribers (configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.9 introduces the ability to add custom fields and use multiple instances of some widgets**
+**Version 0.9.2 contains a fix for this session_start maddness and also two new widgets for your theme!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -295,7 +295,7 @@ get_post_meta($post_ID, "_tdomf_download_name_1");
 * A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
 * Spelling mistake fixed in "Your Submissions"
 
-= v0.X: TBD =
+= v0.9.2: 9th November 2007 =
 
 * Potential fix for the never-ending "session_start" problem. Using template_redirect instead of get_header. 
 * New Suppress Error Messages (works to a point)
