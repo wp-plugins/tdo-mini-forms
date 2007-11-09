@@ -159,12 +159,19 @@ Author URI: http://thedeadone.net
 //     template_redirect instead of get_header. 
 // - New Suppress Error Messages (works to a point)
 // - Warnings about register_globals added
+// - Fix for file uploads mkdir for windows included. Thansk to "feelexit" on 
+//     the TDOMF forums for the patch
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
 // - Multiple form support (doable)
+// - Theme Widgets
+//    * An Admin theme that displays the last X lines from the log and the 
+//      latest X submissions, with direct admin links to log, moderation queue,
+//      widget and options
+//    * A display widget that displays the last X approved submissions
 // - Allow moderators append a message to the approved/rejected notification
 //    (not that hard to do, store the message as a postmeta, notification code
 //     grabs the message from postmeta, uses it and then deletes it from post
@@ -213,9 +220,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "11");
+define("TDOMF_BUILD", "12");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.9.1");
+define("TDOMF_VERSION", "0.9.2");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -361,6 +368,7 @@ require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 
 /////////////////////////
 // Start/Init/Upgrade //

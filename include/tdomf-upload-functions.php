@@ -166,15 +166,28 @@ if(isset($_GET['tdomf_download'])) {
 //
 function tdomf_recursive_mkdir($path, $mode = 0777) {
     $path = trim($path);
+    
+    // A full windows path uses ":" compared to unix
+    if(eregi(':', $path)) {
+      $isWin = true;
+    }
+    
     $dirs = explode(DIRECTORY_SEPARATOR , $path);
     $count = count($dirs);
     $path = '';
     for ($i = 0; $i < $count; ++$i) {
+      if($i = 0 && $isWin) {
+        // if windows, do not insert a SLASH for the first directory
+        // "\c:\\" is an invalid path in Windows
+        // -- thanks to "feelexit" on the TDOMF forums for fix
+        $path .= $dirs[$i];
+      } else { 
         $path .= DIRECTORY_SEPARATOR . $dirs[$i];
-        tdomf_log_message("Creating directory $path");
-        if (!is_dir($path) && !mkdir(trim($path), $mode)) {
-            return false;
-        }
+      }
+      tdomf_log_message("Creating directory $path");
+      if (!is_dir($path) && !mkdir(trim($path), $mode)) {
+          return false;
+      }
     }
     return true;
 }

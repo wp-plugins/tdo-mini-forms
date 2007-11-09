@@ -131,23 +131,16 @@ Alternativily you can use a custom field. Add the Custom Field widget to your fo
 
 I have spent some time exploring the use of TinyMCE (and to a lesser degree FckEditor) for TDO Mini Forms. Both libraries provide a WYSIWYG or "Rich Text" editors in place of your bog-standard text area. Wordpress' write screen using a heavily modified version of TinyMCE. I haven't settled on the right method to do this yet. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. Grab the latest copy and installed it somewhere on your website and then follow the directions on how to replace a text area with TinyMCE. This can be used to even change your comment input field.
 
-= I get an error: "TDOMF ERROR: Headers have already been sent in file..." =
+= I get "ERROR: register_globals is enabled" and/or "ERROR: register_globals is enabled in your PHP environment! =
 
-TDO Mini Forms tries to call the PHP function `session_start()` by adding an action to the `get_header` template tag. The session variable is used to hold security information and to confirm a submission comes from an actual form (and not some bot). But, if you see this error, it means that some where the headers have already been sent and so the session cannot start. If you try to submit a form with this error, you'll only get another error "TDOMF: Bad data submitted".
+[register_globals](http://ie2.php.net/register_globals) is a PHP setting. Having it enabled is considered a security risk and Wordpress takes steps to plug the hole when it detects the setting. However these steps delete information used by the TDOMF form and will prevent it from operating correctly. 
 
-The error message gives you details of the file that has already sent the headers. This could be something as simple as an empty blank line before everything else in the file or another plugin prints some HTML out using a `get_header` tag (if this is the case, it should really use `wp_head`). You can alternativily call session_start before anything else to remove this error. Just insert  `<?php session_start(); ?>` at the top of the offending file or before any HTML is printed out.
+To resolve this, you have a number of options.
 
-= In my form I get an error saying: "ERROR: session_start() has not been called yet!" = 
-
-TDO Mini Forms tries to call the PHP function `session_start()` by adding an action to the `get_header` template tag. The session variable is used to hold security information and to confirm a submission comes from an actual form (and not some bot). But, if you see this error (and you do not see the "TDOMF ERROR: Headers have already been sent..."), it probably means that your theme does not use the `get_header` template tag. If you try to submit a form with this error, you'll only get another error "TDOMF: Bad data submitted". You can confirm this by temporarily switching your theme to the classic or default Wordpress theme. The errors should disappear.
-
-To resolve this, you need to insert a call to session_start at the top of template file. Normally the form is added to a page and your theme should have a "page.php" template file. At the very top, first line, add this line:
-
-`<?php session_start(); ?>`
-
-= I get "TDOMF: Bad data submitted..." error when I submit a post! =
-
-I assuming you don't get the "TDOMF ERROR: Headers have already been sent..." and/or "ERROR: session_start() has not been called yet!..." errors, this error means you've tried to submit your post from an invalid form. Try returning to the submission form, reloading it and then reenter/submit it.
+* If you can access and modify your .htaccess you can disable `register_globals` by adding this line:
+`php_flag register_globals off`
+* Ask your host to turn off `register_globals'.
+* Modify Wordpress (ask on the [forums]( http://thedeadone.net/forum ) how to do that)
 
 = I want to add add tags to QuickTags such as embed video, etc.? =
 
@@ -296,8 +289,15 @@ get_post_meta($post_ID, "_tdomf_download_name_1");
 * Fixed a bug when deleting a post with uploaded files on PHP4 or less
 
 = v0.9.1: 5th November 2007 =
+
 * Fixed a javascript error in Quicktags that blocked it from working on Mozilla
 * Fixed the admin notification email as the Wordpress cache for the custom fields for posts was being forgotten so the admin email did not contain information about IP and uploaded files.
 * A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
 * Spelling mistake fixed in "Your Submissions"
 
+= v0.X: TBD =
+
+* Potential fix for the never-ending "session_start" problem. Using template_redirect instead of get_header. 
+* New Suppress Error Messages (works to a point)
+* Warnings about register_globals added
+* Fix for file uploads mkdir for windows included. Thansk to "feelexit" on the TDOMF forums for the patch
