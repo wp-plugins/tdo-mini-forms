@@ -170,4 +170,27 @@ function tdomf_overview_menu()  {
    </div>
 <?php
 }
+
+function tdomf_dashboard_status() {
+  if(current_user_can('edit_others_posts')) {
+    $posts = tdomf_get_unmoderated_posts(0,15);
+    if(!empty($posts)) { 
+      ?>
+      <div>
+      <h3>      
+        <?php printf(__('Awaiting Approval (%d)', 'tdomf'),tdomf_get_unmoderated_posts_count()); ?>
+        <a href="<?php echo get_bloginfo('wpurl'); ?>/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&f=0" title="Moderate Submissions...">&raquo;</a>
+      </h3>
+      <ul>
+      <?php foreach($posts as $p) { ?> 
+        <li><a href="<?php echo get_permalink($p->ID); ?>"><?php echo $p->post_title; ?></a> from <?php echo get_post_meta($p->ID, TDOMF_KEY_NAME, true); ?></li>
+      <?php } ?>
+      </ul>
+      </div>
+      <?
+    }
+  }
+}
+add_action('activity_box_end',"tdomf_dashboard_status");
+
 ?>

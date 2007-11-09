@@ -554,7 +554,7 @@ function tdomf_get_error_messages($show_links=true) {
           }
           if($test_see_form == false) {
             if($show_links) {
-              $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"admin.php?page=tdomf_show_options_menu\">Configure on Options Page &raquo;</a>")."</font><br/>";
+              $message .= "<font color=\"red\">".sprintf(__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"%s\">Configure on Options Page &raquo;</a>"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu")."</font><br/>";
             } else {
               $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form!")."</font><br/>";
             }
@@ -562,7 +562,7 @@ function tdomf_get_error_messages($show_links=true) {
           }
         }
 
-       $create_user_link = "admin.php?page=tdomf_show_options_menu&action=create_dummy_user";
+       $create_user_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&action=create_dummy_user";
 	    if(function_exists('wp_nonce_url')){
 	          $create_user_link = wp_nonce_url($create_user_link, 'tdomf-create-dummy-user');
     }

@@ -6,16 +6,30 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Widgets for your Theme! //
 /////////////////////////////
 
-function tdomf_theme_widget_admin_init() {
+function tdomf_theme_widgets_init() {
   if ( !function_exists('register_sidebar_widget') || !function_exists('register_widget_control') )
     return;
   
   function tdomf_theme_widget_admin($args) {
     if(current_user_can('manage_options') || current_user_can('edit_others_posts')) {
       extract($args);
+
+      $errors = tdomf_get_error_messages();
+      if(trim($errors) != "") {
+        echo $before_widget;
+        echo $before_title.__("TDOMF Errors","tdomf").$after_title;
+        echo "<p>$errors</p>";
+        echo $after_widget;
+      }
+
       $options = get_option('tdomf_theme_widget_admin');
-      $log = empty($options['log']) ? 5 : $options['log'];
-      $mod = empty($options['mod']) ? 5 : $options['mod'];
+      if($options == false) {
+        $log = 5;
+        $mod = 5;
+      } else {
+        $log = $options['log'];
+        $mod = $options['mod'];
+      }
 
       if($log > 0) {
         echo $before_widget;
@@ -41,7 +55,7 @@ function tdomf_theme_widget_admin_init() {
           echo $after_title;
           echo '<ul>';
           foreach($posts as $p) { 
-            echo "<li>".$p->post_title." from ".get_post_meta($p->ID, TDOMF_KEY_NAME, true)." </li>";
+            echo "<li><a href=\"".get_permalink($p->ID)."\">".$p->post_title."</a> from ".get_post_meta($p->ID, TDOMF_KEY_NAME, true)." </li>";
           }
           echo '</ul>';
           echo $after_widget;
@@ -79,9 +93,14 @@ function tdomf_theme_widget_admin_init() {
 
   function tdomf_theme_widget($args) {
     extract($args);
-    $options = get_option('tdomf_theme_widget_admin');
-    $title = empty($options['title']) ? 'Recent Submissions' : $options['title'];
-    $mod = empty($options['mod']) ? 5 : $options['mod'];
+    $options = get_option('tdomf_theme_widget');
+    if($options == false) {
+      $title = 'Recent Submissions';
+      $mod = 5;
+    } else {
+      $title = $options['title'];
+      $mod = $options['mod'];
+    }
     
     $posts = tdomf_get_published_posts(0,$mod);
     if(!empty($posts)) {
@@ -100,43 +119,83 @@ function tdomf_theme_widget_admin_init() {
     }
   }
   
-	/*function tdomf_theme_widget_admin_control() {
-
-		// Collect our widget's options.
-		$options = get_option('tdomf_theme_widget_admin');
-
-		// This is for handing the control form submission.
-		if ( $_POST['mywidget-submit'] ) {
-			// Clean up control form submission options
-			$newoptions['title'] = strip_tags(stripslashes($_POST['mywidget-title']));
-			$newoptions['text'] = strip_tags(stripslashes($_POST['mywidget-text']));
-		}
-
-		// If original widget options do not match control form
-		// submission options, update them.
-		if ( $options != $newoptions ) {
-			$options = $newoptions;
-			update_option('tdomf_theme_widget_admin', $options);
-		}
-
-		// Format options as valid HTML. Hey, why not.
-		$title = htmlspecialchars($options['title'], ENT_QUOTES);
-		$text = htmlspecialchars($options['text'], ENT_QUOTES);
-
-// The HTML below is the control form for editing options.
-?>
-		<div>
-		<label for="mywidget-title" style="line-height:35px;display:block;">Widget title: <input type="text" id="mywidget-title" name="mywidget-title" value="<?php echo $title; ?>" /></label>
-		<label for="mywidget-text" style="line-height:35px;display:block;">Widget text: <input type="text" id="mywidget-text" name="mywidget-text" value="<?php echo $text; ?>" /></label>
-		<input type="hidden" name="mywidget-submit" id="mywidget-submit" value="1" />
-		</div>
-	<?php
-	// end of tdomf_theme_widget_admin_control()
-	}*/
+  function tdomf_theme_widget_control() {
+    $options = get_option('tdomf_theme_widget');
+  
+    if ( $_POST['tdomf-mod'] ) {
+      $newoptions['title'] = htmlentities(strip_tags($_POST['tdomf-title']));
+      $newoptions['mod'] = intval($_POST['tdomf-mod']);
+        if ( $options != $newoptions ) {
+          $options = $newoptions;
+          update_option('tdomf_theme_widget', $options);
+        }
+    }
+    
+    if($options == false) {
+      $title = 'Recent Submissions';
+      $mod = 5;
+    } else {
+      $title = $options['title'];
+      $mod = $options['mod'];
+    }
+  
+  ?>
+  <div>
+  
+  <label for="tdomf-title">
+  Title
+  <input type="text" id="tdomf-title" name="tdomf-title" value="<?php echo $title; ?>" size="20" />
+  </label>
+  <br/><br/>
+  <label for="tdomf-mod">
+  Number of posts to show:
+  <input type="text" id="tdomf-mod" name="tdomf-mod" value="<?php echo $mod; ?>" size="2" />
+  </label>
+  
+  </div>
+  <?php
+  }
+  
+  function tdomf_theme_widget_admin_control() {
+    $options = get_option('tdomf_theme_widget_admin');
+  
+    if ( $_POST['tdomf-admin-info-log'] ) {
+      $newoptions['log'] = intval($_POST['tdomf-admin-info-log']);
+      $newoptions['mod'] = intval($_POST['tdomf-admin-info-mod']);
+        if ( $options != $newoptions ) {
+          $options = $newoptions;
+          update_option('tdomf_theme_widget_admin', $options);
+        }
+    }
+    
+    if($options == false) {
+      $log = 5;
+      $mod = 5;
+    } else {
+      $log = $options['log'];
+      $mod = $options['mod'];
+    }  
+  ?>
+  <div>
+  
+  <label for="tdomf-admin-info-log">
+  Number of log lines to show:
+  <input type="text" id="tdomf-admin-info-log" name="tdomf-admin-info-log" value="<?php echo $log; ?>" size="2" />
+  </label>
+  <br/><br/>
+  <label for="tdomf-admin-info-mod">
+  Number of posts to show:
+  <input type="text" id="tdomf-admin-info-mod" name="tdomf-admin-info-mod" value="<?php echo $mod; ?>" size="2" />
+  </label>
+  
+  </div>
+  <?php
+  }
 
   register_sidebar_widget('TDOMF Admin Info', 'tdomf_theme_widget_admin');
+  register_widget_control('TDOMF Admin Info', 'tdomf_theme_widget_admin_control', 220, 100);
   register_sidebar_widget('TDOMF Recent Submissions', 'tdomf_theme_widget');
-  #register_widget_control('TDOMF Admin Widget', 'tdomf_theme_widget_admin_control');
+  register_widget_control('TDOMF Recent Submissions', 'tdomf_theme_widget_control', 220, 100);
 }
-add_action('plugins_loaded', 'tdomf_theme_widget_admin_init');
+add_action('plugins_loaded', 'tdomf_theme_widgets_init');
 ?>

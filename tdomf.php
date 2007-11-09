@@ -161,6 +161,9 @@ Author URI: http://thedeadone.net
 // - Warnings about register_globals added
 // - Fix for file uploads mkdir for windows included. Thansk to "feelexit" on 
 //     the TDOMF forums for the patch
+// - "Latest Submissions" added to main Dashboard
+// - Two widgets for your theme!
+// - Fixed 1-q captcha widget not accepting quotes (")
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////

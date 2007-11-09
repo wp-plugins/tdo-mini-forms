@@ -176,7 +176,7 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
     $count = count($dirs);
     $path = '';
     for ($i = 0; $i < $count; ++$i) {
-      if($i = 0 && $isWin) {
+      if($i == 0 && $isWin) {
         // if windows, do not insert a SLASH for the first directory
         // "\c:\\" is an invalid path in Windows
         // -- thanks to "feelexit" on the TDOMF forums for fix
@@ -184,7 +184,9 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       } else { 
         $path .= DIRECTORY_SEPARATOR . $dirs[$i];
       }
-      tdomf_log_message("Creating directory $path");
+      if(is_dir($path)) {
+        tdomf_log_message("Attempting to creating directory $path");
+      } 
       if (!is_dir($path) && !mkdir(trim($path), $mode)) {
           return false;
       }

@@ -134,8 +134,8 @@ function tdomf_widget_1qcaptcha_control($params) {
   }
   // Store settings for this widget
     if ( $_POST["1qcaptcha$postfix1-submit"] ) {
-     $newoptions['question'] = strip_tags($_POST["1qcaptcha$postfix1-question"]);
-     $newoptions['answer'] = strip_tags($_POST["1qcaptcha$postfix1-answer"]);
+     $newoptions['question'] = htmlentities(strip_tags($_POST["1qcaptcha$postfix1-question"]));
+     $newoptions['answer'] = htmlentities(strip_tags($_POST["1qcaptcha$postfix1-answer"]));
      if ( $options != $newoptions ) {
         $options = $newoptions;
         update_option('tdomf_1qcaptcha_widget'.$postfix2, $options);

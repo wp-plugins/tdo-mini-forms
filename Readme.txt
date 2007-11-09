@@ -301,3 +301,6 @@ get_post_meta($post_ID, "_tdomf_download_name_1");
 * New Suppress Error Messages (works to a point)
 * Warnings about register_globals added
 * Fix for file uploads mkdir for windows included. Thansk to "feelexit" on the TDOMF forums for the patch
+* "Latest Submissions" added to main Dashboard
+* Two widgets for your theme!
+* Fixed 1-q captcha widget not accepting quotes (")
