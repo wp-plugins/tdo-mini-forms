@@ -295,7 +295,7 @@ function tdomf_widget_customfields_textfield($args,$number,$options) {
   } else if($options['tf-subtype'] == 'url') {
     $output .= __("URL:","tdomf")." ";
   }
-  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['title-size']."\" value=\"$value\" />";
+  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"$value\" />";
   $output .= "</label>\n";
   
   $output .= $after_widget;
@@ -325,17 +325,17 @@ function tdomf_widget_customfields_textfield_control($number,$options){
   $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".$options['defval']."\" />";
   $output .= "</label><br/><br/>";
 
-  $output .= "<label for \"customfields-tf-subtype-$number\">";
+  #$output .= "<label for \"customfields-tf-subtype-$number\">";
   $output .= "<input type=\"radio\" name=\"customfields-tf-subtype-$number\" id=\"customfields-tf-subtype-$number\" value=\"text\"";
   if($options['tf-subtype'] == "text") { $output .= " checked "; }
-  $output .= ">".__("Text","tdomf")."<br>";
+  $output .= "/>".__("Text","tdomf")."<br>";
   $output .= "<input type=\"radio\" name=\"customfields-tf-subtype-$number\" id=\"customfields-tf-subtype-$number\" value=\"email\"";
   if($options['tf-subtype'] == "email") { $output .= " checked "; }
-  $output .= ">".__("Email (only valid email addresses will be accepted)","tdomf")."<br>";
+  $output .= "/>".__("Email (only valid email addresses will be accepted)","tdomf")."<br>";
   $output .= "<input type=\"radio\" name=\"customfields-tf-subtype-$number\" id=\"customfields-tf-subtype-$number\" value=\"url\"";
   if($options['tf-subtype'] == "url") { $output .= " checked "; }
-  $output .= ">".__("URL (only valid URLs will be accepted)","tdomf")."<br>";
-  $output .= "</label>";
+  $output .= "/>".__("URL (only valid URLs will be accepted)","tdomf")."<br>";
+  #$output .= "</label>";
 
   return $output;
 }

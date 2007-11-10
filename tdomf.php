@@ -164,6 +164,10 @@ Author URI: http://thedeadone.net
 // - "Latest Submissions" added to main Dashboard
 // - Two widgets for your theme!
 // - Fixed 1-q captcha widget not accepting quotes (")
+//
+// vX: TBD
+// - Fixed customfield textfield control radio group in Firefox
+// - Fixed customfield textfield ignoring size option
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,9 +227,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "12");
+define("TDOMF_BUILD", "13");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.9.2");
+define("TDOMF_VERSION", "0.X");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
