@@ -193,6 +193,7 @@ Author URI: http://thedeadone.net
 //    * Info about loaded widgets
 //    * Disable loaded widgets?
 // - Improvements for current widgets
+//    * Thumbnail size options for upload files
 //    * TinyMCE and/or FckEditr for content box (and custom field textarea)
 //    * Custom Fields: Radio groups, drop down lists, checkbox
 //    * Custom Fields: Automatically add to post
@@ -211,6 +212,8 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
+// - Auto add buttons to post content to "delete", "publish/approve" and later
+//    "spam"
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
