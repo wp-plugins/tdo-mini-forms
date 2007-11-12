@@ -295,7 +295,7 @@ function tdomf_widget_customfields_textfield($args,$number,$options) {
   } else if($options['tf-subtype'] == 'url') {
     $output .= __("URL:","tdomf")." ";
   }
-  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"$value\" />";
+  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES)."\" />";
   $output .= "</label>\n";
   
   $output .= $after_widget;
@@ -532,6 +532,10 @@ function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
 function tdomf_widget_customfields_textarea_post($args,$number,$options) {
   extract($args);
   $text = $args["customfields-textarea-$number"];
+  // remove magic quotes
+  if (get_magic_quotes_gpc()) {
+     $text = stripslashes($text);
+  }
   if($options['ta-restrict-tags']) {
     $text = strip_tags($text,$options['ta-allowable-tags']);
   }

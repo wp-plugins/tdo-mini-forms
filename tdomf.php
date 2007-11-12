@@ -168,6 +168,8 @@ Author URI: http://thedeadone.net
 // vX: TBD
 // - Fixed customfield textfield control radio group in Firefox
 // - Fixed customfield textfield ignoring size option
+// - Fixed customfield textarea putting magic quotes on HTML
+// - Fixed customfield textfield not handling HTML and quotes well.
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
