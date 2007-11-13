@@ -3,12 +3,47 @@
 Name: "Custom Fields"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Add a custom field to your form!
-Version: 0.1
+Version: 0.2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
+
+function tdomf_widget_customfields_gen_fmt($index,$value){
+  if(empty($value) || trim($value) == "") {
+    return "";
+  }
+  $options = tdomf_widget_customfields_get_options($index);
+  $title = $options['title'];
+  $key = $options['key'];
+  
+  $output = $options['format'];
+  $output = ereg_replace("%%TITLE%%",$title,$output);
+  $output = ereg_replace("%%VALUE%%",$value,$output);
+  $output = ereg_replace("%%KEY%%",$key,$output);
+  return $output;
+}
+
+function tdomf_widget_customfields_append($post_ID,$options,$index){
+  // Grab value
+  $value = get_post_meta($post_ID,$options['key'],true);
+  // Gen Format
+  $fmt = tdomf_widget_customfields_gen_fmt($index,$value);
+  if($fmt != "") {
+    // Grab existing data
+    $post = wp_get_single_post($post_ID, ARRAY_A);
+    $post = add_magic_quotes($post); 
+    $post_content = $post['post_content'];
+    $post_content .= $fmt;
+    // Update post
+    $post = array (
+        "ID"                      => $post_ID,
+        "post_content"            => $post_content,
+    );
+    $post_ID = wp_update_post($post);
+  }
+}
 
 // TODO: Add a box to allow customised formatting of custom field and 
 // automatically added it to the post content
@@ -54,6 +89,8 @@ function tdomf_widget_customfields_get_options($index) {
        $options['type'] = 'textfield';
        $options['cols'] = 40;
        $options['rows'] = 10; 
+       $options['append'] = false;
+       $options['format'] = "<p><b>%%TITLE%%</b>: %%VALUE%%</p>";
        // textfield specific
        $options['tf-subtype'] = 'text';
        // textarea specific
@@ -62,6 +99,8 @@ function tdomf_widget_customfields_get_options($index) {
        $options['ta-quicktags'] = true;
        $options['ta-content-filter'] = true;       
     }
+    if(!isset($options['append'])){ $options['append'] = false; }
+    if(!isset($options['format'])){ $options['format'] = "<p><b>%%TITLE%%</b>: %%VALUE%%</p>"; }
   return $options;
 }
 
@@ -96,13 +135,14 @@ function tdomf_widget_customfields_preview($args,$params) {
   }
   $options = tdomf_widget_customfields_get_options($number);
   
+  $output = "";
   if($options['type'] == 'textfield') {
-    return tdomf_widget_customfields_textfield_preview($args,$number,$options);
+    $output .= tdomf_widget_customfields_textfield_preview($args,$number,$options);
   } else if($options['type'] == 'textarea') {
-    return tdomf_widget_customfields_textarea_preview($args,$number,$options);
+    $output .= tdomf_widget_customfields_textarea_preview($args,$number,$options);
   }
   
-  return "";
+  return $output;
 }
   
 function tdomf_widget_customfields_validate($args,$params) {
@@ -128,15 +168,21 @@ function tdomf_widget_customfields_post($args,$params) {
   }
   $options = tdomf_widget_customfields_get_options($number);
   
+  $retVal = NULL;
+  
   if($options['type'] == 'textfield') {
-    return tdomf_widget_customfields_textfield_post($args,$number,$options);
+    $retVal = tdomf_widget_customfields_textfield_post($args,$number,$options);
   } else if($options['type'] == 'hidden') {
-    return tdomf_widget_customfields_hidden_post($args,$number,$options);
+    $retVal = tdomf_widget_customfields_hidden_post($args,$number,$options);
   } else if($options['type'] == 'textarea') {
-    return tdomf_widget_customfields_textarea_post($args,$number,$options);
+    $retVal = tdomf_widget_customfields_textarea_post($args,$number,$options);
   }
   
-  return NULL;
+  if($options['append'] && $retVal == NULL){
+    tdomf_widget_customfields_append($args['post_ID'],$options,$number);
+  }
+  
+  return $retVal;
 }
 
 function tdomf_widget_customfields_adminemail($args,$params) {
@@ -175,6 +221,8 @@ function tdomf_widget_customfields_control($params) {
      $newoptions['cols'] = intval($_POST["customfields-cols-$number"]);
      $newoptions['rows'] = intval($_POST["customfields-rows-$number"]);
      $newoptions['type'] = $_POST["customfields-type-$number"];
+     $newoptions['append'] = isset($_POST["customfields-append-$number"]);
+     $newoptions['format'] = $_POST["customfields-format-$number"];
      $newoptions = tdomf_widget_customfields_textfield_control_handler($number,$newoptions);
      $newoptions = tdomf_widget_customfields_textarea_control_handler($number,$newoptions);     
      if ( $options != $newoptions ) {
@@ -190,14 +238,33 @@ function tdomf_widget_customfields_control($params) {
 
 <label for="customfields-title-<?php echo $number; ?>">
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="customfields-title-<?php echo $number; ?>" name="customfields-title-<?php echo $number; ?>" value="<?php echo $options['title']; ?>" />
+<input type="textfield" size="40" id="customfields-title-<?php echo $number; ?>" name="customfields-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
 </label>
 
 <br/><br/>
 
 <label for="customfields-name-<?php echo $number; ?>">
 <?php _e("Custom Field Key:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="customfields-key-<?php echo $number; ?>" name="customfields-key-<?php echo $number; ?>" value="<?php echo $options['key']; ?>" />
+<input type="textfield" size="40" id="customfields-key-<?php echo $number; ?>" name="customfields-key-<?php echo $number; ?>" value="<?php echo htmlentities($options['key'],ENT_QUOTES); ?>" />
+</label>
+
+<br/><br/>
+
+<label for="customfields-append-<?php echo $number; ?>">
+<input type="checkbox" name="customfields-append-<?php echo $number; ?>" id="customfields-append-<?php echo $number; ?>" <?php if($options['append']){ ?> checked <?php } ?> />
+<?php _e("Append Custom Field to Post Content","tdomf"); ?>
+</label>
+
+<br/><br/>
+
+<label for="customfields-format-<?php echo $number; ?>">
+<?php _e("Format to use:","tdomf"); ?><br/>
+<small>
+%%VALUE%% <?php _e("= Value of Custom Field","tdomf"); ?></br>
+%%KEY%% <?php _e("= Custom Field Key","tdomf"); ?><br/> 
+%%TITLE%% <?php _e("= Title","tdomf"); ?>
+</small><br/>
+<textarea cols="40" rows="3" id="customfields-format-<?php echo $number; ?>" name="customfields-format-<?php echo $number; ?>"><?php echo $options['format']; ?></textarea>
 </label>
 
 <br/><br/>
@@ -231,10 +298,9 @@ function tdomf_widget_customfields_control($params) {
 <option value="textarea" <?php if($options['type'] == 'textarea') { ?> selected <? } ?> /><?php _e("Text Area","tdomf"); ?>
 <!-- TODO <option value="checkbox" /><?php _e("Check Box","tdomf"); ?>
 <option value="select" /><?php _e("Drop Down List","tdomf"); ?>
-<option value="radio" /><?php _e("Radio","tdomf"); ?> -->
+<option value="radio" /><?php _e("Radio Group","tdomf"); ?> -->
 </select>
 </label>
-
 
 <div id="customfiles-specific-textfield-<?php echo $number; ?>" <?php if($options['type'] == 'textfield') { ?> style="display:inline;" <? } else { ?> style="display:none;" <?php } ?>>
 <?php echo tdomf_widget_customfields_textfield_control($number,$options); ?>
@@ -262,7 +328,7 @@ function tdomf_widget_customfields_init(){
   if($count <= 0){ $count = 1; } 
   for($i = 1; $i <= $count; $i++) {
     tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
-    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 400, 550, $i);
+    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 400, 750, $i);
     tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', true, $i);
     tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', true, $i);
     tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', true, $i);
@@ -343,10 +409,14 @@ function tdomf_widget_customfields_textfield_control($number,$options){
 function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
   extract($args);
   $output = $before_widget;
-  if($options['title'] != "") {
-    $output .= $before_title.$options['title'].$after_title;
+  if($options['append'] && trim($options['format']) != "") {
+    $output .= tdomf_widget_customfields_gen_fmt($number,$args["customfields-textfield-$number"]);
+  } else {
+    if($options['title'] != "") {
+      $output .= $before_title.$options['title'].$after_title;
+    }
+    $output .= $args["customfields-textfield-$number"];
   }
-  $output .= $args["customfields-textfield-$number"];
   $output .= $after_widget;
   return $output;
 }
@@ -563,9 +633,6 @@ function tdomf_widget_customfields_textarea_adminemail($args,$number,$options) {
 function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   extract($args);
   $output = $before_widget;
-  if($options['title'] != "") {
-    $output .= $before_title.$options['title'].$after_title;
-  }
   
   $text = $args["customfields-textarea-$number"];
   if($options['ta-restrict-tags']) {
@@ -575,7 +642,14 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
     $text = apply_filters('the_content', $text);
   }
   
-  $output .= $text;
+  if($options['append'] && trim($options['format']) != "") {
+    $output .= tdomf_widget_customfields_gen_fmt($number,$text);
+  } else {
+    if($options['title'] != "") {
+      $output .= $before_title.$options['title'].$after_title;
+    }
+    $output .= $text;
+  }
   $output .= $after_widget;
   return $output;
 }

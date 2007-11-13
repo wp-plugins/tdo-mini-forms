@@ -170,17 +170,19 @@ Author URI: http://thedeadone.net
 // - Fixed customfield textfield ignoring size option
 // - Fixed customfield textarea putting magic quotes on HTML
 // - Fixed customfield textfield not handling HTML and quotes well.
+// - Updated customfield to optionally automatically add value to post with a 
+//     user defined format
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
 // - Multiple form support (doable)
-// - Theme Widgets
-//    * An Admin theme that displays the last X lines from the log and the 
-//      latest X submissions, with direct admin links to log, moderation queue,
-//      widget and options
-//    * A display widget that displays the last X approved submissions
+// - More Template Tags
+//    * Log
+//    * Moderation Queue
+//    * Approved Posts
+//    * File Info
 // - Allow moderators append a message to the approved/rejected notification
 //    (not that hard to do, store the message as a postmeta, notification code
 //     grabs the message from postmeta, uses it and then deletes it from post
@@ -193,20 +195,21 @@ Author URI: http://thedeadone.net
 //    * Info about loaded widgets
 //    * Disable loaded widgets?
 // - Improvements for current widgets
-//    * Thumbnail size options for upload files
-//    * TinyMCE and/or FckEditr for content box (and custom field textarea)
+//    * Upload Files: Thumbnail size options for upload files
+//    * Content (and Custom Field): TinyMCE Integration
 //    * Custom Fields: Radio groups, drop down lists, checkbox
-//    * Custom Fields: Automatically add to post
-//    * Randoming questions for Captcha
+//    * 1 Question Captcha: Randoming questions for Captcha
 //    * Email verification of non-registered users
-//    * Finish category widget
-// - Add/select custom styles for form
+//    * Category: Finish category widget
+//    * Notify Me: Option to always notify submitter
+//    * Upload Files: Option to not use tdomf wrapper for file download 
+// - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
 // - AJAX support (maybe, maybe not)
 // - Spam Protection
-//    * Integration with Spam Karma?
-//    * Integration with Aksimet
+//    * Integration with Akismet
+//    * SPAM button
 // - Force Preview (user must preview first before submission)
 // - Allow newly submitted posts be set to "Post ready for review" with the
 //    Wordpress 2.3
@@ -214,6 +217,8 @@ Author URI: http://thedeadone.net
 // - Documentation on creating your own widgets
 // - Auto add buttons to post content to "delete", "publish/approve" and later
 //    "spam"
+// - Add link to "view post" in notification email (as it doesn't require 
+//    nounce)
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
