@@ -1,4 +1,4 @@
-<?php
+p<?php
 
 //////////////////////////
 // Inline upload!       //
@@ -260,7 +260,7 @@ function validateForm() {
         <input type='hidden' name='deletefile[]' value="<?php echo $i; ?>" />
         <?php printf(__("<i>%s</i> (%s) Uploaded","tdomf"),$mysessionfiles[$i]['name'],tdomf_filesize_format($mysessionfiles[$i]['size'])); ?>
         <br/>
-    <? } else {
+    <?php } else {
       if(($sessioncount + $j) < $options['min']) { ?>
         <label for='uploadfile<?php echo $i; ?>' class='required'>
       <?php } else { ?>

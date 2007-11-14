@@ -170,14 +170,21 @@ Author URI: http://thedeadone.net
 // - Fixed customfield textfield ignoring size option
 // - Fixed customfield textarea putting magic quotes on HTML
 // - Fixed customfield textfield not handling HTML and quotes well.
-// - Updated customfield to optionally automatically add value to post with a 
-//     user defined format
+// - Updated customfield to optionally can automatically add value to post with 
+//     a user defined format
+// - Removed any "short tag" versions (i.e. use "<?php" instead of "<?")
+// - Add link to view post from moderator notification email
+// - Auto add buttons to post content to "approve" or "reject" submission on the 
+//     spot
+// - Enable/disable preview of customfield value
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
-// - Multiple form support (doable)
+// - Multiple form support
+//    * Allow users to submit Pages
+//    * Allow users to submit Links
 // - More Template Tags
 //    * Log
 //    * Moderation Queue
@@ -215,10 +222,6 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
-// - Auto add buttons to post content to "delete", "publish/approve" and later
-//    "spam"
-// - Add link to "view post" in notification email (as it doesn't require 
-//    nounce)
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////

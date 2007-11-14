@@ -91,6 +91,7 @@ function tdomf_widget_customfields_get_options($index) {
        $options['rows'] = 10; 
        $options['append'] = false;
        $options['format'] = "<p><b>%%TITLE%%</b>: %%VALUE%%</p>";
+       $options['preview'] = true;
        // textfield specific
        $options['tf-subtype'] = 'text';
        // textarea specific
@@ -101,6 +102,7 @@ function tdomf_widget_customfields_get_options($index) {
     }
     if(!isset($options['append'])){ $options['append'] = false; }
     if(!isset($options['format'])){ $options['format'] = "<p><b>%%TITLE%%</b>: %%VALUE%%</p>"; }
+    if(!isset($options['preview'])){ $options['preview'] = true; }
   return $options;
 }
 
@@ -136,12 +138,13 @@ function tdomf_widget_customfields_preview($args,$params) {
   $options = tdomf_widget_customfields_get_options($number);
   
   $output = "";
-  if($options['type'] == 'textfield') {
-    $output .= tdomf_widget_customfields_textfield_preview($args,$number,$options);
-  } else if($options['type'] == 'textarea') {
-    $output .= tdomf_widget_customfields_textarea_preview($args,$number,$options);
+  if($options['preview']) {
+    if($options['type'] == 'textfield') {
+      $output .= tdomf_widget_customfields_textfield_preview($args,$number,$options);
+    } else if($options['type'] == 'textarea') {
+      $output .= tdomf_widget_customfields_textarea_preview($args,$number,$options);
+    }
   }
-  
   return $output;
 }
   
@@ -216,6 +219,7 @@ function tdomf_widget_customfields_control($params) {
      $newoptions['title'] = $_POST["customfields-title-$number"];
      $newoptions['key'] = $_POST["customfields-key-$number"];;
      $newoptions['required'] = isset($_POST["customfields-required-$number"]);
+     $newoptions['preview'] = isset($_POST["customfields-preview-$number"]);
      $newoptions['defval'] = $_POST["customfields-defval-$number"];
      $newoptions['size'] = intval($_POST["customfields-size-$number"]);
      $newoptions['cols'] = intval($_POST["customfields-cols-$number"]);
@@ -250,6 +254,13 @@ function tdomf_widget_customfields_control($params) {
 
 <br/><br/>
 
+<label for="customfields-preview-<?php echo $number; ?>">
+<input type="checkbox" name="customfields-preview-<?php echo $number; ?>" id="customfields-preview-<?php echo $number; ?>" <?php if($options['preview']) { ?> checked <?php } ?> />
+<?php _e("Include in Preview","tdomf"); ?>
+</label>
+
+<br/><br/>
+
 <label for="customfields-append-<?php echo $number; ?>">
 <input type="checkbox" name="customfields-append-<?php echo $number; ?>" id="customfields-append-<?php echo $number; ?>" <?php if($options['append']){ ?> checked <?php } ?> />
 <?php _e("Append Custom Field to Post Content","tdomf"); ?>
@@ -277,14 +288,22 @@ function tdomf_widget_customfields_control($params) {
       document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'inline';
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
     } else if(type == 'hidden') {
       document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'inline';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
     } else if(type == 'textarea') {
       document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'inline';
+      document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
+    } else if(type == 'checkbox') {
+      document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'inline';
     }
   }
   //]]>
@@ -293,25 +312,32 @@ function tdomf_widget_customfields_control($params) {
 <label for="customfields-type-<?php echo $number; ?>">
 <?php _e("Type: ","tdomf"); ?>
 <select name="customfields-type-<?php echo $number; ?>" onChange="customfields_change_specific<?php echo $number; ?>();">
-<option value="textfield" <?php if($options['type'] == 'textfield') { ?> selected <? } ?> /><?php _e("Text Field","tdomf"); ?>
-<option value="hidden" <?php if($options['type'] == 'hidden') { ?> selected <? } ?> /><?php _e("Hidden","tdomf"); ?>
-<option value="textarea" <?php if($options['type'] == 'textarea') { ?> selected <? } ?> /><?php _e("Text Area","tdomf"); ?>
-<!-- TODO <option value="checkbox" /><?php _e("Check Box","tdomf"); ?>
-<option value="select" /><?php _e("Drop Down List","tdomf"); ?>
+<option value="textfield" <?php if($options['type'] == 'textfield') { ?> selected <?php } ?> /><?php _e("Text Field","tdomf"); ?>
+<option value="hidden" <?php if($options['type'] == 'hidden') { ?> selected <?php } ?> /><?php _e("Hidden","tdomf"); ?>
+<option value="textarea" <?php if($options['type'] == 'textarea') { ?> selected <?php } ?> /><?php _e("Text Area","tdomf"); ?>
+<option value="checkbox" /><?php _e("Check Box","tdomf"); ?>
+
+<!-- Checkboxes, Select (Drop Down List), Radio (Radio Group), List Box (Multiselect List?) -->
+
+<!-- TODO <option value="select" /><?php _e("Drop Down List","tdomf"); ?>
 <option value="radio" /><?php _e("Radio Group","tdomf"); ?> -->
 </select>
 </label>
 
-<div id="customfiles-specific-textfield-<?php echo $number; ?>" <?php if($options['type'] == 'textfield') { ?> style="display:inline;" <? } else { ?> style="display:none;" <?php } ?>>
+<div id="customfiles-specific-textfield-<?php echo $number; ?>" <?php if($options['type'] == 'textfield') { ?> style="display:inline;" <?php } else { ?> style="display:none;" <?php } ?>>
 <?php echo tdomf_widget_customfields_textfield_control($number,$options); ?>
 </div>
 
-<div id="customfiles-specific-hidden-<?php echo $number; ?>" <?php if($options['type'] == 'hidden') { ?> style="display:inline;" <? } else { ?> style="display:none;" <?php } ?>>
+<div id="customfiles-specific-hidden-<?php echo $number; ?>" <?php if($options['type'] == 'hidden') { ?> style="display:inline;" <?php } else { ?> style="display:none;" <?php } ?>>
 <?php echo tdomf_widget_customfields_hidden_control($number,$options); ?>
 </div>
 
-<div id="customfiles-specific-textarea-<?php echo $number; ?>" <?php if($options['type'] == 'textarea') { ?> style="display:inline;" <? } else { ?> style="display:none;" <?php } ?>>
+<div id="customfiles-specific-textarea-<?php echo $number; ?>" <?php if($options['type'] == 'textarea') { ?> style="display:inline;" <?php } else { ?> style="display:none;" <?php } ?>>
 <?php echo tdomf_widget_customfields_textarea_control($number,$options); ?>
+</div>
+
+<div id="customfiles-specific-checkbox-<?php echo $number; ?>" <?php if($options['type'] == 'checkbox') { ?> style="display:inline;" <?php } else { ?> style="display:none;" <?php } ?>>
+<?php echo tdomf_widget_customfields_checkbox_control($number,$options); ?>
 </div>
 
 </div>
@@ -388,7 +414,7 @@ function tdomf_widget_customfields_textfield_control($number,$options){
 
   $output .= "<label for=\"customfields-defval-$number\">";
   $output .= __("Default Value:","tdomf")."<br/>";
-  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".$options['defval']."\" />";
+  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'])."\" />";
   $output .= "</label><br/><br/>";
 
   #$output .= "<label for \"customfields-tf-subtype-$number\">";
@@ -407,15 +433,19 @@ function tdomf_widget_customfields_textfield_control($number,$options){
 }
 
 function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
-  extract($args);
-  $output = $before_widget;
+  $value = trim($args["customfields-textfield-$number"]);
+  if($value == "") {
+    return "";
+  }
+  extract($args);  
+  $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$args["customfields-textfield-$number"]);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$value);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
     }
-    $output .= $args["customfields-textfield-$number"];
+    $output .= $value;
   }
   $output .= $after_widget;
   return $output;
@@ -479,7 +509,7 @@ function tdomf_widget_customfields_hidden_control($number,$options){
   $output  = "<h3>".__("Hidden","tdomf")."</h3>";
   $output .= "<label for=\"customfields-defval-$number\">";
   $output .= __("Value:","tdomf")."<br/>";
-  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".$options['defval']."\" />";
+  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'])."\" />";
   $output .= "</label><br/><br/>";
   return $output;
 }
@@ -498,8 +528,6 @@ function tdomf_widget_customfields_textarea_control_handler($number,$options) {
 
 
 function tdomf_widget_customfields_textarea_control($number,$options){ 
-  
-  // TODO: 'the_content' filter
   
   $output  = "<h3>".__("Text Area","tdomf")."</h3>";
 
@@ -631,10 +659,12 @@ function tdomf_widget_customfields_textarea_adminemail($args,$number,$options) {
 }
 
 function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
+  $text = trim($args["customfields-textarea-$number"]);
+  if($text == "") {
+    return "";
+  }
   extract($args);
   $output = $before_widget;
-  
-  $text = $args["customfields-textarea-$number"];
   if($options['ta-restrict-tags']) {
     $text = strip_tags($text,$options['ta-allowable-tags']);
   }
@@ -653,4 +683,24 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   $output .= $after_widget;
   return $output;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                 Custom Field as a Checkbox //
+////////////////////////////////////////////////////////////////////////////////
+
+function tdomf_widget_customfields_checkbox_control_handler($number,$options) {
+  /*$options['ta-quicktags'] = isset($_POST["customfields-ta-quicktags-$number"]);*/
+  return $options;
+}
+
+
+function tdomf_widget_customfields_checkbox_control($number,$options){
+  $output  = "<h3>".__("Check Box","tdomf")."</h3>";
+  // Default Value (True/False)
+  // Required
+  // Required Value (True/False)
+  return $output;
+}
+  
+
 ?>

@@ -152,11 +152,36 @@ function tdomf_content_submitter_filter($content=''){
 }
 add_filter('the_content', 'tdomf_content_submitter_filter');
 
+//////////////////////////////////////
+// Add TDOMF stylesheet link to template
+//
 function tdomf_stylesheet(){
    ?>
    <link rel="stylesheet" href="<?php echo TDOMF_URLPATH; ?>tdomf-style-form.css" type="text/css" media="screen" />
    <?php
 }
 add_action('wp_head','tdomf_stylesheet');
-   
+
+function tdomf_content_adminbuttons_filter($content=''){
+  global $post;
+  $post_ID = 0;
+  if(isset($post)) { $post_ID = $post->ID; }
+  else if($post_ID == 0){ return $content; }
+  
+   if(get_option(TDOMF_OPTION_MODERATION) 
+   && get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
+   && $post->post_status == 'draft') {
+     
+       $publish_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$post_ID";
+       $publish_link = wp_nonce_url($publish_link,'tdomf-publish_'.$post_ID);
+       
+       $delete_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=delete&post=$post_ID";
+       $delete_link = wp_nonce_url($delete_link,'tdomf-delete_'.$post_ID);
+     
+       return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>]</p>',"tdomf"),$publish_link,$delete_link);
+   }
+   return $content;
+}
+add_filter('the_content', 'tdomf_content_adminbuttons_filter');
+
 ?>

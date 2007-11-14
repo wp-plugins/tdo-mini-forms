@@ -115,6 +115,9 @@ function tdomf_notify_admins($post_ID){
   //
   $moderate_all_link = get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu';
   
+  //View link
+  $view_post = get_permalink($post_ID);
+  
   // Subject line
   //
   $subject = sprintf(__("[%s] Please moderate this new post request from %s","tdomf"),get_bloginfo('title'),$submitter_name);
@@ -123,6 +126,7 @@ function tdomf_notify_admins($post_ID){
   //
   $email_msg  = sprintf(__("A new post with title \"%s\" from %s is awaiting your approval.\r\n\r\n","tdomf"),$title,$submitter_string);
   $email_msg .= sprintf(__("This was submitted from IP %s.\r\n\r\n","tdomf"),$ip);
+  $email_msg .= sprintf(__("You can view this post from %s.\r\n\r\n","tdomf"),$view_post); 
   $email_msg .= sprintf(__("You can moderate this submission from %s.\r\n\r\n","tdomf"),$moderate_all_link);
   $email_msg .= sprintf(__("Content of the post: \r\n\r\n %s \r\n\r\n","tdomf"),$content);
   
