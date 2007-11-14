@@ -28,20 +28,23 @@ function tdomf_widget_customfields_gen_fmt($index,$value){
 function tdomf_widget_customfields_append($post_ID,$options,$index){
   // Grab value
   $value = get_post_meta($post_ID,$options['key'],true);
-  // Gen Format
-  $fmt = tdomf_widget_customfields_gen_fmt($index,$value);
-  if($fmt != "") {
-    // Grab existing data
-    $post = wp_get_single_post($post_ID, ARRAY_A);
-    $post = add_magic_quotes($post); 
-    $post_content = $post['post_content'];
-    $post_content .= $fmt;
-    // Update post
-    $post = array (
-        "ID"                      => $post_ID,
-        "post_content"            => $post_content,
-    );
-    $post_ID = wp_update_post($post);
+  if(!empty($value) && (!is_string($value) || trim($value) != "") )
+  {
+    // Gen Format
+    $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value));
+    if($fmt != "") {
+      // Grab existing data
+      $post = wp_get_single_post($post_ID, ARRAY_A);
+      $post = add_magic_quotes($post); 
+      $post_content = $post['post_content'];
+      $post_content .= $fmt;
+      // Update post
+      $post = array (
+          "ID"                      => $post_ID,
+          "post_content"            => $post_content,
+      );
+      $post_ID = wp_update_post($post);
+    }
   }
 }
 
