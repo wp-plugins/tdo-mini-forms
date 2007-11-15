@@ -177,6 +177,7 @@ Author URI: http://thedeadone.net
 // - Auto add buttons to post content to "approve" or "reject" submission on the 
 //     spot
 // - Enable/disable preview of customfield value
+// - Added option to Upload Files widget to use direct links
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +241,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "13");
+define("TDOMF_BUILD", "14");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.X");
 
