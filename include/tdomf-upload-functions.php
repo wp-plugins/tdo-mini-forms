@@ -330,7 +330,10 @@ function tdomf_widget_upload_get_options() {
        $options['attach-a'] = false;
        $options['attach-thumb-a'] = false;
        $options['thumb-a'] = false;
+       $options['url'] = get_bloginfo('wpurl').'/wp-content/uploads/';
+       $options['nohandler'] = false;
     }
+    if(!isset($options['url'])){ $options['url'] = get_bloginfo('wpurl').'/wp-content/uploads/'; }
   return $options;
 }
 
@@ -405,7 +408,13 @@ function tdomf_widget_upload_post($args) {
           add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,$cmd_output,true);
         }
         
-        $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
+        // Use direct links or wrapper
+        //
+        if($options['nohandler'] && trim($options['url']) != "") {
+          $uri = $options['url']."/$post_ID/".$theirfiles[$i]['name'];
+        } else {
+          $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
+        }
         
         // Modify Post
         //
@@ -631,7 +640,9 @@ function tdomf_widget_upload_control() {
       $newoptions['post-title'] = isset($_POST['upload-files-post-title']);
       $newoptions['attach-a'] = isset($_POST['upload-files-attach-a']);
       $newoptions['attach-thumb-a'] = isset($_POST['upload-files-attach-thumb-a']);
-      $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a']);      
+      $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a']);
+      $newoptions['url'] = $_POST['upload-files-url'];
+      $newoptions['nohandler'] = isset($_POST['upload-files-nohandler']);
       
       if ( $options != $newoptions ) {
         $options = $newoptions;
@@ -678,6 +689,17 @@ function tdomf_widget_upload_control() {
 </label><br/>
 
 <br/>
+
+<label for="upload-files-nohandler">
+<input type="checkbox" name="upload-files-nohandler" id="upload-files-nohandler" <?php if($options['nohandler']) echo "checked"; ?> >
+<?php _e("Do not use TDOMF handler for URL of download","tdomf"); ?>
+</label><br/>
+
+&nbsp;&nbsp;&nbsp;<label for="upload-files-url" ><?php _e("URL of uploaded file area:","tdomf"); ?><br/>
+&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url" name="upload-files-url" value="<?php echo $options['url']; ?>" />
+</label>
+
+<br/><br/>
 
 <label for="upload-files-cmd" ><?php _e("Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:","tdomf"); ?><br/>
 <input type="textfield" size="40" id="upload-files-cmd" name="upload-files-cmd" value="<?php echo $options['cmd']; ?>" />
@@ -736,6 +758,6 @@ function tdomf_widget_upload_control() {
 </p>
         <?php 
 }
-tdomf_register_form_widget_control('upload-files','Upload Files', 'tdomf_widget_upload_control', 500, 700);
+tdomf_register_form_widget_control('upload-files','Upload Files', 'tdomf_widget_upload_control', 550, 750);
 
 ?>
