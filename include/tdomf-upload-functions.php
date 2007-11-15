@@ -481,7 +481,13 @@ function tdomf_widget_upload_post($args) {
                 // if there is a thumb by using basename and the file path of the actual file
                 // attachment
                 //
-                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                // Use direct links *or* wrapper
+                //
+                if($options['nohandler'] && trim($options['url']) != "") {
+                  $thumburi = $options['url']."/$post_ID/".$attachment_metadata['thumb'];
+                } else {
+                  $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                }
                 
                 //$attachment_metadata['thumb'] = $thumb_uri;
                 //$attachment_metadata['thumb'] = $thumbpath;
