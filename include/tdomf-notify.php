@@ -69,7 +69,7 @@ function tdomf_get_admin_emails() {
 // Notify Admins to tell them that a post is awaiting moderation
 //
 function tdomf_notify_admins($post_ID){
-  global $wpdb,$tdomf_form_widgets_adminemail,$post_meta_cache,$blog_id;;
+  global $wpdb,$tdomf_form_widgets_adminemail,$post_meta_cache,$blog_id;
 
   // grab email addresses
   $email_list = tdomf_get_admin_emails();

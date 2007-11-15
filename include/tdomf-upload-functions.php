@@ -75,7 +75,7 @@ add_action( 'tdomf_delete_tmp_file_hook', 'tdomf_delete_tmp_file' );
 // Download handler
 //
 function tdomf_upload_download_handler(){
-   global $current_user;
+   global $current_user,$post_meta_cache,$blog_id;
    $post_ID = $_GET['tdomf_download'];
    $file_ID = $_GET['id'];
    $use_thumb = isset($_GET['thumb']);
@@ -92,6 +92,12 @@ function tdomf_upload_download_handler(){
        return;
      }
    }
+   
+   // For some reason, the post meta value cache does not include private 
+   // keys (those starting with _) so unset it and update it properly!
+   //
+   unset($post_meta_cache[$blog_id][$post_ID]);
+   update_postmeta_cache($post_ID);
    
    if($use_thumb) {
       $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_THUMB.$file_ID, true);   
