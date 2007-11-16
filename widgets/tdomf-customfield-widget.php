@@ -248,6 +248,8 @@ function tdomf_widget_customfields_control($params) {
        $newoptions = tdomf_widget_customfields_textarea_control_handler($number,$newoptions);
      } else if($newoptions['type'] == 'checkbox') {
        $newoptions = tdomf_widget_customfields_checkbox_control_handler($number,$newoptions);
+     } else if($newoptions['type'] == 'select') {
+       $newoptions = tdomf_widget_customfields_select_control_handler($number,$newoptions);
      }
      if ( $options != $newoptions ) {
         $options = $newoptions;
@@ -309,21 +311,31 @@ function tdomf_widget_customfields_control($params) {
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-select-<?php echo $number; ?>").style.display = 'none';
     } else if(type == 'hidden') {
       document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'inline';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-select-<?php echo $number; ?>").style.display = 'none';
     } else if(type == 'textarea') {
       document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'inline';
       document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-select-<?php echo $number; ?>").style.display = 'none';
     } else if(type == 'checkbox') {
       document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
       document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'inline';
+      document.getElementById("customfiles-specific-select-<?php echo $number; ?>").style.display = 'none';
+    } else if(type == 'select') {
+      document.getElementById("customfiles-specific-textfield-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-hidden-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-textarea-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-checkbox-<?php echo $number; ?>").style.display = 'none';
+      document.getElementById("customfiles-specific-select-<?php echo $number; ?>").style.display = 'inline';
     }
   }
   //]]>
@@ -336,11 +348,11 @@ function tdomf_widget_customfields_control($params) {
 <option value="hidden" <?php if($options['type'] == 'hidden') { ?> selected <?php } ?> /><?php _e("Hidden","tdomf"); ?>
 <option value="textarea" <?php if($options['type'] == 'textarea') { ?> selected <?php } ?> /><?php _e("Text Area","tdomf"); ?>
 <option value="checkbox" <?php if($options['type'] == 'checkbox') { ?> selected <?php } ?> /><?php _e("Check Box","tdomf"); ?>
+<option value="select" <?php if($options['type'] == 'select') { ?> selected <?php } ?> /><?php _e("Select (Drop Down List/List Box)","tdomf"); ?>
 
-<!-- Checkboxes, Select (Drop Down List), Radio (Radio Group), List Box (Multiselect List?) -->
+<!-- Checkboxes, Radio (Radio Group) -->
 
-<!-- TODO <option value="select" /><?php _e("Drop Down List","tdomf"); ?>
-<option value="radio" /><?php _e("Radio Group","tdomf"); ?> -->
+<!-- TODO <option value="radio" /><?php _e("Radio Group","tdomf"); ?> -->
 </select>
 </label>
 
@@ -360,6 +372,10 @@ function tdomf_widget_customfields_control($params) {
 <?php echo tdomf_widget_customfields_checkbox_control($number,$options); ?>
 </div>
 
+<div id="customfiles-specific-select-<?php echo $number; ?>" <?php if($options['type'] == 'select') { ?> style="display:inline;" <?php } else { ?> style="display:none;" <?php } ?>>
+<?php tdomf_widget_customfields_select_control($number,$options); ?>
+</div>
+
 </div>
         <?php 
 }
@@ -374,7 +390,7 @@ function tdomf_widget_customfields_init(){
   if($count <= 0){ $count = 1; } 
   for($i = 1; $i <= $count; $i++) {
     tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
-    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 400, 750, $i);
+    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 750, $i);
     tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', true, $i);
     tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', true, $i);
     tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', true, $i);
@@ -820,6 +836,113 @@ function tdomf_widget_customfields_checkbox_preview($args,$number,$options) {
   }
   $output .= $after_widget;
   return $output;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                 Custom Field as a Select //
+////////////////////////////////////////////////////////////////////////////////
+
+function tdomf_widget_customfields_select_control_handler($number,$options) {
+  #$options['required'] = isset($_POST["customfields-cb-required-$number"]);
+  #$options['defval'] = isset($_POST["customfields-cb-defval-$number"]);
+  #$options['required-value'] = isset($_POST["customfields-required-value-$number"]);
+  return $options;
+}
+
+function tdomf_widget_customfields_select_control($number,$options){
+  ?>
+  
+  <!-- http://www.mredkj.com/tutorials/tutorial006.html -->
+  
+  <h3><?php _e("Select","tdomf"); ?></h3>
+  
+  
+  <script language="JavaScript" type="text/javascript">
+  <!--
+    var ios = 0;
+    var aos = 0;
+    function insertSelectList<?php echo $number; ?>() {
+      theSel = document.getElementById("customfields-s-list-<?php echo $number; ?>");
+      newText = document.getElementById("customfields-s-item-name-<?php echo $number; ?>").value;
+      newValue = document.getElementById("customfields-s-item-value-<?php echo $number; ?>").value;
+      if (theSel.length == 0) {
+        var newOpt1 = new Option(newText, newValue);
+        theSel.options[0] = newOpt1;
+        theSel.selectedIndex = 0;
+      } else if (theSel.selectedIndex != -1) {
+        var selText = new Array();
+        var selValues = new Array();
+        var selIsSel = new Array();
+        var newCount = -1;
+        var newSelected = -1;
+        var i;
+        for(i=0; i<theSel.length; i++)
+        {
+          newCount++;
+          if (newCount == theSel.selectedIndex) {
+            selText[newCount] = newText;
+            selValues[newCount] = newValue;
+            selIsSel[newCount] = false;
+            newCount++;
+            newSelected = newCount;
+          }
+          selText[newCount] = theSel.options[i].text;
+          selValues[newCount] = theSel.options[i].value;
+          selIsSel[newCount] = theSel.options[i].selected;
+        }
+        for(i=0; i<=newCount; i++)
+        {
+          var newOpt = new Option(selText[i], selValues[i]);
+          theSel.options[i] = newOpt;
+          theSel.options[i].selected = selIsSel[i];
+        }
+      }
+    }
+  -->
+  </script>
+  
+  <input type="checkbox" name="customfield-s-multi-<?php echo $number; ?>" ie="customfield-s-multi-<?php echo $number; ?>" /> Allow multiple selections
+  
+  <br/><br/>
+  
+  How many rows? 
+  <input type="textfield" size="5" name="customfield-s-rows-<?php echo $number; ?>" id="customfield-s-rows-<?php echo $number; ?>" ?>
+  <i>(1 row will create a drop down list)</i>
+  
+  <br/><br/>
+
+  <input type="button" value="Remove" />
+  <input type="button" value="Default" />  
+  
+  <br/><br/>
+  
+  <div style="float:left;">
+  
+  <select name="customfields-s-list-<?php echo $number; ?>" size="10" multiple="multiple">
+  <option value="test">test</option>
+  </select>
+  
+  <br/><br/>
+
+ </div>
+ 
+ <div style="float:right;">
+ 
+  Name/Text of Item<br/>
+  <input type="textfield" size="30" name="customfield-s-item-name-<?php echo $number; ?>" id="customfield-s-item-name-<?php echo $number; ?>" ?>
+  
+  <br/><br/>
+  
+  Value of Item<br/>
+  <input type="textfield" size="30" name="customfield-s-value-name-<?php echo $number; ?>" id="customfield-s-value-name-<?php echo $number; ?>" ?>
+  
+  <br/><br/>
+  
+  <input type="button" value="Insert Item" onclick="ios++; insertSelectList<?php echo $number; ?>;"/>
+  
+  </div>
+  
+  <?php 
 }
 
 ?>
