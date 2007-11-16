@@ -123,43 +123,43 @@ Author URI: http://thedeadone.net
 // - Categories Widget: First run of the categories widget.
 //
 // v0.9: 2nd November 2007
-// - Updated Upload Files: if a file is added as attachment, Wordpress will 
+// - Updated Upload Files: if a file is added as attachment, Wordpress will
 //    generate a thumbnail if the file is an image.
-// - New Upload File Options: You can now automatically have a link added to 
+// - New Upload File Options: You can now automatically have a link added to
 //    your post that goes to the attachment page (can even use the thumbnail
-//    if it exists). Additionally, if the thumbnail exists, can insert a 
+//    if it exists). Additionally, if the thumbnail exists, can insert a
 //    direct link to file using the thumbnail.
 // - Uploads added as attachments will inherit the categories of the post (but
-//    remember the order of widgets is important so if the categories get 
+//    remember the order of widgets is important so if the categories get
 //    modified after the upload widget has done it's biz, these changes won't
 //    be affected to the attachments)
 // - More info and error checking!
 // - "Notified" instead of "notify" in Notify Me widget
-// - Added quicktags to the post "Content" widget (restrict tags option hides 
+// - Added quicktags to the post "Content" widget (restrict tags option hides
 //    illegal tags from toolbar)
 // - Uninstall was broken! Was not deleting option settings.
 // - Removed "About" menu
 // - Added first draft of custom fields (only textfield and textarea supported)
-// - Updated 1 Question Captcha and Categories widgets to support multiple 
+// - Updated 1 Question Captcha and Categories widgets to support multiple
 //    instances
 // - Added a "Text" widget
 // - Fixed a bug when deleting a post with uploaded files on PHP4 or less
 //
 // v0.9.1: 5th November 2007
-// - Fixed a javascript error in Quicktags that blocked it from working on 
+// - Fixed a javascript error in Quicktags that blocked it from working on
 //    Mozilla
-// - Fixed the admin notification email as the Wordpress cache for the custom 
+// - Fixed the admin notification email as the Wordpress cache for the custom
 //    fields for posts was being forgotten so the admin email did not contain
 //    information about IP and uploaded files.
 // - A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
 // - Spelling mistake fixed in "Your Submissions"
 //
 // v0.9.2: 9th November 2007
-// - Potential fix for the never-ending "session_start" problem. Using 
-//     template_redirect instead of get_header. 
+// - Potential fix for the never-ending "session_start" problem. Using
+//     template_redirect instead of get_header.
 // - New Suppress Error Messages (works to a point)
 // - Warnings about register_globals added
-// - Fix for file uploads mkdir for windows included. Thansk to "feelexit" on 
+// - Fix for file uploads mkdir for windows included. Thansk to "feelexit" on
 //     the TDOMF forums for the patch
 // - "Latest Submissions" added to main Dashboard
 // - Two widgets for your theme!
@@ -170,11 +170,11 @@ Author URI: http://thedeadone.net
 // - Fixed customfield textfield ignoring size option
 // - Fixed customfield textarea putting magic quotes on HTML
 // - Fixed customfield textfield not handling HTML and quotes well.
-// - Updated customfield to optionally can automatically add value to post with 
+// - Updated customfield to optionally can automatically add value to post with
 //     a user defined format
 // - Removed any "short tag" versions (i.e. use "<?php" instead of "<?")
 // - Add link to view post from moderator notification email
-// - Auto add buttons to post content to "approve" or "reject" submission on the 
+// - Auto add buttons to post content to "approve" or "reject" submission on the
 //     spot
 // - Enable/disable preview of customfield value
 // - Added option to Upload Files widget to use direct links
@@ -205,12 +205,13 @@ Author URI: http://thedeadone.net
 // - Improvements for current widgets
 //    * Upload Files: Thumbnail size options for upload files
 //    * Content (and Custom Field): TinyMCE Integration
+//    * Content (and Custom Field): Limit size of post
 //    * Custom Fields: Radio groups, drop down lists, checkbox
 //    * 1 Question Captcha: Randoming questions for Captcha
 //    * Email verification of non-registered users
 //    * Category: Finish category widget
 //    * Notify Me: Option to always notify submitter
-//    * Upload Files: Option to not use tdomf wrapper for file download 
+//    * Upload Files: Option to not use tdomf wrapper for file download
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
