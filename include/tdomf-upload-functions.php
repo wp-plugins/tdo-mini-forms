@@ -98,6 +98,8 @@ function tdomf_upload_download_handler(){
    //
    unset($post_meta_cache[$blog_id][$post_ID]);
    update_postmeta_cache($post_ID);
+
+   #tdomf_log_message("Post Meta Cache for $post_ID on $blog_id <pre>".var_export($post_meta_cache[$blog_id][$post_ID])."</pre>",TDOMF_LOG_BAD);
    
    if($use_thumb) {
       $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_THUMB.$file_ID, true);   
