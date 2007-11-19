@@ -92,6 +92,8 @@ function tdomf_upload_download_handler(){
        return;
      }
    }
+
+   #tdomf_log_message("Post Meta Cache for $post_ID on $blog_id <pre>".var_export($post_meta_cache[$blog_id][$post_ID])."</pre>",TDOMF_LOG_BAD);
    
    // For some reason, the post meta value cache does not include private 
    // keys (those starting with _) so unset it and update it properly!
@@ -99,10 +101,14 @@ function tdomf_upload_download_handler(){
    unset($post_meta_cache[$blog_id][$post_ID]);
    update_postmeta_cache($post_ID);
 
-   #tdomf_log_message("Post Meta Cache for $post_ID on $blog_id <pre>".var_export($post_meta_cache[$blog_id][$post_ID])."</pre>",TDOMF_LOG_BAD);
-   
    if($use_thumb) {
-      $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_THUMB.$file_ID, true);   
+      $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_THUMB.$file_ID, true);
+      // a previous version of TDOMF did not properly define 
+      // TDOMF_KEY_DOWNLOAD_THUMB so it used "TDOMF_KEY_DOWNLOAD_THUMB" as the 
+      // actually key, so double check here, just in case.
+      if(!file_exists($filepath)) {
+        $filepath = get_post_meta($post_ID, "TDOMF_KEY_DOWNLOAD_THUMB.$file_ID", true);
+      }
    } else {
       $filepath = get_post_meta($post_ID, TDOMF_KEY_DOWNLOAD_PATH.$file_ID, true);
    }
