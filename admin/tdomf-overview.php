@@ -128,9 +128,12 @@ function tdomf_overview_menu()  {
     <p><?php _e("Use these links to get started:","tdomf"); ?></p>
 
     <ul>
-      <li><a href="admin.php?page=tdomf_show_options_menu">Configure TDO Mini Forms</a></li>
-      <li><a href="admin.php?page=tdomf_show_form_menu">Create your form</a></li>
-      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form1">See the form</a></li>
+      <li><a href="admin.php?page=tdomf_show_options_menu"><?php _e("Configure TDO Mini Forms","tdomf"); ?></a></li>
+      <li><a href="admin.php?page=tdomf_show_form_menu"><?php _e("Create your form","tdomf"); ?></a></li>
+      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form1"><?php _e("See the form","tdomf"); ?></a></li>
+      <?php if(current_user_can('manage_options')) { ?>
+      <li><a href="<?php echo TDOMF_URLPATH; ?>tdomf-phpinfo.php"><?php _e("phpinfo()","tdomf"); ?></a></li>
+      <?php } ?>
     </ul>
 
 <p><?php _e('Need help with TDO Mini Forms? Please see the <a href="admin.php?page=tdomf_show_help_page">help page</a> or visit the <a href="http://thedeadone.net/forum">support forums on thedeadone.net</a> or the <a href="http://wordpress.org/tags/tdo-mini-forms">support forums on wordpress.org</a>.',"tdomf"); ?></p>
@@ -168,7 +171,7 @@ function tdomf_overview_menu()  {
     </div>
     <br style="clear: both" />
    </div>
-<?php
+    <?php
 }
 
 function tdomf_dashboard_status() {

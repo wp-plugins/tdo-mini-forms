@@ -178,6 +178,8 @@ Author URI: http://thedeadone.net
 //     spot
 // - Enable/disable preview of customfield value
 // - Added option to Upload Files widget to use direct links
+// - Get phpinfo page
+// - Commented out the log message about "saving widget order", way too long!
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////

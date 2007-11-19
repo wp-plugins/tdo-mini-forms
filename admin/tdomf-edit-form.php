@@ -279,7 +279,7 @@ function tdomf_handle_editformmenu_actions() {
 					parse_str($_POST['tdomf_form-1order'],$widget_order);
 					$widget_order = $widget_order['tdomf_form-1'];
 	                update_option(TDOMF_OPTION_FORM_ORDER,$widget_order);
-					tdomf_log_message("Saved widget settings for form-1: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
+					#tdomf_log_message("Saved widget settings for form-1: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
 				} else {
 					$widget_order = tdomf_get_form_widget_default_order();
 					delete_option(TDOMF_OPTION_FORM_ORDER);
