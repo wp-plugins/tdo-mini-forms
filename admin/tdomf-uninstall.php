@@ -47,6 +47,7 @@ function tdomf_reset_options() {
   delete_option(TDOMF_OPTION_ADD_SUBMITTER);
   delete_option(TDOMF_OPTION_FORM_ORDER);  
   delete_option(TDOMF_STAT_SUBMITTED);
+  delete_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES);
   
   echo "<span style='color:green;'>";
   _e("DONE","tdomf");  

@@ -133,6 +133,7 @@ function tdomf_overview_menu()  {
       <li><a href="users.php?page=tdomf_your_submissions#tdomf_form1"><?php _e("See the form","tdomf"); ?></a></li>
       <?php if(current_user_can('manage_options')) { ?>
       <li><a href="<?php echo TDOMF_URLPATH; ?>tdomf-phpinfo.php"><?php _e("phpinfo()","tdomf"); ?></a></li>
+      <li><a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR; ?>tdomf-info.php"><?php _e("tdomfinfo()","tdomf"); ?></a></li>
       <?php } ?>
     </ul>
 
