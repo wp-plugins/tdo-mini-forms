@@ -105,7 +105,7 @@ function tdomf_upload_download_handler(){
       // TDOMF_KEY_DOWNLOAD_THUMB so it used "TDOMF_KEY_DOWNLOAD_THUMB" as the 
       // actually key, so double check here, just in case.
       if(!file_exists($filepath)) {
-        tdomf_log_message("The key " + TDOMF_KEY_DOWNLOAD_THUMB + "$file_ID is not defined on $post_ID. Attempting to use ".'TDOMF_KEY_DOWNLOAD_THUMB'."$file_ID!",TDOMF_LOG_BAD);
+        tdomf_log_message("The key ".TDOMF_KEY_DOWNLOAD_THUMB."$file_ID is not defined on $post_ID. Attempting to use ".'TDOMF_KEY_DOWNLOAD_THUMB'."$file_ID!",TDOMF_LOG_BAD);
         $filepath = get_post_meta($post_ID, 'TDOMF_KEY_DOWNLOAD_THUMB'.$file_ID, true);
       }
    } else {

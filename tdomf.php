@@ -181,12 +181,16 @@ Author URI: http://thedeadone.net
 // - Get phpinfo page
 // - Commented out the log message about "saving widget order", way too long!
 // - Conf dump page
+// - Fixed customfield textarea quicktag's extra button only working on post 
+//     content's quicktag's toolbar
+// - Updated stylesheet to look nice in IE
+// - Fixed borked thumbnails from v0.9
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
-// - Bug: Quicktags on textarea... expand toolbar only works on post content
+// - Invalid markup used in form!
 // - User groups (instead of roles)
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support

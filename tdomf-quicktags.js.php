@@ -518,9 +518,9 @@ function edToolbar<?php echo $postfix; ?>() {
 		document.write(
 			'<input type="button" id="ed_close" class="ed_button" onclick="edCloseAllTags<?php echo $postfix; ?>();" value="Close Tags" />'
 			+ '<input type="button" id="ed_spell" class="ed_button" onclick="edSpell<?php echo $postfix; ?>(edCanvas<?php echo $postfix; ?>);" value="Dict." />'
-			+ '<input type="button" id="ed_extra_show" class="ed_button" onclick="edShowExtra<?php echo $postfix; ?>()" value="&raquo;" style="visibility: hidden;" />'
+			+ '<input type="button" id="ed_extra_show<?php echo $postfix; ?>" class="ed_button" onclick="edShowExtra<?php echo $postfix; ?>()" value="&raquo;" style="visibility: hidden;" />'
 			+ '</span><br />'
-			+ '<span id="ed_extra_buttons">'
+			+ '<span id="ed_extra_buttons<?php echo $postfix; ?>">'
 			+ '<input type="button" id="ed_extra_hide" class="ed_button" onclick="edHideExtra<?php echo $postfix; ?>();" value="&laquo;" />'
 		);
 	}
@@ -528,9 +528,9 @@ function edToolbar<?php echo $postfix; ?>() {
 		document.write(
 			'<input type="button" id="ed_close" class="ed_button" onclick="edCloseAllTags<?php echo $postfix; ?>();" value="Close Tags" />'
 			+ '<input type="button" id="ed_spell" class="ed_button" onclick="edSpell<?php echo $postfix; ?>(edCanvas<?php echo $postfix; ?>);" value="Dict." />'
-			+ '<input type="button" id="ed_extra_show" class="ed_button" onclick="edShowExtra<?php echo $postfix; ?>()" value="&raquo;" />'
+			+ '<input type="button" id="ed_extra_show<?php echo $postfix; ?>" class="ed_button" onclick="edShowExtra<?php echo $postfix; ?>()" value="&raquo;" />'
 			+ '</span><br />'
-			+ '<span id="ed_extra_buttons" style="display: none;">'
+			+ '<span id="ed_extra_buttons<?php echo $postfix; ?>" style="display: none;">'
 			+ '<input type="button" id="ed_extra_hide" class="ed_button" onclick="edHideExtra<?php echo $postfix; ?>();" value="&laquo;" />'
 		);
 	}
@@ -543,8 +543,8 @@ function edToolbar<?php echo $postfix; ?>() {
 }
 
 function edShowExtra<?php echo $postfix; ?>() {
-	document.getElementById('ed_extra_show').style.visibility = 'hidden';
-	document.getElementById('ed_extra_buttons').style.display = 'block';
+	document.getElementById('ed_extra_show<?php echo $postfix; ?>').style.visibility = 'hidden';
+	document.getElementById('ed_extra_buttons<?php echo $postfix; ?>').style.display = 'block';
 	edSetCookie<?php echo $postfix; ?>(
 		'js_quicktags_extra'
 		, 'show'
@@ -553,8 +553,8 @@ function edShowExtra<?php echo $postfix; ?>() {
 }
 
 function edHideExtra<?php echo $postfix; ?>() {
-	document.getElementById('ed_extra_buttons').style.display = 'none';
-	document.getElementById('ed_extra_show').style.visibility = 'visible';
+	document.getElementById('ed_extra_buttons<?php echo $postfix; ?>').style.display = 'none';
+	document.getElementById('ed_extra_show<?php echo $postfix; ?>').style.visibility = 'visible';
 	edSetCookie<?php echo $postfix; ?>(
 		'js_quicktags_extra'
 		, 'hide'
