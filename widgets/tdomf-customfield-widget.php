@@ -114,7 +114,7 @@ function tdomf_widget_customfields_get_options($index) {
     // select specific
     if(!isset($options['s-multiple'])){ $options['s-multiple'] = true; }
     if(!isset($options['s-values'])){ $options['s-values'] = "test:test"; }
-    if(!isset($options['s-defaults'])){ $options['s-values'] = "test"; }
+    if(!isset($options['s-defaults'])){ $options['s-defaults'] = "test"; }
   return $options;
 }
 
@@ -354,7 +354,7 @@ function tdomf_widget_customfields_control($params) {
 <option value="hidden" <?php if($options['type'] == 'hidden') { ?> selected <?php } ?> /><?php _e("Hidden","tdomf"); ?>
 <option value="textarea" <?php if($options['type'] == 'textarea') { ?> selected <?php } ?> /><?php _e("Text Area","tdomf"); ?>
 <option value="checkbox" <?php if($options['type'] == 'checkbox') { ?> selected <?php } ?> /><?php _e("Check Box","tdomf"); ?>
-<option value="select" <?php if($options['type'] == 'select') { ?> selected <?php } ?> /><?php _e("Select (Drop Down List/List Box)","tdomf"); ?>
+<option value="select" <?php if($options['type'] == 'select') { ?> selected <?php } ?> /><?php _e("Drop-Down List/List Box","tdomf"); ?>
 
 <!-- Checkboxes, Radio (Radio Group) -->
 
@@ -396,7 +396,7 @@ function tdomf_widget_customfields_init(){
   if($count <= 0){ $count = 1; } 
   for($i = 1; $i <= $count; $i++) {
     tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
-    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 750, $i);
+    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 770, $i);
     tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', true, $i);
     tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', true, $i);
     tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', true, $i);
@@ -867,9 +867,10 @@ function tdomf_widget_customfields_checkbox_adminemail($args,$number,$options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 function tdomf_widget_customfields_select_control_handler($number,$options) {
-  #$options['required'] = isset($_POST["customfields-cb-required-$number"]);
-  #$options['defval'] = isset($_POST["customfields-cb-defval-$number"]);
-  #$options['required-value'] = isset($_POST["customfields-required-value-$number"]);
+  $options['rows'] = intval($_POST["customfields-s-rows-$number"]); 
+  $options['s-multiple'] = isset($_POST["customfields-s-multi-$number"]);
+  $options['s-values'] = $_POST["customfields-s-list-values-$number"];
+  $options['s-defaults'] = $_POST["customfields-s-list-defaults-$number"];
   return $options;
 }
 
@@ -911,9 +912,10 @@ function tdomf_widget_customfields_select_control($number,$options){
           theSel.options[i] = newOpt;
           settingString = settingString + selText[i] + ":" + selValues[i] + ";";
         }
-        var newOpt2 = new Option(newText, newValue, true, false);
+        //var newOpt2 = new Option(newText, newValue, true, false);
+        var newOpt2 = new Option(newText, newValue, false, false);
         theSel.options[i] = newOpt2;
-        theSel.selectedIndex = i;
+        theSel.selectedIndex = -1;
         settingString = settingString + newText + ":" + newValue + ";";
       }
       document.getElementById("customfields-s-list-values-<?php echo $number; ?>").value = settingString;
@@ -934,37 +936,62 @@ function tdomf_widget_customfields_select_control($number,$options){
         alert("<?php _e("Please select item to remove from the list!","tdomf"); ?>");
       }
     }
+    function makeDefaultSelectList<?php echo $number; ?>()
+    {
+      var theSel = document.getElementById("customfields-s-list-<?php echo $number; ?>");
+      var settingString = "";
+      var messageString = "<?php _e("Default selected options will be: ","tdomf"); ?>";
+      for(i=0; i<theSel.length; i++)
+      {
+        if(theSel[i].selected)
+        {
+          settingString = settingString + theSel.options[i].value + ";";
+          messageString = messageString + theSel.options[i].text + ", ";
+        }
+      }
+      document.getElementById("customfields-s-list-defaults-<?php echo $number; ?>").value = settingString;
+      document.getElementById("customfields-s-defs-msg-<?php echo $number; ?>").innerHTML = messageString;
+    }
   //]]>
   </script>
   
-  <input type="hidden" name="customfields-s-list-defaults-<?php echo $number; ?>" id="customfields-s-list-defaults-<?php echo $number; ?>" value="<?php /* echo $options['s-values']; */ ?>" />
+  <input type="hidden" name="customfields-s-list-defaults-<?php echo $number; ?>" id="customfields-s-list-defaults-<?php echo $number; ?>" value="<?php echo $options['s-defaults']; ?>" />
   <input type="hidden" name="customfields-s-list-values-<?php echo $number; ?>" id="customfields-s-list-values-<?php echo $number; ?>" value="<?php echo $options['s-values']; ?>" />
   
-  <input type="checkbox" name="customfield-s-multi-<?php echo $number; ?>" id="customfield-s-multi-<?php echo $number; ?>" <?php if($options['s-multiple']){ ?> selected <?php } ?> /> 
-  <label for="customfield-s-multi-<?php echo $number; ?>" ><?php _e("Allow multiple selections","tdomf"); ?></label>
+  <input type="checkbox" name="customfields-s-multi-<?php echo $number; ?>" id="customfields-s-multi-<?php echo $number; ?>" <?php if($options['s-multiple']){ ?> checked <?php } ?> /> 
+  <label for="customfields-s-multi-<?php echo $number; ?>" ><?php _e("Allow multiple selections","tdomf"); ?></label>
   
   <br/><br/>
   
-  <label for="customfield-s-rows-<?php echo $number; ?>">
+  <label for="customfields-s-rows-<?php echo $number; ?>">
   <?php _e("How many rows?","tdomf"); ?> 
-  <input type="textfield" size="5" name="customfield-s-rows-<?php echo $number; ?>" id="customfield-s-rows-<?php echo $number; ?>" value="<?php echo $options['rows']; ?>" />
+  <input type="textfield" size="5" name="customfields-s-rows-<?php echo $number; ?>" id="customfields-s-rows-<?php echo $number; ?>" value="<?php echo $options['rows']; ?>" />
   <?php _e("<i>(1 row will create a drop down list)</i>","tdomf"); ?>
   </label>
   
   <br/><br/>
 
   <input type="button" value="<?php _e("Remove","tdomf"); ?>" onclick="removeFromSelectList<?php echo $number; ?>();" />
-  <input type="button" value="<?php _e("Default","tdomf"); ?>" />  
+  <input type="button" value="<?php _e("Make Current Selection Default","tdomf"); ?>" onclick="makeDefaultSelectList<?php echo $number; ?>();" />
+  
+  <br/><br/>
+  
+  <!-- TODO: default values -->
+  <div id="customfields-s-defs-msg-<?php echo $number; ?>" ><?php /* _e("Default selected options will be: ","tdomf"); */ ?></div>
   
   <br/><br/>
   
   <div style="float:left;">
   
-  <!-- multiple="multiple" -->
-  
-  <select name="customfields-s-list-<?php echo $number; ?>" id="customfields-s-list-<?php echo $number; ?>" size="10" >
+  <select name="customfields-s-list-<?php echo $number; ?>" id="customfields-s-list-<?php echo $number; ?>" size="10" multiple="multiple" >
   <?php if(!empty($options['s-values'])) {
-        // TODO
+          $select_options = split(";",$options['s-values']);
+          foreach($select_options as $select_option) {
+            list($text,$value) = split(":",$select_option,2);
+             if(trim($text) != "" && trim($value) != "") { 
+             ?><option value="<?php echo $value; ?>"><?php echo $text; ?></option><?php
+             }
+          }
         } ?>
   </select>
   

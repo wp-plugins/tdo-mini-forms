@@ -186,6 +186,9 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
+// - Bug: Quicktags on textarea... expand toolbar only works on post content
+// - User groups (instead of roles)
+// - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support
 //    * Allow users to submit Pages
 //    * Allow users to submit Links
