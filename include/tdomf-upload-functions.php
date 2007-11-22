@@ -185,6 +185,14 @@ if(isset($_GET['tdomf_download'])) {
 function tdomf_recursive_mkdir($path, $mode = 0777) {
     $path = trim($path);
     
+    // TODO For versions > PHP 5.1.6, a trailing slash in mkdir causes problems!
+    
+    #clearstatcache();
+    if(is_dir($path)) {
+      tdomf_log_message("$path exists");
+      return true;
+    }
+    
     // A full windows path uses ":" compared to unix
     if(eregi(':', $path)) {
       $isWin = true;
@@ -299,12 +307,32 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
           tdomf_log_message("$path is a symbolic link");
         }
       }
-      if ($path != "/" && !is_dir($path) && !mkdir(trim($path), $mode)) {
-          return false;
+      
+      // In safe_mode, is_dir may return false for a valid path. So, if in 
+      // safe_mode and is_dir returns false, try and create directory but 
+      // ignore and suppress errors
+      //
+      if(ini_get('safe_mode') || ini_get('open_basedir')) {
+        if(!is_dir($path)) {
+          @mkdir(trim($path), $mode);
+        }
+      } else {
+        // Not in safe mode, is_dir should work all the time. Therefore 
+        // break out if mkdir fails!
+        if (!is_dir($path) && !mkdir(trim($path), $mode)) {
+            return false;
+        }
       }
       // use real path!
       $path = realpath($path);
     }
+    
+    if(is_dir($path)) {
+      tdomf_log_message("The directory $path was successfully created!", TDOMF_LOG_GOOD);
+    } else {
+      tdomf_log_message("The directory $path was not created!", TDOMF_LOG_BAD);
+    }
+    
     return true;
 }
 
