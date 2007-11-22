@@ -205,8 +205,15 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       } else { 
         $path .= DIRECTORY_SEPARATOR . $dirs[$i];
       }
-      if(!is_dir($path)) {
-        tdomf_log_message("Attempting to creating directory $path");
+      
+      // sometimes double slashes get added to path (differences between PHP4 
+      // and PHP5 and BSD systems etc.) and cause problems with open_basedir 
+      // matching and other things. Might as well fix it here.
+      // 
+      $path = ereg_replace("//","/",$path);
+      
+      if(!is_dir($path) && $path != "/" ) {
+        tdomf_log_message("Attempting to create directory $path");
         
         // about to create directory (that's not root), check safe mode 
         // for debugging only - no fix here!
@@ -292,7 +299,7 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
           tdomf_log_message("$path is a symbolic link");
         }
       }
-      if (!is_dir($path) && !mkdir(trim($path), $mode)) {
+      if ($path != "/" && !is_dir($path) && !mkdir(trim($path), $mode)) {
           return false;
       }
       // use real path!
