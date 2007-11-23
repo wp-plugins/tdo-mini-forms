@@ -185,11 +185,15 @@ Author URI: http://thedeadone.net
 //     content's quicktag's toolbar
 // - Updated stylesheet to look nice in IE
 // - Fixed borked thumbnails from v0.9
+// - Fixed some issues with file uploading and safe_mode
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
+// - Update readme.txt in reatlion to safe_mode and open_basedir (must be able 
+//    to at least upload with the normal wordpress interface)
+// - Enable extra debug log messages
 // - Invalid markup used in form!
 // - User groups (instead of roles)
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
@@ -234,6 +238,7 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
+// - Country codes on submitter's IP
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
@@ -252,7 +257,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "14");
+define("TDOMF_BUILD", "15");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.X");
 

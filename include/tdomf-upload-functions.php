@@ -181,6 +181,7 @@ if(isset($_GET['tdomf_download'])) {
 }
 
 // Create path recursivily
+// Which is a disaster when safe_mode is enabled. A simple function gone insane!
 //
 function tdomf_recursive_mkdir($path, $mode = 0777) {
     $path = trim($path);
@@ -223,6 +224,10 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       if(!is_dir($path) && $path != "/" ) {
         tdomf_log_message("Attempting to create directory $path");
         
+        /* 
+        // Some debug code to check for safe_mode compatibility, uncomment
+        // if you ahve an issue in safe_mode 
+        
         // about to create directory (that's not root), check safe mode 
         // for debugging only - no fix here!
         if( $i > 0 && ini_get('safe_mode') ){
@@ -253,9 +258,9 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
           if($check_gid) {
             // gid or uid
             if( ini_get('safe_mode_gid') ){
-              $myid = getmygid();
-              $myid_posix = posix_getgid();
-              $pathid = filegroup($prevpath);
+              $myid = @getmygid();
+              $myid_posix = @posix_getgid();
+              $pathid = @filegroup($prevpath);
               // log message
               if($pathid != $myid){
                 tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has gid $pathid. This script has gid $myid", TDOMF_LOG_BAD);
@@ -264,9 +269,9 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
                 tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has gid $pathid. This process has gid $myid_posix", TDOMF_LOG_BAD);
               }
             } else {
-              $myid = getmyuid();
-              $myid_posix = posix_getuid();
-              $pathid = fileowner($prevpath);
+              $myid = @getmyuid();
+              $myid_posix = @posix_getuid();
+              $pathid = @fileowner($prevpath);
               // log message
               if($pathid != $myid){
                 tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has uid $pathid. This script has uid $myid", TDOMF_LOG_BAD);
@@ -301,12 +306,14 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
             tdomf_log_message("$prevpath does not match any path in open_basedir: " + ini_get('open_basedir'), TDOMF_LOG_BAD);
           }
         }
-      } else {
+        */
+      } 
+      /*else {
         tdomf_log_message("Looking at $path");
         if(is_link($path)) {
           tdomf_log_message("$path is a symbolic link");
         }
-      }
+      }*/
       
       // In safe_mode, is_dir may return false for a valid path. So, if in 
       // safe_mode and is_dir returns false, try and create directory but 
@@ -320,6 +327,7 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
         // Not in safe mode, is_dir should work all the time. Therefore 
         // break out if mkdir fails!
         if (!is_dir($path) && !mkdir(trim($path), $mode)) {
+            tdomf_log_message("Error when attempting to create $path!", TDOMF_LOG_ERROR);
             return false;
         }
       }
