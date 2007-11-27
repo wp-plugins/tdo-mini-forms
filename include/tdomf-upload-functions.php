@@ -171,7 +171,7 @@ function tdomf_upload_download_handler(){
      } else {
        tdomf_log_message("No file found on post with id $post_ID!",TDOMF_LOG_ERROR);
      }
-     tdomf_log_message("Post Meta Cache for $post_ID on $blog_id <pre>".var_export($post_meta_cache[$blog_id][$post_ID])."</pre>",TDOMF_LOG_BAD);
+     tdomf_log_message("Post Meta Cache for $post_ID on $blog_id <pre>".var_export($post_meta_cache[$blog_id][$post_ID],true)."</pre>",TDOMF_LOG_BAD);
    }
    header("HTTP/1.0 404 Not Found");
    exit();
