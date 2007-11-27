@@ -9,11 +9,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 //
 function tdomf_load_widgets() {
    if(file_exists(TDOMF_WIDGET_PATH)) {
-       #tdomf_log_message("Looking in ".TDOMF_WIDGET_PATH." for widgets...");
+       #tdomf_log_message_extra("Looking in ".TDOMF_WIDGET_PATH." for widgets...");
 	   if ($handle = opendir(TDOMF_WIDGET_PATH)) {
 		  while (false !== ($file = readdir($handle))) {
 		     if(preg_match('/.*\\.php$/',$file)) {
-			 	#tdomf_log_message("Loading widget $file...");
+			 	#tdomf_log_message_extra("Loading widget $file...");
 			 	require_once(TDOMF_WIDGET_PATH.$file);
 			 }
 		  }
@@ -109,7 +109,7 @@ function tdomf_register_form_widget($id, $name, $callback) {
    if(isset($tdomf_form_widgets[$id])) {
       tdomf_log_message("tdomf_register_form_widget: Widget $id already exists. Overwriting...");
    }
-   #tdomf_log_message("Loading Widget $id...");
+   #tdomf_log_message_extra("Loading Widget $id...");
    $tdomf_form_widgets[$id]['name'] = $name;
    $tdomf_form_widgets[$id]['cb'] = $callback;
    $tdomf_form_widgets[$id]['params'] = array_slice(func_get_args(), 3);
@@ -127,7 +127,7 @@ function tdomf_register_form_widget_control($id, $name, $control_callback, $widt
    if(isset($tdomf_form_widgets_control[$id])) {
          tdomf_log_message("tdomf_register_form_widget_control: Widget $id already exists. Overwriting...");
    }
-   #tdomf_log_message("Loading Widget Control $id...");
+   #tdomf_log_message_extra("Loading Widget Control $id...");
    $tdomf_form_widgets_control[$id]['name'] = $name;
    $tdomf_form_widgets_control[$id]['cb'] = $control_callback;
    $tdomf_form_widgets_control[$id]['width'] = $width;
@@ -147,7 +147,7 @@ function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax
    if(isset($tdomf_form_widgets_preview[$id])) {
       tdomf_log_message("Preview widget $id already exists. Overwriting...");
    }
-   #tdomf_log_message("Loading Widget Preview $id...");
+   #tdomf_log_message_extra("Loading Widget Preview $id...");
    $tdomf_form_widgets_preview[$id]['name'] = $name;
    $tdomf_form_widgets_preview[$id]['cb'] = $preview_callback;
    $tdomf_form_widgets_preview[$id]['ajax'] = $ajax;
@@ -166,7 +166,7 @@ function tdomf_register_form_widget_validate($id, $name, $validate_callback, $aj
    if(isset($tdomf_form_widgets_validate[$id])) {
       tdomf_log_message("Widget $id already exists. Overwriting...");
    }
-   #tdomf_log_message("Loading Widget Validate $id...");
+   #tdomf_log_message_extra("Loading Widget Validate $id...");
    $tdomf_form_widgets_validate[$id]['name'] = $name;
    $tdomf_form_widgets_validate[$id]['cb'] = $validate_callback;
    $tdomf_form_widgets_validate[$id]['ajax'] = $ajax;
@@ -185,7 +185,7 @@ function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = tru
    if(isset($tdomf_form_widgets_post[$id])) {
       tdomf_log_message("tdomf_register_form_widget_post: Widget $id already exists. Overwriting...");
    }
-   #tdomf_log_message("Loading Widget Post $id...");
+   #tdomf_log_message_extra("Loading Widget Post $id...");
    $tdomf_form_widgets_post[$id]['name'] = $name;
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
    $tdomf_form_widgets_post[$id]['ajax'] = $ajax;

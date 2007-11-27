@@ -66,6 +66,14 @@ function tdomf_log_message($message,$color=TDOMF_LOG_GENERAL){
    }
 }
 
+// The actual logging function
+//
+function tdomf_log_message_extra($message,$color=TDOMF_LOG_GENERAL){
+  if(get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES)) {
+    tdomf_log_message($message,$color);
+  }
+}
+
 // Clear/Empty the log
 //
 function tdomf_clear_log(){

@@ -429,7 +429,7 @@ function tdomf_widget_customfields_textfield($args,$number,$options) {
   } else if($options['tf-subtype'] == 'url') {
     $output .= __("URL:","tdomf")." ";
   }
-  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES)."\" />";
+  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlspecialchars($value)."\" />";
   $output .= "</label>\n";
   
   $output .= $after_widget;

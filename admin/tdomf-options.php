@@ -304,6 +304,33 @@ function tdomf_show_options_menu() {
 	<input type="checkbox" name="tdomf_disable_errors" id="tdomf_disable_errors"  <?php if($disable_errors) echo "checked"; ?> >
 	</p>
   
+  <h3><?php _e('Extra Log Messages','tdomf'); ?></h3>
+  
+  <p>
+  <?php _e('You can enable extra log messages to aid in debugging problems','tdomf'); ?>
+  </p>
+  
+  <?php $extra_log = get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES); ?>
+
+	</p>
+	<b><?php _e("Enable extra log messages ","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_extra_log" id="tdomf_extra_log"  <?php if($extra_log) echo "checked"; ?> >
+	</p>
+  
+  
+  <h3><?php _e('"Your Submissions" Page','tdomf'); ?></h3>
+  
+  <p>
+  <?php _e('When a user logs into Wordpress, they can access a "Your Submissions" page which contains a copy of the form. You can disable this page by disabling this option.','tdomf'); ?>
+  </p>
+  
+  <?php $your_submissions = get_option(TDOMF_OPTION_YOUR_SUBMISSIONS); ?>
+
+	</p>
+	<b><?php _e("Enable 'Your Submissions' page ","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_your_submissions" id="tdomf_your_submissions"  <?php if($your_submissions) echo "checked"; ?> >
+	</p>
+  
     <br/><br/>
 
     <table border="0"><tr>
@@ -516,6 +543,18 @@ function tdomf_handle_options_actions() {
       $disable_errors = false;
       if(isset($_POST['tdomf_disable_errors'])) { $disable_errors = true; }
       update_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES,$disable_errors);
+      
+      // extra log messages
+      
+      $extra_log = false;
+      if(isset($_POST['tdomf_extra_log'])) { $extra_log = true; }
+      update_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES,$extra_log);
+      
+      // your submissions
+      
+      $your_submissions = false;
+      if(isset($_POST['tdomf_your_submissions'])) { $your_submissions = true; }
+      update_option(TDOMF_OPTION_YOUR_SUBMISSIONS,$your_submissions);
       
       $message .= "Options Saved!<br/>";
       tdomf_log_message("Options Saved");

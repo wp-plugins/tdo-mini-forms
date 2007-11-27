@@ -36,7 +36,7 @@ $tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';
 // First pass security check
 //
 if(isset($_SESSION['tdomf_upload_key']) && $_SESSION['tdomf_upload_key'] != $_POST['tdomf_upload_key']){
-   #tdomf_log_message("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
+   tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
    unset($_SESSION['tdomf_upload_key']); // prevents any "operations" on uploads
    #exit("TDOMF: Bad data submitted");
 }
@@ -124,7 +124,7 @@ if(isset($_SESSION['tdomf_upload_key'])) {
         if(in_array($ext,$allowed_exts)) {
           $storagepath = tdomf_create_tmp_storage_path();
           $uploaded_file = $storagepath.DIRECTORY_SEPARATOR.$upload_file_name;
-          #tdomf_log_message("Saving uploaded file to $uploaded_file");
+          tdomf_log_message_extra("Saving uploaded file to $uploaded_file");
           // Save the file
           if(move_uploaded_file($upload_temp_file_name,$uploaded_file)) {
             $uploaded_file = realpath($uploaded_file);
@@ -162,7 +162,7 @@ if(isset($_SESSION['tdomf_upload_key'])) {
             break;
         }
       } else {
-        #tdomf_log_message("No file here",TDOMF_LOG_ERROR);
+        tdomf_log_message_extra("No file here",TDOMF_LOG_ERROR);
       }
     }
     // Store in session!

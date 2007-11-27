@@ -170,6 +170,14 @@ get_post_meta($post_ID, "_tdomf_download_name_1");
 
 // And so on...`
 
+= Uploading a bmp file causes errors! =
+
+If you have the options for attachments and thumbnail generation turned on for Upload Files and you try to upload a *.bmp (bitmap) image, you'll get an error like this:
+
+`Warning: imageantialias(): supplied argument is not a valid Image resource...`
+
+Wordpress does not support bitmaps for thumbnails so you cannot use bitmaps for thumbnail generation.
+
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
@@ -183,8 +191,8 @@ get_post_meta($post_ID, "_tdomf_download_name_1");
 
 * v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
 * It has been found that there is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
-* Sometimes, on first login, the "Your Submissions" page displays an error about headers already sent, however the form still works and subsequent loads of the page do not reveal this error. I have not reproduced this locally yet so I haven't got to the core of the issue yet.
-* If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). 
+* If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper.
+* Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
 
 == Version History ==
 

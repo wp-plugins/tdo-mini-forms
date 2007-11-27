@@ -64,7 +64,7 @@ function tdomf_preview_form($args) {
    $widget_order = tdomf_get_widget_order();
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_preview[$w])) {
-		#tdomf_log_message("Looking at preview widget $w");
+		tdomf_log_message_extra("Looking at preview widget $w");
 		$message .= $tdomf_form_widgets_preview[$w]['cb']($widget_args,$tdomf_form_widgets_preview[$w]['params']);
 	  }
    }
@@ -376,7 +376,7 @@ EOT;
     $random_string = tdomf_random_string(100);
     $_SESSION["tdomf_key"] = $random_string;
     $form .= "<input type='hidden' id='tdomf_key' name='tdomf_key' value='$random_string' />";
-    #tdomf_log_message('Placing key '.$random_string.' in $_SESSION: <pre>'.var_export($_SESSION,true)."</pre>");
+    tdomf_log_message_extra('Placing key '.$random_string.' in $_SESSION: <pre>'.var_export($_SESSION,true)."</pre>");
   }
 
   // Process widgets

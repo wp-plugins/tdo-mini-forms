@@ -279,13 +279,17 @@ function tdomf_handle_editformmenu_actions() {
 					parse_str($_POST['tdomf_form-1order'],$widget_order);
 					$widget_order = $widget_order['tdomf_form-1'];
 	                update_option(TDOMF_OPTION_FORM_ORDER,$widget_order);
-					#tdomf_log_message("Saved widget settings for form-1: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
+					tdomf_log_message_extra("Saved widget settings for form-1: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
 				} else {
 					$widget_order = tdomf_get_form_widget_default_order();
 					delete_option(TDOMF_OPTION_FORM_ORDER);
 					tdomf_log_message("Restored default settings for form-1");
 				}
+        if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) {
                 ?> <div id="message" class="updated fade"><p><?php printf(__("Saved Settings. <a href='%s'>See your form &raquo</a>","tdomf"),"users.php?page=tdomf_your_submissions#tdomf_form1"); ?></p></div> <?php
+        } else {
+                ?> <div id="message" class="updated fade"><p><?php _e("Saved Settings.","tdomf"); ?></p></div> <?php
+        }
 				break;
 	 	}
 	}

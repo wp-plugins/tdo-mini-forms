@@ -60,7 +60,7 @@ function tdomf_filesize_format($bytes, $format = '', $force = '')
 // Delete a temp file. Function used to clean out upload files after 1 hour.
 //
 function tdomf_delete_tmp_file($filepath) {
-  #tdomf_log_message("tdomf_delete_tmp_file for $filepath");
+  tdomf_log_message_extra("tdomf_delete_tmp_file for $filepath");
   if(file_exists($filepath)) {
      tdomf_log_message("Attempting to delete $filepath...");
      if(unlink($filepath)) {
@@ -224,96 +224,96 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       if(!is_dir($path) && $path != "/" ) {
         tdomf_log_message("Attempting to create directory $path");
         
-        /* 
-        // Some debug code to check for safe_mode compatibility, uncomment
-        // if you ahve an issue in safe_mode 
-        
-        // about to create directory (that's not root), check safe mode 
-        // for debugging only - no fix here!
-        if( $i > 0 && ini_get('safe_mode') ){
-
-          // only check gid or uid if path not in include dir (if include dir
-          // is set of course)
-          $check_gid = true;
-          if( ini_get('safe_mode_include_dir') != NULL ){
-            $include_dirs = ini_get('safe_mode_include_dir');
-            if($isWin) {
-              $include_dirs = split(";",$include_dirs);
-            } else {
-              $include_dirs = split(":",$include_dirs);
+        if(get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES)) {
+          // Some debug code to check for safe_mode compatibility, only enabled
+          // if option is enabled!
+          
+          // about to create directory (that's not root), check safe mode 
+          // for debugging only - no fix here!
+          if( $i > 0 && ini_get('safe_mode') ){
+  
+            // only check gid or uid if path not in include dir (if include dir
+            // is set of course)
+            $check_gid = true;
+            if( ini_get('safe_mode_include_dir') != NULL ){
+              $include_dirs = ini_get('safe_mode_include_dir');
+              if($isWin) {
+                $include_dirs = split(";",$include_dirs);
+              } else {
+                $include_dirs = split(":",$include_dirs);
+              }
+              if(!empty($include_dirs)) {
+                foreach($include_dirs as $inc_dir){
+                  // safe_mode_include_dir is actually just a prefix
+                  if( substr($prevpath, 0, strlen($inc_dir)) == $inc_dir) {
+                    tdomf_log_message("$prevpath matches a path in safe_mode_include_dir: " + $inc_dir, TDOMF_LOG_GOOD);
+                    $check_gid = false;
+                  }
+                }
+              }
+              if($check_gid) {
+                tdomf_log_message("$prevpath does not match any path in safe_mode_include_dir: " + ini_get('safe_mode_include_dir'), TDOMF_LOG_BAD);
+              }
             }
-            if(!empty($include_dirs)) {
-              foreach($include_dirs as $inc_dir){
-                // safe_mode_include_dir is actually just a prefix
+            if($check_gid) {
+              // gid or uid
+              if( ini_get('safe_mode_gid') ){
+                $myid = @getmygid();
+                $myid_posix = @posix_getgid();
+                $pathid = @filegroup($prevpath);
+                // log message
+                if($pathid != $myid){
+                  tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has gid $pathid. This script has gid $myid", TDOMF_LOG_BAD);
+                }
+                if($pathid != $myid_posix){
+                  tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has gid $pathid. This process has gid $myid_posix", TDOMF_LOG_BAD);
+                }
+              } else {
+                $myid = @getmyuid();
+                $myid_posix = @posix_getuid();
+                $pathid = @fileowner($prevpath);
+                // log message
+                if($pathid != $myid){
+                  tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has uid $pathid. This script has uid $myid", TDOMF_LOG_BAD);
+                }
+                if($pathid != $myid_posix){
+                  tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has uid $pathid. This process has uid $myid_posix", TDOMF_LOG_BAD);
+                }
+              }
+            }
+            
+          }
+          
+          // check open_basedir (seperate to safe_mode)
+          if( ini_get('open_basedir') != NULL ){
+            $open_basedir_match = false;
+            $op_dirs = ini_get('open_basedir');
+            if($isWin) {
+              $op_dirs = split(";",$op_dirs);
+            } else {
+              $op_dirs = split(":",$op_dirs);
+            }
+            if(!empty($op_dirs)) {
+              foreach($op_dirs as $inc_dir){
+                // open_basedir is actually just a prefix
                 if( substr($prevpath, 0, strlen($inc_dir)) == $inc_dir) {
-                  tdomf_log_message("$prevpath matches a path in safe_mode_include_dir: " + $inc_dir, TDOMF_LOG_GOOD);
+                  tdomf_log_message("$prevpath matches a path in open_basedir: " + $inc_dir, TDOMF_LOG_GOOD);
                   $check_gid = false;
                 }
               }
             }
             if($check_gid) {
-              tdomf_log_message("$prevpath does not match any path in safe_mode_include_dir: " + ini_get('safe_mode_include_dir'), TDOMF_LOG_BAD);
+              tdomf_log_message("$prevpath does not match any path in open_basedir: " + ini_get('open_basedir'), TDOMF_LOG_BAD);
             }
-          }
-          if($check_gid) {
-            // gid or uid
-            if( ini_get('safe_mode_gid') ){
-              $myid = @getmygid();
-              $myid_posix = @posix_getgid();
-              $pathid = @filegroup($prevpath);
-              // log message
-              if($pathid != $myid){
-                tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has gid $pathid. This script has gid $myid", TDOMF_LOG_BAD);
-              }
-              if($pathid != $myid_posix){
-                tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has gid $pathid. This process has gid $myid_posix", TDOMF_LOG_BAD);
-              }
-            } else {
-              $myid = @getmyuid();
-              $myid_posix = @posix_getuid();
-              $pathid = @fileowner($prevpath);
-              // log message
-              if($pathid != $myid){
-                tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has uid $pathid. This script has uid $myid", TDOMF_LOG_BAD);
-              }
-              if($pathid != $myid_posix){
-                tdomf_log_message("Safe Mode Enabled: May not be able to create path $path because $prevpath has uid $pathid. This process has uid $myid_posix", TDOMF_LOG_BAD);
-              }
-            }
-          }
-          
-        }
-        
-        // check open_basedir (seperate to safe_mode)
-        if( ini_get('open_basedir') != NULL ){
-          $open_basedir_match = false;
-          $op_dirs = ini_get('open_basedir');
-          if($isWin) {
-            $op_dirs = split(";",$op_dirs);
-          } else {
-            $op_dirs = split(":",$op_dirs);
-          }
-          if(!empty($op_dirs)) {
-            foreach($op_dirs as $inc_dir){
-              // open_basedir is actually just a prefix
-              if( substr($prevpath, 0, strlen($inc_dir)) == $inc_dir) {
-                tdomf_log_message("$prevpath matches a path in open_basedir: " + $inc_dir, TDOMF_LOG_GOOD);
-                $check_gid = false;
-              }
-            }
-          }
-          if($check_gid) {
-            tdomf_log_message("$prevpath does not match any path in open_basedir: " + ini_get('open_basedir'), TDOMF_LOG_BAD);
           }
         }
-        */
       } 
-      /*else {
-        tdomf_log_message("Looking at $path");
+      else {
+        tdomf_log_message_extra("Looking at $path");
         if(is_link($path)) {
-          tdomf_log_message("$path is a symbolic link");
+          tdomf_log_message_extra("$path is a symbolic link");
         }
-      }*/
+      }
       
       // In safe_mode, is_dir may return false for a valid path. So, if in 
       // safe_mode and is_dir returns false, try and create directory but 

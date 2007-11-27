@@ -171,7 +171,7 @@ function tdomf_notify_poster_approved($post_id) {
    global $wpdb;
    $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true); 
    
-   #tdomf_log_message("tdomf_notify_poster_approved: $email");
+   tdomf_log_message_extra("tdomf_notify_poster_approved: $email");
    
    if(tdomf_check_email_address($email)){
 
@@ -209,7 +209,7 @@ function tdomf_notify_poster_approved($post_id) {
 function tdomf_notify_poster_rejected($post_id) {
    global $wpdb;
    
-   #tdomf_log_message("tdomf_notify_poster_rejected: $email");
+   tdomf_log_message_extra("tdomf_notify_poster_rejected: $email");
    
    $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true); 
    

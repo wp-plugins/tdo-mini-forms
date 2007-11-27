@@ -130,7 +130,9 @@ function tdomf_overview_menu()  {
     <ul>
       <li><a href="admin.php?page=tdomf_show_options_menu"><?php _e("Configure TDO Mini Forms","tdomf"); ?></a></li>
       <li><a href="admin.php?page=tdomf_show_form_menu"><?php _e("Create your form","tdomf"); ?></a></li>
+      <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
       <li><a href="users.php?page=tdomf_your_submissions#tdomf_form1"><?php _e("See the form","tdomf"); ?></a></li>
+      <?php } ?>
       <?php if(current_user_can('manage_options')) { ?>
       <li><a href="<?php echo TDOMF_URLPATH; ?>tdomf-phpinfo.php"><?php _e("phpinfo()","tdomf"); ?></a></li>
       <li><a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR; ?>tdomf-info.php"><?php _e("tdomfinfo()","tdomf"); ?></a></li>

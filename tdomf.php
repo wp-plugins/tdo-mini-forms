@@ -165,11 +165,14 @@ Author URI: http://thedeadone.net
 // - Two widgets for your theme!
 // - Fixed 1-q captcha widget not accepting quotes (")
 //
-// vX: TBD
+// v0.9.3: TBD
 // - Fixed customfield textfield control radio group in Firefox
 // - Fixed customfield textfield ignoring size option
 // - Fixed customfield textarea putting magic quotes on HTML
 // - Fixed customfield textfield not handling HTML and quotes well.
+// - Fixed customfield textfield not handling foreign characters well.
+// - Fixed customfield textarea quicktag's extra button only working on post 
+//     content's quicktag's toolbar
 // - Updated customfield to optionally can automatically add value to post with
 //     a user defined format
 // - Removed any "short tag" versions (i.e. use "<?php" instead of "<?")
@@ -179,27 +182,25 @@ Author URI: http://thedeadone.net
 // - Enable/disable preview of customfield value
 // - Added option to Upload Files widget to use direct links
 // - Get phpinfo page
-// - Commented out the log message about "saving widget order", way too long!
 // - Conf dump page
-// - Fixed customfield textarea quicktag's extra button only working on post 
-//     content's quicktag's toolbar
 // - Updated stylesheet to look nice in IE
 // - Fixed borked thumbnails from v0.9
 // - Fixed some issues with file uploading and safe_mode
+// - New Option: Enable/Disable "Your Submissions" page
+// - New Option: Enable extra debug log messages
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
-// - Update readme.txt in reatlion to safe_mode and open_basedir (must be able 
+// - Update readme.txt in relation to safe_mode and open_basedir (must be able 
 //    to at least upload with the normal wordpress interface)
-// - Enable extra debug log messages
-// - Invalid markup used in form!
-// - User groups (instead of roles)
+// - Bug: invalid markup used in form elements!
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support
 //    * Allow users to submit Pages
 //    * Allow users to submit Links
+//    * User groups (instead of roles)
 // - More Template Tags
 //    * Log
 //    * Moderation Queue
@@ -234,7 +235,7 @@ Author URI: http://thedeadone.net
 //    * Integration with Akismet
 //    * SPAM button
 // - Force Preview (user must preview first before submission)
-// - Allow newly submitted posts be set to "Post ready for review" with the
+// - Allow newly submitted posts be set to "Post ready for review" with
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
@@ -257,9 +258,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "15");
+define("TDOMF_BUILD", "16");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.X");
+define("TDOMF_VERSION", "0.9.3 (beta)");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -347,6 +348,8 @@ define('TDOMF_KEY_DOWNLOAD_CMD_OUTPUT',"_tdomf_download_cmd_output_");
 //
 define('TDOMF_KEY_DOWNLOAD_THUMB',"_tdomf_download_thumb_");
 define('TDOMF_OPTION_DISABLE_ERROR_MESSAGES',"tdomf_disable_error_messages");
+define('TDOMF_OPTION_EXTRA_LOG_MESSAGES',"tdomf_extra_log_messages");
+define('TDOMF_OPTION_YOUR_SUBMISSIONS',"tdomf_your_submissions");
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //
@@ -382,7 +385,9 @@ function tdomf_add_menus()
 
     //
     // Your submissions
-    add_submenu_page('profile.php', 'Your Submissions', 'Your Submissions', 0, 'tdomf_your_submissions', 'tdomf_show_your_submissions_menu');
+    if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) {
+      add_submenu_page('profile.php', 'Your Submissions', 'Your Submissions', 0, 'tdomf_your_submissions', 'tdomf_show_your_submissions_menu');
+    }
 }
 
 //////////////////////////////////
@@ -412,7 +417,8 @@ require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 ////////////////////////
 
 function tdomf_init(){
-  // Pre 0.7
+  
+  // Pre 0.7 or a fresh install!
   if(get_option(TDOMF_VERSION_CURRENT) == false)
   {
     add_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
@@ -421,6 +427,17 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_MODERATION,true);
     add_option(TDOMF_OPTION_PREVIEW,true);
     add_option(TDOMF_OPTION_TRUST_COUNT,-1);
+    add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
+  }
+
+  // Pre 0.9.3 (beta)/16
+  if(intval(get_option(TDOMF_VERSION_CURRENT)) < 16) {
+    add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
+  }
+  
+  // Update build number
+  if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
+    update_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
   }
 }
 

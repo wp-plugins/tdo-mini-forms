@@ -75,7 +75,7 @@ if($message == NULL) {
 
     // For preview, remove magic quote slashes!
     if (get_magic_quotes_gpc()) {
-      #tdomf_log_message("Magic quotes is enabled. Stripping slashes for preview...");
+      tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes for preview...");
       function stripslashes_array($array) {
           return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
       }
