@@ -178,6 +178,24 @@ If you have the options for attachments and thumbnail generation turned on for U
 
 Wordpress does not support bitmaps for thumbnails so you cannot use bitmaps for thumbnail generation.
 
+= I can't upload files! safe_mode and open_basedir issues=
+
+First step, make sure you can upload with the normal Wordpress admin UI. If you can't then your not going to be able to upload with TDOMF until that is sorted. 
+
+If you do and you get an error with something like this
+
+`Warning: mkdir() [function.mkdir]: open_basedir restriction in effect`
+
+or
+
+`Warning: mkdir(): [function.mkdir]: SAFE MODE Restriction in effect` 
+
+Then you host has restricted where you can create and upload files. Safe mode is particularly bad because it'll fail in unexpected ways. Ultimately the best solution is not to use safe mode or open_basedir but you may not have the option to do that.
+
+The best solution is to use a folder to store uploads that does not break safe mode. If you can upload with the normal wordpress interface then you can use something like <path to your wordpress install>/wp-content/uploads. Remember also that you cannot use symbolic links in your path to get around open_basedir restrictions.
+
+You can enable extra log messages from the options screen to see more detailed messages about file uploading. You can also check your "phpinfo()" from the main TDOMF page.
+
 == Screenshots ==
 
 1. The Form as displayed to non-registered users

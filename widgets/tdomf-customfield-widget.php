@@ -29,6 +29,10 @@ function tdomf_widget_customfields_gen_fmt($index,$value){
 function tdomf_widget_customfields_append($post_ID,$options,$index){
   // Grab value
   $value = get_post_meta($post_ID,$options['key'],true);
+  // select of course has to be a special case!
+  if($options['type'] == 'select') {
+    $value = tdomf_widget_customfields_select_convert($value,$options);
+  }
   if(!empty($value) && (!is_string($value) || trim($value) != "") )
   {
     // Gen Format
@@ -202,6 +206,8 @@ function tdomf_widget_customfields_post($args,$params) {
     $retVal = tdomf_widget_customfields_textarea_post($args,$number,$options);
   } else if($options['type'] == 'checkbox') {
     $retVal = tdomf_widget_customfields_checkbox_post($args,$number,$options);
+  } else if($options['type'] == 'select') {
+    $retVal = tdomf_widget_customfields_select_post($args,$number,$options);
   }
   
   if($options['append'] && $retVal == NULL){
@@ -224,6 +230,8 @@ function tdomf_widget_customfields_adminemail($args,$params) {
     return tdomf_widget_customfields_textarea_adminemail($args,$number,$options);
   } else if($options['type'] == 'checkbox') {
     return tdomf_widget_customfields_checkbox_adminemail($args,$number,$options);
+  } else if($options['type'] == 'select') {
+    return tdomf_widget_customfields_select_adminemail($args,$number,$options);
   }
   
   return "";
@@ -867,7 +875,7 @@ function tdomf_widget_customfields_checkbox_adminemail($args,$number,$options) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//                                                 Custom Field as a Select //
+//                                                   Custom Field as a Select //
 ////////////////////////////////////////////////////////////////////////////////
 
 function tdomf_widget_customfields_select_control_handler($number,$options) {
@@ -1072,7 +1080,12 @@ function tdomf_widget_customfields_select($args,$number,$options) {
     }
 
     $select_defaults = array();
-    if(!empty($options['s-defaults'])) {
+    if(isset($args['customfields-s-list-'.$number])){
+      $select_defaults = $args['customfields-s-list-'.$number];
+      if(!is_array($select_defaults)) {
+        $select_defaults = array( $select_defaults );
+      }
+    } else if(!empty($options['s-defaults'])) {
       $select_defaults = split(";",$options['s-defaults']);
     }
     
@@ -1096,29 +1109,69 @@ function tdomf_widget_customfields_select($args,$number,$options) {
     return $output;
   }
 
-function tdomf_widget_customfields_select_preview($args,$number,$options) {
-  /*$value = trim($args["customfields-textfield-$number"]);
-  if($value == "") {
-    return "";
+function tdomf_widget_customfields_select_convert($post_input,$options) {
+  $opts = split(";",$options['s-values']);
+  $message = "";
+  if(is_array($post_input)) {
+    foreach($opts as $opt) {
+        list($text,$value) = split(":",$opt,2);
+        if(in_array($value,$post_input)) {
+          $message .= $text . ", ";
+        }
+    }
+  } else {
+    foreach($opts as $opt) {
+        list($text,$value) = split(":",$opt,2);
+        if($value == $post_input) {
+          $message = $text;
+          break;
+        }
+    }
   }
+  return $message;
+}
+  
+function tdomf_widget_customfields_select_preview($args,$number,$options) {
+  $vals = $args["customfields-s-list-$number"];
+  $message = tdomf_widget_customfields_select_convert($vals,$options);
+  
   extract($args);  
-  $output = $before_widget;  
+  $output = $before_widget;
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$message);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
     }
-    $output .= $value;
+    $output .= $message;
   }
-  $output .= $after_widget;
-  return $output;*/
-  
-  #return var_export($args,true);
-  
-  $value = $args["customfields-s-list-$number"];
-  extract($args);  
-  return "Select box test: " . var_export($value,true);
+  $output .= $after_widget;  
+  return $output;
 }
+
+function tdomf_widget_customfields_select_post($args,$number,$options) {
+  extract($args);
+  add_post_meta($post_ID,$options['key'],$args["customfields-s-list-$number"]);
+  return NULL;
+}
+
+function tdomf_widget_customfields_select_adminemail($args,$number,$options) {
+  extract($args);
+  $output  = $before_widget;
+  $output .= $before_title.__("Custom Field: ","tdomf");
+  if($options['title'] != "") {
+    $output .= '"'.$options['title'].'" ';
+  }
+  $output .= '['.$options['key'].']';
+  $output .= $after_title;
+  $value = get_post_meta($post_ID,$options['key'],true);
+  $output .= tdomf_widget_customfields_select_convert($value,$options);
+  $output .= $after_widget;
+  return $output;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                              Custom Field as a Radio group //
+////////////////////////////////////////////////////////////////////////////////
 
 ?>

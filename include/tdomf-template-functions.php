@@ -174,9 +174,9 @@ function tdomf_content_adminbuttons_filter($content=''){
      
        $publish_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$post_ID";
        $publish_link = wp_nonce_url($publish_link,'tdomf-publish_'.$post_ID);
-       
-       $delete_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=delete&post=$post_ID";
-       $delete_link = wp_nonce_url($delete_link,'tdomf-delete_'.$post_ID);
+            
+       $delete_link = get_bloginfo('wpurl')."/wp-admin/post.php?action=delete&post=$post_ID";
+       $delete_link = wp_nonce_url($delete_link,'delete-post_'.$post_ID);
      
        return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>]</p>',"tdomf"),$publish_link,$delete_link);
    }

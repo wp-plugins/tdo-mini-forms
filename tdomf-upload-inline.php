@@ -36,7 +36,7 @@ $tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';
 // First pass security check
 //
 if(isset($_SESSION['tdomf_upload_key']) && $_SESSION['tdomf_upload_key'] != $_POST['tdomf_upload_key']){
-   tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
+   #tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
    unset($_SESSION['tdomf_upload_key']); // prevents any "operations" on uploads
    #exit("TDOMF: Bad data submitted");
 }
