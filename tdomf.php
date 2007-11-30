@@ -26,14 +26,6 @@ Author URI: http://thedeadone.net
 */
 
 ////////////////////////////////////////////////////////////////////////////////
-// Note for translators
-//
-// See http://codex.wordpress.org/Translating_WordPress for details of
-// translating wordpress plugins. All printed text is outputted using _e and __
-// and the text domain "tdomf".
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
 // Version History
 //
 // Preview: 21 November 2006
@@ -194,6 +186,7 @@ Author URI: http://thedeadone.net
 // - Category widget: Multiple category selection
 // - Category widget: Display as list
 // - Customfield now supports select and checkbox options
+// - Added po file for translation
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,11 +240,6 @@ Author URI: http://thedeadone.net
 // - Country codes on submitter's IP
 // - Widget to determine category from post arguments
 ////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////
-// loading text domain for language translation
-//
-load_plugin_textdomain('tdomf','wp-content/plugins/tdo-mini-forms');
 
 ///////////////////////////////////////////////////
 // Defines and other global vars for this Plugin //
@@ -356,6 +344,11 @@ define('TDOMF_KEY_DOWNLOAD_THUMB',"_tdomf_download_thumb_");
 define('TDOMF_OPTION_DISABLE_ERROR_MESSAGES',"tdomf_disable_error_messages");
 define('TDOMF_OPTION_EXTRA_LOG_MESSAGES',"tdomf_extra_log_messages");
 define('TDOMF_OPTION_YOUR_SUBMISSIONS',"tdomf_your_submissions");
+
+//////////////////////////////////////////////////
+// loading text domain for language translation
+//
+load_plugin_textdomain('tdomf',TDOMF_FULLPATH);
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //
