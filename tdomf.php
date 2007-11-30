@@ -188,13 +188,17 @@ Author URI: http://thedeadone.net
 // - Fixed some issues with file uploading and safe_mode
 // - New Option: Enable/Disable "Your Submissions" page
 // - New Option: Enable extra debug log messages
+// - Make the tags widget conditional on the existance of 'wp_set_post_tags'. 
+//     This will improve backwards compatibility with Wordpress < 2.3 
+//    (officially unsupported)
+// - Category widget: Multiple category selection
+// - Category widget: Display as list
+// - Customfield now supports select and checkbox options
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
-// - Update readme.txt in relation to safe_mode and open_basedir (must be able 
-//    to at least upload with the normal wordpress interface)
 // - Bug: invalid markup used in form elements!
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support
@@ -218,15 +222,16 @@ Author URI: http://thedeadone.net
 //    * Info about loaded widgets
 //    * Disable loaded widgets?
 // - Improvements for current widgets
+//    * Upload Files: Multiple instances
 //    * Upload Files: Thumbnail size options for upload files
 //    * Content (and Custom Field): TinyMCE Integration
 //    * Content (and Custom Field): Limit size of post
-//    * Custom Fields: Radio groups, drop down lists, checkbox
+//    * Custom Fields: Radio groups, multiple checkboxs (grid-layout)
 //    * 1 Question Captcha: Randoming questions for Captcha
 //    * Email verification of non-registered users
-//    * Category: Finish category widget
+//    * Category: options for list size, width, include cats and multiple 
+//        default categories
 //    * Notify Me: Option to always notify submitter
-//    * Upload Files: Option to not use tdomf wrapper for file download
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
@@ -240,6 +245,7 @@ Author URI: http://thedeadone.net
 // - A "manage download" menu
 // - Documentation on creating your own widgets
 // - Country codes on submitter's IP
+// - Widget to determine category from post arguments
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
