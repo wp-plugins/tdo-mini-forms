@@ -348,7 +348,7 @@ define('TDOMF_OPTION_YOUR_SUBMISSIONS',"tdomf_your_submissions");
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf',TDOMF_FULLPATH);
+load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //
