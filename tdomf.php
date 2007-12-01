@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.9.2
+Version: 0.9.3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -157,7 +157,7 @@ Author URI: http://thedeadone.net
 // - Two widgets for your theme!
 // - Fixed 1-q captcha widget not accepting quotes (")
 //
-// v0.9.3: TBD
+// v0.9.3: 1st December 2007
 // - Fixed customfield textfield control radio group in Firefox
 // - Fixed customfield textfield ignoring size option
 // - Fixed customfield textarea putting magic quotes on HTML
@@ -252,9 +252,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "16");
+define("TDOMF_BUILD", "17");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.9.3 (beta)");
+define("TDOMF_VERSION", "0.9.3");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
