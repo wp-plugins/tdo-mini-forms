@@ -3,8 +3,8 @@ Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields
 Requires at least: 2.3
-Tested up to: 2.3
-Stable Tag: 0.9.2
+Tested up to: 2.3.1
+Stable Tag: 0.9.3
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
@@ -12,7 +12,7 @@ This plugin allows you to add a form to your website that allows your readers (i
 
 This plugin allows you to add a form to your website that allows non-registered users and/or subscribers (configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.9.2 contains a fix for this session_start maddness and also two new widgets for your theme!**
+**Version 0.9.3 has tons of fixs and you can now get custom fields in checkbox and select (that's dropdown and listbox)!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -330,3 +330,31 @@ You can enable extra log messages from the options screen to see more detailed m
 * "Latest Submissions" added to main Dashboard
 * Two widgets for your theme!
 * Fixed 1-q captcha widget not accepting quotes (")
+
+= v0.9.3: 1st December 2007 = 
+
+* Fixed customfield textfield control radio group in Firefox
+* Fixed customfield textfield ignoring size option
+* Fixed customfield textarea putting magic quotes on HTML
+* Fixed customfield textfield not handling HTML and quotes well.
+* Fixed customfield textfield not handling foreign characters well.
+* Fixed customfield textarea quicktag's extra button only working on post content's quicktag's toolbar
+* Updated customfield to optionally can automatically add value to post with a user defined format
+* Removed any "short tag" versions (i.e. use "<?php" instead of "<?")
+* Add link to view post from moderator notification email
+* Auto add buttons to post content to "approve" or "reject" submission on the spot
+* Enable/disable preview of customfield value
+* Added option to Upload Files widget to use direct links
+* Get phpinfo page
+* Conf dump page
+* Updated stylesheet to look nice in IE
+* Fixed borked thumbnails from v0.9
+* Fixed some issues with file uploading and safe_mode
+* New Option: Enable/Disable "Your Submissions" page
+* New Option: Enable extra debug log messages
+* Make the tags widget conditional on the existance of 'wp_set_post_tags'. This will improve backwards compatibility with Wordpress < 2.3 (officially unsupported)
+* Category widget: Multiple category selection
+* Category widget: Display as list
+* Customfield now supports select and checkbox options
+* Added po file for translation
+
