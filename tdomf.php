@@ -192,6 +192,9 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
+// - Bug: Text widget re-encodes HTML entities each form edit
+// - Bug: Make all input fields handle foreign characters
+// - Bug: Custom Field javascript doesn't work in Firefox.
 // - Bug: invalid markup used in form elements!
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support
@@ -203,6 +206,7 @@ Author URI: http://thedeadone.net
 //    * Moderation Queue
 //    * Approved Posts
 //    * File Info
+//    * Country codes on submitter's IP
 // - Allow moderators append a message to the approved/rejected notification
 //    (not that hard to do, store the message as a postmeta, notification code
 //     grabs the message from postmeta, uses it and then deletes it from post
@@ -213,10 +217,12 @@ Author URI: http://thedeadone.net
 //    * Banned IP, Banned user and other insufficent priviliges messages
 // - Widget Manager Menu
 //    * Info about loaded widgets
-//    * Disable loaded widgets?
+//    * Disable loading of widgets
+//    * Editor pane for widgets
 // - Improvements for current widgets
 //    * Upload Files: Multiple instances
 //    * Upload Files: Thumbnail size options for upload files
+//    * Upload Files: Limit size of image by w/h
 //    * Content (and Custom Field): TinyMCE Integration
 //    * Content (and Custom Field): Limit size of post
 //    * Custom Fields: Radio groups, multiple checkboxs (grid-layout)
@@ -228,17 +234,19 @@ Author URI: http://thedeadone.net
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
-// - AJAX support (maybe, maybe not)
+// - AJAX support (probably never)
 // - Spam Protection
 //    * Integration with Akismet
-//    * SPAM button
+//    * SPAM button in moderation page
 // - Force Preview (user must preview first before submission)
 // - Allow newly submitted posts be set to "Post ready for review" with
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
-// - Country codes on submitter's IP
-// - Widget to determine category from post arguments
+// - Widget to determine category from post arguments (already implemented, 
+//    needs to be tidied up)
+// - Widget to popup text instead of statically presenting text
+// - Image Captcha Widget
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////

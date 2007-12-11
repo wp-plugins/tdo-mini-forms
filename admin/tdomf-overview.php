@@ -193,7 +193,7 @@ function tdomf_dashboard_status() {
       <?php } ?>
       </ul>
       </div>
-      <?
+      <?php
     }
   }
 }
