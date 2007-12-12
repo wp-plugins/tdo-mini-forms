@@ -94,17 +94,22 @@ if($message == NULL) {
 	}
 }
 
-// Go back to form with args
-//
-$redirect_url = $_POST['redirect'];
-if($save_post_info) {
-	$args = $_POST;
+if(!isset($post_id)) {
+  // Go back to form with args
+  //
+  $redirect_url = $_POST['redirect'];
+  if($save_post_info) {
+    $args = $_POST;
+  } else {
+    $args = array();
+    $args['tdomf_no_form'] = true;
+  }
+  $args['tdomf_post_message'] = $message;
+  $_SESSION['tdomf_form_post'] = $args;
 } else {
-	$args = array();
-	$args['tdomf_no_form'] = true;
+  unset($_SESSION['tdomf_form_post']);
+  $redirect_url = get_permalink($post_id);
 }
-$args['tdomf_post_message'] = $message;
-$_SESSION['tdomf_form_post'] = $args;
 //
 header("Location: $redirect_url");
 exit;

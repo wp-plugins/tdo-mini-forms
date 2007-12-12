@@ -187,6 +187,11 @@ Author URI: http://thedeadone.net
 // - Category widget: Display as list
 // - Customfield now supports select and checkbox options
 // - Added po file for translation
+//
+// v0.9.4: TBD
+// - Added "getcat" widget
+// - If moderation turned off, when post published, redirect to published post
+//    page.
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,6 +252,7 @@ Author URI: http://thedeadone.net
 //    needs to be tidied up)
 // - Widget to popup text instead of statically presenting text
 // - Image Captcha Widget
+// - Allow users to define their own quicktags
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
