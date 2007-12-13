@@ -28,7 +28,7 @@ require_once($wp_config);
 
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
+load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
 
 // URL for this form
 $tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';

@@ -18,7 +18,7 @@ global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf','wp-content/plugins/tdomf');
+load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
 
 // Security Check
 //

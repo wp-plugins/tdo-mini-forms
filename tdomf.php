@@ -192,6 +192,8 @@ Author URI: http://thedeadone.net
 // - Added "getcat" widget
 // - If moderation turned off, when post published, redirect to published post
 //    page.
+// - Fixed Custom Field widget javascript. Now works properly in Firefox.
+// - Image Captcha Widget
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +201,6 @@ Author URI: http://thedeadone.net
 //
 // - Bug: Text widget re-encodes HTML entities each form edit
 // - Bug: Make all input fields handle foreign characters
-// - Bug: Custom Field javascript doesn't work in Firefox.
 // - Bug: invalid markup used in form elements!
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support
@@ -232,6 +233,7 @@ Author URI: http://thedeadone.net
 //    * Content (and Custom Field): Limit size of post
 //    * Custom Fields: Radio groups, multiple checkboxs (grid-layout)
 //    * 1 Question Captcha: Randoming questions for Captcha
+//    * 1 Question Captcha: Validate at post time, not at preview
 //    * Email verification of non-registered users
 //    * Category: options for list size, width, include cats and multiple 
 //        default categories
@@ -251,8 +253,8 @@ Author URI: http://thedeadone.net
 // - Widget to determine category from post arguments (already implemented, 
 //    needs to be tidied up)
 // - Widget to popup text instead of statically presenting text
-// - Image Captcha Widget
 // - Allow users to define their own quicktags
+// - Add "credits" for various places I pull source and other stuff from
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -358,6 +360,7 @@ define('TDOMF_KEY_DOWNLOAD_THUMB',"_tdomf_download_thumb_");
 define('TDOMF_OPTION_DISABLE_ERROR_MESSAGES',"tdomf_disable_error_messages");
 define('TDOMF_OPTION_EXTRA_LOG_MESSAGES',"tdomf_extra_log_messages");
 define('TDOMF_OPTION_YOUR_SUBMISSIONS',"tdomf_your_submissions");
+define('TDOMF_WIDGET_URLPATH',TDOMF_URLPATH.'widgets/');
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

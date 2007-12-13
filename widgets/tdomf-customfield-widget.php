@@ -361,7 +361,7 @@ function tdomf_widget_customfields_control($params) {
 
 <label for="customfields-type-<?php echo $number; ?>">
 <?php _e("Type: ","tdomf"); ?>
-<select name="customfields-type-<?php echo $number; ?>" onChange="customfields_change_specific<?php echo $number; ?>();">
+<select name="customfields-type-<?php echo $number; ?>" id="customfields-type-<?php echo $number; ?>" onChange="customfields_change_specific<?php echo $number; ?>();">
 <option value="textfield" <?php if($options['type'] == 'textfield') { ?> selected <?php } ?> /><?php _e("Text Field","tdomf"); ?>
 <option value="hidden" <?php if($options['type'] == 'hidden') { ?> selected <?php } ?> /><?php _e("Hidden","tdomf"); ?>
 <option value="textarea" <?php if($options['type'] == 'textarea') { ?> selected <?php } ?> /><?php _e("Text Area","tdomf"); ?>
