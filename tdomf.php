@@ -255,6 +255,7 @@ Author URI: http://thedeadone.net
 // - Widget to popup text instead of statically presenting text
 // - Allow users to define their own quicktags
 // - Add "credits" for various places I pull source and other stuff from
+// - Prevent plugin from being acitvate if register_globals is enabled
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -268,9 +269,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "17");
+define("TDOMF_BUILD", "18");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.9.3");
+define("TDOMF_VERSION", "0.9.4");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
