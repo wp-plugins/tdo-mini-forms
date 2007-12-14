@@ -39,6 +39,8 @@ load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
 
 session_start();
 
+// TODO: Don't change word when on preview: isset($_POST['tdomf_form1_preview'])
+
 //////////////////////////////////////////////////////
 ////// User Defined Vars:
 //////////////////////////////////////////////////////
@@ -322,8 +324,6 @@ function sendImage($pic)
 }
 
 
-
-
 //////////////////////////////////////////////////////
 ////// Choose Word:
 //////////////////////////////////////////////////////
@@ -372,8 +372,6 @@ if($use_dict==1)
 // hence, even if attackers can read the session file, they can't get the freeCap word
 // (though most hashes are easy to brute force for simple strings)
 $_SESSION['freecap_word_hash'] = $hash_func($word);
-
-
 
 
 //////////////////////////////////////////////////////

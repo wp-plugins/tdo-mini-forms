@@ -94,7 +94,7 @@ if($message == NULL) {
 	}
 }
 
-if(!isset($post_id)) {
+if(!isset($post_id) || get_post_status($post_id) != 'publish') {
   // Go back to form with args
   //
   $redirect_url = $_POST['redirect'];
