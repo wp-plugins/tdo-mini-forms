@@ -82,11 +82,11 @@ function tdomf_widget_iagree_control() {
 <br/><br/>
 
 <label for="i-agree-text" ><?php _e("The message to show beside the checkbox:","tdomf"); ?><br/>
-<textarea cols="40" rows="2" id="i-agree-text" name="i-agree-text" ><?php echo $options['text']; ?></textarea>
+<textarea cols="40" rows="2" id="i-agree-text" name="i-agree-text" ><?php echo htmlentities($options['text']); ?></textarea>
 </label>
 <br/><br/>
 <label for="i-agree-error-text" ><?php _e("The message to show when the user has failed to check the box:","tdomf"); ?><br/>
-<textarea cols="40" rows="2" id="i-agree-error-text" name="i-agree-error-text" ><?php echo $options['error-text']; ?></textarea>
+<textarea cols="40" rows="2" id="i-agree-error-text" name="i-agree-error-text" ><?php echo htmlentities($options['error-text']); ?></textarea>
 </label>
 
 </div>

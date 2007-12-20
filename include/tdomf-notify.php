@@ -305,7 +305,7 @@ function tdomf_widget_notifyme($args) {
   $output .= " /> ".__("Do you wish to be notified when your post is approved (or rejected)?","tdomf")."</label>";
   
   if($show_email_input) {
-    $output .=  "<br/><label for='notifyme_email'>".__("Email for notification:","tdomf").' <input type="text" value="'.$notifyme_email.'" name="notifyme_email" id="notifyme_email" size="40" /></label>';
+    $output .=  "<br/><label for='notifyme_email'>".__("Email for notification:","tdomf").' <input type="text" value="'.htmlentities($notifyme_email,ENT_QUOTES).'" name="notifyme_email" id="notifyme_email" size="40" /></label>';
   }
   
   $output .= $after_widget;

@@ -35,7 +35,7 @@ function tdomf_widget_text_number_bottom(){
       <?php } ?>
       </select>
       <span class="submit">
-        <input type="submit" value="Save" id="tdomf-widget-text-number-submit" name="tdomf-widget-text-number-submit" />
+        <input type="submit" value="<?php _e("Save","tdomf"); ?>" id="tdomf-widget-text-number-submit" name="tdomf-widget-text-number-submit" />
       </span>
       </p>
     </form>
@@ -112,13 +112,13 @@ function tdomf_widget_text_control($params) {
 
 <label for="text-title-<?php echo $number; ?>">
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="text-title-<?php echo $number; ?>" name="text-title-<?php echo $number; ?>" value="<?php echo $options['title']; ?>" />
+<input type="textfield" size="40" id="text-title-<?php echo $number; ?>" name="text-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
 </label>
 
 <br/><br/>
 
 <label for="text-text-<?php echo $number; ?>" ><?php _e("Text:","tdomf"); ?><br/>
-<textarea cols="40" rows="4" id="text-text-<?php echo $number; ?>" name="text-text-<?php echo $number; ?>" ><?php echo $options['text']; ?></textarea>
+<textarea cols="40" rows="4" id="text-text-<?php echo $number; ?>" name="text-text-<?php echo $number; ?>" ><?php echo htmlentities($options['text']); ?></textarea>
 </label>
 
 </div>

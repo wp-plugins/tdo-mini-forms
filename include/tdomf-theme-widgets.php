@@ -144,12 +144,12 @@ function tdomf_theme_widgets_init() {
   
   <label for="tdomf-title">
   Title
-  <input type="text" id="tdomf-title" name="tdomf-title" value="<?php echo $title; ?>" size="20" />
+  <input type="text" id="tdomf-title" name="tdomf-title" value="<?php echo htmlentities($title,ENT_QUOTES); ?>" size="20" />
   </label>
   <br/><br/>
   <label for="tdomf-mod">
   Number of posts to show:
-  <input type="text" id="tdomf-mod" name="tdomf-mod" value="<?php echo $mod; ?>" size="2" />
+  <input type="text" id="tdomf-mod" name="tdomf-mod" value="<?php echo htmlentities($mod,ENT_QUOTES); ?>" size="2" />
   </label>
   
   </div>
@@ -180,12 +180,12 @@ function tdomf_theme_widgets_init() {
   
   <label for="tdomf-admin-info-log">
   Number of log lines to show:
-  <input type="text" id="tdomf-admin-info-log" name="tdomf-admin-info-log" value="<?php echo $log; ?>" size="2" />
+  <input type="text" id="tdomf-admin-info-log" name="tdomf-admin-info-log" value="<?php echo htmlentities($log,ENT_QUOTES); ?>" size="2" />
   </label>
   <br/><br/>
   <label for="tdomf-admin-info-mod">
   Number of posts to show:
-  <input type="text" id="tdomf-admin-info-mod" name="tdomf-admin-info-mod" value="<?php echo $mod; ?>" size="2" />
+  <input type="text" id="tdomf-admin-info-mod" name="tdomf-admin-info-mod" value="<?php echo htmlentities($mod,ENT_QUOTES); ?>" size="2" />
   </label>
   
   </div>

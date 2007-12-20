@@ -514,7 +514,9 @@ function tdomf_widget_upload_post($args) {
   if($options['post-title'] || $options['a'] || $options['img']) {
     // Grab existing data
     $post = wp_get_single_post($post_ID, ARRAY_A);
-    //$post = add_magic_quotes($post); 
+    if(!empty($post['post_content'])) {
+         $post = add_magic_quotes($post);
+    }
     $content = $post['post_content'];
     $title = $post['post_title'];
     $cats = $post['post_category'];
@@ -807,15 +809,15 @@ function tdomf_widget_upload_control() {
 
 <label for="upload-files-title">
 <?php _e("Title: ","tdomf"); ?>
-<input type="text" id="upload-files-title" name="upload-files-title" value="<?php echo $options['title']; ?>" />
+<input type="textfield" id="upload-files-title" name="upload-files-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-path" ><?php _e("Path to store uploads (should not be publically accessible):","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-path" name="upload-files-path" value="<?php echo $options['path']; ?>" />
+<input type="textfield" size="40" id="upload-files-path" name="upload-files-path" value="<?php echo htmlentities($options['path'],ENT_QUOTES); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-types" ><?php _e("Allowed File Types:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-types" name="upload-files-types" value="<?php echo $options['types']; ?>" />
+<input type="textfield" size="40" id="upload-files-types" name="upload-files-types" value="<?php echo htmlentities($options['types'],ENT_QUOTES); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-post-title">
@@ -824,17 +826,17 @@ function tdomf_widget_upload_control() {
 </label><br/><br/>
 
 <label for="upload-files-size">
-<input type="textfield" name="upload-files-size" id="upload-files-size" value="<?php echo $options['size']; ?>" size="10" />
+<input type="textfield" name="upload-files-size" id="upload-files-size" value="<?php echo htmlentities($options['size'],ENT_QUOTES); ?>" size="10" />
 <?php printf(__("Max File Size in bytes. Example: 1024 = %s, 1048576 = %s","tdomf"),tdomf_filesize_format(1024),tdomf_filesize_format(1048576)); ?> 
 </label><br/><br/>
 
 <label for="upload-files-min">
-<input type="textfield" name="upload-files-min" id="upload-files-min" value="<?php echo $options['min']; ?>" size="2" />
+<input type="textfield" name="upload-files-min" id="upload-files-min" value="<?php echo htmlentities($options['min'],ENT_QUOTES); ?>" size="2" />
 <?php _e("Minimum File Uploads <i>(0 indicates file uploads optional)</i>","tdomf"); ?> 
 </label><br/>
 
 <label for="upload-files-size">
-<input type="textfield" name="upload-files-max" id="upload-files-max" value="<?php echo $options['max']; ?>" size="2" />
+<input type="textfield" name="upload-files-max" id="upload-files-max" value="<?php echo htmlentities($options['max'],ENT_QUOTES); ?>" size="2" />
 <?php _e("Maximum File Uploads","tdomf"); ?> 
 </label><br/>
 
@@ -846,13 +848,13 @@ function tdomf_widget_upload_control() {
 </label><br/>
 
 &nbsp;&nbsp;&nbsp;<label for="upload-files-url" ><?php _e("URL of uploaded file area:","tdomf"); ?><br/>
-&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url" name="upload-files-url" value="<?php echo $options['url']; ?>" />
+&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url" name="upload-files-url" value="<?php echo htmlentities($options['url'],ENT_QUOTES); ?>" />
 </label>
 
 <br/><br/>
 
 <label for="upload-files-cmd" ><?php _e("Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-cmd" name="upload-files-cmd" value="<?php echo $options['cmd']; ?>" />
+<input type="textfield" size="40" id="upload-files-cmd" name="upload-files-cmd" value="<?php echo htmlentities($options['cmd'],ENT_QUOTES); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-attach">
@@ -902,7 +904,7 @@ function tdomf_widget_upload_control() {
 </label><br/>
 
 <label for="upload-files-custom-key" ><?php _e("Name of Custom Key:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-custom-key" name="upload-files-custom-key" value="<?php echo $options['custom-key']; ?>" />
+<input type="textfield" size="40" id="upload-files-custom-key" name="upload-files-custom-key" value="<?php echo htmlentities($options['custom-key'],ENT_QUOTES); ?>" />
 </label>
 
 </p>

@@ -172,7 +172,7 @@ function tdomf_show_form_menu() {
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
 			<p class="submit">
-				<input type="submit" value="Save Changes &raquo;" />
+				<input type="submit" value="<?php _e("Save Changes &raquo;","tdomf"); ?>" />
 			</p>
 			<div id="zones">
 							<input type="hidden" id="tdomf_form-1order" name="tdomf_form-1order" value="" />
@@ -230,7 +230,7 @@ function tdomf_show_form_menu() {
 			<?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-save-widget-order'); } ?>
 
             <input type="hidden" name="action" id="action" value="save_widget_order" />
-				<input type="submit" value="Save Changes &raquo;" />
+				<input type="submit" value="<?php _e("Save Changes &raquo;","tdomf"); ?>" />
 			</p>
 
 			<div id="controls">

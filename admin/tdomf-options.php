@@ -206,7 +206,7 @@ function tdomf_show_options_menu() {
 
 	<p>
 	<b><?php _e("Auto Trust Submitter Count","tdomf"); ?></b>
-	<input type="text" name="tdomf_trust_count" id="tdomf_trust_count" size="3" value="<?php echo get_option(TDOMF_OPTION_TRUST_COUNT); ?>" />
+	<input type="text" name="tdomf_trust_count" id="tdomf_trust_count" size="3" value="<?php echo htmlentities(get_option(TDOMF_OPTION_TRUST_COUNT),ENT_QUOTES); ?>" />
 	</p>
 
 	<h3><?php _e('Turn On/Off Moderation',"tdomf"); ?> </h3>
@@ -262,7 +262,7 @@ function tdomf_show_options_menu() {
 
 	</p>
 	<b><?php _e("From Email Address","tdomf"); ?></b>
-	<input type="text" name="tdomf_from_email" id="tdomf_from_email" value="<?php if($from_email) { echo $from_email; } ?>" >
+	<input type="text" name="tdomf_from_email" id="tdomf_from_email" value="<?php if($from_email) { echo htmlentities($from_email,ENT_QUOTES); } ?>" >
 	</p>
 
     <h3><?php _e('Change author to submitter automatically',"tdomf"); ?> </h3>

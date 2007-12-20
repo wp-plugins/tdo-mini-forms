@@ -19,7 +19,7 @@ function tdomf_show_editor_menu() {
 
 	    </select>
 
- 		<input type="submit" name="Submit" value="Select &raquo;" class="button" />
+ 		<input type="submit" name="Submit" value="<?php _e('Select &raquo;','tdomf'); ?>" class="button" />
      </form>
  </div>
 

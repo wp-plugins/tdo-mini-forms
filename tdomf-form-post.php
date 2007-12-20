@@ -38,6 +38,22 @@ if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key
 }
 unset($_SESSION['tdomf_key']);
 
+function tdomf_fixslashesargs() {
+    if (get_magic_quotes_gpc()) {
+      tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes!");
+      if(!function_exists('stripslashes_array')) {
+        function stripslashes_array($array) {
+            return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
+        }
+      }
+      $_COOKIE = stripslashes_array($_COOKIE);
+      #$_FILES = stripslashes_array($_FILES);
+      #$_GET = stripslashes_array($_GET);
+      $_POST = stripslashes_array($_POST);
+      $_REQUEST = stripslashes_array($_REQUEST);
+    }
+}
+
 // Double check user permissions
 //
 $message = tdomf_check_permissions_form();
@@ -67,24 +83,16 @@ if($message == NULL) {
       } else {
         $message = sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$retVal);
         $save_post_info = TRUE;
+        tdomf_fixslashesargs();
       }
     } else {
       $save_post_info = TRUE;
+      tdomf_fixslashesargs();
     }
   } else if(isset($_POST['tdomf_form1_preview'])) {
 
     // For preview, remove magic quote slashes!
-    if (get_magic_quotes_gpc()) {
-      tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes for preview...");
-      function stripslashes_array($array) {
-          return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
-      }
-      $_COOKIE = stripslashes_array($_COOKIE);
-      #$_FILES = stripslashes_array($_FILES);
-      #$_GET = stripslashes_array($_GET);
-      $_POST = stripslashes_array($_POST);
-      $_REQUEST = stripslashes_array($_REQUEST);
-    }
+    tdomf_fixslashesargs();
 
        $save_post_info = TRUE;
 	   $message = tdomf_validate_form($_POST);

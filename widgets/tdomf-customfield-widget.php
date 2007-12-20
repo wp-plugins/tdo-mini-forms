@@ -3,7 +3,7 @@
 Name: "Custom Fields"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Add a custom field to your form!
-Version: 0.2
+Version: 0.3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -38,13 +38,13 @@ function tdomf_widget_customfields_append($post_ID,$options,$index){
     // Gen Format
     $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value));
     if($fmt != "") {
-      // fix format (just in case)
-      $fmt = ereg_replace("'","\\'",$fmt);
       // Grab existing data
       $post = wp_get_single_post($post_ID, ARRAY_A);
-      $post = add_magic_quotes($post); 
+      if(!empty($post['post_content'])) {
+         $post = add_magic_quotes($post);
+      }
       $post_content = $post['post_content'];
-      $post_content .= $fmt;
+      $post_content .= addslashes($fmt);
       // Update post
       $post = array (
           "ID"                      => $post_ID,
@@ -441,7 +441,7 @@ function tdomf_widget_customfields_textfield($args,$number,$options) {
   } else if($options['tf-subtype'] == 'url') {
     $output .= __("URL:","tdomf")." ";
   }
-  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlspecialchars($value)."\" />";
+  $output .= "<input type=\"textfield\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES)."\" />";
   $output .= "</label>\n";
   
   $output .= $after_widget;
@@ -465,12 +465,12 @@ function tdomf_widget_customfields_textfield_control($number,$options){
 
   $output .= "<label for=\"customfields-size-$number\">";
   $output .= __("Size:","tdomf");;
-  $output .= "<input type=\"textfield\" name=\"customfields-size-$number\" id=\"customfields-size-$number\" value=\"".$options['size']."\" size=\"3\" />";
+  $output .= "<input type=\"textfield\" name=\"customfields-size-$number\" id=\"customfields-size-$number\" value=\"".htmlentities($options['size'],ENT_QUOTES)."\" size=\"3\" />";
   $output .= "</label><br/><br/>";
 
   $output .= "<label for=\"customfields-tf-defval-$number\">";
   $output .= __("Default Value:","tdomf")."<br/>";
-  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-tf-defval-$number\" name=\"customfields-tf-defval-$number\" value=\"".htmlentities($options['defval'])."\" />";
+  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-tf-defval-$number\" name=\"customfields-tf-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES)."\" />";
   $output .= "</label><br/><br/>";
 
   #$output .= "<label for \"customfields-tf-subtype-$number\">";
@@ -527,7 +527,10 @@ function tdomf_widget_customfields_textfield_validate($args,$number,$options) {
 
 function tdomf_widget_customfields_textfield_post($args,$number,$options) {
   extract($args);
-  add_post_meta($post_ID,$options['key'],$args["customfields-textfield-$number"]);
+  if (get_magic_quotes_gpc()) {
+     $value = stripslashes($args["customfields-textfield-$number"]);
+  }
+  add_post_meta($post_ID,$options['key'],$value);
   return NULL;
 }
 
@@ -551,7 +554,7 @@ function tdomf_widget_customfields_textfield_adminemail($args,$number,$options) 
 
 function tdomf_widget_customfields_hidden($args,$number,$options) {
   $value = htmlentities($options['defval']);
-  $output = "<input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"$value\" />";
+  $output = "<input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"".htmlentities($value,ENT_QUOTES)."\" />";
   return $output;
 }
 
@@ -565,7 +568,7 @@ function tdomf_widget_customfields_hidden_control($number,$options){
   $output  = "<h3>".__("Hidden","tdomf")."</h3>";
   $output .= "<label for=\"customfields-defval-$number\">";
   $output .= __("Value:","tdomf")."<br/>";
-  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'])."\" />";
+  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES)."\" />";
   $output .= "</label><br/><br/>";
   return $output;
 }
@@ -614,11 +617,11 @@ function tdomf_widget_customfields_textarea_control($number,$options){
   $output .= "<label for=\"customfields-cols-$number\" >";
   $output .= __("Cols","tdomf");
   $output .= " <input type=\"textfield\" name=\"customfields-cols-$number\" id=\"customfields-cols-$number\" value=\"";
-  $output .= $options['cols']."\" size=\"3\" /></label>";
+  $output .= htmlentities($options['cols'],ENT_QUOTES)."\" size=\"3\" /></label>";
   $output .= " <label for=\"customfields-rows-$number\" >";
   $output .= __("Rows","tdomf");
   $output .= " <input type=\"textfield\" name=\"customfields-rows-$number\" id=\"customfields-rows-$number\" value=\"";
-  $output .= $options['rows']."\" size=\"3\" /></label><br/><br/>";
+  $output .= htmlentities($options['rows'],ENT_QUOTES)."\" size=\"3\" /></label><br/><br/>";
 
   $output .= "<label for=\"customfields-restrict-tags-$number\">";
   $output .= __("Restrict Tags","tdomf");
@@ -659,7 +662,7 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
     $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
     $output .= "\n<script type='text/javascript'>edToolbarcfta$number();</script>\n";
   }
-  $output .= "<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >$value</textarea>";
+  $output .= "<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >".htmlentities($value)."</textarea>";
   if($options['ta-quicktags']) {
     $output .= "\n<script type='text/javascript'>var edCanvascfta$number = document.getElementById('customfields-textarea-$number');</script>\n";
   }
@@ -981,7 +984,7 @@ function tdomf_widget_customfields_select_control($number,$options){
   
   <label for="customfields-s-rows-<?php echo $number; ?>">
   <?php _e("How many rows?","tdomf"); ?> 
-  <input type="textfield" size="5" name="customfields-s-rows-<?php echo $number; ?>" id="customfields-s-rows-<?php echo $number; ?>" value="<?php echo $options['rows']; ?>" />
+  <input type="textfield" size="5" name="customfields-s-rows-<?php echo $number; ?>" id="customfields-s-rows-<?php echo $number; ?>" value="<?php echo htmlentities($options['rows'],ENT_QUOTES); ?>" />
   <?php _e("<i>(1 row will create a drop down list)</i>","tdomf"); ?>
   </label>
   

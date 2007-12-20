@@ -66,7 +66,7 @@ EOT;
   $output .= "<small>".sprintf(__("If you can't read the word in the image, <a href=\"%s\">click here</a>","tdomf"),'#" onClick="this.blur();new_freecap();return false;')."</small><br/>";
   $output .= '<label for="imagecaptcha" class="required" >';
   $output .= __('What is the word in the image? ','tdomf')."<br/>";
-  $output .= '<input type="textfield" id="imagecaptcha" name="imagecaptcha" size="30" value="'.$args["imagecaptcha"].'" />';
+  $output .= '<input type="textfield" id="imagecaptcha" name="imagecaptcha" size="30" value="'.htmlentities($args["imagecaptcha"],ENT_QUOTES).'" />';
   $output .= '</label>';
       
   $output .= $after_widget;

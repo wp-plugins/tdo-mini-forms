@@ -194,15 +194,15 @@ Author URI: http://thedeadone.net
 //    page.
 // - Fixed Custom Field widget javascript. Now works properly in Firefox.
 // - Image Captcha Widget
+// - Updated all text fields input (and output) to use htmlentities. Hopefully
+//    this will cure foreign character input/output issues and weird
+//    re-encoding issues with widget settings.
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
-// - Bug: Text widget re-encodes HTML entities each form edit
-// - Bug: Make all input fields handle foreign characters
 // - Bug: invalid markup used in form elements!
-// - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Multiple form support
 //    * Allow users to submit Pages
 //    * Allow users to submit Links
@@ -238,6 +238,8 @@ Author URI: http://thedeadone.net
 //    * Category: options for list size, width, include cats and multiple 
 //        default categories
 //    * Notify Me: Option to always notify submitter
+//    * Image Captcha should not reload on every preview
+//    * Update "getcat" plugin with info
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
@@ -250,12 +252,13 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
-// - Widget to determine category from post arguments (already implemented, 
-//    needs to be tidied up)
 // - Widget to popup text instead of statically presenting text
 // - Allow users to define their own quicktags
 // - Add "credits" for various places I pull source and other stuff from
 // - Prevent plugin from being acitvate if register_globals is enabled
+// - Mark validation to widgets as for "preview" or "post"
+// - Allow some way to ask for input during validation (i.e. for captchas)
+// - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////

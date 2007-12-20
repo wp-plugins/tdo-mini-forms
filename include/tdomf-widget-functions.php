@@ -264,7 +264,7 @@ function tdomf_widget_content($args) {
     } else {
       $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/>\n";
     }
-    $output .= '<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.$content_title.'" />';
+    $output .= '<input type="textfield" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES).'" />';
     $output .= "</label>\n";
     if($options['text-enable']) {
       $output .= "<br/><br/>";
@@ -343,7 +343,9 @@ function tdomf_widget_content_post($args) {
   
   // Grab existing data
   $post = wp_get_single_post($post_ID, ARRAY_A);
-  $post = add_magic_quotes($post); 
+  if(!empty($post['post_content'])) {
+    $post = add_magic_quotes($post);
+  }
   $post_content = $post['post_content'];
   if(!isset($content_title)) {
     $content_title = $post['post_title'];
@@ -398,12 +400,12 @@ function tdomf_widget_content_control() {
 
         ?>
 <div>
-<label for="content-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="text" id="content-title" name="content-title" value="<?php echo $options['title']; ?>" /></label>
+<label for="content-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="textfield" id="content-title" name="content-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" /></label>
 
 <h4><?php _e("Title of Post","tdomf"); ?></h4>
 <label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> ></label>
 <label for="content-title-required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="content-title-required" id="content-title-required" <?php if($options['title-required']) echo "checked"; ?> ></label>
-<label for="content-title-size" style="line-height:35px;"><?php _e("Size","tdomf"); ?> <input type="textfield" name="content-title-size" id="content-title-size" value="<?php echo $options['title-size']; ?>" size="3" /></label>
+<label for="content-title-size" style="line-height:35px;"><?php _e("Size","tdomf"); ?> <input type="textfield" name="content-title-size" id="content-title-size" value="<?php echo htmlentities($options['title-size'],ENT_QUOTES); ?>" size="3" /></label>
 
 <h4><?php _e("Content of Post","tdomf"); ?></h4>
 <label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> ></label>
@@ -411,8 +413,8 @@ function tdomf_widget_content_control() {
 <br/>
 <label for="content-quicktags" style="line-height:35px;"><?php _e("Use Quicktags","tdomf"); ?> <input type="checkbox" name="content-quicktags" id="content-quicktags" <?php if($options['quicktags']) echo "checked"; ?> ></label>
 <br/>
-<label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo $options['text-cols']; ?>" size="3" /></label>
-<label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo $options['text-rows']; ?>" size="3" /></label>
+<label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo htmlentities($options['text-cols'],ENT_QUOTES); ?>" size="3" /></label>
+<label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo htmlentities($options['text-rows'],ENT_QUOTES); ?>" size="3" /></label>
 <br/>
 <label for="content-restrict-tags" style="line-height:35px;"><?php _e("Restrict Tags","tdomf"); ?> <input type="checkbox" name="content-restrict-tags" id="content-restrict-tags" <?php if($options['restrict-tags']) echo "checked"; ?> ></label>
 <br/>
@@ -537,7 +539,7 @@ function tdomf_widget_whoami($args) {
      if($options['name-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Name:","tdomf").' <br/><input type="text" value="'.$whoami_name.'" name="whoami_name" id="whoami_name" />';
+     $output .= ">".__("Name:","tdomf").' <br/><input type="text" value="'.htmlentities($whoami_name,ENT_QUOTES).'" name="whoami_name" id="whoami_name" />';
      if($options['name-required']) {
         $output .= __(" (Required)","tdomf");
      }
@@ -550,7 +552,7 @@ function tdomf_widget_whoami($args) {
      if($options['email-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Email:","tdomf").'<br/><input type="text" value="'.$whoami_email.'" name="whoami_email" id="whoami_email" />';
+     $output .= ">".__("Email:","tdomf").'<br/><input type="text" value="'.htmlentities($whoami_email,ENT_QUOTES).'" name="whoami_email" id="whoami_email" />';
          if($options['email-required']) {
             $output .= __(" (Required)","tdomf");
          }
@@ -563,7 +565,7 @@ function tdomf_widget_whoami($args) {
      if($options['webpage-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Webpage:","tdomf").'<br/><input type="text" value="'.$whoami_webpage.'" name="whoami_webpage" id="whoami_webpage" />';
+     $output .= ">".__("Webpage:","tdomf").'<br/><input type="text" value="'.htmlentities($whoami_webpage,ENT_QUOTES).'" name="whoami_webpage" id="whoami_webpage" />';
          if($options['webpage-required']) {
             $output .= __(" (Required)","tdomf");
          }
@@ -603,7 +605,7 @@ function tdomf_widget_whoami_control() {
 
         ?>
 <div>
-<label for="who_am_i-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="text" id="who_am_i-title" name="who_am_i-title" value="<?php echo $options['title']; ?>" /></label>
+<label for="who_am_i-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="text" id="who_am_i-title" name="who_am_i-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" /></label>
 
 <h4><?php _e("Submitter Name","tdomf"); ?></h4>
 <label for="who_am_i-name-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="who_am_i-name-enable" id="who_am_i-name-enable" <?php if($options['name-enable']) echo "checked"; ?> ></label>

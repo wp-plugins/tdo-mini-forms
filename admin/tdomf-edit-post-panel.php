@@ -148,15 +148,15 @@ function tdomf_show_edit_post_panel() {
                 Submitter does not have a user account</label>
 
                 <label for="tdomf_submitter_name" class="selectit">Name
-                <input type="text" value="<?php echo get_post_meta($post->ID, TDOMF_KEY_NAME, true); ?>" name="tdomf_submitter_name" id="tdomf_submitter_name" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_NAME, true),ENT_QUOTES); ?>" name="tdomf_submitter_name" id="tdomf_submitter_name" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
                 </label>
 
                 <label for="tdomf_submitter_email" class="selectit">Email
-                <input type="text" value="<?php echo get_post_meta($post->ID, TDOMF_KEY_EMAIL, true); ?>" name="tdomf_submitter_email" id="tdomf_submitter_email" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_EMAIL, true),ENT_QUOTES); ?>" name="tdomf_submitter_email" id="tdomf_submitter_email" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
                 </label>
 
                 <label for="tdomf_submitter_web" class="selectit">Webpage
-                <input type="text" value="<?php echo get_post_meta($post->ID, TDOMF_KEY_WEB, true); ?>" name="tdomf_submitter_web" id="tdomf_submitter_web" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_WEB, true),ENT_QUOTES); ?>" name="tdomf_submitter_web" id="tdomf_submitter_web" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
                 </label>
 
                 <br/><br/>

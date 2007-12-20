@@ -3,7 +3,7 @@
 Name: "1 Question Captcha"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: The user must answer a simple question before a post is submitted
-Version: 3
+Version: 4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -28,7 +28,7 @@ function tdomf_widget_1qcaptcha_number_bottom(){
       <?php } ?>
       </select>
       <span class="submit">
-        <input type="submit" value="Save" id="tdomf-widget-1qcaptcha-number-submit" name="tdomf-widget-1qcaptcha-number-submit" />
+        <input type="submit" value="<?php _e("Save","tdomf"); ?>" id="tdomf-widget-1qcaptcha-number-submit" name="tdomf-widget-1qcaptcha-number-submit" />
       </span>
       </p>
     </form>
@@ -89,7 +89,7 @@ function tdomf_widget_1qcaptcha($args,$params) {
   $output  = $before_widget;  
   $output .= '<label for="1qcaptcha" class="required" >';
   $output .= $options['question'];
-  $output .= '<br/><input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="'.$args["1qcaptcha$postfix"].'" />';
+  $output .= '<br/><input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="'.htmlentities($args["1qcaptcha$postfix"],ENT_QUOTES).'" />';
   $output .= '</label>';
   $output .= $after_widget;
   return $output;
@@ -134,8 +134,8 @@ function tdomf_widget_1qcaptcha_control($params) {
   }
   // Store settings for this widget
     if ( $_POST["1qcaptcha$postfix1-submit"] ) {
-     $newoptions['question'] = htmlentities(strip_tags($_POST["1qcaptcha$postfix1-question"]));
-     $newoptions['answer'] = htmlentities(strip_tags($_POST["1qcaptcha$postfix1-answer"]));
+     $newoptions['question'] = $_POST["1qcaptcha$postfix1-question"];
+     $newoptions['answer'] = $_POST["1qcaptcha$postfix1-answer"];
      if ( $options != $newoptions ) {
         $options = $newoptions;
         update_option('tdomf_1qcaptcha_widget'.$postfix2, $options);
@@ -146,11 +146,11 @@ function tdomf_widget_1qcaptcha_control($params) {
 <div>
 
 <label for="1qcaptcha<?php echo $postfix1; ?>-question" ><?php _e("The simple question:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="1qcaptcha<?php echo $postfix1; ?>-question" name="1qcaptcha<?php echo $postfix1; ?>-question" value="<?php echo $options['question']; ?>" />
+<input type="textfield" size="40" id="1qcaptcha<?php echo $postfix1; ?>-question" name="1qcaptcha<?php echo $postfix1; ?>-question" value="<?php echo htmlentities($options['question'],ENT_QUOTES); ?>" />
 </label>
 <br/><br/>
 <label for="1qcaptcha<?php echo $postfix1; ?>-answer" ><?php _e("The simple answer:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="1qcaptcha<?php echo $postfix1; ?>-answer" name="1qcaptcha<?php echo $postfix1; ?>-answer" value="<?php echo $options['answer']; ?>" />
+<input type="textfield" size="40" id="1qcaptcha<?php echo $postfix1; ?>-answer" name="1qcaptcha<?php echo $postfix1; ?>-answer" value="<?php echo htmlentities($options['answer'],ENT_QUOTES); ?>" />
 </label>
 
 </div>

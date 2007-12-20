@@ -195,7 +195,7 @@ function tdomf_widget_categories_control($params) {
 
 <label for="categories<?php echo $postfix1; ?>-title" >
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo $options['title']; ?>" />
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
 </label>
 <br/><br/>
 
@@ -219,13 +219,13 @@ function tdomf_widget_categories_control($params) {
 
 <label for="categories<?php echo $postfix1; ?>-include" >
 <?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo $options['include']; ?>" disabled />
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES); ?>" disabled />
 </label>
 <br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-exclude" >
 <?php _e("List of categories to exclude (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo $options['exclude']; ?>" />
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES); ?>" />
 </label>
 <br/><br/>
 
