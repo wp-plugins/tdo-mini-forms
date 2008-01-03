@@ -199,6 +199,8 @@ Author URI: http://thedeadone.net
 //    re-encoding issues with widget settings.
 // - Word count or character limit on post content
 // - Theme Widget that displays the form!
+// - Add "credits" to readme.txt for various places I pull source and other 
+//    stuff from
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +259,6 @@ Author URI: http://thedeadone.net
 // - Documentation on creating your own widgets
 // - Widget to popup text instead of statically presenting text
 // - Allow users to define their own quicktags
-// - Add "credits" for various places I pull source and other stuff from
 // - Prevent plugin from being acitvate if register_globals is enabled
 // - Mark validation to widgets as for "preview" or "post"
 // - Allow some way to ask for input during validation (i.e. for captchas)

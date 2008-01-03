@@ -196,6 +196,22 @@ The best solution is to use a folder to store uploads that does not break safe m
 
 You can enable extra log messages from the options screen to see more detailed messages about file uploading. You can also check your "phpinfo()" from the main TDOMF page.
 
+= Credits =
+
+I've used code in TDOMF that I've found in the wild so some credit is due to these authors for making their source code avaliable for re-use. 
+
+PHP Function to create a random string based on (http://www.tutorialized.com/view/tutorial/PHP-Random-String-Generator/13903)
+
+PHP Function to validate an email address based on (http://www.ilovejackdaniels.com/php/email-address-validation/)
+
+PHP Function to turn a file size in bytes to an intelligable format based on (http://www.phpriot.com/d/code/strings/filesize-format/index.html)
+
+Quicktags Javascript script taken from (http://www.alexking.org/)
+
+Freecap (PHP Image capatcha) taken from (http://puremango.co.uk/)
+
+Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tutorial006.html)
+
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
