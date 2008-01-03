@@ -3,7 +3,7 @@
 Name: "Custom Fields"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Add a custom field to your form!
-Version: 0.3
+Version: 0.4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -119,6 +119,9 @@ function tdomf_widget_customfields_get_options($index) {
     if(!isset($options['s-multiple'])){ $options['s-multiple'] = true; }
     if(!isset($options['s-values'])){ $options['s-values'] = "test:test"; }
     if(!isset($options['s-defaults'])){ $options['s-defaults'] = "test"; }
+    // new textarea ones
+    if(!isset($options['ta-char-limit'])){ $optoins['ta-char-limit'] = 0; }
+    if(!isset($options['ta-word-limit'])){ $optoins['ta-word-limit'] = 0; }
   return $options;
 }
 
@@ -584,6 +587,8 @@ function tdomf_widget_customfields_textarea_control_handler($number,$options) {
   $options['ta-restrict-tags'] = isset($_POST["customfields-ta-restrict-tags-$number"]);
   $options['ta-allowable-tags'] = $_POST["customfields-ta-allowable-tags-$number"];
   $options['ta-content-filter'] = isset($_POST["customfields-ta-content-filter-$number"]);
+  $options['ta-char-limit'] = intval($_POST["customfields-ta-content-char-limit-$number"]);
+  $options['ta-word-limit'] = intval($_POST["customfields-ta-content-word-limit-$number"]);  
   return $options;
 }
 
@@ -613,6 +618,9 @@ function tdomf_widget_customfields_textarea_control($number,$options){
   $output .= " <input type=\"checkbox\" name=\"customfields-ta-content-filter-$number\" id=\"customfields-ta-content-filter-$number\"";
   if($options['ta-content-filter']){ $output .= " checked "; }
   $output .= "></label><br/><br/>";
+
+  $output .= "<label for=\"customfields-ta-content-char-limit-".$number."\" >".__("Character Limit <i>(0 indicates no limit)</i>","tdomf")." <input type=\"textfield\" name=\"customfields-ta-content-char-limit-".$number."\" id=\"customfields-ta-content-char-limit-".$number."\" value=\"".$options['ta-char-limit']."\" size=\"3\" /></label><br/>";
+  $output .= "<label for=\"customfields-ta-content-word-limit-".$number."\" >".__("Word Limit <i>(0 indicates no limit)</i>","tdomf")." <input type=\"textfield\" name=\"customfields-ta-content-word-limit-".$number."\" id=\"customfields-ta-content-word-limit-".$number."\" value=\"".$options['ta-word-limit']."\" size=\"3\" /></label><br/><br/>";
   
   $output .= "<label for=\"customfields-cols-$number\" >";
   $output .= __("Cols","tdomf");
@@ -654,6 +662,12 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
   if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
     $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags']))."<br/>";
   }
+  if($options['ta-word-limit'] > 0) {
+      $output .= sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['ta-word-limit'])."<br/>";
+  }
+  if($options['ta-char-limit'] > 0) {
+      $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['ta-char-limit'])."<br/>";
+  }
   if($options['ta-quicktags']) {
     $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number";
     if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
@@ -679,6 +693,30 @@ function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
     } else {
       $output .= __("You are missing some text!","tdomf");
     }
+  }
+  if($options['ta-word-limit'] > 0 || $options['ta-char-limit'] > 0) {
+      
+      // prefitler the content of ta so it's as close to the end result as possible
+      //
+      $ta_prefiltered = $args["customfields-textarea-$number"];
+      if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
+         $ta_prefiltered = strip_tags($ta_prefiltered,$options['allowable-tags']);
+      } 
+      // don't apply content filters!
+      
+      if($options['ta-char-limit'] > 0 && strlen($ta_prefiltered) > $options['ta-char-limit']) {
+        $output .= sprintf(__("You have exceeded the max character length by %d characters","tdomf"),(strlen($ta_prefiltered) - $options['ta-char-limit'])); 
+      } else if($options['ta-word-limit'] > 0) {
+        // Remove all HTML tags as they do not count as "words"!
+        $ta_prefiltered = trim(strip_tags($ta_prefiltered));
+        // Remove excess whitespace
+        $ta_prefiltered = preg_replace('/\s\s+/', ' ', $ta_prefiltered);
+        // count the words!
+        $word_count = count(explode(" ", $ta_prefiltered));
+        if($word_count > $options['ta-word-limit']) {
+          $output .= sprintf(__("You have exceeded the max word count by %d words","tdomf"),($word_count - $options['ta-word-limit']));
+        }
+      }
   }
   // return output if any
   if($output != "") {

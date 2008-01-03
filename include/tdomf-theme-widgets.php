@@ -10,6 +10,12 @@ function tdomf_theme_widgets_init() {
   if ( !function_exists('register_sidebar_widget') || !function_exists('register_widget_control') )
     return;
   
+  function tdomf_theme_widget_form($args) {
+    echo $before_widget;
+    tdomf_the_form();
+    echo $after_widget;
+  }
+  
   function tdomf_theme_widget_admin($args) {
     if(current_user_can('manage_options') || current_user_can('edit_others_posts')) {
       extract($args);
@@ -192,6 +198,7 @@ function tdomf_theme_widgets_init() {
   <?php
   }
 
+  register_sidebar_widget('TDOMF Form', 'tdomf_theme_widget_form');
   register_sidebar_widget('TDOMF Admin Info', 'tdomf_theme_widget_admin');
   register_widget_control('TDOMF Admin Info', 'tdomf_theme_widget_admin_control', 220, 100);
   register_sidebar_widget('TDOMF Recent Submissions', 'tdomf_theme_widget');

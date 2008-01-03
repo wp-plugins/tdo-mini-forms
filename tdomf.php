@@ -197,12 +197,15 @@ Author URI: http://thedeadone.net
 // - Updated all text fields input (and output) to use htmlentities. Hopefully
 //    this will cure foreign character input/output issues and weird
 //    re-encoding issues with widget settings.
+// - Word count or character limit on post content
+// - Theme Widget that displays the form!
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
 // - Bug: invalid markup used in form elements!
+// - Bug: Multiple notifications to submitter when post is edited
 // - Multiple form support
 //    * Allow users to submit Pages
 //    * Allow users to submit Links
@@ -230,7 +233,6 @@ Author URI: http://thedeadone.net
 //    * Upload Files: Thumbnail size options for upload files
 //    * Upload Files: Limit size of image by w/h
 //    * Content (and Custom Field): TinyMCE Integration
-//    * Content (and Custom Field): Limit size of post
 //    * Custom Fields: Radio groups, multiple checkboxs (grid-layout)
 //    * 1 Question Captcha: Randoming questions for Captcha
 //    * 1 Question Captcha: Validate at post time, not at preview
@@ -240,6 +242,7 @@ Author URI: http://thedeadone.net
 //    * Notify Me: Option to always notify submitter
 //    * Image Captcha should not reload on every preview
 //    * Update "getcat" plugin with info
+//    * Upload Files: Image cropping
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)

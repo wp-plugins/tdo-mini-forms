@@ -244,6 +244,12 @@ function tdomf_widget_content_get_options() {
        $options['restrict-tags'] = true;
        $options['allowable-tags'] = "<p><b><i><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
     }
+    if(!isset($options['char-limit'])) {
+       $options['char-limit'] = 0;
+    }
+    if(!isset($options['word-limit'])) {
+       $options['word-limit'] = 0;
+    }
   return $options;
 }
 
@@ -279,6 +285,12 @@ function tdomf_widget_content($args) {
     $output .= "</label>\n";    
     if($options['allowable-tags'] != "" && $options['restrict-tags']) {
       $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['allowable-tags']))."<br/>";
+    }
+    if($options['word-limit'] > 0) {
+      $output .= sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['word-limit'])."<br/>";
+    }
+    if($options['char-limit'] > 0) {
+      $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['char-limit'])."<br/>";
     }
     if($options['quicktags']) {
       $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget";
@@ -387,6 +399,8 @@ function tdomf_widget_content_control() {
      $newoptions['restrict-tags'] = isset($_POST['content-restrict-tags']);
      $newoptions['allowable-tags'] = $_POST['content-allowable-tags'];
      $newoptions['quicktags'] = $_POST['content-quicktags'];
+     $newoptions['char-limit'] = intval($_POST['content-char-limit']);
+     $newoptions['word-limit'] = intval($_POST['content-word-limit']);
      if ( $options != $newoptions ) {
         $options = $newoptions;
         update_option('tdomf_content_widget', $options);
@@ -413,6 +427,10 @@ function tdomf_widget_content_control() {
 <br/>
 <label for="content-quicktags" style="line-height:35px;"><?php _e("Use Quicktags","tdomf"); ?> <input type="checkbox" name="content-quicktags" id="content-quicktags" <?php if($options['quicktags']) echo "checked"; ?> ></label>
 <br/>
+<label for="content-char-limit" style="line-height:35px;"><?php _e("Character Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-char-limit" id="content-char-limit" value="<?php echo htmlentities($options['char-limit'],ENT_QUOTES); ?>" size="3" /></label>
+<br/>
+<label for="content-word-limit" style="line-height:35px;"><?php _e("Word Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-word-limit" id="content-word-limit" value="<?php echo htmlentities($options['word-limit'],ENT_QUOTES); ?>" size="3" /></label>
+<br/>
 <label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo htmlentities($options['text-cols'],ENT_QUOTES); ?>" size="3" /></label>
 <label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo htmlentities($options['text-rows'],ENT_QUOTES); ?>" size="3" /></label>
 <br/>
@@ -422,7 +440,7 @@ function tdomf_widget_content_control() {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('content','Content', 'tdomf_widget_content_control', 300, 430);
+tdomf_register_form_widget_control('content','Content', 'tdomf_widget_content_control', 340, 520);
 
 ///////////////////////////////////////
 // Validate title and content from form 
@@ -441,6 +459,37 @@ function tdomf_widget_content_validate($args) {
        && (empty($content_content) || trim($content_content) == "")) {
       if($output != "") { $output .= "<br/>"; }
       $output .= __("You must specify some post text.","tdomf");
+  }
+  if($options['word-limit'] > 0 || $options['char-limit'] > 0) {
+      
+      // prefitler the content so it's as close to the end result as possible
+      //
+      $content_prefiltered = preg_replace('|\[tdomf_form1\]|', '', $content_content);
+      if(!get_option(TDOMF_OPTION_MODERATION)){
+         // if moderation is enabled, we don't do kses filtering, might as well
+         // give full picture to user!
+         $content_prefiltered = wp_filter_post_kses($content_prefiltered);
+      }
+      if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+         $content_prefiltered = strip_tags($content_prefiltered,$options['allowable-tags']);
+      } 
+
+      // don't apply content filters!
+      //$content_prefiltered = apply_filters('the_content', $content_prefiltered);
+      
+      if($options['char-limit'] > 0 && strlen($content_prefiltered) > $options['char-limit']) {
+        $output .= sprintf(__("You have exceeded the max character length by %d characters","tdomf"),(strlen($content_prefiltered) - $options['char-limit'])); 
+      } else if($options['word-limit'] > 0) {
+        // Remove all HTML tags as they do not count as "words"!
+        $content_prefiltered = trim(strip_tags($content_prefiltered));
+        // Remove excess whitespace
+        $content_prefiltered = preg_replace('/\s\s+/', ' ', $content_prefiltered);
+        // count the words!
+        $word_count = count(explode(" ", $content_prefiltered));
+        if($word_count > $options['word-limit']) {
+          $output .= sprintf(__("You have exceeded the max word count by %d words","tdomf"),($word_count - $options['word-limit']));
+        }
+      }
   }
   // return output if any
   if($output != "") {
