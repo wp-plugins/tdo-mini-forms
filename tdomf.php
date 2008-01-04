@@ -163,7 +163,7 @@ Author URI: http://thedeadone.net
 // - Fixed customfield textarea putting magic quotes on HTML
 // - Fixed customfield textfield not handling HTML and quotes well.
 // - Fixed customfield textfield not handling foreign characters well.
-// - Fixed customfield textarea quicktag's extra button only working on post 
+// - Fixed customfield textarea quicktag's extra button only working on post
 //     content's quicktag's toolbar
 // - Updated customfield to optionally can automatically add value to post with
 //     a user defined format
@@ -180,8 +180,8 @@ Author URI: http://thedeadone.net
 // - Fixed some issues with file uploading and safe_mode
 // - New Option: Enable/Disable "Your Submissions" page
 // - New Option: Enable extra debug log messages
-// - Make the tags widget conditional on the existance of 'wp_set_post_tags'. 
-//     This will improve backwards compatibility with Wordpress < 2.3 
+// - Make the tags widget conditional on the existance of 'wp_set_post_tags'.
+//     This will improve backwards compatibility with Wordpress < 2.3
 //    (officially unsupported)
 // - Category widget: Multiple category selection
 // - Category widget: Display as list
@@ -199,7 +199,7 @@ Author URI: http://thedeadone.net
 //    re-encoding issues with widget settings.
 // - Word count or character limit on post content
 // - Theme Widget that displays the form!
-// - Add "credits" to readme.txt for various places I pull source and other 
+// - Add "credits" to readme.txt for various places I pull source and other
 //    stuff from
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -239,7 +239,7 @@ Author URI: http://thedeadone.net
 //    * 1 Question Captcha: Randoming questions for Captcha
 //    * 1 Question Captcha: Validate at post time, not at preview
 //    * Email verification of non-registered users
-//    * Category: options for list size, width, include cats and multiple 
+//    * Category: options for list size, width, include cats and multiple
 //        default categories
 //    * Notify Me: Option to always notify submitter
 //    * Image Captcha should not reload on every preview
@@ -263,6 +263,8 @@ Author URI: http://thedeadone.net
 // - Mark validation to widgets as for "preview" or "post"
 // - Allow some way to ask for input during validation (i.e. for captchas)
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
+// - Allow submitters to pick where the "more" tag goes
+// - Add a "title" field to the file upload for file links/attachment pages
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -441,7 +443,7 @@ require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 ////////////////////////
 
 function tdomf_init(){
-  
+
   // Pre 0.7 or a fresh install!
   if(get_option(TDOMF_VERSION_CURRENT) == false)
   {
@@ -458,7 +460,7 @@ function tdomf_init(){
   if(intval(get_option(TDOMF_VERSION_CURRENT)) < 16) {
     add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
   }
-  
+
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
