@@ -188,7 +188,7 @@ Author URI: http://thedeadone.net
 // - Customfield now supports select and checkbox options
 // - Added po file for translation
 //
-// v0.9.4: TBD
+// v0.9.4: 7th Janary 2008
 // - Added "getcat" widget
 // - If moderation turned off, when post published, redirect to published post
 //    page.
@@ -204,6 +204,10 @@ Author URI: http://thedeadone.net
 // - Added a "Read More..." <!--more--> tag to the quick tags
 // - Fixed Bug when multiple notifications to submitter when post is edited 
 //    after approval
+//
+// v0.x.x: TBD
+// - Suppressed errors for is_dir and other file functions just in case of 
+//    open_basedir settings!
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,6 +242,9 @@ Author URI: http://thedeadone.net
 //    * Upload Files: Limit size of image by w/h
 //    * Content (and Custom Field): TinyMCE Integration
 //    * Custom Fields: Radio groups, multiple checkboxs (grid-layout)
+//    * Custom Fields: Textfield: Numeric and Date
+//    * Custom Fields: Select: required
+//    * Tags: select from list/tag cloud
 //    * 1 Question Captcha: Randoming questions for Captcha
 //    * 1 Question Captcha: Validate at post time, not at preview
 //    * Email verification of non-registered users
@@ -280,7 +287,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "19");
+define("TDOMF_BUILD", "20");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.9.4");
 

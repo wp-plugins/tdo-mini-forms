@@ -189,7 +189,7 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
     // TODO For versions > PHP 5.1.6, a trailing slash in mkdir causes problems!
     
     #clearstatcache();
-    if(is_dir($path)) {
+    if(@is_dir($path)) {
       tdomf_log_message("$path exists");
       return true;
     }
@@ -221,7 +221,7 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       // 
       $path = ereg_replace("//","/",$path);
       
-      if(!is_dir($path) && $path != "/" ) {
+      if(!@is_dir($path) && $path != "/" ) {
         tdomf_log_message("Attempting to create directory $path");
         
         if(get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES)) {
@@ -320,22 +320,22 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       // ignore and suppress errors
       //
       if(ini_get('safe_mode') || ini_get('open_basedir')) {
-        if(!is_dir($path)) {
+        if(!@is_dir($path)) {
           @mkdir(trim($path), $mode);
         }
       } else {
         // Not in safe mode, is_dir should work all the time. Therefore 
         // break out if mkdir fails!
-        if (!is_dir($path) && !mkdir(trim($path), $mode)) {
+        if (!@is_dir($path) && !@mkdir(trim($path), $mode)) {
             tdomf_log_message("Error when attempting to create $path!", TDOMF_LOG_ERROR);
             return false;
         }
       }
       // use real path!
-      $path = realpath($path);
+      $path = @realpath($path);
     }
     
-    if(is_dir($path)) {
+    if(@is_dir($path)) {
       tdomf_log_message("The directory $path was successfully created!", TDOMF_LOG_GOOD);
     } else {
       tdomf_log_message("The directory $path was not created!", TDOMF_LOG_BAD);
@@ -411,7 +411,7 @@ if(isset($_GET['tdomf_upload_preview'])) {
 // Taken from http://ie2.php.net/manual/en/function.rmdir.php
 //
 function tdomf_deltree($path) {
-  if (is_dir($path)) {
+  if (@is_dir($path)) {
      if(function_exists('scandir')) {
         $entries = scandir($path);
      } else {
