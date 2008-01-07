@@ -1,0 +1,1468 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: tdo-mini-forms\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-01-07 10:06-0000\n"
+"PO-Revision-Date: 2008-01-07 10:09-0000\n"
+"Last-Translator: Mark Cunningham <Mark.Cunningham@gmail.com>\n"
+"Language-Team: Mark Cunningham <Mark.Cunningham@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Country: IRELAND\n"
+"X-Poedit-KeywordsList: _e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: C:\\Documents and Settings\\markcu\\My Documents\\Personal Stuff\\tdomf\\tdomf_svn_https\\trunk\n"
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:250
+msgid "Your files will be kept on the server for 1 hour. You must submit your post before then."
+msgstr "Your files will be kept on the server for 1 hour. You must submit your post before then."
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:268
+msgid "Upload: "
+msgstr "Upload: "
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:272
+msgid "Upload Now!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:275
+msgid "Delete All!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:171
+msgid "You can drag-drop, order and configure \"widgets\" for your form below."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:175
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:233
+msgid "Save Changes &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:186
+msgid "Your form will be displayed using the default widget order. Dragging widgets into this box will replace the default with your customized form."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:194
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:210
+msgid "Configure"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:291
+msgid "Saved Settings."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-post-panel.php:116
+msgid "TDOMF"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:12
+msgid "Select type of files to edit:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:16
+msgid "Form Style Sheet"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:17
+msgid "Widgets"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:18
+msgid "TDOMF Core Files"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:22
+msgid "Select &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-info.php:14
+msgid "TDOMF Debug"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-info.php:22
+msgid "View Log"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-log.php:17
+msgid "Log cleared."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-log.php:34
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:49
+msgid "Latest Activity"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:206
+msgid "Previous Banned Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:209
+msgid "Previous Trusted Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:212
+msgid "Previous Submitters"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:216
+msgid "You can ban (and un-ban) any registered user. This means the user cannot use the forms. It has no impact on anything else. i.e. they can still read, comment and post. You can also make a user \"trusted\". This means that anything they submit using the form is automatically published."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:218
+msgid "Manage Submitter IPs &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:222
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:422
+msgid "Filter Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:224
+msgid "All Submitters"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:225
+msgid "Banned Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:226
+msgid "Trusted Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:234
+msgid "There are no users to moderate with this filter."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:272
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:208
+msgid "ID"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:273
+msgid "Login"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:274
+msgid "Display Name"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:275
+msgid "Role"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:276
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:472
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:212
+msgid "Status"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:277
+msgid "Approved<br/>(Submitted)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:313
+msgid "N/A"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:315
+msgid "-"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:327
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:501
+msgid "Un-ban"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:329
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:356
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:503
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:524
+msgid "Ban"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:336
+msgid "Un-trust"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:338
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:357
+msgid "Trust"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:358
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:526
+msgid "Reset"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:367
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:535
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:289
+msgid "Previous Entries"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:371
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:539
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:293
+msgid "Next Entries"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:409
+msgid "Previous Banned IPs"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:412
+msgid "Previous IPs"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:416
+msgid "You can ban an IP address. This means no-one with this IP address can use the form. It has no impact on anything else. i.e. they can still read, comment and post."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:418
+msgid "&laquo; Manage Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:424
+msgid "All IPs of submitters"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:425
+msgid "Banned IPs"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:433
+msgid "There are no ips to moderate with this filter."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:471
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:211
+msgid "IP"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:495
+msgid "Banned"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:495
+msgid "Normal"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:145
+msgid "Previous Published Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:148
+msgid "Previous Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:151
+msgid "Previous Unmoderated Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:155
+msgid "From here you can publish, unpublish or delete any submitted post."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:159
+msgid "Filter Posts"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:161
+msgid "Unpublished (Awaiting approval)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:162
+msgid "Published"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:163
+msgid "All"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:171
+msgid "There are no posts to moderate."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:209
+msgid "Title"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:210
+msgid "Submitter"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:244
+msgid "View"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:251
+msgid "Publish"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:253
+msgid "Un-Publish"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:257
+msgid "Edit"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:258
+msgid "Delete"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:273
+msgid "Delete Checked Posts &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:275
+msgid "Publish Checked Posts &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:278
+msgid "Un-Publish Checked Posts &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:19
+msgid "TDOMF Options"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:26
+msgid "Create a page with the form automatically"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:32
+msgid "Who can access the form?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:34
+msgid "You can control access to the form based on user users roles. You can chose \"Unregistered Users\" if you want anyone to be able to access the form. If a user can publish their own posts, when they use the form, the post will be automatically published. (Only roles that cannot publish are listed here)."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:90
+msgid "Unregistered Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:108
+msgid "Who gets notified?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:110
+msgid "When a form is submitted by someone who can't automatically publish their entry, someone who can approve or publish the posts will be notified by email. You can chose which roles will be notified. If you select no role, no-one will be notified."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:130
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:137
+msgid "Default Category"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:132
+msgid "You can select a default category that the entry will be added to by default. You can change always edit the entry before publishing."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:153
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:161
+msgid "Default Author"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:155
+msgid "You <b>must</b> pick a default user to be used as the \"author\" of the post. This user cannot be able to publish or edit posts."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:189
+msgid "Author and Submitter fix"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:192
+msgid "If an entry is submitted by a subscriber and is published using the normal wordpress interface, the author can be changed to the person who published it, not submitted. Select this option if you want this to be automatically corrected. This problem only occurs on blogs that have more than one user who can publish."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:197
+msgid "Auto-correct Author"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:201
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:208
+msgid "Auto Trust Submitter Count"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:204
+msgid "This only counts for submitters who register with your blog and submit using a user account. You can have the user automatically changed to \"trusted\" after a configurable number of approved submissions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:212
+msgid "Turn On/Off Moderation"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:215
+msgid "<b>It is not recommended to turn off moderation.</b> Someone should always approve submissions from anonoymous users otherwise your webpage becomes a source for spammers and bots. However this feature has been requested too many times to not include. I recommend you use the \"Auto Trust Submitter Count\" instead if you want to enable automatic posting from users. Turning off moderation does not prevent you from banning specific users and IP address or deleting or setting to draft submitted posts."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:221
+msgid "Enable Moderation"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:225
+msgid "Preview"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:228
+msgid "If your chosen widgets support preview, you can allow users to preview their post before submission"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:234
+msgid "Enable Preview"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:255
+msgid "From Email Address for Notifications"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:258
+msgid "You can set a different email address for notifications here. If you leave this field blank, the default for your blog will be used."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:264
+msgid "From Email Address"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:268
+msgid "Change author to submitter automatically"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:271
+msgid "If your theme displays the author of a post, you can automatically have it display the submitter info instead, if avaliable. It is recommended to use the \"Who Am I\" widget to get the full benefit of this option. The default and classic themes in Wordpress do not display the author of a post."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:277
+msgid "Use submitter info for author in your theme"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:281
+msgid "Add submitter link automatically to post"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:284
+msgid "You can automatically add submitter info to the end of a post. This works on all themes."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:290
+msgid "Add submitter to end of post"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:294
+msgid "Disable Error Messages"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:297
+msgid "You can disable the display of errors to the user when they use this form. This does not stop errors being reported to the log or enable forms to be submitted with \"Bad Data\""
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:303
+msgid "Disable error messages being show to user"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:307
+msgid "Extra Log Messages"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:310
+msgid "You can enable extra log messages to aid in debugging problems"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:316
+msgid "Enable extra log messages "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:321
+msgid "\"Your Submissions\" Page"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:324
+msgid "When a user logs into Wordpress, they can access a \"Your Submissions\" page which contains a copy of the form. You can disable this page by disabling this option."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:330
+msgid "Enable 'Your Submissions' page "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:340
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:31
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:38
+msgid "Save"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:45
+msgid "Welcome to TDO Mini Forms"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:51
+msgid "Log"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:60
+msgid "Latest Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:75
+msgid "Latest Approved Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:87
+msgid "Stats"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:128
+msgid "Use these links to get started:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:131
+msgid "Configure TDO Mini Forms"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:132
+msgid "Create your form"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:134
+msgid "See the form"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:137
+msgid "phpinfo()"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:138
+msgid "tdomfinfo()"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:142
+msgid "Need help with TDO Mini Forms? Please see the <a href=\"admin.php?page=tdomf_show_help_page\">help page</a> or visit the <a href=\"http://thedeadone.net/forum\">support forums on thedeadone.net</a> or the <a href=\"http://wordpress.org/tags/tdo-mini-forms\">support forums on wordpress.org</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:144
+msgid "Welcome"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:147
+msgid "TDO Mini Forms plugin allows you to provide a form to your readers and users so that they can submit posts to your blog, even if they don't have rights to do so. You can control what type of users, such as unregistered users and subscribers, can access and use the form. Posts are submitted as draft so that you can approve them before they are published. (You can optionally turn this off so that submissions are automatically published). As of version 0.7, you can now also customise the form using widgets."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:151
+msgid "Latest TDO Mini Forms News!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:25
+msgid "Deleting Options... "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:54
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:71
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:88
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:110
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:131
+msgid "DONE"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:58
+msgid "Resetting role capabilities... "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:75
+msgid "Deleting Widget Options (or at least the ones I can find!)... "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:91
+msgid "FAIL"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:102
+msgid "Removing info from all users (this may take a few minutes depending on number of users)... "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:116
+msgid "Removing info from all posts (this may take a few minutes depending on number of posts)... "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:150
+msgid "Uninstall TDO Mini Forms"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:174
+msgid "From here you can uninstall and remove some or all of TDO Mini Form's options and information."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:178
+msgid "You can simply remove just the settings/options. This will preserve submitter information on posts and users if you re-enable TDO Mini Forms later."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:179
+msgid "Remove Options"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:183
+msgid "This removes nearly <b>everything</b>. Any posts submitted, users created or pages created are not removed. However submitted posts are stripped of any information about TDO Mini Forms. If you re-enable TDO Mini Forms, posts previousily submitted will not turn up as submitted posts any more."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:184
+msgid "Uninstall Nearly Everything!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:65
+msgid "Your Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:88
+msgid "Configure Options"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:89
+msgid "Modify Form"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:91
+msgid "Moderate Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:105
+msgid "Your Sumissions waiting Moderation"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:146
+msgid "Make a submission!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:154
+msgid "Powered by the <a href=\"http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/\">TDO Mini Forms Plugin."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-hacks.php:72
+msgid "This may be due to..."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-hacks.php:75
+msgid "Another plugin inserting HTML before TDOMF's get_header action is activated. You can confirm this by disabling all your other plugins and checking if this error is still reported."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-hacks.php:77
+msgid "Your current wordpress theme inserting HTML before calling the template tag \"get_header\". This may be as simple as a blank new line. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. You can also check your theme where it calls \"get_header\"."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:43
+msgid "TDOMF Log"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:73
+msgid "TDOMF Admin Links"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:811
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:417
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:657
+msgid "Title: "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:815
+msgid "Path to store uploads (should not be publically accessible):"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:819
+msgid "Allowed File Types:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:825
+msgid "Use filename as post title (as long as the content widget doesn't set it)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:835
+msgid "Minimum File Uploads <i>(0 indicates file uploads optional)</i>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:840
+msgid "Maximum File Uploads"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:847
+msgid "Do not use TDOMF handler for URL of download"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:850
+msgid "URL of uploaded file area:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:856
+msgid "Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:862
+msgid "Insert Uploaded Files as Attachments on post (this will also generate a thumbnail using Wordpress core if upload is an image)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:869
+msgid "Add link to Attachment page to post content"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:876
+msgid "Add thumbnail link to Attachment page to post content (if thumbnail avaliable)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:883
+msgid "Add thumbnail as download link to post content (if thumbnail avaliable)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:891
+msgid "Add download link to post content"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:896
+msgid "Add download link as image tag to post content"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:903
+msgid "Add Download Link as custom value"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:906
+msgid "Name of Custom Key:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:419
+msgid "Title of Post"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:420
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:425
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:660
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:664
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:668
+msgid "Show"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:421
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:426
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:661
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:665
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:669
+msgid "Required"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:422
+msgid "Size"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:424
+msgid "Content of Post"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:428
+msgid "Use Quicktags"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:430
+msgid "Character Limit <i>(0 indicates no limit)</i>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:432
+msgid "Word Limit <i>(0 indicates no limit)</i>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:434
+msgid "Cols"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:435
+msgid "Rows"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:437
+msgid "Restrict Tags"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:439
+msgid "Allowable Tags"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:659
+msgid "Submitter Name"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:663
+msgid "Submitter Webpage"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:667
+msgid "Submitter Email"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:23
+msgid "1 Question Captcha Widgets"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:24
+msgid "How many 1 Question Captcha widgets would you like?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:148
+msgid "The simple question:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:152
+msgid "The simple answer:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:27
+msgid "Categories Widgets"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:28
+msgid "How many Categories widgets would you like?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:197
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:287
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:114
+msgid "Title:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:204
+msgid "Overwrite Default Categories"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:210
+msgid "Allow users to select more than one category"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:216
+msgid "Display categories in hierarchical mode"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:221
+msgid "List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:227
+msgid "List of categories to exclude (separate multiple categories with commas: 0,2,3)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:233
+msgid "Display categtories as:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:234
+msgid "Dropdown"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:235
+msgid "List"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:71
+msgid "Custom Fields Widgets"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:72
+msgid "How many Custom Fields widgets would you like?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:294
+msgid "Custom Field Key:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:302
+msgid "Include in Preview"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:309
+msgid "Append Custom Field to Post Content"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:315
+msgid "Format to use:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:317
+msgid "= Value of Custom Field"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:318
+msgid "= Custom Field Key"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:319
+msgid "= Title"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:366
+msgid "Type: "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:368
+msgid "Text Field"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:369
+msgid "Hidden"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:370
+msgid "Text Area"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:371
+msgid "Check Box"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:372
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:933
+msgid "Select"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:376
+msgid "Radio Group"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:944
+msgid "You must specify a value for Item name and Item value"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:962
+msgid "That value already exists!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:993
+msgid "Please select item to remove from the list!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1000
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1051
+msgid "Default selected options will be: "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1019
+msgid "Allow multiple selections"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1024
+msgid "How many rows?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1026
+msgid "<i>(1 row will create a drop down list)</i>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1031
+msgid "Remove"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1032
+msgid "Make Current Selection Default"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1082
+msgid "Name/Text of Item"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1088
+msgid "Value of Item"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1093
+msgid "Append Item"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-iagree-widget.php:80
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:109
+msgid "HTML is permissible in messages."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-iagree-widget.php:84
+msgid "The message to show beside the checkbox:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-iagree-widget.php:88
+msgid "The message to show when the user has failed to check the box:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:30
+msgid "Text Widgets"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:31
+msgid "How many text widgets would you like?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:120
+msgid "Text:"
+msgstr ""
+
