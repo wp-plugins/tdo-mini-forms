@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha
 Requires at least: 2.3
 Tested up to: 2.3.1
-Stable Tag: 0.9.3
+Stable Tag: 0.9.4
 
 This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
 
@@ -12,7 +12,7 @@ This plugin allows you to add a form to your website that allows your readers (i
 
 This plugin allows you to add a form to your website that allows non-registered users and/or subscribers (configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.9.3 has tons of fixs and you can now get custom fields in checkbox and select (that's dropdown and listbox)!**
+**Version 0.9.4, to name a few, includes an image captcha widget, a theme widget to display the form in your sidebar, word and/or character limit in submissions and several fixes!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -25,9 +25,9 @@ Registered users have access to a "Your Submissions" page which lists their curr
 = Features =
 
 * Highly customisable: Create your form using a Widget interface.
-* Simple Captcha Widget.
-* Posting Policy Widget.
-* Add Custom Fields to your widget.
+* Simple Question and/or Image Captcha.
+* Posting Policy
+* Add Custom Fields to your Forms.
 * QuickTags support for Forms.
 * Upload Files and can be attached to posts. Uses Wordpress' core to create thumbnails if applicable.
 * Submitters can be notified if post approved or rejected.
@@ -178,7 +178,7 @@ If you have the options for attachments and thumbnail generation turned on for U
 
 Wordpress does not support bitmaps for thumbnails so you cannot use bitmaps for thumbnail generation.
 
-= I can't upload files! safe_mode and open_basedir issues=
+= I can't upload files! : safe_mode and open_basedir issues =
 
 First step, make sure you can upload with the normal Wordpress admin UI. If you can't then your not going to be able to upload with TDOMF until that is sorted. 
 
@@ -202,7 +202,7 @@ I've used code in TDOMF that I've found in the wild so some credit is due to the
 
 PHP Function to create a random string based on (http://www.tutorialized.com/view/tutorial/PHP-Random-String-Generator/13903)
 
-PHP Function to validate an email address based on (http://www.ilovejackdaniels.com/php/email-address-validation/)
+PHP Function to validate an email address based on (http://www.ilovejackdaniels.com/php/email-address-validation/ )
 
 PHP Function to turn a file size in bytes to an intelligable format based on (http://www.phpriot.com/d/code/strings/filesize-format/index.html)
 
@@ -227,6 +227,7 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 * It has been found that there is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
 * If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
+* Form does not validate as XHTML. I'll fix this soon I swear! :)
 
 == Version History ==
 
@@ -374,3 +375,15 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 * Customfield now supports select and checkbox options
 * Added po file for translation
 
+= v0.9.4: 7th January 2007 = 
+
+* Added "Set Category from get variables" widget
+* If moderation turned off, when post published, redirect to published post page.
+* Fixed Custom Field widget javascript. Now works properly in Firefox (why does Firefox break on code that works in Opera and IE all the time?)
+* Image Captcha Widget
+* Updated all text fields input (and output) to use htmlentities. Hopefully this will cure foreign character input/output issues and weird re-encoding issues with widget settings.
+* Word count or character limit on post content
+* Theme Widget that displays the form!
+* Add "credits" to readme.txt for various places I pull source and other stuff from
+* Added a "Read More..." `<!--more-->` tag to the quick tags
+* Fixed Bug when multiple notifications to submitter when post is edited after approval

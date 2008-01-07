@@ -365,6 +365,17 @@ edButtons<?php echo $postfix; ?>.push(
 );
 <?php } ?>
 
+<?php if(!$restrict_tags || substr_count($allowed_tags,"<!--more-->") >= 1) { ?>
+edButtons<?php echo $postfix; ?>.push(
+	new edButton<?php echo $postfix; ?>(
+		'ed_more'
+		,'Read More...'
+		,'<!--more-->'
+		,''
+	)
+);
+<?php } ?>
+
 <?php if(!$restrict_tags 
       || (substr_count($allowed_tags,"<ol>")  >= 1
        && substr_count($allowed_tags,"<li>")  >= 1

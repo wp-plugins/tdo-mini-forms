@@ -169,9 +169,13 @@ function tdomf_notify_admins($post_ID){
 //
 function tdomf_notify_poster_approved($post_id) {
    global $wpdb;
-   $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true); 
    
-   tdomf_log_message_extra("tdomf_notify_poster_approved: $email");
+   $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true);
+   delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
+   
+   if($email != false) {
+      tdomf_log_message_extra("tdomf_notify_poster_approved: $email");
+   }
    
    if(tdomf_check_email_address($email)){
 
@@ -201,7 +205,6 @@ function tdomf_notify_poster_approved($post_id) {
       return @wp_mail($email, $subject, $notify_message);
     }
    }
-   delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
    return $post_id;
 }
 // Notify Poster of rejected post
@@ -212,6 +215,7 @@ function tdomf_notify_poster_rejected($post_id) {
    tdomf_log_message_extra("tdomf_notify_poster_rejected: $email");
    
    $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true); 
+   delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
    
    if(tdomf_check_email_address($email)){
 
@@ -241,7 +245,6 @@ function tdomf_notify_poster_rejected($post_id) {
       return @wp_mail($email, $subject, $notify_message);
     }
    }
-   delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
    return $post_id;
 }
 add_action('publish_post', 'tdomf_notify_poster_approved');

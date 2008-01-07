@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.9.3
+Version: 0.9.4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -201,13 +201,15 @@ Author URI: http://thedeadone.net
 // - Theme Widget that displays the form!
 // - Add "credits" to readme.txt for various places I pull source and other
 //    stuff from
+// - Added a "Read More..." <!--more--> tag to the quick tags
+// - Fixed Bug when multiple notifications to submitter when post is edited 
+//    after approval
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
 // - Bug: invalid markup used in form elements!
-// - Bug: Multiple notifications to submitter when post is edited
 // - Multiple form support
 //    * Allow users to submit Pages
 //    * Allow users to submit Links
@@ -243,7 +245,7 @@ Author URI: http://thedeadone.net
 //        default categories
 //    * Notify Me: Option to always notify submitter
 //    * Image Captcha should not reload on every preview
-//    * Update "getcat" plugin with info
+//    * Update "getcat" plugin with control UI
 //    * Upload Files: Image cropping
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
@@ -263,8 +265,8 @@ Author URI: http://thedeadone.net
 // - Mark validation to widgets as for "preview" or "post"
 // - Allow some way to ask for input during validation (i.e. for captchas)
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
-// - Allow submitters to pick where the "more" tag goes
 // - Add a "title" field to the file upload for file links/attachment pages
+// - Control who can access form by role and/or user, ip and capability.
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -278,7 +280,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "18");
+define("TDOMF_BUILD", "19");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.9.4");
 
