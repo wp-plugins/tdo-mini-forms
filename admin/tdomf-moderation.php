@@ -110,7 +110,7 @@ function tdomf_get_published_posts_count() {
 // Show the moderation menu
 //
 function tdomf_show_mod_posts_menu() {
-   if(!get_option(TDOMF_OPTION_MODERATION)) { ?>
+   if(!tdomf_is_moderation_in_use()) { ?>
    <div class="wrap">
        <h2><?php printf(__('Moderation Disabled', 'tdomf'),$limit); ?></h2>
        <p><center><b><?php printf(__('Moderation is currently disabled. You can enable it on the <a href="%s">options</a> page.',"tdomf"),"admin.php?page=tdomf_show_options_menu"); ?></b></center></p>
@@ -136,6 +136,8 @@ function tdomf_show_mod_posts_menu() {
    	$posts = tdomf_get_unmoderated_posts($offset,$limit);
    	$max = tdomf_get_unmoderated_posts_count();
    }
+   
+   $form_count = count(tdomf_get_form_ids());
 
    ?>
 
@@ -209,6 +211,9 @@ function getNumChecked(form)
     <th scope="col"><?php _e("Title","tdomf"); ?></th>
     <th scope="col"><?php _e("Submitter","tdomf"); ?></th>
     <th scope="col"><?php _e("IP","tdomf"); ?></th>
+    <?php if($form_count > 1) { ?>
+      <th scope="col"><?php _e("Form","tdomf"); ?></th>
+    <?php } ?>
     <th scope="col"><?php _e("Status","tdomf"); ?></th>
     <th scope="col" colspan="4" style="text-align: center">Actions</th>
    </tr>
@@ -233,13 +238,31 @@ function getNumChecked(form)
 		               <a href="user-edit.php?user_id=<?php echo $user_id;?>" class="edit">
 		               <?php $u = get_userdata($user_id);
 		                echo $u->user_login; ?></a>
-		             <?php } else {
+		             <?php } else if(!empty($name) && !empty($email)) {
 		                echo $name." (".$email.")";
-		             } ?>
+		             } else if(!empty($name)) {
+                   echo $name;
+                 } else if(!empty($email)) {
+                   echo $email;
+                 } else {
+                   _e("N/A","tdomf");
+                 } ?>
 		       </td>
 		       <td>
 		             <?php echo get_post_meta($p->ID, TDOMF_KEY_IP, true); ?>
 		       </td>
+           
+           <?php if($form_count > 1) { ?>
+             <td>
+           <?php $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true);
+                 if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
+                   <?php _e("N/A","tdomf"); ?>
+                 <?php } else { ?>
+                   <a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id ?>"><?php echo $form_id ?></a>
+                 <?php } ?>
+                 </td>
+           <?php } ?>
+           
 		       <td><?php _e($p->post_status,"tdomf"); ?></td>
 		       <td><a href="<?php echo get_permalink($p->ID); ?>" class="edit"><?php _e("View","tdomf"); ?></a></td>
 

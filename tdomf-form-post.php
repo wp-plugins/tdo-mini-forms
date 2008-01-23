@@ -20,23 +20,35 @@ global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
 
+// Form id
+//
+if(!isset($_POST['tdomf_form_id'])) {
+  tdomf_log_message("tdomf-form-post: No Form ID set!",TDOMF_LOG_BAD);
+  exit(__("TDOMF: No Form id!","tdomf"));
+}
+$form_id = intval($_POST['tdomf_form_id']);
+if(!tdomf_form_exists($form_id)){
+  tdomf_log_message("tdomf-form-post: Bad form id %d!",TDOMF_LOG_BAD);
+  exit(__("TDOMF: Bad Form Id","tdomf"));
+}
+
 // Security Check
 //
-if(!isset($_SESSION['tdomf_key']) || $_SESSION['tdomf_key'] != $_POST['tdomf_key']) {
+if(!isset($_SESSION['tdomf_key_'.$form_id]) || $_SESSION['tdomf_key_'.$form_id] != $_POST['tdomf_key_'.$form_id]) {
    if(ini_get('register_globals')){
      tdomf_log_message('register_globals is enabled. This will prevent TDOMF from operating.',TDOMF_LOG_ERROR);
      exit(__("TDOMF: Bad data submitted. <i>register_globals</i> is enabled. This must be set to disabled.","tdomf"));
-   } else  if(!isset($_SESSION) || !isset($_SESSION['tdomf_key']) || trim($_SESSION['tdomf_key']) == "") {
+   } else  if(!isset($_SESSION) || !isset($_SESSION['tdomf_key_'.$form_id]) || trim($_SESSION['tdomf_key_'.$form_id]) == "") {
      tdomf_log_message('Key is missing from $_SESSION: contents of $_SESSION:<pre>'.var_export($_SESSION,true)."</pre>",TDOMF_LOG_BAD);
    }
-   $session_key = $_SESSION['tdomf_key'];
-   $post_key = $_POST['tdomf_key'];
+   $session_key = $_SESSION['tdomf_key_'.$form_id];
+   $post_key = $_POST['tdomf_key_'.$form_id];
    $ip = $_SERVER['REMOTE_ADDR'];
    tdomf_log_message("Form submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
-   unset($_SESSION['tdomf_key']);
+   unset($_SESSION['tdomf_key_'.$form_id]);
    exit(__("TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again.","tdomf"));
 }
-unset($_SESSION['tdomf_key']);
+unset($_SESSION['tdomf_key_'.$form_id]);
 
 function tdomf_fixslashesargs() {
     if (get_magic_quotes_gpc()) {
@@ -56,17 +68,17 @@ function tdomf_fixslashesargs() {
 
 // Double check user permissions
 //
-$message = tdomf_check_permissions_form();
+$message = tdomf_check_permissions_form($form_id);
 
 // Now either generate a preview or create a post
 //
 $save_post_info = FALSE;
 if($message == NULL) {
-  if(isset($_POST['tdomf_form1_send'])) {
+  if(isset($_POST['tdomf_form'.$form_id.'_send'])) {
 
     tdomf_log_message("Someone is attempting to submit something");
 
-    $message = tdomf_validate_form($_POST);
+    $message = tdomf_validate_form($_POST,false);
     if($message == NULL) {
       $args = $_POST;
       $args['ip'] = $_SERVER['REMOTE_ADDR'];
@@ -89,13 +101,13 @@ if($message == NULL) {
       $save_post_info = TRUE;
       tdomf_fixslashesargs();
     }
-  } else if(isset($_POST['tdomf_form1_preview'])) {
+  } else if(isset($_POST['tdomf_form'.$form_id.'_preview'])) {
 
     // For preview, remove magic quote slashes!
     tdomf_fixslashesargs();
 
        $save_post_info = TRUE;
-	   $message = tdomf_validate_form($_POST);
+	   $message = tdomf_validate_form($_POST,true);
 	   if($message == NULL) {
 		  $message = tdomf_preview_form($_POST);
 	   }
@@ -110,12 +122,12 @@ if(!isset($post_id) || get_post_status($post_id) != 'publish') {
     $args = $_POST;
   } else {
     $args = array();
-    $args['tdomf_no_form'] = true;
+    $args['tdomf_no_form_'.$form_id] = true;
   }
-  $args['tdomf_post_message'] = $message;
-  $_SESSION['tdomf_form_post'] = $args;
+  $args['tdomf_post_message_'.$form_id] = $message;
+  $_SESSION['tdomf_form_post_'.$form_id] = $args;
 } else {
-  unset($_SESSION['tdomf_form_post']);
+  unset($_SESSION['tdomf_form_post_'.$form_id]);
   $redirect_url = get_permalink($post_id);
 }
 //

@@ -6,14 +6,34 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Widgets for your Theme! //
 /////////////////////////////
 
+function tdomf_get_latest_submissions_post_list_line($p) {
+  $submitter = get_post_meta($p->ID, TDOMF_KEY_NAME, true);
+    if($submitter == false || empty($submitter)) {
+      return "<li>".sprintf(__("<a href=\"%s\">\"%s\"</a>","tdomf"),get_permalink($p->ID),$p->post_title)."</li>";
+    } 
+    return "<li>".sprintf(__("<a href=\"%s\">\"%s\"</a> submitted by %s","tdomf"),get_permalink($p->ID),$p->post_title,$submitter)."</li>";
+}
+
 function tdomf_theme_widgets_init() {
   if ( !function_exists('register_sidebar_widget') || !function_exists('register_widget_control') )
     return;
   
-  function tdomf_theme_widget_form($args) {
+  function tdomf_theme_widget_form($args,$params) {
+    extract($args);
+    $form_id = $params;
+    if(!tdomf_form_exists($form_id)) {
+       $form_id = tdomf_get_first_form_id();
+    }
     echo $before_widget;
-    tdomf_the_form();
+    echo $before_title;
+    echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
+    echo $after_title;
+    tdomf_the_form($form_id);
     echo $after_widget;
+  }
+  $form_ids = tdomf_get_form_ids();
+  foreach($form_ids as $form_id) {
+    register_sidebar_widget("TDOMF Form " . $form_id->form_id, 'tdomf_theme_widget_form', $form_id->form_id);
   }
   
   function tdomf_theme_widget_admin($args) {
@@ -60,8 +80,8 @@ function tdomf_theme_widgets_init() {
           }
           echo $after_title;
           echo '<ul>';
-          foreach($posts as $p) { 
-            echo "<li><a href=\"".get_permalink($p->ID)."\">".$p->post_title."</a> from ".get_post_meta($p->ID, TDOMF_KEY_NAME, true)." </li>";
+          foreach($posts as $p) {
+            echo tdomf_get_post_list_line($p);
           }
           echo '</ul>';
           echo $after_widget;
@@ -73,7 +93,7 @@ function tdomf_theme_widgets_init() {
       _e('TDOMF Admin Links', 'tdomf'); 
       echo $after_title;
       echo "<ul>";
-      if($mod <= 0 && get_option(TDOMF_OPTION_MODERATION)) {
+      if($mod <= 0 && tdomf_is_moderation_in_use()) {
         echo "<li>";
         printf(__("<a href=\"%s\">Moderate (%d)</a>","tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&f=0",tdomf_get_unmoderated_posts_count());
         echo "</li>";
@@ -118,7 +138,8 @@ function tdomf_theme_widgets_init() {
       }
       echo "<ul>";
       foreach($posts as $p) { 
-         echo "<li><a href=\"".get_permalink($p->ID)."\">".$p->post_title."</a> from ".get_post_meta($p->ID, TDOMF_KEY_NAME, true)."</li>";
+         #echo "<li><a href=\"".get_permalink($p->ID)."\">".$p->post_title."</a> from ".get_post_meta($p->ID, TDOMF_KEY_NAME, true)."</li>";
+         echo tdomf_get_latest_submissions_post_list_line($p);
       }
       echo "</ul>";
       echo $after_widget;
@@ -198,7 +219,6 @@ function tdomf_theme_widgets_init() {
   <?php
   }
 
-  register_sidebar_widget('TDOMF Form', 'tdomf_theme_widget_form');
   register_sidebar_widget('TDOMF Admin Info', 'tdomf_theme_widget_admin');
   register_widget_control('TDOMF Admin Info', 'tdomf_theme_widget_admin_control', 220, 100);
   register_sidebar_widget('TDOMF Recent Submissions', 'tdomf_theme_widget');

@@ -8,10 +8,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 /////////////////////////////////////////////
 // Check if current user can access the form!
 //
-function tdomf_can_current_user_see_form() {
+function tdomf_can_current_user_see_form($form_id = 1) {
    global $current_user;
    get_currentuserinfo();
 
+   // if using default id
+   if(!tdomf_form_exists($form_id) && $form_id == 1){
+     $form_id = tdomf_get_first_form_id();
+   }
+   
    if(is_user_logged_in()) {
        $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
        if($user_status == TDOMF_USER_STATUS_BANNED) {
@@ -32,8 +37,8 @@ function tdomf_can_current_user_see_form() {
 	 }
   }
   
-  if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
-  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM)) {
+  if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
+  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
       // User doesn't have capability to see form
       return false;
   	}
@@ -46,15 +51,15 @@ function tdomf_can_current_user_see_form() {
 //////////////////////////////////////
 // Get the form 
 //
-function tdomf_get_the_form() {
-  return tdomf_generate_form();
+function tdomf_get_the_form($form_id = 1) {
+  return tdomf_generate_form($form_id);
 }
 
 //////////////////////////////////////
 // Display the Form
 //
-function tdomf_the_form() {
-  echo tdomf_get_the_form();
+function tdomf_the_form($form_id = 1) {
+  echo tdomf_get_the_form($form_id);
 }
 
 //////////////////////////////////////
@@ -167,8 +172,14 @@ function tdomf_content_adminbuttons_filter($content=''){
   $post_ID = 0;
   if(isset($post)) { $post_ID = $post->ID; }
   else if($post_ID == 0){ return $content; }
+
+  // use some form of the form_id
+  $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
+   if($form_id == false || !tdomf_form_exists($form_id)){
+     $form_id = tdomf_get_first_form_id();
+   }
   
-   if(get_option(TDOMF_OPTION_MODERATION) 
+   if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) 
    && get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
    && $post->post_status == 'draft') {
      

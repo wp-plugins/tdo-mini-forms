@@ -3,7 +3,7 @@
 Name: "Set Category from get variables"
 URI: http://thedeadone.net/forum/viewthread/TDOMF-Hacks/4/Bypass-Default-Category/20/
 Description: Change category of post based on URI of forum. Make sure this is the last widget!
-Version: 0.2
+Version: 0.3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -28,7 +28,7 @@ function tdomf_widget_getcat($args) {
   global $tdomf_getcat_var_name;
   extract($args);
 
-  $getcat = get_option(TDOMF_DEFAULT_CATEGORY);
+  $getcat = tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,$tdomf_form_id);
   if(isset($_GET[$tdomf_getcat_var_name])) {
   	$getcat = intval($_GET[$tdomf_getcat_var_name]);
   } else if(isset($args[$tdomf_getcat_var_name])) {

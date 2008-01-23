@@ -43,6 +43,8 @@ function tdomf_show_edit_post_panel() {
   $submitter_id = get_post_meta($post->ID, TDOMF_KEY_USER_ID, true);
 
   $submitter_ip = get_post_meta($post->ID, TDOMF_KEY_IP, true);
+  
+  $form_id  = get_post_meta($post->ID, TDOMF_KEY_FORM_ID, true);
 
   // use JavaScript SACK library for AJAX
   wp_print_scripts( array( 'sack' ));
@@ -118,26 +120,26 @@ function tdomf_show_edit_post_panel() {
                 <fieldset>
                 <legend>
                 <input id="tdomf_flag" type="checkbox" name="tdomf_flag" <?php if($tdomf_flag){ ?>checked<?php } ?> <?php if(!$can_edit){ ?> disabled <?php } ?> onClick="tdomf_update_panel();" />
-                <label for="tdomf_flag">Managed by TDOMF</label>
+                <label for="tdomf_flag"><?php _e("Managed by TDOMF","tdomf"); ?></label>
                 </legend>
 
                 <br/>
 
                 <?php if(!empty($submitter_id) && $submitter_id == get_option(TDOMF_DEFAULT_AUTHOR)) { ?>
-                  <span style="color:red;font-size:larger;">The submitter of this post is set as the "default user"! Please correct!</span>
+                  <span style="color:red;font-size:larger;"><?php _e('The submitter of this post is set as the "default user"! Please correct!','tdomf'); ?></span>
                   <br/><br/>
                 <?php } ?>
 
                 <label for="tdomf_submitter_is_user" class="selectit">
                 <input id="tdomf_submitter_is_user" type="radio" name="tdomf_submitter" value="tdomf_submitter_is_user" <?php if(!empty($submitter_id)) { ?>checked<?php } ?> <?php if(!$can_edit || !$tdomf_flag){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" />
-                Submitter is an existing user</label>
+                <?php _e('Submitter is an existing user','tdomf'); ?></label>
 
                 <select id="tdomf_submitter_user" name="tdomf_submitter_user" <?php if(!$can_edit || !$tdomf_flag || empty($submitter_id)){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" >
                 <?php $users = tdomf_get_all_users();
                       foreach($users as $user) {
                         $status = get_usermeta($user->ID,TDOMF_KEY_STATUS);
                         if($user->ID == $submitter_id || $user->ID != get_option(TDOMF_DEFAULT_AUTHOR)) { ?>
-                          <option value="<?php echo $user->ID; ?>" <?php if($user->ID == $submitter_id) { ?> selected <?php } ?> ><?php echo $user->user_login; ?><?php if($user->ID == get_option(TDOMF_DEFAULT_AUTHOR)) { ?> (Default User) <?php } ?><?php if(!empty($status) && $status == TDOMF_USER_STATUS_BANNED) { ?> (Banned User) <?php } ?></option>
+                          <option value="<?php echo $user->ID; ?>" <?php if($user->ID == $submitter_id) { ?> selected <?php } ?> ><?php echo $user->user_login; ?><?php if($user->ID == get_option(TDOMF_DEFAULT_AUTHOR)) { _e("(Default User)","tdomf"); } ?><?php if(!empty($status) && $status == TDOMF_USER_STATUS_BANNED) { _e("(Banned User)","tdomf"); } ?></option>
                       <?php } } ?>
                </select>
 
@@ -145,27 +147,29 @@ function tdomf_show_edit_post_panel() {
 
                 <label for="tdomf_submitter_not_user" class="selectit">
                 <input id="tdomf_submitter_not_user" type="radio" name="tdomf_submitter" value="tdomf_submitter_not_user" <?php if(empty($submitter_id)) { ?>checked<?php } ?> <?php if(!$can_edit || !$tdomf_flag){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" />
-                Submitter does not have a user account</label>
+                <?php _e("Submitter does not have a user account","tdomf"); ?></label>
 
                 <label for="tdomf_submitter_name" class="selectit">Name
-                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_NAME, true),ENT_QUOTES); ?>" name="tdomf_submitter_name" id="tdomf_submitter_name" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_NAME, true),ENT_QUOTES,get_bloginfo('charset')); ?>" name="tdomf_submitter_name" id="tdomf_submitter_name" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
                 </label>
 
                 <label for="tdomf_submitter_email" class="selectit">Email
-                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_EMAIL, true),ENT_QUOTES); ?>" name="tdomf_submitter_email" id="tdomf_submitter_email" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_EMAIL, true),ENT_QUOTES,get_bloginfo('charset')); ?>" name="tdomf_submitter_email" id="tdomf_submitter_email" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
                 </label>
 
                 <label for="tdomf_submitter_web" class="selectit">Webpage
-                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_WEB, true),ENT_QUOTES); ?>" name="tdomf_submitter_web" id="tdomf_submitter_web" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_WEB, true),ENT_QUOTES,get_bloginfo('charset')); ?>" name="tdomf_submitter_web" id="tdomf_submitter_web" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
                 </label>
 
                 <br/><br/>
 
                 <?php if(!empty($submitter_ip)) { ?>
-                  This post was submitted from IP <?php echo $submitter_ip; ?>.
+                  <?php printf(__("This post was submitted from IP %s.","tdomf"),$submitter_ip); ?>
                 <?php } else { ?>
-                  No IP was recorded when this post was submitted.
+                  <?php _e("No IP was recorded when this post was submitted.","tdomf"); ?>
                 <?php } ?>
+                <?php if($form_id != false && tdomf_form_exists($form_id)) {
+                printf(__("Submitted from Form %d.","tdomf"),$form_id); } ?>
                 </fieldset>
 
                  <p><input type="button" value="Update &raquo;" onclick="tdomf_ajax_edit_post(this.form.tdomf_flag, tdomf_submitter_is_user, tdomf_submitter_user, tdomf_submitter_name, tdomf_submitter_email, tdomf_submitter_web);" />

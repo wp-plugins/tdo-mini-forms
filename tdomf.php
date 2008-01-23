@@ -208,13 +208,24 @@ Author URI: http://thedeadone.net
 // v0.x.x: TBD
 // - Suppressed errors for is_dir and other file functions just in case of 
 //    open_basedir settings!
+// - Use "get_bloginfo('charset')" in htmlentities in widget control. Hopefully
+//    this will finally resolve the issues with foreign lanaguage characters
+// - Multiple Form Support
+// - Widgets that validate know if it's for preview or post. Certain validation 
+//    should only occur at post like captcha and "who am I" info for example.
+// - Option to specify the max number of instances of a multi-instant widget per
+//    form
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // The never-ending TODO list
 //
 // - Bug: invalid markup used in form elements!
-// - Multiple form support
+// - Widget to allow users to enable/disable comments and trackbacks on their
+//    submission
+// - Widget to allow user to enter a date to post the submission (as in future
+//    post)
+// - Multiple form advancements
 //    * Allow users to submit Pages
 //    * Allow users to submit Links
 //    * User groups (instead of roles)
@@ -245,19 +256,21 @@ Author URI: http://thedeadone.net
 //    * Custom Fields: Textfield: Numeric and Date
 //    * Custom Fields: Select: required
 //    * Tags: select from list/tag cloud
+//    * Tags: Widget of input field
 //    * 1 Question Captcha: Randoming questions for Captcha
-//    * 1 Question Captcha: Validate at post time, not at preview
-//    * Email verification of non-registered users
 //    * Category: options for list size, width, include cats and multiple
 //        default categories
 //    * Notify Me: Option to always notify submitter
 //    * Image Captcha should not reload on every preview
 //    * Update "getcat" plugin with control UI
 //    * Upload Files: Image cropping
+//    * Text: Option to "popup" up text (include HTML space for link)
+//    * Text: Option to not use the form formatting
+// - Email verification of non-registered users
 // - Edit style-sheet for form inside TDOMF (possible have multiple styles)
 // - Edit post support
 //    * Unregistered user editing (lots of strange reprecussions here)
-// - AJAX support (probably never)
+// - AJAX support (useful for mulitiple forms on the same page!)
 // - Spam Protection
 //    * Integration with Akismet
 //    * SPAM button in moderation page
@@ -266,14 +279,13 @@ Author URI: http://thedeadone.net
 //    Wordpress 2.3
 // - A "manage download" menu
 // - Documentation on creating your own widgets
-// - Widget to popup text instead of statically presenting text
 // - Allow users to define their own quicktags
 // - Prevent plugin from being acitvate if register_globals is enabled
-// - Mark validation to widgets as for "preview" or "post"
 // - Allow some way to ask for input during validation (i.e. for captchas)
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Add a "title" field to the file upload for file links/attachment pages
 // - Control who can access form by role and/or user, ip and capability.
+// - Uninstall *everything* option
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -287,7 +299,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "20");
+define("TDOMF_BUILD", "21");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.9.4");
 
@@ -301,11 +313,11 @@ define("TDOMF_NOTIFY_LEVEL", "tdomf_notify_level");
 // 0.6 Settings (no longer used)
 //
 define('TDOMF_NOTIFY','tdomf_notify');
-define("TDOMF_ITEMS_PER_PAGE",30);
-define("TDOMF_POSTS_INDEX",  0);
-define("TDOMF_USERS_INDEX",  1);
-define("TDOMF_IPS_INDEX",    2);
-define("TDOMF_OPTIONS_INDEX",3);
+define("TDOMF_ITEMS_PER_PAGE", 30);
+define("TDOMF_POSTS_INDEX",    0);
+define("TDOMF_USERS_INDEX",    1);
+define("TDOMF_IPS_INDEX",      2);
+define("TDOMF_OPTIONS_INDEX",  3);
 //$tdomf_ajax_progress_icon = get_bloginfo("wpurl")."/wp-content/plugins/tdomf/ajax-loader.gif";
 
 /////////////////
@@ -381,6 +393,23 @@ define('TDOMF_OPTION_EXTRA_LOG_MESSAGES',"tdomf_extra_log_messages");
 define('TDOMF_OPTION_YOUR_SUBMISSIONS',"tdomf_your_submissions");
 define('TDOMF_WIDGET_URLPATH',TDOMF_URLPATH.'widgets/');
 
+////////////////
+// 0.10 Settings
+//
+
+define('TDOMF_OPTION_NAME',"tdomf_form_name");
+define('TDOMF_OPTION_DESCRIPTION',"tdomf_form_description");
+define('TDOMF_OPTION_CREATEDPAGES',"tdomf_form_created_pages");
+define('TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS',"tdomf_form_inc_user_page");
+define('TDOMF_OPTION_CREATEDUSERS',"tdomf_form_created_users");
+define('TDOMF_OPTION_WIDGET_INSTANCES',"tdomf_form_widget_instances");
+define('TDOMF_KEY_FORM_ID',"_tdomf_form_id");
+
+// DB Table Names
+//
+define("TDOMF_DB_TABLE_FORMS", "tdomf_table_forms");
+define("TDOMF_DB_TABLE_WIDGETS", "tdomf_table_widgets");
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -402,7 +431,7 @@ function tdomf_add_menus()
     add_submenu_page( TDOMF_FOLDER , __('Widgets', 'tdomf'), __('Widgets', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
     //
     // Moderation Queue
-    if(get_option(TDOMF_OPTION_MODERATION)) {
+    if(tdomf_is_moderation_in_use()) {
        add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), tdomf_get_unmoderated_posts_count()), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     else {
@@ -446,6 +475,7 @@ require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
 
 /////////////////////////
 // Start/Init/Upgrade //
@@ -470,12 +500,15 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
   }
 
+  
+  
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
   }
 }
 
+tdomf_db_create_tables();
 tdomf_load_widgets();
 
 ?>

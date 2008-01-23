@@ -30,34 +30,49 @@ require_once($wp_config);
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
 
-// URL for this form
-$tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';
+// Get and verify Form Id
+//
+if(isset($_REQUEST['tdomf_form_id'])){
+  $form_id = intval($_REQUEST['tdomf_form_id']);
+} else {
+  tdomf_log_message("Inline Upload Form: No form id found!",TDOMF_LOG_BAD);
+  exit("TDOMF: No Form ID found");
+}
+if(!tdomf_form_exists($form_id)) {
+  tdomf_log_message("Inline Upload Form: A form id of a non-existant form used $form_id!",TDOMF_LOG_BAD);
+  unset($_SESSION['tdomf_form_id']);
+  exit("TDOMF: Bad Form ID");
+}
+
 
 // First pass security check
 //
-if(isset($_SESSION['tdomf_upload_key']) && $_SESSION['tdomf_upload_key'] != $_POST['tdomf_upload_key']){
+if(isset($_SESSION['tdomf_upload_key_'.$form_id]) && $_SESSION['tdomf_upload_key_'.$form_id] != $_POST['tdomf_upload_key_'.$form_id]){
    #tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
-   unset($_SESSION['tdomf_upload_key']); // prevents any "operations" on uploads
+   unset($_SESSION['tdomf_upload_key_'.$form_id]); // prevents any "operations" on uploads
    #exit("TDOMF: Bad data submitted");
 }
 
+// URL for this form
+$tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';
+
 // Permissions check
 //
-if(!tdomf_can_current_user_see_form()) {
+if(!tdomf_can_current_user_see_form($form_id)) {
   tdomf_log_message("Someone with no permissions tried to access the inline-uplaod form!",TDOMF_LOG_BAD);
-  unset($_SESSION['tdomf_upload_key']);
+  unset($_SESSION['tdomf_upload_key_'.$form_id]);
   exit("TDOMF: Bad permissions");
 }
 
 // Widget in use check
 //
-if(!in_array("upload-files",tdomf_get_widget_order())) {
+if(!in_array("upload-files",tdomf_get_widget_order($form_id))) {
   exit("TDOMF: Upload feature not yet enabled");
 }
 
 // Grab options for uploads
 //
-$options = tdomf_widget_upload_get_options();
+$options = tdomf_widget_upload_get_options($form_id);
 
 // Placeholder for error messages
 //
@@ -75,9 +90,9 @@ $count = 0;
 
 // Double check files in $_SESSION!
 //
-if(isset($_SESSION['uploadfiles'])) {
+if(isset($_SESSION['uploadfiles_'.$form_id])) {
   $sessioncount = 0;
-  $mysessionfiles = $_SESSION['uploadfiles'];
+  $mysessionfiles = $_SESSION['uploadfiles_'.$form_id];
   for($i =  0; $i < $options['max']; $i++) {
     if(!file_exists($mysessionfiles[$i]['path'])) {
       unset($mysessionfiles[$i]);
@@ -93,36 +108,36 @@ $allowed_exts = split(" ",strtolower($options['types']));
 
 // Only do actions if key is good!
 //
-if(isset($_SESSION['tdomf_upload_key'])) {
+if(isset($_SESSION['tdomf_upload_key_'.$form_id])) {
 
   // Delete files at user request
   //
-  if(isset($_POST['tdomf_upload_inline_delete_all'])) {
+  if(isset($_POST['tdomf_upload_inline_delete_all_'.$form_id])) {
     for($i =  0; $i < $options['max']; $i++) {
       tdomf_delete_tmp_file($mysessionfiles[$i]['path']);
     }
     $mysessionfiles = array();
     $sessioncount = 0;
-    unset($_SESSION['uploadfiles']);
+    unset($_SESSION['uploadfiles_'.$form_id]);
   }
 
   // Only worry about uploaded files if the upload secruity key is good
   //
-  else if(isset($_POST['tdomf_upload_inline_submit'])) {
+  else if(isset($_POST['tdomf_upload_inline_submit_'.$form_id])) {
 
     // Move the uploaded file to the temp storage path
     //
     for($i =  0; $i < $options['max']; $i++) {
-      $upload_temp_file_name = $_FILES["uploadfile$i"]['tmp_name'];
-      $upload_file_name = $_FILES["uploadfile$i"]['name'];
-      $upload_error = $_FILES["uploadfile$i"]['error'];
-      $upload_size = $_FILES["uploadfile$i"]['size'];
-      $upload_type = $_FILES["uploadfile$i"]['type'];
+      $upload_temp_file_name = $_FILES["uploadfile".$form_id."_".$i]['tmp_name'];
+      $upload_file_name = $_FILES["uploadfile".$form_id."_".$i]['name'];
+      $upload_error = $_FILES["uploadfile".$form_id."_".$i]['error'];
+      $upload_size = $_FILES["uploadfile".$form_id."_".$i]['size'];
+      $upload_type = $_FILES["uploadfile".$form_id."_".$i]['type'];
       if(is_uploaded_file($upload_temp_file_name)) {
         // double check file extension
         $ext = strtolower(strrchr($upload_file_name,"."));
         if(in_array($ext,$allowed_exts)) {
-          $storagepath = tdomf_create_tmp_storage_path();
+          $storagepath = tdomf_create_tmp_storage_path($form_id);
           $uploaded_file = $storagepath.DIRECTORY_SEPARATOR.$upload_file_name;
           tdomf_log_message_extra("Saving uploaded file to $uploaded_file");
           // Save the file
@@ -167,7 +182,7 @@ if(isset($_SESSION['tdomf_upload_key'])) {
     }
     // Store in session!
     $mysessionfiles = array_merge($myfiles, $mysessionfiles);
-    $_SESSION['uploadfiles'] = $mysessionfiles;
+    $_SESSION['uploadfiles_'.$form_id] = $mysessionfiles;
     // Recount
     $sessioncount = 0;
     for($i =  0; $i < $options['max']; $i++) {
@@ -180,9 +195,9 @@ if(isset($_SESSION['tdomf_upload_key'])) {
 
 // Create new security key
 //
-unset($_SESSION['tdomf_upload_key']);
+unset($_SESSION['tdomf_upload_key_'.$form_id]);
 $random_string = tdomf_random_string(100);
-$_SESSION["tdomf_upload_key"] = $random_string;
+$_SESSION["tdomf_upload_key_".$form_id] = $random_string;
 
 // Now the fun bit, the actually form!
 //
@@ -224,8 +239,8 @@ function validateFile(id,msg) {
 }
 function validateForm() {
   <?php for($i =  0, $j = 0; $i < $options['max']; $i++) { ?>
-  if(!validateFile('uploadfile<?php echo $i; ?>'),false) {
-    var f = document.getElementById('uploadfile<?php echo $i; ?>').value;
+  if(!validateFile('uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>'),false) {
+    var f = document.getElementById('uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>').value;
     alert( "<?php printf(__('File %s has a bad extension and cannot be upload!','tdomf'),'" + f + "'); ?>" );
     return false;
   }
@@ -244,8 +259,9 @@ function validateForm() {
 <?php } ?>
 
 <form name="tdomf_upload_inline_form" id="tdomf_upload_inline_form" enctype="multipart/form-data" method="post" action="<?php echo $tdomf_upload_inline_url; ?>"  >
-  <input type='hidden' id='tdomf_upload_key' name='tdomf_upload_key' value='<?php echo $random_string ?>' >
+  <input type='hidden' id='tdomf_upload_key_<?php echo $form_id; ?>' name='tdomf_upload_key_<?php echo $form_id; ?>' value='<?php echo $random_string ?>' >
   <input type='hidden' name='MAX_FILE_SIZE' value='<?php echo $options['size']; ?>' />
+  <input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='<?php echo $form_id; ?>' />
   <?php if($sessioncount > 0) { ?>
   <p><?php _e("Your files will be kept on the server for 1 hour. You must submit your post before then.","tdomf"); ?></p>
   <?php } ?>
@@ -262,17 +278,17 @@ function validateForm() {
         <br/>
     <?php } else {
       if(($sessioncount + $j) < $options['min']) { ?>
-        <label for='uploadfile<?php echo $i; ?>' class='required'>
+        <label for='uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>' class='required'>
       <?php } else { ?>
-        <label for='uploadfile<?php echo $i; ?>'>
+        <label for='uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>'>
       <?php } _e("Upload: ","tdomf"); $j++; ?>
-      <input type='file' name='uploadfile<?php echo $i; ?>' id='uploadfile<?php echo $i; ?>' size='30' onChange="validateFile('uploadfile<?php echo $i; ?>',true);" /></label><br/>
+      <input type='file' name='uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>' id='uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>' size='30' onChange="validateFile('uploadfile<?php echo $form_id; ?>_<?php echo $i; ?>',true);" /></label><br/>
   <?php } }?>
   <?php if($sessioncount < $options['max']) { ?>
-  <input type="submit" id="tdomf_upload_inline_submit" name="tdomf_upload_inline_submit" value="<?php _e("Upload Now!","tdomf"); ?>" />
+  <input type="submit" id="tdomf_upload_inline_submit_<?php echo $form_id; ?>" name="tdomf_upload_inline_submit_<?php echo $form_id; ?>" value="<?php _e("Upload Now!","tdomf"); ?>" />
   <?php } ?>
   <?php if($sessioncount > 0) { ?>
-  <input type="submit" id="tdomf_upload_inline_delete_all" name="tdomf_upload_inline_delete_all" value="<?php _e("Delete All!","tdomf"); ?>" />
+  <input type="submit" id="tdomf_upload_inline_delete_all_<?php echo $form_id; ?>" name="tdomf_upload_inline_delete_all_<?php echo $form_id; ?>" value="<?php _e("Delete All!","tdomf"); ?>" />
   <?php } ?>
 </form>
 

@@ -27,8 +27,8 @@ function tdomf_load_widgets() {
 
 // Return the widget order
 //
-function tdomf_get_widget_order() {
-  $widget_order = get_option(TDOMF_OPTION_FORM_ORDER);
+function tdomf_get_widget_order($form_id = 1) {
+  $widget_order = tdomf_get_option_form(TDOMF_OPTION_FORM_ORDER,$form_id);
   if($widget_order == false) {
   	return tdomf_get_form_widget_default_order();
   }
@@ -38,12 +38,12 @@ function tdomf_get_widget_order() {
 // Is a preview avaliable
 // Currently selected widgets must provide a preview and preview must be enabled.
 //
-function tdomf_widget_is_preview_avaliable() {
+function tdomf_widget_is_preview_avaliable($form_id = 1) {
    global $tdomf_form_widgets_preview;
-   if(!get_option(TDOMF_OPTION_PREVIEW)) {
+   if(!tdomf_get_option_form(TDOMF_OPTION_PREVIEW,$form_id)) {
    	  return false;
    }
-   $widget_order = tdomf_get_widget_order();
+   $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $id) {
       if(isset($tdomf_form_widgets_preview[$id])) {
          return true;
@@ -54,14 +54,14 @@ function tdomf_widget_is_preview_avaliable() {
 
 // AJAX allowed (Not currently supported)
 //
-function tdomf_widget_is_ajax_avaliable() {
+function tdomf_widget_is_ajax_avaliable($form_id = 1) {
    global $tdomf_form_widgets_preview, $tdomf_form_widgets_validate, $tdomf_form_widgets_post;
-   if(!get_option(TDOMF_OPTION_AJAX)) {
+   if(!tdomf_get_option_form(TDOMF_OPTION_AJAX,$form_id)) {
    	  return false;
    }
-   $widget_order = get_option(TDOMF_OPTION_FORM_ORDER);
+   $widget_order = tdomf_get_option_form(TDOMF_OPTION_FORM_ORDER,$form_id);
    foreach($widget_order as $id) {
-      if(get_option(TDOMF_OPTION_PREVIEW)
+      if(tdomf_get_option_form(TDOMF_OPTION_PREVIEW,$form_id)
       		&& isset($tdomf_form_widgets_preview[$id])
       		&& !$tdomf_form_widgets_preview[$id]["ajax"]) {
        	return false;
@@ -228,8 +228,8 @@ function tdomf_get_form_widget_default_order() {
 /////////////////////////////////////////
 // Default options for the content widget 
 //
-function tdomf_widget_content_get_options() {
-  $options = get_option('tdomf_content_widget');
+function tdomf_widget_content_get_options($form_id) {
+  $options = tdomf_get_option_widget('tdomf_content_widget',$form_id);
     if($options == false) {
        $options = array();
        $options['title'] = "";
@@ -258,7 +258,7 @@ function tdomf_widget_content_get_options() {
 //
 function tdomf_widget_content($args) {
   extract($args);
-  $options = tdomf_widget_content_get_options();
+  $options = tdomf_widget_content_get_options($tdomf_form_id);
   if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
   $output = $before_widget;
   if($options['title'] != "") {
@@ -270,7 +270,7 @@ function tdomf_widget_content($args) {
     } else {
       $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/>\n";
     }
-    $output .= '<input type="textfield" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES).'" />';
+    $output .= '<input type="textfield" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES,get_bloginfo('charset')).'" />';
     $output .= "</label>\n";
     if($options['text-enable']) {
       $output .= "<br/><br/>";
@@ -316,7 +316,7 @@ tdomf_register_form_widget('content','Content', 'tdomf_widget_content');
 //
 function tdomf_widget_content_preview($args) {
   extract($args);
-  $options = tdomf_widget_content_get_options();
+  $options = tdomf_widget_content_get_options($tdomf_form_id);
   if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
   $output = $before_widget;
   if($options['title'] != "") {
@@ -328,9 +328,10 @@ function tdomf_widget_content_preview($args) {
     $output .= "<br/>";
   }
   if($options['text-enable']) {
-    $content_content = preg_replace('|\[tdomf_form1\]|', '', $content_content);
+    $content_content = preg_replace('|\<!--tdomf_form.*-->|', '', $content_content);
+    $content_content = preg_replace('|\[tdomf_form.*\]|', '', $content_content);
     $output .= "<b>".__("Text: ","tdomf")."</b><br/>";
-    if(!get_option(TDOMF_OPTION_MODERATION)){
+    if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
      // if moderation is enabled, we don't do kses filtering, might as well
      // give full picture to user!
      $content_content = wp_filter_post_kses($content_content);
@@ -351,7 +352,7 @@ tdomf_register_form_widget_preview('content','Content', 'tdomf_widget_content_pr
 //
 function tdomf_widget_content_post($args) {
   extract($args);
-  $options = tdomf_widget_content_get_options();
+  $options = tdomf_widget_content_get_options($tdomf_form_id);
   
   // Grab existing data
   $post = wp_get_single_post($post_ID, ARRAY_A);
@@ -384,8 +385,8 @@ tdomf_register_form_widget_post('content','Content', 'tdomf_widget_content_post'
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //
-function tdomf_widget_content_control() {
-  $options = tdomf_widget_content_get_options();
+function tdomf_widget_content_control($form_id) {
+  $options = tdomf_widget_content_get_options($form_id);
   // Store settings for this widget
     if ( $_POST['content-submit'] ) {
      $newoptions['title'] = strip_tags(stripslashes($_POST['content-title']));
@@ -403,7 +404,7 @@ function tdomf_widget_content_control() {
      $newoptions['word-limit'] = intval($_POST['content-word-limit']);
      if ( $options != $newoptions ) {
         $options = $newoptions;
-        update_option('tdomf_content_widget', $options);
+        tdomf_set_option_widget('tdomf_content_widget', $options,$form_id);
         
      }
   }
@@ -414,12 +415,12 @@ function tdomf_widget_content_control() {
 
         ?>
 <div>
-<label for="content-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="textfield" id="content-title" name="content-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" /></label>
+<label for="content-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="textfield" id="content-title" name="content-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
 
 <h4><?php _e("Title of Post","tdomf"); ?></h4>
 <label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> ></label>
 <label for="content-title-required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="content-title-required" id="content-title-required" <?php if($options['title-required']) echo "checked"; ?> ></label>
-<label for="content-title-size" style="line-height:35px;"><?php _e("Size","tdomf"); ?> <input type="textfield" name="content-title-size" id="content-title-size" value="<?php echo htmlentities($options['title-size'],ENT_QUOTES); ?>" size="3" /></label>
+<label for="content-title-size" style="line-height:35px;"><?php _e("Size","tdomf"); ?> <input type="textfield" name="content-title-size" id="content-title-size" value="<?php echo htmlentities($options['title-size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
 
 <h4><?php _e("Content of Post","tdomf"); ?></h4>
 <label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> ></label>
@@ -427,12 +428,12 @@ function tdomf_widget_content_control() {
 <br/>
 <label for="content-quicktags" style="line-height:35px;"><?php _e("Use Quicktags","tdomf"); ?> <input type="checkbox" name="content-quicktags" id="content-quicktags" <?php if($options['quicktags']) echo "checked"; ?> ></label>
 <br/>
-<label for="content-char-limit" style="line-height:35px;"><?php _e("Character Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-char-limit" id="content-char-limit" value="<?php echo htmlentities($options['char-limit'],ENT_QUOTES); ?>" size="3" /></label>
+<label for="content-char-limit" style="line-height:35px;"><?php _e("Character Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-char-limit" id="content-char-limit" value="<?php echo htmlentities($options['char-limit'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
 <br/>
-<label for="content-word-limit" style="line-height:35px;"><?php _e("Word Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-word-limit" id="content-word-limit" value="<?php echo htmlentities($options['word-limit'],ENT_QUOTES); ?>" size="3" /></label>
+<label for="content-word-limit" style="line-height:35px;"><?php _e("Word Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-word-limit" id="content-word-limit" value="<?php echo htmlentities($options['word-limit'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
 <br/>
-<label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo htmlentities($options['text-cols'],ENT_QUOTES); ?>" size="3" /></label>
-<label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo htmlentities($options['text-rows'],ENT_QUOTES); ?>" size="3" /></label>
+<label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo htmlentities($options['text-cols'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
+<label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo htmlentities($options['text-rows'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
 <br/>
 <label for="content-restrict-tags" style="line-height:35px;"><?php _e("Restrict Tags","tdomf"); ?> <input type="checkbox" name="content-restrict-tags" id="content-restrict-tags" <?php if($options['restrict-tags']) echo "checked"; ?> ></label>
 <br/>
@@ -445,10 +446,10 @@ tdomf_register_form_widget_control('content','Content', 'tdomf_widget_content_co
 ///////////////////////////////////////
 // Validate title and content from form 
 //
-function tdomf_widget_content_validate($args) {
-  $options = tdomf_widget_content_get_options();
-  if(!$options['title-enable'] && !$options['text-enable']) { return ""; }  
+function tdomf_widget_content_validate($args,$preview) {
   extract($args);
+  $options = tdomf_widget_content_get_options($tdomf_form_id);
+  if(!$options['title-enable'] && !$options['text-enable']) { return ""; }  
   $output = "";
   if($options['title-enable'] && $options['title-required']
        && (empty($content_title) || trim($content_title) == "")) {
@@ -464,8 +465,9 @@ function tdomf_widget_content_validate($args) {
       
       // prefitler the content so it's as close to the end result as possible
       //
-      $content_prefiltered = preg_replace('|\[tdomf_form1\]|', '', $content_content);
-      if(!get_option(TDOMF_OPTION_MODERATION)){
+      $content_prefiltered = preg_replace('|\[tdomf_form.*\]|', '', $content_content);
+      $content_prefiltered = preg_replace('|<!--tdomf_form.*-->|', '', $content_prefiltered);
+      if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
          // if moderation is enabled, we don't do kses filtering, might as well
          // give full picture to user!
          $content_prefiltered = wp_filter_post_kses($content_prefiltered);
@@ -521,8 +523,8 @@ function tdomf_widget_whoami_store_cookies($name = "", $email = "", $web = "") {
 
 // Grab the options for the whoami widget. If none avaliable, generate default
 //
-function tdomf_widget_whoami_get_options() {
-  $options = get_option('tdomf_whoami_widget');
+function tdomf_widget_whoami_get_options($form_id) {
+  $options = tdomf_get_option_widget('tdomf_whoami_widget',$form_id);
     if($options == false) {
        $options = array();
        $options['title'] = "";
@@ -545,7 +547,7 @@ function tdomf_widget_whoami($args) {
   get_currentuserinfo();
   
   extract($args);
-  $options = tdomf_widget_whoami_get_options();
+  $options = tdomf_widget_whoami_get_options($tdomf_form_id);
 
   $output = $before_widget;
 
@@ -588,7 +590,7 @@ function tdomf_widget_whoami($args) {
      if($options['name-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Name:","tdomf").' <br/><input type="text" value="'.htmlentities($whoami_name,ENT_QUOTES).'" name="whoami_name" id="whoami_name" />';
+     $output .= ">".__("Name:","tdomf").' <br/><input type="text" value="'.htmlentities($whoami_name,ENT_QUOTES,get_bloginfo('charset')).'" name="whoami_name" id="whoami_name" />';
      if($options['name-required']) {
         $output .= __(" (Required)","tdomf");
      }
@@ -601,7 +603,7 @@ function tdomf_widget_whoami($args) {
      if($options['email-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Email:","tdomf").'<br/><input type="text" value="'.htmlentities($whoami_email,ENT_QUOTES).'" name="whoami_email" id="whoami_email" />';
+     $output .= ">".__("Email:","tdomf").'<br/><input type="text" value="'.htmlentities($whoami_email,ENT_QUOTES,get_bloginfo('charset')).'" name="whoami_email" id="whoami_email" />';
          if($options['email-required']) {
             $output .= __(" (Required)","tdomf");
          }
@@ -614,7 +616,7 @@ function tdomf_widget_whoami($args) {
      if($options['webpage-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Webpage:","tdomf").'<br/><input type="text" value="'.htmlentities($whoami_webpage,ENT_QUOTES).'" name="whoami_webpage" id="whoami_webpage" />';
+     $output .= ">".__("Webpage:","tdomf").'<br/><input type="text" value="'.htmlentities($whoami_webpage,ENT_QUOTES,get_bloginfo('charset')).'" name="whoami_webpage" id="whoami_webpage" />';
          if($options['webpage-required']) {
             $output .= __(" (Required)","tdomf");
          }
@@ -630,8 +632,8 @@ tdomf_register_form_widget('who-am-i','Who Am I', 'tdomf_widget_whoami');
 //////////////////////////////////////////
 // Display and handle widget control panel 
 //
-function tdomf_widget_whoami_control() {
-  $options = tdomf_widget_whoami_get_options();
+function tdomf_widget_whoami_control($form_id) {
+  $options = tdomf_widget_whoami_get_options($form_id);
   
   // Store settings for this widget
     if ( $_POST['who-am-i-submit'] ) {
@@ -644,7 +646,7 @@ function tdomf_widget_whoami_control() {
      $newoptions['webpage-required'] = isset($_POST['who_am_i-webpage-required']);
      if ( $options != $newoptions ) {
         $options = $newoptions;
-        update_option('tdomf_whoami_widget', $options);
+        tdomf_set_option_widget('tdomf_whoami_widget', $options,$form_id);
      }
   }
   
@@ -654,7 +656,7 @@ function tdomf_widget_whoami_control() {
 
         ?>
 <div>
-<label for="who_am_i-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="text" id="who_am_i-title" name="who_am_i-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" /></label>
+<label for="who_am_i-title" style="line-height:35px;display:block;"><?php _e("Title: ","tdomf"); ?><input type="text" id="who_am_i-title" name="who_am_i-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
 
 <h4><?php _e("Submitter Name","tdomf"); ?></h4>
 <label for="who_am_i-name-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="who_am_i-name-enable" id="who_am_i-name-enable" <?php if($options['name-enable']) echo "checked"; ?> ></label>
@@ -702,7 +704,11 @@ tdomf_register_form_widget_preview('who-am-i','Who Am I', 'tdomf_widget_whoami_p
 //////////////////////////////////
 // Validate input for this widget
 //
-function tdomf_widget_whoami_validate($args) {
+function tdomf_widget_whoami_validate($args,$preview) {
+  // only preview - no validation required
+  if($preview) {
+    return NULL;
+  }
   // if user logged in, no validation required
   if(is_user_logged_in()){
     return NULL;
@@ -710,7 +716,7 @@ function tdomf_widget_whoami_validate($args) {
   // do validation
   extract($args);
   $output = "";
-  $options = tdomf_widget_whoami_get_options();
+  $options = tdomf_widget_whoami_get_options($tdomf_form_id);
   if($options['name-enable'] && $options['name-required']
        && (empty($whoami_name) || trim($whoami_name) == "")) {
       $output .= __("You must specify a name.","tdomf");

@@ -3,19 +3,19 @@
 Name: "Custom Fields"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Add a custom field to your form!
-Version: 0.4
+Version: 0.5
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-function tdomf_widget_customfields_gen_fmt($index,$value){
+function tdomf_widget_customfields_gen_fmt($index,$value,$form_id){
   $value = strval($value);
   if(empty($value) || trim($value) == "") {
     return "";
   }
-  $options = tdomf_widget_customfields_get_options($index);
+  $options = tdomf_widget_customfields_get_options($index,$form_id);
   $title = $options['title'];
   $key = $options['key'];
   
@@ -29,6 +29,7 @@ function tdomf_widget_customfields_gen_fmt($index,$value){
 function tdomf_widget_customfields_append($post_ID,$options,$index){
   // Grab value
   $value = get_post_meta($post_ID,$options['key'],true);
+  $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
   // select of course has to be a special case!
   if($options['type'] == 'select') {
     $value = tdomf_widget_customfields_select_convert($value,$options);
@@ -36,7 +37,7 @@ function tdomf_widget_customfields_append($post_ID,$options,$index){
   if(!empty($value) && (!is_string($value) || trim($value) != "") )
   {
     // Gen Format
-    $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value));
+    $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value,$form_id));
     if($fmt != "") {
       // Grab existing data
       $post = wp_get_single_post($post_ID, ARRAY_A);
@@ -62,16 +63,21 @@ function tdomf_widget_customfields_append($post_ID,$options,$index){
 // tdomf widget page
 //
 function tdomf_widget_customfields_number_bottom(){
-  $count = get_option('tdomf_customfields_widget_count');
+  $form_id = tdomf_edit_form_form_id();
+  $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
   if($count <= 0){ $count = 1; } 
+  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+  if($max == false){ $max = 9; }
+  if($count > ($max+1)){ $count = ($max+1); }
   
+  if($max > 1) {
   ?>
   <div class="wrap">
     <form method="post">
       <h2><?php _e("Custom Fields Widgets","tdomf"); ?></h2>
       <p style="line-height: 30px;"><?php _e("How many Custom Fields widgets would you like?","tdomf"); ?>
       <select id="tdomf-widget-customfields-number" name="tdomf-widget-customfields-number" value="<?php echo $count; ?>">
-      <?php for($i = 1; $i < 10; $i++) { ?>
+      <?php for($i = 1; $i < ($max+1); $i++) { ?>
         <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
       <?php } ?>
       </select>
@@ -82,13 +88,14 @@ function tdomf_widget_customfields_number_bottom(){
     </form>
   </div>
   <?php 
+  }
 }
 add_action('tdomf_widget_page_bottom','tdomf_widget_customfields_number_bottom');
 
 // Get Options for this widget
 //
-function tdomf_widget_customfields_get_options($index) {
-  $options = get_option('tdomf_customfields_widget_'.$index);
+function tdomf_widget_customfields_get_options($index,$form_id) {
+  $options = tdomf_get_option_widget('tdomf_customfields_widget_'.$index,$form_id);
     if($options == false) {
        $options = array();
        $options['key'] = "";
@@ -133,7 +140,7 @@ function tdomf_widget_customfields($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_customfields_get_options($number);
+  $options = tdomf_widget_customfields_get_options($number,$args['tdomf_form_id']);
   
   if($options['type'] == 'textfield') {
     return tdomf_widget_customfields_textfield($args,$number,$options);
@@ -157,7 +164,7 @@ function tdomf_widget_customfields_preview($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_customfields_get_options($number);
+  $options = tdomf_widget_customfields_get_options($number,$args['tdomf_form_id']);
   
   $output = "";
   if($options['preview']) {
@@ -174,12 +181,12 @@ function tdomf_widget_customfields_preview($args,$params) {
   return $output;
 }
   
-function tdomf_widget_customfields_validate($args,$params) {
+function tdomf_widget_customfields_validate($args,$preview,$params) {
   $number = 0;
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_customfields_get_options($number);
+  $options = tdomf_widget_customfields_get_options($number,$args['tdomf_form_id']);
   
   if($options['type'] == 'textfield') {
     return tdomf_widget_customfields_textfield_validate($args,$number,$options);
@@ -197,7 +204,7 @@ function tdomf_widget_customfields_post($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_customfields_get_options($number);
+  $options = tdomf_widget_customfields_get_options($number,$args['tdomf_form_id']);
   
   $retVal = NULL;
   
@@ -225,7 +232,7 @@ function tdomf_widget_customfields_adminemail($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_customfields_get_options($number);
+  $options = tdomf_widget_customfields_get_options($number,$args['tdomf_form_id']);
   
   if($options['type'] == 'textfield') {
     return tdomf_widget_customfields_textfield_adminemail($args,$number,$options);
@@ -243,13 +250,13 @@ function tdomf_widget_customfields_adminemail($args,$params) {
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //
-function tdomf_widget_customfields_control($params) {
+function tdomf_widget_customfields_control($form_id,$params) {
   $number = 0;
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
   
-  $options = tdomf_widget_customfields_get_options($number);
+  $options = tdomf_widget_customfields_get_options($number,$form_id);
   // Store settings for this widget
   if ( $_POST["customfields-$number-submit"] ) {
      $newoptions['title'] = $_POST["customfields-title-$number"];
@@ -274,7 +281,7 @@ function tdomf_widget_customfields_control($params) {
      }
      if ( $options != $newoptions ) {
         $options = $newoptions;
-        update_option('tdomf_customfields_widget_'.$number, $options);
+        tdomf_set_option_widget('tdomf_customfields_widget_'.$number, $options,$form_id);
         
      }
   }
@@ -285,14 +292,14 @@ function tdomf_widget_customfields_control($params) {
 
 <label for="customfields-title-<?php echo $number; ?>">
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="customfields-title-<?php echo $number; ?>" name="customfields-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="customfields-title-<?php echo $number; ?>" name="customfields-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 <br/><br/>
 
 <label for="customfields-name-<?php echo $number; ?>">
 <?php _e("Custom Field Key:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="customfields-key-<?php echo $number; ?>" name="customfields-key-<?php echo $number; ?>" value="<?php echo htmlentities($options['key'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="customfields-key-<?php echo $number; ?>" name="customfields-key-<?php echo $number; ?>" value="<?php echo htmlentities($options['key'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 <br/><br/>
@@ -403,12 +410,17 @@ function tdomf_widget_customfields_control($params) {
 
 
 function tdomf_widget_customfields_init(){
+  $form_id = tdomf_edit_form_form_id();
   if ( $_POST['tdomf-widget-customfields-number-submit'] ) {
     $count = $_POST['tdomf-widget-customfields-number'];
-    if($count > 0){ update_option('tdomf_customfields_widget_count',$count); }
+    if($count > 0){ tdomf_set_option_widget('tdomf_customfields_widget_count',$count,$form_id); }
   }
-  $count = get_option('tdomf_customfields_widget_count');
+  $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
   if($count <= 0){ $count = 1; } 
+  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+  if($max <= 1){ $count = 1; }
+  else if($count > ($max+1)){ $count = $max + 1; }
+  
   for($i = 1; $i <= $count; $i++) {
     tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
     tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 800, $i);
@@ -444,7 +456,7 @@ function tdomf_widget_customfields_textfield($args,$number,$options) {
   } else if($options['tf-subtype'] == 'url') {
     $output .= __("URL:","tdomf")." ";
   }
-  $output .= "<input type=\"textfield\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES)."\" />";
+  $output .= "<input type=\"textfield\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" />";
   $output .= "</label>\n";
   
   $output .= $after_widget;
@@ -468,12 +480,12 @@ function tdomf_widget_customfields_textfield_control($number,$options){
 
   $output .= "<label for=\"customfields-size-$number\">";
   $output .= __("Size:","tdomf");;
-  $output .= "<input type=\"textfield\" name=\"customfields-size-$number\" id=\"customfields-size-$number\" value=\"".htmlentities($options['size'],ENT_QUOTES)."\" size=\"3\" />";
+  $output .= "<input type=\"textfield\" name=\"customfields-size-$number\" id=\"customfields-size-$number\" value=\"".htmlentities($options['size'],ENT_QUOTES,get_bloginfo('charset'))."\" size=\"3\" />";
   $output .= "</label><br/><br/>";
 
   $output .= "<label for=\"customfields-tf-defval-$number\">";
   $output .= __("Default Value:","tdomf")."<br/>";
-  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-tf-defval-$number\" name=\"customfields-tf-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES)."\" />";
+  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-tf-defval-$number\" name=\"customfields-tf-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES,get_bloginfo('charset'))."\" />";
   $output .= "</label><br/><br/>";
 
   #$output .= "<label for \"customfields-tf-subtype-$number\">";
@@ -556,8 +568,8 @@ function tdomf_widget_customfields_textfield_adminemail($args,$number,$options) 
 ////////////////////////////////////////////////////////////////////////////////
 
 function tdomf_widget_customfields_hidden($args,$number,$options) {
-  $value = htmlentities($options['defval']);
-  $output = "<input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"".htmlentities($value,ENT_QUOTES)."\" />";
+  $value = htmlentities($options['defval'],ENT_NOQUOTES,get_bloginfo('charset'));
+  $output = "<input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" />";
   return $output;
 }
 
@@ -571,7 +583,7 @@ function tdomf_widget_customfields_hidden_control($number,$options){
   $output  = "<h3>".__("Hidden","tdomf")."</h3>";
   $output .= "<label for=\"customfields-defval-$number\">";
   $output .= __("Value:","tdomf")."<br/>";
-  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES)."\" />";
+  $output .= "<input type=\"textfield\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES,get_bloginfo('charset'))."\" />";
   $output .= "</label><br/><br/>";
   return $output;
 }
@@ -625,11 +637,11 @@ function tdomf_widget_customfields_textarea_control($number,$options){
   $output .= "<label for=\"customfields-cols-$number\" >";
   $output .= __("Cols","tdomf");
   $output .= " <input type=\"textfield\" name=\"customfields-cols-$number\" id=\"customfields-cols-$number\" value=\"";
-  $output .= htmlentities($options['cols'],ENT_QUOTES)."\" size=\"3\" /></label>";
+  $output .= htmlentities($options['cols'],ENT_QUOTES,get_bloginfo('charset'))."\" size=\"3\" /></label>";
   $output .= " <label for=\"customfields-rows-$number\" >";
   $output .= __("Rows","tdomf");
   $output .= " <input type=\"textfield\" name=\"customfields-rows-$number\" id=\"customfields-rows-$number\" value=\"";
-  $output .= htmlentities($options['rows'],ENT_QUOTES)."\" size=\"3\" /></label><br/><br/>";
+  $output .= htmlentities($options['rows'],ENT_QUOTES,get_bloginfo('charset'))."\" size=\"3\" /></label><br/><br/>";
 
   $output .= "<label for=\"customfields-restrict-tags-$number\">";
   $output .= __("Restrict Tags","tdomf");
@@ -660,7 +672,7 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
   $output .= "</label>\n";
     
   if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-    $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags']))."<br/>";
+    $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags'],ENT_NOQUOTES,get_bloginfo('charset')))."<br/>";
   }
   if($options['ta-word-limit'] > 0) {
       $output .= sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['ta-word-limit'])."<br/>";
@@ -676,7 +688,7 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
     $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
     $output .= "\n<script type='text/javascript'>edToolbarcfta$number();</script>\n";
   }
-  $output .= "<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >".htmlentities($value)."</textarea>";
+  $output .= "<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >".htmlentities($value,ENT_NOQUOTES,get_bloginfo('charset'))."</textarea>";
   if($options['ta-quicktags']) {
     $output .= "\n<script type='text/javascript'>var edCanvascfta$number = document.getElementById('customfields-textarea-$number');</script>\n";
   }
@@ -823,7 +835,7 @@ function tdomf_widget_customfields_checkbox($args,$number,$options) {
   $output  = $before_widget;
   
   $value = $options['defval'];
-  if(isset($args["tdomf_key"])){
+  if(isset($args["tdomf_key_$tdomf_form_id"])){
     $value = isset($args["customfields-checkbox-$number"]);
   }
   
@@ -1022,7 +1034,7 @@ function tdomf_widget_customfields_select_control($number,$options){
   
   <label for="customfields-s-rows-<?php echo $number; ?>">
   <?php _e("How many rows?","tdomf"); ?> 
-  <input type="textfield" size="5" name="customfields-s-rows-<?php echo $number; ?>" id="customfields-s-rows-<?php echo $number; ?>" value="<?php echo htmlentities($options['rows'],ENT_QUOTES); ?>" />
+  <input type="textfield" size="5" name="customfields-s-rows-<?php echo $number; ?>" id="customfields-s-rows-<?php echo $number; ?>" value="<?php echo htmlentities($options['rows'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
   <?php _e("<i>(1 row will create a drop down list)</i>","tdomf"); ?>
   </label>
   

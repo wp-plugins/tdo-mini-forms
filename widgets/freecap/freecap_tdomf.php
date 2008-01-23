@@ -33,6 +33,8 @@ require_once($wp_config);
 
 global $wpdb;
 
+$form_id = intval($_REQUEST['tdomf_form_id']);
+
 // loading text domain for language translation
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
@@ -74,7 +76,7 @@ $seed_func = "mt_srand";
 // crc32 supported by PHP4.0.1+
 $hash_func = "sha1";
 // store in session so can validate in form processor
-$_SESSION['hash_func'] = $hash_func;
+$_SESSION['hash_func_'.$form_id] = $hash_func;
 
 // image type:
 // possible values: "jpg", "png", "gif"
@@ -203,11 +205,11 @@ $im2 = ImageCreate($width, $height);
 //////////////////////////////////////////////////////
 ////// Avoid Brute Force Attacks:
 //////////////////////////////////////////////////////
-if(empty($_SESSION['freecap_attempts']))
+if(empty($_SESSION['freecap_attempts_'.$form_id]))
 {
-	$_SESSION['freecap_attempts'] = 1;
+	$_SESSION['freecap_attempts_'.$form_id] = 1;
 } else {
-	$_SESSION['freecap_attempts']++;
+	$_SESSION['freecap_attempts_'.$form_id]++;
 
 	// if more than ($max_attempts) refreshes, block further refreshes
 	// can be negated by connecting with new session id
@@ -216,9 +218,9 @@ if(empty($_SESSION['freecap_attempts']))
 	// in short, there's little point trying to avoid brute forcing
 	// the best way to protect against BF attacks is to ensure the dictionary is not
 	// accessible via the web or use random string option
-	if($_SESSION['freecap_attempts']>$max_attempts)
+	if($_SESSION['freecap_attempts_'.$form_id]>$max_attempts)
 	{
-		$_SESSION['freecap_word_hash'] = false;
+		$_SESSION['freecap_word_hash_'.$form_id] = false;
 
 		$bg = ImageColorAllocate($im,255,255,255);
 		ImageColorTransparent($im,$bg);

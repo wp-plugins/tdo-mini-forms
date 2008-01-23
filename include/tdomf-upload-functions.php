@@ -17,15 +17,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // Figure out the storage path for this user/ip and thusly create it
 //
-function tdomf_create_tmp_storage_path() {
+function tdomf_create_tmp_storage_path($form_id = 1) {
   global $current_user;
-  $options = tdomf_widget_upload_get_options(); 
+  $options = tdomf_widget_upload_get_options($form_id); 
   get_currentuserinfo();
   if(is_user_logged_in()) {  
-    $storagepath = $options['path'].DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$current_user->user_login;
+    $storagepath = $options['path'].DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$form_id.DIRECTORY_SEPARATOR.$current_user->user_login;
   } else {
     $ip =  $_SERVER['REMOTE_ADDR'];
-    $storagepath = $options['path'].DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$ip;
+    $storagepath = $options['path'].DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$form_id.DIRECTORY_SEPARATOR.$ip;
   }
   if(!file_exists($storagepath)) {
     tdomf_log_message("$storagepath does not exist. Creating it.");
@@ -330,9 +330,9 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
             tdomf_log_message("Error when attempting to create $path!", TDOMF_LOG_ERROR);
             return false;
         }
+        // use real path (only if we are pretty certain it won't break)
+        $path = @realpath($path);
       }
-      // use real path!
-      $path = @realpath($path);
     }
     
     if(@is_dir($path)) {
@@ -349,25 +349,26 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
 function tdomf_upload_preview_handler(){
    $id = $_GET['tdomf_upload_preview'];
    $key = $_GET['key'];
+   $form_id = intval($_GET['form']);
 
    // Session start
    //
    if (!isset($_SESSION)) session_start();
    
    // Security check   
-   if($_SESSION['tdomf_upload_preview_key'] != $key) {
+   if($_SESSION['tdomf_upload_preview_key_'.$form_id] != $key) {
      return;
    }
    
-   if(!isset($_SESSION['uploadfiles'][$id])) {
+   if(!isset($_SESSION['uploadfiles_'.$form_id][$id])) {
      tdomf_log_message("(preview) No file with that id! $id",TDOMF_LOG_ERROR);
      return;
    }
       
-   $filepath = $_SESSION['uploadfiles'][$id]['path'];
+   $filepath = $_SESSION['uploadfiles_'.$form_id][$id]['path'];
    if(!empty($filepath)) {
 
-     $type = $_SESSION['uploadfiles'][$id]['type'];
+     $type = $_SESSION['uploadfiles_'.$form_id][$id]['type'];
      
      // Check if file exists
      //
@@ -454,8 +455,8 @@ include_once(ABSPATH . 'wp-admin/includes/admin.php');
 
 // Get Options for this widget
 //
-function tdomf_widget_upload_get_options() {
-  $options = get_option('tdomf_upload_widget');
+function tdomf_widget_upload_get_options($form_id) {
+  $options = tdomf_get_option_widget('tdomf_upload_widget',$form_id);
     if($options == false) {
        $options = array();
        $options['title'] = '';
@@ -486,13 +487,13 @@ function tdomf_widget_upload_get_options() {
 //
 function tdomf_widget_upload($args) {
   extract($args);
-  $options = tdomf_widget_upload_get_options();
+  $options = tdomf_widget_upload_get_options($tdomf_form_id);
   
   $output  = $before_widget;  
   if($options['title'] != "") {
     $output .= $before_title.$options['title'].$after_title;
   }
-  $inline_path = TDOMF_URLPATH."tdomf-upload-inline.php";
+  $inline_path = TDOMF_URLPATH."tdomf-upload-inline.php"."?tdomf_form_id=".$tdomf_form_id;
   // my best guestimate
   $height = 160 + (intval($options['max']) * 30);
   $output .= "<iframe id='uploadfiles_inline' name='uploadfiles_inline' frameborder='0' marginwidth='0' marginheight='0' width='100%' height='$height' src='$inline_path'></iframe>";
@@ -508,7 +509,7 @@ tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload')
 //
 function tdomf_widget_upload_post($args) {
   extract($args);
-  $options = tdomf_widget_upload_get_options();
+  $options = tdomf_widget_upload_get_options($tdomf_form_id);
   
   $modifypost = false;
   if($options['post-title'] || $options['a'] || $options['img']) {
@@ -523,7 +524,7 @@ function tdomf_widget_upload_post($args) {
   }
   
   $filecount = 0;
-  $theirfiles = $_SESSION['uploadfiles'];
+  $theirfiles = $_SESSION['uploadfiles_'.$tdomf_form_id];
   for($i =  0; $i < $options['max']; $i++) {
     if(!file_exists($theirfiles[$i]['path'])) {
       unset($theirfiles[$i]);
@@ -686,16 +687,16 @@ tdomf_register_form_widget_post('upload-files','Upload Files', 'tdomf_widget_upl
 ////////////////////////////////
 // Validate uploads if possible
 //
-function tdomf_widget_upload_validate($args) {
+function tdomf_widget_upload_validate($args,$preview) {
   extract($args);
-  $options = tdomf_widget_upload_get_options();
+  $options = tdomf_widget_upload_get_options($tdomf_form_id);
   if(!isset($_SESSION)) {
     return $before_widget.__("SESSION has not be started! Something is wrong with your TDOMF installation.","tdomf").$after_widget;
   }
-  if($options['min'] > 0 && !isset($_SESSION['uploadfiles'])) {
+  if($options['min'] > 0 && !isset($_SESSION['uploadfiles_'.$tdomf_form_id])) {
     return $before_widget.sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files.","tdomf"),$options['min']).$after_widget;
   }
-  $theirfiles = $_SESSION['uploadfiles'];
+  $theirfiles = $_SESSION['uploadfiles_'.$tdomf_form_id];
   $filecount = 0;
   for($i =  0; $i < $options['max']; $i++) {
     if(!file_exists($theirfiles[$i]['path'])) {
@@ -716,16 +717,16 @@ tdomf_register_form_widget_validate('upload-files','Upload Files', 'tdomf_widget
 //
 function tdomf_widget_upload_preview($args) {
   extract($args);
-  $options = tdomf_widget_upload_get_options();
+  $options = tdomf_widget_upload_get_options($tdomf_form_id);
 
   $random_string = tdomf_random_string(100);
-  $_SESSION['tdomf_upload_preview_key'] = $random_string;
+  $_SESSION['tdomf_upload_preview_key_'.$tdomf_form_id] = $random_string;
   
   $output = $before_widget;
-  $theirfiles = $_SESSION['uploadfiles'];
+  $theirfiles = $_SESSION['uploadfiles_'.$tdomf_form_id];
   for($i =  0; $i < $options['max']; $i++) {
     if(file_exists($theirfiles[$i]['path'])) {
-      $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$random_string;
+      $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$random_string."&form=".$tdomf_form_id;
       if($options['a']) {
         $output .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($theirfiles[$i]['path'])).")</a></p>";
       }
@@ -744,7 +745,7 @@ tdomf_register_form_widget_preview('upload-files','Upload Files', 'tdomf_widget_
 //
 function tdomf_widget_upload_adminemail($args) {
   extract($args);
-  $options = tdomf_widget_upload_get_options();
+  $options = tdomf_widget_upload_get_options($tdomf_form_id);
   
   $output = "";
   for($i =  0; $i < $options['max']; $i++) {
@@ -771,8 +772,8 @@ tdomf_register_form_widget_adminemail('upload-files','Upload Files', 'tdomf_widg
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //
-function tdomf_widget_upload_control() {
-  $options = tdomf_widget_upload_get_options();
+function tdomf_widget_upload_control($form_id) {
+  $options = tdomf_widget_upload_get_options($form_id);
   
   // Store settings for this widget
   if ( $_POST['upload-files-submit'] ) {
@@ -798,7 +799,7 @@ function tdomf_widget_upload_control() {
       
       if ( $options != $newoptions ) {
         $options = $newoptions;
-        update_option('tdomf_upload_widget', $options);
+        tdomf_set_option_widget('tdomf_upload_widget', $options, $form_id);
      }
   }
 
@@ -809,15 +810,15 @@ function tdomf_widget_upload_control() {
 
 <label for="upload-files-title">
 <?php _e("Title: ","tdomf"); ?>
-<input type="textfield" id="upload-files-title" name="upload-files-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
+<input type="textfield" id="upload-files-title" name="upload-files-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-path" ><?php _e("Path to store uploads (should not be publically accessible):","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-path" name="upload-files-path" value="<?php echo htmlentities($options['path'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="upload-files-path" name="upload-files-path" value="<?php echo htmlentities($options['path'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-types" ><?php _e("Allowed File Types:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-types" name="upload-files-types" value="<?php echo htmlentities($options['types'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="upload-files-types" name="upload-files-types" value="<?php echo htmlentities($options['types'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-post-title">
@@ -826,17 +827,17 @@ function tdomf_widget_upload_control() {
 </label><br/><br/>
 
 <label for="upload-files-size">
-<input type="textfield" name="upload-files-size" id="upload-files-size" value="<?php echo htmlentities($options['size'],ENT_QUOTES); ?>" size="10" />
+<input type="textfield" name="upload-files-size" id="upload-files-size" value="<?php echo htmlentities($options['size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="10" />
 <?php printf(__("Max File Size in bytes. Example: 1024 = %s, 1048576 = %s","tdomf"),tdomf_filesize_format(1024),tdomf_filesize_format(1048576)); ?> 
 </label><br/><br/>
 
 <label for="upload-files-min">
-<input type="textfield" name="upload-files-min" id="upload-files-min" value="<?php echo htmlentities($options['min'],ENT_QUOTES); ?>" size="2" />
+<input type="textfield" name="upload-files-min" id="upload-files-min" value="<?php echo htmlentities($options['min'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
 <?php _e("Minimum File Uploads <i>(0 indicates file uploads optional)</i>","tdomf"); ?> 
 </label><br/>
 
 <label for="upload-files-size">
-<input type="textfield" name="upload-files-max" id="upload-files-max" value="<?php echo htmlentities($options['max'],ENT_QUOTES); ?>" size="2" />
+<input type="textfield" name="upload-files-max" id="upload-files-max" value="<?php echo htmlentities($options['max'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
 <?php _e("Maximum File Uploads","tdomf"); ?> 
 </label><br/>
 
@@ -848,13 +849,13 @@ function tdomf_widget_upload_control() {
 </label><br/>
 
 &nbsp;&nbsp;&nbsp;<label for="upload-files-url" ><?php _e("URL of uploaded file area:","tdomf"); ?><br/>
-&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url" name="upload-files-url" value="<?php echo htmlentities($options['url'],ENT_QUOTES); ?>" />
+&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url" name="upload-files-url" value="<?php echo htmlentities($options['url'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 <br/><br/>
 
 <label for="upload-files-cmd" ><?php _e("Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-cmd" name="upload-files-cmd" value="<?php echo htmlentities($options['cmd'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="upload-files-cmd" name="upload-files-cmd" value="<?php echo htmlentities($options['cmd'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
 <label for="upload-files-attach">
@@ -904,7 +905,7 @@ function tdomf_widget_upload_control() {
 </label><br/>
 
 <label for="upload-files-custom-key" ><?php _e("Name of Custom Key:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-custom-key" name="upload-files-custom-key" value="<?php echo htmlentities($options['custom-key'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="upload-files-custom-key" name="upload-files-custom-key" value="<?php echo htmlentities($options['custom-key'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 </p>

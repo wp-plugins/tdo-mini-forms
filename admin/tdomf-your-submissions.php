@@ -141,12 +141,18 @@ function tdomf_show_your_submissions_menu() {
      }
      </style>
       
-         
-    <div class="wrap">
-    <h2><?php _e("Make a submission!","tdomf"); ?></h2>
-    <?php echo tdomf_generate_form(); ?>
-    <br/><br/>
-    
+    <?php $form_ids = tdomf_get_form_ids(); 
+          if(!empty($form_ids)) {
+            foreach($form_ids as $form_id) { 
+              if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id->form_id)) { ?>
+                  <div class="wrap">
+                  <h2><?php echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?></h2>
+    <p><?php echo tdomf_get_option_form(TDOMF_OPTION_DESCRIPTION,$form_id->form_id); ?></p>
+    <?php echo tdomf_generate_form($form_id->form_id); ?>
+          <br/><br/>
+          </div>
+            <?php } }
+          }?>
     <?php } ?>
     
   </div>

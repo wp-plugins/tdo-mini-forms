@@ -10,7 +10,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // Checks if current user/ip has permissions to post!
 //
-function tdomf_check_permissions_form() {
+function tdomf_check_permissions_form($form_id = 1) {
    global $current_user;
 
    get_currentuserinfo();
@@ -41,10 +41,14 @@ function tdomf_check_permissions_form() {
 
   // Users who can access form
   //
-  if(get_option(TDOMF_OPTION_ALLOW_EVERYONE) == false) {
-  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM)) {
+  if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
+  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
       tdomf_log_message("User with the incorrect privilages attempted to submit a post!",TDOMF_LOG_ERROR);
-	  	return sprintf(__("You (%s) do not currently have permissions to use this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>.","tdomf"),$current_user->user_name,get_bloginfo('admin_email'));
+      if(is_user_logged_in()) {
+        return sprintf(__("You (%s) do not currently have permissions to use this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>.","tdomf"),$current_user->user_name,get_bloginfo('admin_email'));
+      } else {
+        return __("Unregistered users do not currently have permissions to use this form.","tdomf");
+      }
   	}
   }
 
@@ -61,7 +65,8 @@ function tdomf_preview_form($args) {
                                       "before_title"=>"<b>",
                                       "after_title"=>"</b><br/>" ),
                                       $args);
-   $widget_order = tdomf_get_widget_order();
+   $form_id = intval($args['tdomf_form_id']);
+   $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_preview[$w])) {
 		tdomf_log_message_extra("Looking at preview widget $w");
@@ -72,12 +77,12 @@ function tdomf_preview_form($args) {
       tdomf_log_message("Couldn't generate preview!",TDOMF_LOG_ERROR);
 	  return __("Error! Could not generate a preview!","tdomf");
    }
-   return "<div class=\"tdomf_form_preview\" id=\"tdomf_form1_preview\" name=\"tdomf_form1_preview\">".sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message)."</div>";
+   return "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_preview\" name=\"tdomf_form".$form_id."_preview\">".sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message)."</div>";
 }
 
 // Validate input using widgets
 //
-function tdomf_validate_form($args) {
+function tdomf_validate_form($args,$preview = false) {
    global $tdomf_form_widgets_validate;
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"",
@@ -85,10 +90,11 @@ function tdomf_validate_form($args) {
                                       "before_title"=>"<b>",
                                       "after_title"=>"</b><br/>"),
 							   $args);
-   $widget_order = tdomf_get_widget_order();
+   $form_id = intval($args['tdomf_form_id']);
+   $widget_order = tdomf_get_widget_order($form_id,$preview);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_validate[$w])) {
-		$temp_message = $tdomf_form_widgets_validate[$w]['cb']($widget_args,$tdomf_form_widgets_validate[$w]['params']);
+		$temp_message = $tdomf_form_widgets_validate[$w]['cb']($widget_args,$preview,$tdomf_form_widgets_validate[$w]['params']);
 		if($temp_message != NULL && trim($temp_message) != ""){
 		   $message .= $temp_message;
 		}
@@ -111,14 +117,14 @@ function tdomf_create_post($args) {
    tdomf_log_message("Attempting to create a post based on submission");
 
    // Default submitter
-   $user_id = get_option(TDOMF_DEFAULT_AUTHOR);
+   $user_id = tdomf_get_option_form(TDOMF_DEFAULT_AUTHOR,1);
    if(is_user_logged_in()) {
       $user_id = $current_user->ID;
    }
 
    // Default category
    //
-   $post_cats = array(get_option(TDOMF_DEFAULT_CATEGORY));
+   $post_cats = array(tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,1));
 
    // Default title (should this be an option?)
    //
@@ -152,7 +158,7 @@ function tdomf_create_post($args) {
    add_post_meta($post_ID, TDOMF_KEY_FLAG, true, true);
 
    // Submitter info
-   if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)){
+   if($user_id != tdomf_get_option_form(TDOMF_DEFAULT_AUTHOR,1)){
      tdomf_log_message("Logging default submitter info (user $user_id) for this post $post_ID");
      add_post_meta($post_ID, TDOMF_KEY_USER_ID, $user_id, true);
      add_post_meta($post_ID, TDOMF_KEY_USER_NAME, $user->user_login, true);
@@ -166,13 +172,18 @@ function tdomf_create_post($args) {
         add_post_meta($post_ID, TDOMF_KEY_IP, $ip, true);
    }
 
+   // Form Id
+   $form_id = intval($args['tdomf_form_id']);
+   add_post_meta($post_ID, TDOMF_KEY_FORM_ID, $form_id, true);
+
+   
    tdomf_log_message("Let the widgets do their work on newly created $post_ID");
 
    // Disable kses protection! It seems to get over-protective of non-registered
    // posts! If the post is going to be moderated, then we don't have an issue
    // as an admin will verify it... I think. Hope to god this is not a
    // security risk!
-   if(get_option(TDOMF_OPTION_MODERATION)){
+   if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
      kses_remove_filters();
    }
    
@@ -185,7 +196,7 @@ function tdomf_create_post($args) {
                                       "before_title"=>"<b>",
                                       "after_title"=>"</b><br/>"),
                                       $args);
-   $widget_order = tdomf_get_widget_order();
+   $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_post[$w])) {
       $temp_message = $tdomf_form_widgets_post[$w]['cb']($widget_args,$tdomf_form_widgets_post[$w]['params']);
@@ -214,7 +225,7 @@ function tdomf_create_post($args) {
    // publish (maybe)
    //
    $send_moderator_email = true;
-   if(!get_option(TDOMF_OPTION_MODERATION)){
+   if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
       tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
       // Use update post instead of publish post because in WP2.3, 
       // update_post doesn't seem to add the date correctly!
@@ -250,12 +261,12 @@ function tdomf_create_post($args) {
    // Notify admins
    //
    if($send_moderator_email){
-      tdomf_notify_admins($post_ID);
+      tdomf_notify_admins($post_ID,$form_id);
    }
 
    // Renable filters so we dont' break anything else!
    //
-   if(get_option(TDOMF_OPTION_MODERATION) && current_user_can('unfiltered_html') == false){
+   if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
      kses_init_filters();
    }
    
@@ -264,14 +275,18 @@ function tdomf_create_post($args) {
 
 // Create the form!
 //
-function tdomf_generate_form() {
+function tdomf_generate_form($form_id = 1) {
   global $tdomf_form_widgets;
 
+  if(!tdomf_form_exists($form_id)) {
+    return sprintf(__("Form %d does not exist.",'tdomf'),$form_id); 
+  }
+  
   // AJAX is currently not supported
   //
-  $use_ajax = tdomf_widget_is_ajax_avaliable();
+  $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
 
-  $form = tdomf_check_permissions_form();
+  $form = tdomf_check_permissions_form($form_id);
   if($form != NULL) {
     return $form;
   }
@@ -314,15 +329,15 @@ function tdomf_generate_form() {
   
   if(!$use_ajax) {
      $post_args = array();
-     if(isset($_SESSION['tdomf_form_post'])) {
-    	$post_args = $_SESSION['tdomf_form_post'];
-    	unset($_SESSION['tdomf_form_post']);
-    	if(isset($post_args['tdomf_post_message'])) {
-    	   $form = $post_args['tdomf_post_message'];
-    	}
-    	if(isset($post_args['tdomf_no_form'])) {
-    	   return $form;
-    	}
+     if(isset($_SESSION['tdomf_form_post_'.$form_id])) {
+    	$post_args = $_SESSION['tdomf_form_post_'.$form_id];
+        unset($_SESSION['tdomf_form_post_'.$form_id]);
+        if(isset($post_args['tdomf_post_message_'.$form_id])) {
+           $form = $post_args['tdomf_post_message_'.$form_id];
+        }
+        if(isset($post_args['tdomf_no_form_'.$form_id])) {
+           return $form;
+        }
      }
   } else {
      wp_print_scripts( array( 'sack' ));
@@ -369,31 +384,36 @@ EOT;
   // Ajax or POST setup
   //
   if($use_ajax) {
-  	$form .= "<div id='tdomf_form1_msg_div'></div>\n<form>";
+  	$form .= "<div id='tdomf_form".$form_id."_msg_div'></div>\n<form>";
   } else {
-    $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form1" name="tdomf_form1" class="tdomf_form" >';
+    $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form'.$form_id.'" name="tdomf_form'.$form_id.'" class="tdomf_form" >';
     $form .= "<input type='hidden' id='redirect' name='redirect' value='$_SERVER[REQUEST_URI]' />";
     $random_string = tdomf_random_string(100);
-    $_SESSION["tdomf_key"] = $random_string;
-    $form .= "<input type='hidden' id='tdomf_key' name='tdomf_key' value='$random_string' />";
+    $_SESSION["tdomf_key_$form_id"] = $random_string;
+    $form .= "<input type='hidden' id='tdomf_key' name='tdomf_key_$form_id' value='$random_string' />";
     tdomf_log_message_extra('Placing key '.$random_string.' in $_SESSION: <pre>'.var_export($_SESSION,true)."</pre>");
   }
 
+  // Form id
+  $form .= "\n<input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' />\n";
+  
   // Process widgets
   //
   if(!$use_ajax) {
   	$widget_args = array_merge( array( "before_widget"=>"<fieldset>\n",
                                        "after_widget"=>"\n</fieldset>\n",
                                        "before_title"=>"<legend>",
-                                       "after_title"=>"</legend>" ),
+                                       "after_title"=>"</legend>",
+                                       "tdomf_form_id"=>$form_id),
                                 $post_args);
   } else {
   	$widget_args = array( "before_widget"=>"<fieldset>\n",
                           "after_widget"=>"\n</fieldset>\n",
                           "before_title"=>"<legend>",
-                          "after_title"=>"</legend>" );
+                          "after_title"=>"</legend>",
+                          "tdomf_form_id"=>$form_id);
   }
-  $widget_order = tdomf_get_widget_order();
+  $widget_order = tdomf_get_widget_order($form_id);
   foreach($widget_order as $w) {
 	if(isset($tdomf_form_widgets[$w])) {
 		$form .= $tdomf_form_widgets[$w]['cb']($widget_args,$tdomf_form_widgets[$w]['params']);
@@ -405,15 +425,15 @@ EOT;
   //
   $form .= '<table border="0" align="left"><tr>';
   if($use_ajax) {
-    if(tdomf_widget_is_preview_avaliable()) {
-	    	$form .= '<td width="10px"><input type="button" value="'.__("Preview","tdomf").'" name="tdomf_form1_preview" id="tdomf_form1_preview" onclick="tdomf_preview_post(); return false;" /></td>';
+    if(tdomf_widget_is_preview_avaliable($form_id)) {
+	    	$form .= '<td width="10px"><input type="button" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomf_preview_post(); return false;" /></td>';
     }
-    $form .= '<td width="10px"><input type="button" value="'.__("Send","tdomf").'" name="tdomf_form1_send" id="tdomf_form1_send" onclick="tdomf_submit_post(); return false;" /></td>';
+    $form .= '<td width="10px"><input type="button" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomf_submit_post(); return false;" /></td>';
   } else {
-  	if(tdomf_widget_is_preview_avaliable()) {
-    	$form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form1_preview" id="tdomf_form1_preview" /></td>';
+  	if(tdomf_widget_is_preview_avaliable($form_id)) {
+    	$form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" /></td>';
     }
-  	$form .= '<td width="10px"><input type="submit" value="'.__("Post","tdomf").'" name="tdomf_form1_send" id="tdomf_form1_send" /></td>';
+  	$form .= '<td width="10px"><input type="submit" value="'.__("Post","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" /></td>';
   }
 
 
@@ -423,17 +443,41 @@ EOT;
   return $form;
 }
 
-// Replaces <!--tdomf_form1--> or [tdomf_form1] with actual form
+// Replaces <!--tdomf_formX--> or [tdomf_formX] with actual form
 //
 function tdomf_form_filter($content=''){
    if ('' == $content ||
-       (preg_match('|<!--tdomf_form1-->|', $content) <= 0 && preg_match('|\[tdomf_form1\]|', $content) <= 0)) {
+       (preg_match('|<!--tdomf_form.*-->|', $content) <= 0 && preg_match('|\[tdomf_form.*\]|', $content) <= 0)) {
    	return $content;
    }
-   #$the_form = tdomf_generate_form();
-   $content = preg_replace('|<!--tdomf_form1-->|', '[tdomf_form1]', $content);
-   // make sure to swallow paragraph markers as well so the form is valid xhtml
-   $content = preg_replace('|(<p>)*(\n)*\[tdomf_form1\](\n)*(</p>)*|', tdomf_generate_form(), $content);
+   
+   $forms = array();
+   if(preg_match_all('|<!--tdomf_form.*-->|', $content, $matches) > 0) {
+     foreach($matches[0] as $match) {
+       $match = str_replace('<!--tdomf_form','',trim($match));
+       $match = intval(str_replace('-->','',$match));
+       if(!isset($forms[$match])){
+         $forms[$match] = tdomf_generate_form($match);
+       }
+     }
+   }
+   
+   if(preg_match_all('|\[tdomf_form.*\]|', $content, $matches) > 0) {
+     foreach($matches[0] as $match) {
+       $match = str_replace('[tdomf_form','',trim($match));
+       $match = intval(str_replace(']','',$match));
+       if(!isset($forms[$match])){
+         $forms[$match] = tdomf_generate_form($match);
+       }
+     }
+   }
+
+   foreach($forms as $id => $form ) {
+     $content = preg_replace('|<!--tdomf_form$id-->|', '[tdomf_form$id]', $content);
+     // make sure to swallow paragraph markers as well so the form is valid xhtml
+     $content = preg_replace("|(<p>)*(\n)*\[tdomf_form$id\](\n)*(</p>)*|", $form, $content);
+   }
+   
    return $content;
 }
 add_filter('the_content', 'tdomf_form_filter');

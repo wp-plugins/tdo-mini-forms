@@ -36,7 +36,6 @@ function tdomf_reset_options() {
   delete_option(TDOMF_AUTO_FIX_AUTHOR);
   delete_option(TDOMF_BANNED_IPS);
   delete_option(TDOMF_VERSION_CURRENT);
-  delete_option(TDOMF_LOG);
   delete_option(TDOMF_OPTION_MODERATION);
   delete_option(TDOMF_OPTION_TRUST_COUNT);
   delete_option(TDOMF_OPTION_ALLOW_EVERYONE);
@@ -49,6 +48,14 @@ function tdomf_reset_options() {
   delete_option(TDOMF_STAT_SUBMITTED);
   delete_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES);
   delete_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES);
+  delete_option(TDOMF_OPTION_YOUR_SUBMISSIONS);
+  delete_option(TDOMF_OPTION_NAME);
+  delete_option(TDOMF_OPTION_DESCRIPTION);
+  delete_option(TDOMF_OPTION_CREATEDPAGES);
+  delete_option(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS);
+  delete_option(TDOMF_OPTION_CREATEDUSERS);
+  delete_option(TDOMF_OPTION_WIDGET_INSTANCES);
+  delete_option(TDOMF_LOG);
   
   echo "<span style='color:green;'>";
   _e("DONE","tdomf");  
@@ -62,9 +69,9 @@ function tdomf_reset_options() {
   }
   $roles = $wp_roles->role_objects;
   foreach($roles as $role) {
-     // remove cap as it's not needed
-     if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM])){
-       $role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM);
+     // TODO: remove cap for each option
+     if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_1'])){
+       $role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_1');
      }
   }
   echo "<span style='color:green;'>";
@@ -91,6 +98,85 @@ function tdomf_reset_options() {
     _e("FAIL","tdomf");
   }
   echo "</span><br/>";
+  
+  echo "<span style='width:200px;'>";
+  _e("Deleting Database Tables... ","tdomf");
+  echo "</span>";
+  tdomf_db_delete_tables();
+  echo "<span style='color:green;'>";
+    _e("DONE","tdomf");
+  echo "</span><br/>";
+  
+}
+
+function tdomf_full_uninstall() {
+  
+  // Delete Posts
+  //
+   echo "<span style='width:200px;'>";
+  _e("Removing posts submitted or managed by TDO Mini Forms (this may take a few minutes depending on the number of posts)... ","tdomf");
+  echo "</span>";
+  $posts = tdomf_get_all_posts();
+  foreach($posts as $post) {
+    delete_option(TDOMF_NOTIFY.$post->ID);
+    $tdomf_flag = get_post_meta($post->ID, TDOMF_KEY_FLAG, true);
+    if(!empty($tdomf_flag)){
+       wp_delete_post($post->ID);
+    }
+  }
+  echo "<span style='color:green;'>";
+  _e("DONE","tdomf"); 
+  echo "</span><br/>";
+  
+  // Delete Created Users
+  //
+   echo "<span style='width:200px;'>";
+  _e("Attempting to delete any users created by TDOMF... ","tdomf");
+  echo "</span>";
+  $users = get_option(TDOMF_OPTION_CREATEDUSERS);
+  if($users != false) {
+    foreach($users as $u) {
+      wp_delete_user($u);
+    }
+  }
+  echo "<span style='color:green;'>";
+  _e("DONE","tdomf"); 
+  echo "</span><br/>";
+  
+  // Strip existing Users
+  //
+   echo "<span style='width:200px;'>";
+  _e("Removing info from remaining users (this may take a few minutes depending on number of users)... ","tdomf");
+  echo "</span>";
+  $users = tdomf_get_all_users();
+  foreach($users as $user) {
+    delete_usermeta($user->ID, TDOMF_KEY_FLAG);
+    delete_usermeta($user->ID, TDOMF_KEY_STATUS);
+  }
+  echo "<span style='color:green;'>";
+  _e("DONE","tdomf"); 
+  echo "</span><br/>";
+  
+  // Delete Forms
+  //
+  $form_ids = tdomf_get_form_ids();
+  foreach($form_ids as $f) {
+    echo "<span style='width:200px;'>";
+    printf(__("Deleting Form %d... ","tdomf"),$f->form_id);
+    echo "</span>";
+    if(tdomf_delete_form($f->form_id)) {
+      echo "<span style='color:green;'>";
+     _e("DONE","tdomf");
+    } else {
+      echo "<span style='color:red;'>";
+     _e("FAIL","tdomf");
+    }
+    echo "</span><br/>";
+  }
+  
+  // Delete Options
+  //
+  tdomf_reset_options();
 }
 
 // Uninstall everything else!
@@ -117,7 +203,7 @@ function tdomf_uninstall() {
   echo "</span>";
   $posts = tdomf_get_all_posts();
   foreach($posts as $post) {
-    delete_option(TDOMF_NOTIFY.$post_id);
+    delete_option(TDOMF_NOTIFY.$post->ID);
     delete_post_meta($post->ID, TDOMF_KEY_NOTIFY_EMAIL);
     delete_post_meta($post->ID, TDOMF_KEY_FLAG);
     delete_post_meta($post->ID, TDOMF_KEY_NAME);
@@ -130,14 +216,6 @@ function tdomf_uninstall() {
   echo "<span style='color:green;'>";
   _e("DONE","tdomf"); 
   echo "</span><br/>";
-    
-  /*echo "<span style='width:200px;'>";
-  _e("Removing any users created by TDOMF... ","tdomf");
-  echo "</span>";
-  // TODO: Delete created authors!
-  echo "<span style='color:red;'>";
-  _e("NOT DONE","tdomf"); echo "<br/>";
-  echo "</span>";*/
 }
 
 // Display a help page
@@ -159,15 +237,30 @@ function tdomf_show_uninstall_menu() {
               check_admin_referer('tdomf-reset-options');
               tdomf_reset_options();
               ?>
-              <p><a href='<?php echo $deactivate_url; ?>' title='Deactivate tdomf' class="delete">Final Step: Deactivate TDO Mini Forms Plugin</a></p>
+              <p><a href='<?php echo $deactivate_url; ?>' title='Deactivate TDO Mini Forms' class="delete">
+              <?php _e("Final step to complete uninstall: Deactivate TDO Mini Forms Plugin","tdomf"); ?></a></p>
               <?php
             } else if($action == "uninstall") {
               check_admin_referer('tdomf-uninstall');
               tdomf_uninstall();
               ?>
-              <p><a href='<?php echo $deactivate_url; ?>' title='Deactivate tdomf' class="delete">Final Step: Deactivate TDO Mini Forms Plugin</a></p>
+              <p><a href='<?php echo $deactivate_url; ?>' title='Deactivate TDO Mini Forms' class="delete">
+              <?php _e("Final step to complete uninstall: Deactivate TDO Mini Forms Plugin","tdomf"); ?></a></p>
               <?php
-            }  ?>
+            } else if($action == "uninstall-all-1") {
+              check_admin_referer('tdomf-uninstall-all-1');
+              ?>
+              <p><?php _e("You are about to do some potentially critical things to Wordpress. Please only proceed if you happy with the risks.","tdomf"); ?></p>
+              <p><a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=uninstall-all-2",'tdomf-uninstall-all-2'); ?>" class='delete' ><?php _e("Are you really really sure you want to proceed?","tdomf"); ?></a></p>
+              <?php
+            } else if($action == "uninstall-all-2") {
+              check_admin_referer('tdomf-uninstall-all-2');
+              tdomf_full_uninstall();
+              ?>
+              <p><a href='<?php echo $deactivate_url; ?>' title='Deactivate TDO Mini Forms' class="delete">
+              <?php _e("Final step to complete uninstall: Deactivate TDO Mini Forms Plugin","tdomf"); ?></a></p>
+              <?php
+            } ?>
             </p>  
     <?php } else { ?>
             
@@ -180,8 +273,13 @@ function tdomf_show_uninstall_menu() {
             </div>
             
             <div class="wrap">
-            <p><?php _e("This removes nearly <b>everything</b>. Any posts submitted, users created or pages created are not removed. However submitted posts are stripped of any information about TDO Mini Forms. If you re-enable TDO Mini Forms, posts previousily submitted will not turn up as submitted posts any more.","tdomf"); ?></p>
+            <p><?php _e("This removes <i>nearly everything</i>. Any posts submitted, users created or pages created are not removed. However submitted posts are stripped of any information about TDO Mini Forms. If you re-enable TDO Mini Forms, posts previousily submitted will not turn up as submitted posts any more.","tdomf"); ?></p>
             <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=uninstall",'tdomf-uninstall'); ?>" class='delete' ><?php _e("Uninstall Nearly Everything!","tdomf"); ?></a>
+            </div>
+            
+            <div class="wrap">
+            <p><?php _e("This removes <b>everything</b>. It is advised to backup your database before proceeding as posts, pages and users will be deleted. All posts submitted by users using TDO Mini Forms will be deleted. Any users created by TDO Mini forms will be deleted. Any pages created by TDO Mini Forms will be deleted. All options and settings will be completely removed. It'll be like you never used TDO Mini Forms!","tdomf"); ?></p>
+            <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_uninstall_menu&action=uninstall-all-1",'tdomf-uninstall-all-1'); ?>" class='delete' ><?php _e("Uninstall Everything!!!!","tdomf"); ?></a>
             </div>
             
     <?php } ?>

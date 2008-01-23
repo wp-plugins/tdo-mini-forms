@@ -3,7 +3,7 @@
 Name: "Categories"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget allows users to select categories for their submissions
-Version: 0.4
+Version: 0.5
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -18,16 +18,22 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // How many widgets do you want?
 //
 function tdomf_widget_categories_number_bottom(){
-  $count = get_option('tdomf_categories_widget_count');
+  $form_id = tdomf_edit_form_form_id();
+  $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
   if($count <= 0){ $count = 1; } 
+  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+  if($max == false){ $max = 9; }
+  if($count <= 0){ $count = 1; }
+  if($count > ($max+1)){ $count = ($max+1); }
   
+  if($max > 1) {
   ?>
   <div class="wrap">
     <form method="post">
       <h2><?php _e("Categories Widgets","tdomf"); ?></h2>
       <p style="line-height: 30px;"><?php _e("How many Categories widgets would you like?","tdomf"); ?>
       <select id="tdomf-widget-categories-number" name="tdomf-widget-categories-number" value="<?php echo $count; ?>">
-      <?php for($i = 1; $i < 10; $i++) { ?>
+      <?php for($i = 1; $i < ($max+1); $i++) { ?>
         <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
       <?php } ?>
       </select>
@@ -38,6 +44,7 @@ function tdomf_widget_categories_number_bottom(){
     </form>
   </div>
   <?php 
+  }
 }
 add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom');
 
@@ -45,11 +52,15 @@ add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom');
 // Initilise multiple category widgets!
 //
 function tdomf_widget_categories_init(){
+  $form_id = tdomf_edit_form_form_id();
   if ( $_POST['tdomf-widget-categories-number-submit'] ) {
     $count = $_POST['tdomf-widget-categories-number'];
-    if($count > 0){ update_option('tdomf_categories_widget_count',$count); }
+    if($count > 0){ tdomf_set_option_widget('tdomf_categories_widget_count',$count,$form_id); }
   }
-  $count = get_option('tdomf_categories_widget_count');
+  $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
+  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+  if($max <= 1){ $count = 1; }
+  else if($count > ($max+1)){ $count = $max + 1; }
 
   tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories',1);
   tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 350, 510, 1);
@@ -69,10 +80,10 @@ tdomf_widget_categories_init();
 
 // Get Options for this widget
 //
-function tdomf_widget_categories_get_options($number = 1) {
+function tdomf_widget_categories_get_options($number = 1,$form_id = 1) {
   $postfix = "";
   if($number != 1){ $postfix = "_$number"; }
-  $options = get_option('tdomf_categories_widget'.$postfix);
+  $options = tdomf_get_option_widget('tdomf_categories_widget'.$postfix,$form_id);
     if($options == false) {
        $options = array();
        $options['title'] = '';
@@ -95,7 +106,7 @@ function tdomf_widget_categories($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_categories_get_options($number);
+  $options = tdomf_widget_categories_get_options($number,$args['tdomf_form_id']);
   $postfix = "";
   if($number != 1){ $postfix = "-$number"; }
   
@@ -158,12 +169,12 @@ function tdomf_widget_categories($args,$params) {
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //
-function tdomf_widget_categories_control($params) {
+function tdomf_widget_categories_control($form_id,$params) {
   $number = 1;
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_categories_get_options($number);
+  $options = tdomf_widget_categories_get_options($number,$form_id);
   $postfix1 = "";
   $postfix2 = "";
   if($number != 1){ 
@@ -181,7 +192,7 @@ function tdomf_widget_categories_control($params) {
        $newoptions['display'] = $_POST["categories$postfix1-display"];
      if ( $options != $newoptions ) {
         $options = $newoptions;
-        update_option('tdomf_categories_widget'.$postfix2, $options);
+        tdomf_set_option_widget('tdomf_categories_widget'.$postfix2, $options,$form_id);
         
      }
   }
@@ -195,7 +206,7 @@ function tdomf_widget_categories_control($params) {
 
 <label for="categories<?php echo $postfix1; ?>-title" >
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 <br/><br/>
 
@@ -219,13 +230,13 @@ function tdomf_widget_categories_control($params) {
 
 <label for="categories<?php echo $postfix1; ?>-include" >
 <?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES); ?>" disabled />
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" disabled />
 </label>
 <br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-exclude" >
 <?php _e("List of categories to exclude (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES); ?>" />
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 <br/><br/>
 
@@ -252,7 +263,7 @@ function tdomf_widget_categories_preview($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_categories_get_options($number);
+  $options = tdomf_widget_categories_get_options($number,$args['tdomf_form_id']);
   $postfix1 = "";
   if($number != 1){ 
     $postfix1 = "-$number"; 
@@ -281,7 +292,7 @@ function tdomf_widget_categories_post($args,$params) {
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
   }
-  $options = tdomf_widget_categories_get_options($number);
+  $options = tdomf_widget_categories_get_options($number,$args['tdomf_form_id']);
   $postfix1 = "";
   if($number != 1){ 
     $postfix1 = "-$number"; 

@@ -40,12 +40,12 @@ function tdomf_check_email_address($email) {
 
 // Grab email address of moderators
 //
-function tdomf_get_admin_emails() {
+function tdomf_get_admin_emails($form_id) {
   global $wpdb;
 
   // grab email addresses
   $email_list = "";
-  $notify_roles = get_option(TDOMF_NOTIFY_ROLES);
+  $notify_roles = tdomf_get_option_form(TDOMF_NOTIFY_ROLES,$form_id);
   if($notify_roles != false) {
      if($notify_roles != false) {
         $users = tdomf_get_all_users();
@@ -68,11 +68,11 @@ function tdomf_get_admin_emails() {
 
 // Notify Admins to tell them that a post is awaiting moderation
 //
-function tdomf_notify_admins($post_ID){
+function tdomf_notify_admins($post_ID,$form_id){
   global $wpdb,$tdomf_form_widgets_adminemail,$post_meta_cache,$blog_id;
 
   // grab email addresses
-  $email_list = tdomf_get_admin_emails();
+  $email_list = tdomf_get_admin_emails($form_id);
   if($email_list == "") {
      tdomf_log_message("Could not get any email addresses to notify. No moderation notification email sent.",TDOMF_LOG_BAD);
      return false;
@@ -125,6 +125,7 @@ function tdomf_notify_admins($post_ID){
   // Email Body
   //
   $email_msg  = sprintf(__("A new post with title \"%s\" from %s is awaiting your approval.\r\n\r\n","tdomf"),$title,$submitter_string);
+  $email_msg .= sprintf(__("It was submitted using Form ID %d (\"%s\")\r\n\r\n","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id));
   $email_msg .= sprintf(__("This was submitted from IP %s.\r\n\r\n","tdomf"),$ip);
   $email_msg .= sprintf(__("You can view this post from %s.\r\n\r\n","tdomf"),$view_post); 
   $email_msg .= sprintf(__("You can moderate this submission from %s.\r\n\r\n","tdomf"),$moderate_all_link);
@@ -136,7 +137,8 @@ function tdomf_notify_admins($post_ID){
                          "before_widget" => "",
                          "after_widget"  => "\r\n\r\n\n",
                          "before_title"  => "",
-                         "after_title"   => "\r\n\r\n");
+                         "after_title"   => "\r\n\r\n",
+                         "tdomf_form_id" => $form_id);
    $widget_order = tdomf_get_widget_order();
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_adminemail[$w])) {
@@ -151,12 +153,12 @@ function tdomf_notify_admins($post_ID){
 
   // Use custom from field
   //
-  if(get_option(TDOMF_OPTION_FROM_EMAIL)) {
+  if(tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id)) {
 
   	// We can modify the "from" field by using the "header" option at the end!
   	//
   	$headers = "MIME-Version: 1.0\n" .
-  	           "From: ". get_option(TDOMF_OPTION_FROM_EMAIL) . "\n" .
+  	           "From: ". tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id) . "\n" .
   	           "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
 
   	return @wp_mail($email_list, $subject, $email_msg, $headers);
@@ -183,7 +185,11 @@ function tdomf_notify_poster_approved($post_id) {
      
     $postdata = get_postdata($post_id);
     $title = $postdata['Title'];
-
+    $form_id = get_post_meta($post_id, TDOMF_KEY_FORM_ID, true);
+    if($form_id == false || !tdomf_form_exists($form_id)){
+      $form_id = tdomf_get_first_form_id();
+    }
+    
     $subject = sprintf(__("[%s] Your entry \"%s\" has been approved!","tdomf"),get_bloginfo('title'),$title);
 
     $notify_message = sprintf(__("This is just a quick email to notify you that your post has been approved and published online. You can see it at %s.\r\n\r\n","tdomf"),get_permalink($post_id));
@@ -192,12 +198,12 @@ function tdomf_notify_poster_approved($post_id) {
 
     // Use custom from field
     //
-    if(get_option(TDOMF_OPTION_FROM_EMAIL)) {
+    if(tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id)) {
   
       // We can modify the "from" field by using the "header" option at the end!
       //
       $headers = "MIME-Version: 1.0\n" .
-                 "From: ". get_option(TDOMF_OPTION_FROM_EMAIL) . "\n" .
+                 "From: ". tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id) . "\n" .
                  "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
   
       return @wp_mail($email, $subject, $notify_message, $headers);
@@ -223,6 +229,10 @@ function tdomf_notify_poster_rejected($post_id) {
      
     $postdata = get_postdata($post_id);
     $title = $postdata['Title'];
+    $form_id = get_post_meta($post_id, TDOMF_KEY_FORM_ID, true);
+    if($form_id == false || !tdomf_form_exists($form_id)){
+      $form_id = tdomf_get_first_form_id();
+    }
 
     $subject = sprintf(__("[%s] Your entry \"%s\" has been rejected! :(","tdomf"),get_bloginfo('title'),$title);
 
@@ -232,12 +242,12 @@ function tdomf_notify_poster_rejected($post_id) {
 
     // Use custom from field
     //
-    if(get_option(TDOMF_OPTION_FROM_EMAIL)) {
+    if(tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id)) {
   
       // We can modify the "from" field by using the "header" option at the end!
       //
       $headers = "MIME-Version: 1.0\n" .
-                 "From: ". get_option(TDOMF_OPTION_FROM_EMAIL) . "\n" .
+                 "From: ". tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id) . "\n" .
                  "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
   
       return @wp_mail($email, $subject, $notify_message, $headers);
@@ -256,7 +266,7 @@ add_action('delete_post', 'tdomf_notify_poster_rejected');
 
 // Do we need to display a email input?
 //
-function tdomf_widget_notifyme_show_email_input(){
+function tdomf_widget_notifyme_show_email_input($form_id){
   global $current_user;
   get_currentuserinfo();
   $show_email_input = true;
@@ -264,9 +274,9 @@ function tdomf_widget_notifyme_show_email_input(){
     // user has already set a valid email address!
     $show_email_input = false;
   } else { 
-    $widgets_in_use = tdomf_get_widget_order();
+    $widgets_in_use = tdomf_get_widget_order($form_id);
     if(in_array("who-am-i",$widgets_in_use)) {
-      $whoami_options = tdomf_widget_whoami_get_options();
+      $whoami_options = tdomf_widget_whoami_get_options($form_id);
       if($whoami_options['email-enable'] && $whoami_options['email-required']) {
         // great, who-am-i widget will provide a valid email address!
         $show_email_input = false;
@@ -284,7 +294,7 @@ function tdomf_widget_notifyme($args) {
   
   // Dont' do anything if the user can already publish or is trusted!
   //
-  if(!get_option(TDOMF_OPTION_MODERATION) || current_user_can('publish_posts')){
+  if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id) || current_user_can('publish_posts')){
     return "";
    } else if(is_user_logged_in() && $current_user->ID != get_option(TDOMF_DEFAULT_AUTHOR)) {
      $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
@@ -301,7 +311,7 @@ function tdomf_widget_notifyme($args) {
     $notifyme_email = $_COOKIE['tdomf_notify_widget_email'];
   }
   
-  $show_email_input = tdomf_widget_notifyme_show_email_input();
+  $show_email_input = tdomf_widget_notifyme_show_email_input($tdomf_form_id);
 
   $output .= "<label for='notifyme'><input type='checkbox' name='notifyme' id='notifyme'";
   if(isset($notifyme)) $output .= " checked "; 
@@ -318,11 +328,13 @@ tdomf_register_form_widget('notifyme', 'Notify Me', 'tdomf_widget_notifyme');
 
 // Widget validate input
 //
-function tdomf_widget_notifyme_validate($args) {
+function tdomf_widget_notifyme_validate($args,$preview) {
   extract($args);
-  if(tdomf_widget_notifyme_show_email_input()) {
-    if(isset($notifyme) && !tdomf_check_email_address($notifyme_email)) {
-      return $before_widget.__("You must specify a valid email address to send the notification to.","tdomf").$after_widget;
+  if(!$preview) {
+    if(tdomf_widget_notifyme_show_email_input($tdomf_form_id)) {
+      if(isset($notifyme) && !tdomf_check_email_address($notifyme_email)) {
+        return $before_widget.__("You must specify a valid email address to send the notification to.","tdomf").$after_widget;
+      }
     }
   }
   return NULL;

@@ -151,6 +151,15 @@ function tdomf_form_admin_head() {
 }
 add_action( 'admin_head', 'tdomf_form_admin_head' );
 
+function tdomf_edit_form_form_id() {
+  if(isset($_REQUEST['form'])) {
+    return intval($_REQUEST['form']);
+  } else {
+    return tdomf_get_first_form_id();
+  }
+  return false;
+}
+
 // Show the page!
 //
 function tdomf_show_form_menu() {
@@ -158,19 +167,41 @@ function tdomf_show_form_menu() {
 
   tdomf_handle_editformmenu_actions();
 
-  $widget_order = get_option(TDOMF_OPTION_FORM_ORDER);
+  $form_ids = tdomf_get_form_ids();
+  
+  $form_id = tdomf_edit_form_form_id();
+  
+  $widget_order = tdomf_get_option_form(TDOMF_OPTION_FORM_ORDER,$form_id);
 
   ?>
 
   <?php do_action( 'tdomf_widget_page_top' ); ?>
 
+  <?php if(count($form_ids) > 1) { ?>
+    <div class="wrap">
+    <?php foreach($form_ids as $single_form_id) { ?>
+      
+      <?php if($single_form_id->form_id == $form_id) { ?>
+        <b>
+      <?php } else { ?>
+        <a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $single_form_id->form_id; ?>">
+      <?php } ?>
+      
+      <?php printf(__("Form %d","tdomf"),$single_form_id->form_id); ?><?php if($single_form_id->form_id == $form_id) { ?></b><?php } else {?></a><?php } ?> |
 
+      <?php } ?>
+    </div>
+  <?php } ?>
+  
 <div class="wrap">
-		<h2>Form Arrangement</h2>
+		<h2><?php printf(__("Form Arrangement for Form %d: \"%s\"","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id)); ?></h2>
 
-		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below.',"tdomf"); ?></p>
+		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Widgets will be executed and displayed in order from top to bottom.',"tdomf"); ?></p>
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
+      
+      <input type="hidden" id="tdomf-form-id" name="tdomf-form-id" value="<?php echo $form_id; ?>" />
+    
 			<p class="submit">
 				<input type="submit" value="<?php _e("Save Changes &raquo;","tdomf"); ?>" />
 			</p>
@@ -239,7 +270,7 @@ function tdomf_show_form_menu() {
 				   <span class="controlhandle"><?php echo $tdomf_form_widgets_control[$id]['name']; ?></span>
 					<span id="<?php echo $id; ?>closer" class="controlcloser">&#215;</span>
 					<div class="controlform">
-						<?php $w['cb']($tdomf_form_widgets_control[$id]['params']); ?>
+						<?php $w['cb']($form_id,$tdomf_form_widgets_control[$id]['params']); ?>
                   <input type="hidden" id="<?php echo $id; ?>-submit" name="<?php echo $id; ?>-submit" value="1" />
 					</div>
 				</div>
@@ -260,6 +291,12 @@ function tdomf_show_form_menu() {
 //
 function tdomf_handle_editformmenu_actions() {
 
+  // get form id
+  $form_id = false;
+  if(isset($_REQUEST['tdomf-form-id'])) {
+    $form_id = intval($_REQUEST['tdomf-form-id']);
+  }
+  
   if (get_magic_quotes_gpc()) {
       function stripslashes_array($array) {
           return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
@@ -271,28 +308,30 @@ function tdomf_handle_editformmenu_actions() {
       #$_REQUEST = stripslashes_array($_REQUEST);
     }
 
-	if ( isset( $_POST['action'] ) ) {
+	if ( isset( $_POST['action'] ) && $form_id ) {
 		switch( $_POST['action'] ) {
 			case 'save_widget_order' :
 			    check_admin_referer('tdomf-save-widget-order');
 			    if(isset($_POST['tdomf_form-1order']) && !empty($_POST['tdomf_form-1order'])) {
 					parse_str($_POST['tdomf_form-1order'],$widget_order);
 					$widget_order = $widget_order['tdomf_form-1'];
-	                update_option(TDOMF_OPTION_FORM_ORDER,$widget_order);
-					tdomf_log_message_extra("Saved widget settings for form-1: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
+	                tdomf_set_option_form(TDOMF_OPTION_FORM_ORDER,$widget_order,$form_id);
+					tdomf_log_message_extra("Saved widget settings for form-$form_id: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
 				} else {
 					$widget_order = tdomf_get_form_widget_default_order();
-					delete_option(TDOMF_OPTION_FORM_ORDER);
-					tdomf_log_message("Restored default settings for form-1");
+					tdomf_set_option_form(TDOMF_OPTION_FORM_ORDER,false,$form_id);
+					tdomf_log_message("Restored default settings for form-$form_id");
 				}
-        if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) {
-                ?> <div id="message" class="updated fade"><p><?php printf(__("Saved Settings. <a href='%s'>See your form &raquo</a>","tdomf"),"users.php?page=tdomf_your_submissions#tdomf_form1"); ?></p></div> <?php
+        if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS) && tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id)) {
+                ?> <div id="message" class="updated fade"><p><?php printf(__("Saved Settings. <a href='%s'>See your form &raquo</a>","tdomf"),"users.php?page=tdomf_your_submissions#tdomf_form$form_id"); ?></p></div> <?php
         } else {
                 ?> <div id="message" class="updated fade"><p><?php _e("Saved Settings.","tdomf"); ?></p></div> <?php
         }
 				break;
 	 	}
-	}
+	} else if( isset( $_POST['action'] ) ) {
+    ?> <div id="message" class="updated fade"><p><font color='red'><?php _e("Please select a form to modify!","tdomf"); ?></font></p></div> <?php
+  }
 }
 
 ?>
