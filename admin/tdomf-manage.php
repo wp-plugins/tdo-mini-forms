@@ -773,7 +773,7 @@ function tdomf_auto_trust_user($post_id) {
   
            // ... and finally
            //
-           if($approved_count >= $trust_count) {
+           if($trust_count != -1 && $approved_count >= $trust_count) {
              tdomf_log_message("User $user_id has $approved_count approved posts. Automatically setting the user to approved!",TDOMF_LOG_GOOD);
              update_usermeta($user_id, TDOMF_KEY_FLAG, true);
              update_usermeta($user_id, TDOMF_KEY_STATUS, TDOMF_USER_STATUS_TRUSTED);

@@ -127,8 +127,8 @@ function tdomf_widget_customfields_get_options($index,$form_id) {
     if(!isset($options['s-values'])){ $options['s-values'] = "test:test"; }
     if(!isset($options['s-defaults'])){ $options['s-defaults'] = "test"; }
     // new textarea ones
-    if(!isset($options['ta-char-limit'])){ $optoins['ta-char-limit'] = 0; }
-    if(!isset($options['ta-word-limit'])){ $optoins['ta-word-limit'] = 0; }
+    if(!isset($options['ta-char-limit'])){ $options['ta-char-limit'] = 0; }
+    if(!isset($options['ta-word-limit'])){ $options['ta-word-limit'] = 0; }
   return $options;
 }
 
@@ -408,29 +408,37 @@ function tdomf_widget_customfields_control($form_id,$params) {
         <?php 
 }
 
-
-function tdomf_widget_customfields_init(){
-  $form_id = tdomf_edit_form_form_id();
+function tdomf_widget_customfields_handle_number($form_id) {
   if ( $_POST['tdomf-widget-customfields-number-submit'] ) {
     $count = $_POST['tdomf-widget-customfields-number'];
     if($count > 0){ tdomf_set_option_widget('tdomf_customfields_widget_count',$count,$form_id); }
   }
-  $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
-  if($count <= 0){ $count = 1; } 
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max <= 1){ $count = 1; }
-  else if($count > ($max+1)){ $count = $max + 1; }
-  
-  for($i = 1; $i <= $count; $i++) {
-    tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
-    tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 800, $i);
-    tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', true, $i);
-    tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', true, $i);
-    tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', true, $i);
-    tdomf_register_form_widget_adminemail("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_adminemail', $i);
+}
+add_action('tdomf_widget_page_top',' tdomf_widget_customfields_handle_number');
+
+function tdomf_widget_customfields_init($form_id){
+  if(tdomf_form_exists($form_id)) {
+    $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
+    if($count <= 0){ $count = 1; } 
+    $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+    if($max <= 1){ $count = 1; }
+    else if($count > ($max+1)){ $count = $max + 1; }
+    
+    for($i = 1; $i <= $count; $i++) {
+      tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields',$i);
+      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 800, $i);
+      tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', true, $i);
+      tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', true, $i);
+      tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', true, $i);
+      tdomf_register_form_widget_adminemail("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_adminemail', $i);
+    }
   }
 }
-tdomf_widget_customfields_init();
+add_action('tdomf_create_post_start','tdomf_widget_customfields_init');
+add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_preview_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                Custom Field as a Textfield //
@@ -511,7 +519,7 @@ function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$tdomf_form_id);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -784,7 +792,7 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   }
   
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$text);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$text,$tdomf_form_id);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -898,7 +906,7 @@ function tdomf_widget_customfields_checkbox_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$tdomf_form_id);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -1191,7 +1199,7 @@ function tdomf_widget_customfields_select_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$message);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$message,$tdomf_form_id);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;

@@ -59,13 +59,17 @@ function tdomf_check_permissions_form($form_id = 1) {
 //
 function tdomf_preview_form($args) {
    global $tdomf_form_widgets_preview;
+
+   $form_id = intval($args['tdomf_form_id']);
+   
+   do_action('tdomf_preview_form_start',$form_id);
+   
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"\n<p>\n",
                                       "after_widget"=>"\n</p>\n",
                                       "before_title"=>"<b>",
                                       "after_title"=>"</b><br/>" ),
                                       $args);
-   $form_id = intval($args['tdomf_form_id']);
    $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_preview[$w])) {
@@ -84,13 +88,17 @@ function tdomf_preview_form($args) {
 //
 function tdomf_validate_form($args,$preview = false) {
    global $tdomf_form_widgets_validate;
+
+   $form_id = intval($args['tdomf_form_id']);
+   
+   do_action('tdomf_validate_form_start',$form_id);
+   
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"",
                                       "after_widget"=>"<br/>\n",
                                       "before_title"=>"<b>",
                                       "after_title"=>"</b><br/>"),
 							   $args);
-   $form_id = intval($args['tdomf_form_id']);
    $widget_order = tdomf_get_widget_order($form_id,$preview);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_validate[$w])) {
@@ -114,6 +122,9 @@ function tdomf_validate_form($args,$preview = false) {
 function tdomf_create_post($args) {
    global $wp_rewrite, $tdomf_form_widgets_post, $current_user;
 
+   $form_id = intval($args['tdomf_form_id']);
+   do_action('tdomf_create_post_start',$form_id);
+   
    tdomf_log_message("Attempting to create a post based on submission");
 
    // Default submitter
@@ -173,7 +184,7 @@ function tdomf_create_post($args) {
    }
 
    // Form Id
-   $form_id = intval($args['tdomf_form_id']);
+   //
    add_post_meta($post_ID, TDOMF_KEY_FORM_ID, $form_id, true);
 
    
@@ -326,6 +337,8 @@ function tdomf_generate_form($form_id = 1) {
   } 
   
   // AJAX or normal POST headers...
+  
+  do_action('tdomf_generate_form_start',$form_id);
   
   if(!$use_ajax) {
      $post_args = array();

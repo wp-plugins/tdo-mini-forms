@@ -86,6 +86,8 @@ function tdomf_widget_text($args,$params) {
   return $output;
 }
 
+// TODO: Update multi-widget init
+
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //

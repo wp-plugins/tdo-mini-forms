@@ -48,6 +48,8 @@ function tdomf_widget_categories_number_bottom(){
 }
 add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom');
 
+// TODO: Update multi-widget init
+
 ///////////////////////////////////////
 // Initilise multiple category widgets!
 //

@@ -46,29 +46,46 @@ add_action('tdomf_widget_page_bottom','tdomf_widget_1qcaptcha_number_bottom');
 /////////////////////////////////
 // Initilise multiple captchas!
 //
-function tdomf_widget_1qcaptcha_init(){
-  $form_id = tdomf_edit_form_form_id();
+function tdomf_widget_1qcaptcha_init($form_id){
+  if(tdomf_form_exists($form_id)) {
+    if ( $_POST['tdomf-widget-1qcaptcha-number-submit'] ) {
+      $count = $_POST['tdomf-widget-1qcaptcha-number'];
+      if($count > 0){ tdomf_set_option_widget('tdomf_1qcaptcha_widget_count',$count,$form_id); }
+    }
+    $count = tdomf_get_option_widget('tdomf_1qcaptcha_widget_count',$form_id);
+    $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+    if($max <= 1){ $count = 1; }
+    else if($count > ($max+1)){ $count = $max + 1; }
   
-  if ( $_POST['tdomf-widget-1qcaptcha-number-submit'] ) {
-    $count = $_POST['tdomf-widget-1qcaptcha-number'];
-    if($count > 0){ tdomf_set_option_widget('tdomf_1qcaptcha_widget_count',$count,$form_id); }
-  }
-  $count = tdomf_get_option_widget('tdomf_1qcaptcha_widget_count',$form_id);
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max <= 1){ $count = 1; }
-  else if($count > ($max+1)){ $count = $max + 1; }
-
-  tdomf_register_form_widget("1qcaptcha","1 Question Captcha 1", 'tdomf_widget_1qcaptcha',1);
-  tdomf_register_form_widget_control("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_control', 350, 150, 1);
-  tdomf_register_form_widget_validate("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_validate', true, 1);
-  
-  for($i = 2; $i <= $count; $i++) {
-    tdomf_register_form_widget("1qcaptcha-$i","1 Question Captcha $i", 'tdomf_widget_1qcaptcha',$i);
-    tdomf_register_form_widget_control("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_control', 350, 150, $i);
-    tdomf_register_form_widget_validate("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_validate', true, $i);
+    tdomf_register_form_widget("1qcaptcha","1 Question Captcha 1", 'tdomf_widget_1qcaptcha',1);
+    tdomf_register_form_widget_control("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_control', 350, 150, 1);
+    tdomf_register_form_widget_validate("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_validate', true, 1);
+    
+    for($i = 2; $i <= $count; $i++) {
+      tdomf_register_form_widget("1qcaptcha-$i","1 Question Captcha $i", 'tdomf_widget_1qcaptcha',$i);
+      tdomf_register_form_widget_control("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_control', 350, 150, $i);
+      tdomf_register_form_widget_validate("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_validate', true, $i);
+    }
   }
 }
- tdomf_widget_1qcaptcha_init();
+add_action('tdomf_create_post_start','tdomf_widget_1qcaptcha_init');
+add_action('tdomf_generate_form_start','tdomf_widget_1qcaptcha_init');
+add_action('tdomf_preview_form_start','tdomf_widget_1qcaptcha_init');
+add_action('tdomf_post_form_start','tdomf_widget_1qcaptcha_init');
+add_action('tdomf_widget_page_top','tdomf_widget_1qcaptcha_init');
+
+/////////////////////////////////
+// Update option for widget count
+//
+function tdomf_widget_1qcaptcha_handle_number($form_id){
+  if(tdomf_form_exists($form_id)) {
+    if ( $_POST['tdomf-widget-1qcaptcha-number-submit'] ) {
+      $count = $_POST['tdomf-widget-1qcaptcha-number'];
+      if($count > 0){ tdomf_set_option_widget('tdomf_1qcaptcha_widget_count',$count,$form_id); }
+    }
+  }
+}
+add_action('tdomf_widget_page_top','tdomf_widget_1qcaptcha_handle_number');
 
 /////////////////////////////////
 // Get options for this widget

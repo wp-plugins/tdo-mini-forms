@@ -29,6 +29,7 @@ function tdomf_theme_widgets_init() {
     echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
     echo $after_title;
     tdomf_the_form($form_id);
+    echo "<br/><br/>\n";
     echo $after_widget;
   }
   $form_ids = tdomf_get_form_ids();

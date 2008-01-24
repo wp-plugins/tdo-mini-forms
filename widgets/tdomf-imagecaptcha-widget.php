@@ -10,6 +10,8 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+// TODO: Update multi-widget init
+
 /////////////////////////////////
 // Initilise multiple captchas!
 //
@@ -85,7 +87,7 @@ function tdomf_widget_imagecaptcha_validate($args,$preview,$params) {
   
   // all freeCap words are lowercase.
 	// font #4 looks uppercase, but trust me, it's not...
-	if($_SESSION['hash_func_'.$tdomf_form_id](strtolower($args["imagecaptcha"]))==$_SESSION['freecap_word_hash_'.$tdomf_form_id])
+	if($_SESSION['hash_func_'.$tdomf_form_id](strtolower($args["imagecaptcha_".$tdomf_form_id]))==$_SESSION['freecap_word_hash_'.$tdomf_form_id])
 	{
 		// reset freeCap session vars
 		// cannot stress enough how important it is to do this

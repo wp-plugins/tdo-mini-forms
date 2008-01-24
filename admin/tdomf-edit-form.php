@@ -175,7 +175,7 @@ function tdomf_show_form_menu() {
 
   ?>
 
-  <?php do_action( 'tdomf_widget_page_top' ); ?>
+  <?php do_action( 'tdomf_widget_page_top', $form_id ); ?>
 
   <?php if(count($form_ids) > 1) { ?>
     <div class="wrap">
