@@ -19,7 +19,7 @@ function tdomf_get_all_posts() {
 // Delete pre-configured options
 //
 function tdomf_reset_options() {
-  global $wpdb, $wp_roles;
+  global $wpdb, $wp_roles, $table_prefix;
    
   echo "<span style='width:200px;'>";
   _e("Deleting Options... ","tdomf");
@@ -68,12 +68,18 @@ function tdomf_reset_options() {
     $wp_roles = new WP_Roles();
   }
   $roles = $wp_roles->role_objects;
+  $form_ids = tdomf_get_form_ids();
   foreach($roles as $role) {
-     // TODO: remove cap for each option
      if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_1'])){
        $role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_1');
      }
+     foreach($form_ids as $f) {
+       if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$f->form_id])){
+          $role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$f->form_id);
+       }
+     }
   }
+  
   echo "<span style='color:green;'>";
   _e("DONE","tdomf"); 
   echo "</span><br/>";

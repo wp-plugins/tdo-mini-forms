@@ -5,7 +5,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
  * TODO: Reset widgets for a specific form */
 
 function tdomf_db_create_tables() {
-  global $wpdb,$wp_roles;
+  global $wpdb,$wp_roles, $table_prefix;
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
 
@@ -122,32 +122,52 @@ function tdomf_db_create_tables() {
       
       if($wpdb->get_var("show tables like '$table_widget_name'") == $table_widget_name) {
         
-        tdomf_log_message("$table_widget_name created successfully. Importing widget settings for default form...");
-
         // default form id
         $form_id = 1;
+
+        // don't import if table prefix is "tdomf_"...
+        //
+        if(get_option(TDOMF_VERSION_CURRENT) != false && $table_prefix != "tdomf_") {
+          
+          // we are importing...
+          tdomf_log_message("$table_widget_name created successfully. Importing widget settings for default form...");
         
-        // scan for widget options
-        $alloptions = wp_load_alloptions();
-        foreach($alloptions as $id => $val) {
-          if(preg_match('#^tdomf_.+#',$id)) {
-            
-            $widget_key = $wpdb->escape($id);
-            $widget_value = $wpdb->escape(maybe_serialize(get_option($id)));
-            
-            // TODO: need to avoid copying up real options to the table!
-            
-            // Now insert into widget table
-            $sql = "INSERT INTO $table_widget_name" .
-                   "(form_id, widget_key, widget_value) " .
-                   "VALUES ('$form_id','$widget_key','$widget_value')";
-            if($wpdb->query( $sql )) {
-               tdomf_log_message("Imported widget option $id into $table_widget_name!",TDOMF_LOG_GOOD);
-               delete_option($id);
-            } else {
-               tdomf_log_message("Failed to import widget option $id into db table $table_widget_name!",TDOMF_LOG_ERROR);
+          // non-widget-able options
+          $non_widget_options = array( TDOMF_DEFAULT_AUTHOR, 
+                                       TDOMF_AUTO_FIX_AUTHOR,
+                                       TDOMF_BANNED_IPS,
+                                       TDOMF_VERSION_CURRENT,
+                                       TDOMF_OPTION_AUTHOR_THEME_HACK,
+                                       TDOMF_OPTION_ADD_SUBMITTER,
+                                       TDOMF_STAT_SUBMITTED,
+                                       TDOMF_OPTION_DISABLE_ERROR_MESSAGES,
+                                       TDOMF_OPTION_EXTRA_LOG_MESSAGES,
+                                       TDOMF_OPTION_YOUR_SUBMISSIONS,
+                                       TDOMF_OPTION_CREATEDUSERS,
+                                       TDOMF_LOG);
+          
+          // scan for widget options
+          $alloptions = wp_load_alloptions();
+          foreach($alloptions as $id => $val) {
+            if(!in_array($id,$non_widget_options) && preg_match('#^tdomf_.+#',$id)) {
+              
+              $widget_key = $wpdb->escape($id);
+              $widget_value = $wpdb->escape(maybe_serialize(get_option($id)));
+              
+              // Now insert into widget table
+              $sql = "INSERT INTO $table_widget_name" .
+                     "(form_id, widget_key, widget_value) " .
+                     "VALUES ('$form_id','$widget_key','$widget_value')";
+              if($wpdb->query( $sql )) {
+                 tdomf_log_message("Imported widget option $id into $table_widget_name!",TDOMF_LOG_GOOD);
+                 delete_option($id);
+              } else {
+                 tdomf_log_message("Failed to import widget option $id into db table $table_widget_name!",TDOMF_LOG_ERROR);
+              }
             }
           }
+        } else {
+          tdomf_log_message("$table_widget_name created successfully.");
         }
     } else {
       tdomf_log_message("Can't find db table $table_widget_name! Table not created.",TDOMF_LOG_ERROR);
@@ -249,7 +269,7 @@ function tdomf_delete_widgets($form_id) {
 function tdomf_delete_form($form_id) {
   if(tdomf_form_exists($form_id))
   {
-    global $wpdb;
+    global $wpdb,$wp_roles;
 
     // Delete pages created with this form
     //
@@ -276,7 +296,14 @@ function tdomf_delete_form($form_id) {
               WHERE form_id = '".$wpdb->escape($form_id)."'";
     $wpdb->query($query);
     
-    // TODO: Remove capablities
+    // Remove capablitiies from roles
+    //
+    $roles = $wp_roles->role_objects;
+    foreach($roles as $role) {
+     if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
+       $role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id);
+     }
+    }
     
     return true;
   }
