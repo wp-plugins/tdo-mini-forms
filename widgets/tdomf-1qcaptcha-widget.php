@@ -48,10 +48,6 @@ add_action('tdomf_widget_page_bottom','tdomf_widget_1qcaptcha_number_bottom');
 //
 function tdomf_widget_1qcaptcha_init($form_id){
   if(tdomf_form_exists($form_id)) {
-    if ( $_POST['tdomf-widget-1qcaptcha-number-submit'] ) {
-      $count = $_POST['tdomf-widget-1qcaptcha-number'];
-      if($count > 0){ tdomf_set_option_widget('tdomf_1qcaptcha_widget_count',$count,$form_id); }
-    }
     $count = tdomf_get_option_widget('tdomf_1qcaptcha_widget_count',$form_id);
     $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
     if($max <= 1){ $count = 1; }
@@ -68,10 +64,9 @@ function tdomf_widget_1qcaptcha_init($form_id){
     }
   }
 }
-add_action('tdomf_create_post_start','tdomf_widget_1qcaptcha_init');
 add_action('tdomf_generate_form_start','tdomf_widget_1qcaptcha_init');
-add_action('tdomf_preview_form_start','tdomf_widget_1qcaptcha_init');
-add_action('tdomf_post_form_start','tdomf_widget_1qcaptcha_init');
+add_action('tdomf_validate_form_start','tdomf_widget_1qcaptcha_init');
+add_action('tdomf_control_form_start','tdomf_widget_1qcaptcha_init');
 add_action('tdomf_widget_page_top','tdomf_widget_1qcaptcha_init');
 
 /////////////////////////////////
@@ -97,7 +92,7 @@ function tdomf_widget_1qcaptcha_get_options($number = 1,$form_id = 1) {
     if($options == false) {
        $options = array();
        $options['question'] = __("What year is it?","tdomf");
-       $options['answer'] = __("2007","tdomf");
+       $options['answer'] = __("2008","tdomf");
     }
   return $options;
 }

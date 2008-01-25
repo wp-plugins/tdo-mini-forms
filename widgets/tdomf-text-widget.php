@@ -10,14 +10,6 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-// Check if the number of text widgets has changed before setting up the widget!
-//
-if ( $_POST['tdomf-widget-text-number-submit'] ) {
-  $form_id = tdomf_edit_form_form_id();
-  $count = $_POST['tdomf-widget-text-number'];
-  if($count > 0){ tdomf_set_option_widget('tdomf_text_widget_count',$count,$form_id); }
-}
-
 // Add a menu option to control the number of text widgets to the bottom of the 
 // tdomf widget page
 //
@@ -86,8 +78,6 @@ function tdomf_widget_text($args,$params) {
   return $output;
 }
 
-// TODO: Update multi-widget init
-
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //
@@ -134,20 +124,33 @@ function tdomf_widget_text_control($form_id,$params) {
         <?php 
 }
     
-function tdomf_widget_text_init(){
-  $form_id = tdomf_edit_form_form_id();
-  $count = tdomf_get_option_widget('tdomf_text_widget_count',$form_id);
-  if($count <= 0){ $count = 1; } 
-  
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max <= 1){ $count = 1; }
-  else if($count > ($max+1)){ $count = $max + 1; }
-  
-  for($i = 1; $i <= $count; $i++) {
-    tdomf_register_form_widget("text-$i","Text $i", 'tdomf_widget_text',$i);
-    tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 400, 300, $i);
+function tdomf_widget_text_init($form_id){
+  if(tdomf_form_exists($form_id)) {     
+     $count = tdomf_get_option_widget('tdomf_text_widget_count',$form_id);
+     if($count <= 0){ $count = 1; } 
+     
+     $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+     if($max <= 1){ $count = 1; }
+     else if($count > ($max+1)){ $count = $max + 1; }
+     
+     for($i = 1; $i <= $count; $i++) {
+       tdomf_register_form_widget("text-$i","Text $i", 'tdomf_widget_text',$i);
+       tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 400, 300, $i);
+     }
   }
 }
-tdomf_widget_text_init();
+add_action('tdomf_generate_form_start','tdomf_widget_text_init');
+add_action('tdomf_control_form_start','tdomf_widget_text_init');
+add_action('tdomf_widget_page_top','tdomf_widget_text_init');
+
+function tdomf_widget_text_handle_number($form_id) {
+  if(tdomf_form_exists($form_id)) {   
+      if ( isset($_POST['tdomf-widget-text-number-submit']) ) {
+        $count = $_POST['tdomf-widget-text-number'];
+        if($count > 0){ tdomf_set_option_widget('tdomf_text_widget_count',$count,$form_id); }
+      }
+  }
+}
+add_action('tdomf_widget_page_top','tdomf_widget_text_handle_number');
 
 ?>

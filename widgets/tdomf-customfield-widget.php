@@ -409,12 +409,14 @@ function tdomf_widget_customfields_control($form_id,$params) {
 }
 
 function tdomf_widget_customfields_handle_number($form_id) {
-  if ( $_POST['tdomf-widget-customfields-number-submit'] ) {
-    $count = $_POST['tdomf-widget-customfields-number'];
-    if($count > 0){ tdomf_set_option_widget('tdomf_customfields_widget_count',$count,$form_id); }
+  if(tdomf_form_exists($form_id)) {   
+     if (isset( $_POST['tdomf-widget-customfields-number-submit'] )) {
+       $count = $_POST['tdomf-widget-customfields-number'];
+       if($count > 0){ tdomf_set_option_widget('tdomf_customfields_widget_count',$count,$form_id); }
+     }
   }
 }
-add_action('tdomf_widget_page_top',' tdomf_widget_customfields_handle_number');
+add_action('tdomf_widget_page_top','tdomf_widget_customfields_handle_number');
 
 function tdomf_widget_customfields_init($form_id){
   if(tdomf_form_exists($form_id)) {
@@ -437,7 +439,8 @@ function tdomf_widget_customfields_init($form_id){
 add_action('tdomf_create_post_start','tdomf_widget_customfields_init');
 add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
 add_action('tdomf_preview_form_start','tdomf_widget_customfields_init');
-add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_validate_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_control_form_start','tdomf_widget_customfields_init');
 add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
 
 ////////////////////////////////////////////////////////////////////////////////

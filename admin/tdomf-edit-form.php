@@ -19,6 +19,8 @@ add_action("load-tdomf_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts"
 //
 function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
+   $form_id = tdomf_edit_form_form_id();
+   do_action('tdomf_control_form_start',$form_id);
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
 ?>
    <?php if(function_exists('wp_admin_css')) {

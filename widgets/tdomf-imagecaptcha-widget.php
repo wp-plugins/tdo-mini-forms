@@ -10,28 +10,34 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-// TODO: Update multi-widget init
-
 /////////////////////////////////
 // Initilise multiple captchas!
 //
-function tdomf_widget_imagecaptcha_init(){
-  $form_id = tdomf_edit_form_form_id();
-  if ( $_POST['tdomf-widget-imagecaptcha-number-submit'] ) {
-    $count = $_POST['tdomf-widget-imagecaptcha-number'];
-    if($count > 0){ tdomf_set_option_widget('tdomf_imagecaptcha_widget_count',$count); }
-  }
-  $count = tdomf_get_option_widget('tdomf_imagecaptcha_widget_count',$form_id);
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max <= 1){ $count = 1; }
-  else if($count > ($max+1)){ $count = $max + 1; }
-  
-  for($i = 2; $i <= $count; $i++) {
-    tdomf_register_form_widget("imagecaptcha-$i","Image Captcha $i", 'tdomf_widget_imagecaptcha',$i);
-    tdomf_register_form_widget_validate("imagecaptcha-$i", "Image Captcha $i",'tdomf_widget_imagecaptcha_validate', true, $i);
+function tdomf_widget_imagecaptcha_init($form_id){
+  if(tdomf_form_exists($form_id)) {   
+     $count = tdomf_get_option_widget('tdomf_imagecaptcha_widget_count',$form_id);
+     $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+     if($max <= 1){ $count = 1; }
+     else if($count > ($max+1)){ $count = $max + 1; }
+     for($i = 2; $i <= $count; $i++) {
+       tdomf_register_form_widget("imagecaptcha-$i","Image Captcha $i", 'tdomf_widget_imagecaptcha',$i);
+       tdomf_register_form_widget_validate("imagecaptcha-$i", "Image Captcha $i",'tdomf_widget_imagecaptcha_validate', true, $i);
+     }
   }
 }
-tdomf_widget_imagecaptcha_init();
+add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_validate_form_start','tdomf_widget_imagecaptcha_init');
+add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
+
+function tdomf_widget_imagecaptcha_handle_number($form_id) {
+  if(tdomf_form_exists($form_id)) {   
+   if ( isset($_POST['tdomf-widget-imagecaptcha-number-submit']) ) {
+      $count = $_POST['tdomf-widget-imagecaptcha-number'];
+      if($count > 0){ tdomf_set_option_widget('tdomf_imagecaptcha_widget_count',$count,$form_id); }
+   }
+  }
+}
+add_action('tdomf_widget_page_top','tdomf_widget_imagecaptcha_handle_number');
 
 //////////////////////////////
 // Display the widget! 

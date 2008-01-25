@@ -53,32 +53,43 @@ add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom');
 ///////////////////////////////////////
 // Initilise multiple category widgets!
 //
-function tdomf_widget_categories_init(){
-  $form_id = tdomf_edit_form_form_id();
-  if ( $_POST['tdomf-widget-categories-number-submit'] ) {
-    $count = $_POST['tdomf-widget-categories-number'];
-    if($count > 0){ tdomf_set_option_widget('tdomf_categories_widget_count',$count,$form_id); }
-  }
-  $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max <= 1){ $count = 1; }
-  else if($count > ($max+1)){ $count = $max + 1; }
-
-  tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories',1);
-  tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 350, 510, 1);
-  tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', true, 1);
-  tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', true, 1);
-  tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', true, 1);
-  
-  for($i = 2; $i <= $count; $i++) {
-    tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories',$i);
-    tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 350, 510, $i);
-    tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', true, $i);
-    tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', true, $i);
-    tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', true, $i);
+function tdomf_widget_categories_init($form_id){
+  if(tdomf_form_exists($form_id)) {   
+     $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
+     $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+     if($max <= 1){ $count = 1; }
+     else if($count > ($max+1)){ $count = $max + 1; }
+   
+     tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories',1);
+     tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 350, 510, 1);
+     tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', true, 1);
+     tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', true, 1);
+     tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', true, 1);
+     
+     for($i = 2; $i <= $count; $i++) {
+       tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories',$i);
+       tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 350, 510, $i);
+       tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', true, $i);
+       tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', true, $i);
+       tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', true, $i);
+     }
   }
 }
-tdomf_widget_categories_init();
+add_action('tdomf_create_post_start','tdomf_widget_categories_init');
+add_action('tdomf_generate_form_start','tdomf_widget_categories_init');
+add_action('tdomf_preview_form_start','tdomf_widget_categories_init');
+add_action('tdomf_control_form_start','tdomf_widget_categories_init');
+add_action('tdomf_widget_page_top','tdomf_widget_categories_init');
+
+function tdomf_widget_categories_handle_number($form_id) {
+  if(tdomf_form_exists($form_id)) {   
+     if (isset($_POST['tdomf-widget-categories-number-submit']) ) {
+       $count = $_POST['tdomf-widget-categories-number'];
+       if($count > 0){ tdomf_set_option_widget('tdomf_categories_widget_count',$count,$form_id); }
+     }
+  }
+}
+add_action('tdomf_widget_page_top','tdomf_widget_categories_handle_number');
 
 // Get Options for this widget
 //
