@@ -275,6 +275,7 @@ Author URI: http://thedeadone.net
 //    * Integration with Akismet
 //    * SPAM button in moderation page
 // - Force Preview (user must preview first before submission)
+// - Hide Form on Preview
 // - Allow newly submitted posts be set to "Post ready for review" with
 //    Wordpress 2.3
 // - A "manage download" menu

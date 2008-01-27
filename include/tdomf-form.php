@@ -128,14 +128,14 @@ function tdomf_create_post($args) {
    tdomf_log_message("Attempting to create a post based on submission");
 
    // Default submitter
-   $user_id = tdomf_get_option_form(TDOMF_DEFAULT_AUTHOR,1);
+   $user_id = get_option(TDOMF_DEFAULT_AUTHOR);
    if(is_user_logged_in()) {
       $user_id = $current_user->ID;
    }
 
    // Default category
    //
-   $post_cats = array(tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,1));
+   $post_cats = array(tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,$form_id));
 
    // Default title (should this be an option?)
    //
@@ -169,7 +169,7 @@ function tdomf_create_post($args) {
    add_post_meta($post_ID, TDOMF_KEY_FLAG, true, true);
 
    // Submitter info
-   if($user_id != tdomf_get_option_form(TDOMF_DEFAULT_AUTHOR,1)){
+   if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)){
      tdomf_log_message("Logging default submitter info (user $user_id) for this post $post_ID");
      add_post_meta($post_ID, TDOMF_KEY_USER_ID, $user_id, true);
      add_post_meta($post_ID, TDOMF_KEY_USER_NAME, $user->user_login, true);
