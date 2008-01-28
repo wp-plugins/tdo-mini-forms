@@ -291,6 +291,8 @@ function tdomf_widget_notifyme_show_email_input($form_id){
 function tdomf_widget_notifyme($args) {
   global $current_user;
   get_currentuserinfo();
+
+  extract($args);
   
   // Dont' do anything if the user can already publish or is trusted!
   //
@@ -303,7 +305,6 @@ function tdomf_widget_notifyme($args) {
      }
    }
 
-   extract($args);
    $output = $before_widget;
    
   // Check if values set in cookie
