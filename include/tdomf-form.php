@@ -399,8 +399,9 @@ EOT;
   if($use_ajax) {
   	$form .= "<div id='tdomf_form".$form_id."_msg_div'></div>\n<form>";
   } else {
+    $redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
     $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form'.$form_id.'" name="tdomf_form'.$form_id.'" class="tdomf_form" >';
-    $form .= "<input type='hidden' id='redirect' name='redirect' value='$_SERVER[REQUEST_URI]' />";
+    $form .= "<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />";
     $random_string = tdomf_random_string(100);
     $_SESSION["tdomf_key_$form_id"] = $random_string;
     $form .= "<input type='hidden' id='tdomf_key' name='tdomf_key_$form_id' value='$random_string' />";

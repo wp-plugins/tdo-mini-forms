@@ -311,7 +311,7 @@ function tdomf_widget_categories_post($args,$params) {
     $postfix1 = "-$number"; 
   }
   extract($args);
-  $options = tdomf_widget_categories_get_options();
+  $options = tdomf_widget_categories_get_options($args['tdomf_form_id']);
 
   // Grab existing data
   $post = wp_get_single_post($post_ID, ARRAY_A);
