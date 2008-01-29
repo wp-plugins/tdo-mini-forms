@@ -221,7 +221,7 @@ function tdomf_widget_customfields_post($args,$params) {
   }
   
   if($options['append'] && $retVal == NULL){
-    tdomf_widget_customfields_append($args['post_ID'],$options,$number);
+    tdomf_widget_customfields_append($args['post_ID'],$options,$number,$args['tdomf_form_id']);
   }
   
   return $retVal;

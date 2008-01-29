@@ -123,7 +123,7 @@ function tdomf_widget_categories($args,$params) {
   $postfix = "";
   if($number != 1){ $postfix = "-$number"; }
   
-  $defcat = get_option(TDOMF_DEFAULT_CATEGORY);
+  $defcat = tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,$args['tdomf_form_id']);
   if(isset($args["categories$postfix"])) {
     $defcat = $args["categories$postfix"];
   }

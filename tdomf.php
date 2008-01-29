@@ -286,7 +286,8 @@ Author URI: http://thedeadone.net
 // - Throttle number of submissions per "day" (hour/min) per "ip" (user)
 // - Add a "title" field to the file upload for file links/attachment pages
 // - Control who can access form by role and/or user, ip and capability.
-// - Uninstall *everything* option
+// - Optionally, show the moderation menu using a style like the "comment 
+//     moderation" page
 ////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
