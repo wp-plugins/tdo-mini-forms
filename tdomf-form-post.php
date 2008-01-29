@@ -44,7 +44,7 @@ if(!isset($_SESSION['tdomf_key_'.$form_id]) || $_SESSION['tdomf_key_'.$form_id] 
    $session_key = $_SESSION['tdomf_key_'.$form_id];
    $post_key = $_POST['tdomf_key_'.$form_id];
    $ip = $_SERVER['REMOTE_ADDR'];
-   tdomf_log_message("Form submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
+   tdomf_log_message("Form ($form_id) submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
    unset($_SESSION['tdomf_key_'.$form_id]);
    exit(__("TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again.","tdomf"));
 }

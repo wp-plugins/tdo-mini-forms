@@ -404,7 +404,7 @@ EOT;
     $form .= "<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />";
     $random_string = tdomf_random_string(100);
     $_SESSION["tdomf_key_$form_id"] = $random_string;
-    $form .= "<input type='hidden' id='tdomf_key' name='tdomf_key_$form_id' value='$random_string' />";
+    $form .= "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$random_string' />";
     tdomf_log_message_extra('Placing key '.$random_string.' in $_SESSION: <pre>'.var_export($_SESSION,true)."</pre>");
   }
 
