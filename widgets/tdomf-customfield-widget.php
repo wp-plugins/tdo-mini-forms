@@ -553,6 +553,7 @@ function tdomf_widget_customfields_textfield_validate($args,$number,$options) {
 
 function tdomf_widget_customfields_textfield_post($args,$number,$options) {
   extract($args);
+  $value = $args["customfields-textfield-$number"];
   if (get_magic_quotes_gpc()) {
      $value = stripslashes($args["customfields-textfield-$number"]);
   }

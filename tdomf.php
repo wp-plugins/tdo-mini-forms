@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.9.4
+Version: 0.10 Beta
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -215,80 +215,116 @@ Author URI: http://thedeadone.net
 //    should only occur at post like captcha and "who am I" info for example.
 // - Option to specify the max number of instances of a multi-instant widget per
 //    form
+// - Can now set a form to submit pages instead of posts.
+// - Fixed a bug where customfield textfield would submit empty values for the
+//    custom field if you had magic quotes turned off.
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 ////////////////////////////////////////////////////////////////////////////////
-// The never-ending TODO list
-//
-// - Bug: invalid markup used in form elements!
-// - Widget to allow users to enable/disable comments and trackbacks on their
-//    submission
-// - Widget to allow user to enter a date to post the submission (as in future
-//    post)
-// - Multiple form advancements
-//    * Allow users to submit Pages
-//    * Allow users to submit Links
-//    * User groups (instead of roles)
-// - More Template Tags
-//    * Log
-//    * Moderation Queue
-//    * Approved Posts
-//    * File Info
-//    * Country codes on submitter's IP
-// - Allow moderators append a message to the approved/rejected notification
-//    (not that hard to do, store the message as a postmeta, notification code
-//     grabs the message from postmeta, uses it and then deletes it from post
-//     meta)
-// - Allow admins to modify messages to user for...
-//    * Submitted post awaiting moderation
-//    * Submitted post automatically published
-//    * Banned IP, Banned user and other insufficent priviliges messages
-// - Widget Manager Menu
-//    * Info about loaded widgets
-//    * Disable loading of widgets
-//    * Editor pane for widgets
-// - Improvements for current widgets
-//    * Upload Files: Multiple instances
-//    * Upload Files: Thumbnail size options for upload files
-//    * Upload Files: Limit size of image by w/h
-//    * Content (and Custom Field): TinyMCE Integration
-//    * Custom Fields: Radio groups, multiple checkboxs (grid-layout)
-//    * Custom Fields: Textfield: Numeric and Date
-//    * Custom Fields: Select: required
-//    * Tags: select from list/tag cloud
-//    * Tags: Widget of input field
-//    * 1 Question Captcha: Randoming questions for Captcha
-//    * Category: options for list size, width, include cats and multiple
-//        default categories
-//    * Notify Me: Option to always notify submitter
-//    * Image Captcha should not reload on every preview
-//    * Update "getcat" plugin with control UI
-//    * Upload Files: Image cropping
-//    * Text: Option to "popup" up text (include HTML space for link)
-//    * Text: Option to not use the form formatting
-// - Email verification of non-registered users
-// - Edit style-sheet for form inside TDOMF (possible have multiple styles)
-// - Edit post support
-//    * Unregistered user editing (lots of strange reprecussions here)
-// - AJAX support (useful for mulitiple forms on the same page!)
-// - Spam Protection
-//    * Integration with Akismet
-//    * SPAM button in moderation page
-// - Force Preview (user must preview first before submission)
-// - Hide Form on Preview
-// - Allow newly submitted posts be set to "Post ready for review" with
-//    Wordpress 2.3
-// - A "manage download" menu
-// - Documentation on creating your own widgets
-// - Allow users to define their own quicktags
-// - Prevent plugin from being acitvate if register_globals is enabled
-// - Allow some way to ask for input during validation (i.e. for captchas)
-// - Throttle number of submissions per "day" (hour/min) per "ip" (user)
-// - Add a "title" field to the file upload for file links/attachment pages
-// - Control who can access form by role and/or user, ip and capability.
-// - Optionally, show the moderation menu using a style like the "comment 
-//     moderation" page
+TODO for future versions
+
+Known Bugs
+- Invalid markup is used in several form elements
+- Fix Image Captcha so that it is included in Wordpress download Zip
+
+Spam Protection
+- Integration with Akismet
+- Spam Button on moderation page
+
+New Features
+- Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
+- Widget Manager Menu
+  * Info about loaded widgets
+  * Disable loading of specific widgets
+- File Editor (edit TDOMF files from within admin UI)
+  * Widgets
+  * TDOMF Core Files (with usual warnings)
+  * Restore
+- Style Sheet Editor
+  * Preview
+  * Select from pre-configured Styles
+  * Submit new style to include in TDOMF
+- Email verification of non-registered users
+- AJAX support
+- Edit Posts 
+  * Using same/similar form as what the post was submitted with
+  * Create Edit-Post only forms
+  * Unregistered user editing (requires some sort of magic code)
+- Manage Downloads page
+- Throttle number of submissions per day (or hour/min) per ip (or user)
+- Option to display the moderation menu like the "comment moderation" page (i.e. with little extracts of the posts)
+- Get input during validation of form (for capatchas)
+- Option to use "Post ready for review" instead of draft for unapproved submitted posts
+
+New Form Options
+- Force Preview before submission
+- Hide Form on Preview
+- Forms can be used to submit links
+- Select Form Style/include Custom CSS
+- Control who can access form not just by role but also by user, ip and capability.
+- Modify error messages for form
+  * Submitted post awaiting moderation
+  * Banned X and other insufficent priviliges messages
+- Prevent plugin from being activate if register_globals is enabled (if we can do AJAX, this may not be an issue)
+
+New Widgets
+- Widget to allow users to enable/disable comments and trackbacks on their submission
+- Widget to allow user to enter a date to post the submission (as in future post)
+
+Existing Widget Improvements
+- Any widget with a size or length field should be customisable.
+- Upload Files
+  * Multiple Instances
+  * Thumbnail size
+  * Limit size of image by w/h
+  * Image cropping
+  * Title field for file links/attachment pages
+- Content
+  * TinyMCE Integration
+  * Allow users to define their own quicktags
+  * Mechanism to allow sumitter to select where the link/image for upload should go 
+- Custom Field: Textarea
+  * TinyMCE Integration
+  * Allow users to define their own quicktags
+  * Mechanism to allow sumitter to select where the link/image for upload should go
+- Custom Field
+  * Radio Groups
+  * Multiple Checkboxes (grid-layout)
+- Custom Field: Textfield
+  * Numeric
+  * Date
+- Custom Field: Select
+  * Required support
+- Tags
+  * Select from existing tag list or tag cloud
+- 1 Question Captcha
+  * Random questions for Captcha
+- Category
+  * Include specific categories
+  * Multiple default categories
+- Notify Me
+  * Option to always notify submitter
+- Image Captcha
+  * Do not reload image on every preview (would be resolved by a seperate validation step)
+- Text
+  * Option to not use the form formatting (i.e. no "<fieldset>" tags before and after)
+  * Option to have the text popup (would require a HTML space for the link)
+- Set Category from GET variables
+  * Add options (or at least information) for this widget
+
+Template Tags
+- Log
+- Moderation Queue
+- Approved Posts
+- File Info
+- Country codes on submitter's IP
+
+Misc
+- Documentation on creating your own widgets
+
 ////////////////////////////////////////////////////////////////////////////////
+*/
 
 ///////////////////////////////////////////////////
 // Defines and other global vars for this Plugin //
@@ -301,9 +337,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "21");
+define("TDOMF_BUILD", "22");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.9.4");
+define("TDOMF_VERSION", "0.10 Beta");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -405,6 +441,7 @@ define('TDOMF_OPTION_CREATEDPAGES',"tdomf_form_created_pages");
 define('TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS',"tdomf_form_inc_user_page");
 define('TDOMF_OPTION_CREATEDUSERS',"tdomf_form_created_users");
 define('TDOMF_OPTION_WIDGET_INSTANCES',"tdomf_form_widget_instances");
+define('TDOMF_OPTION_SUBMIT_PAGE',"tdomf_form_submit_page");
 define('TDOMF_KEY_FORM_ID',"_tdomf_form_id");
 
 // DB Table Names

@@ -446,6 +446,19 @@ function tdomf_show_form_options($form_id) {
 	</p>
   
 
+  <h3><?php _e('Submit Page instead of Post',"tdomf"); ?> </h3>
+
+	<p>
+	<?php _e('You can make this form submit Pages instead of posts. All widgets will technically work, however they their submitted information may not be used by Wordpress.',"tdomf"); ?>
+    </p>
+
+    <?php $use_page = tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id); ?>
+
+	</p>
+	<b><?php _e("Submit Page","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_use_page" id="tdomf_use_page"  <?php if($use_page) echo "checked"; ?> >
+	</p>
+  
   <table border="0"><tr>
 
     <td>
@@ -573,24 +586,34 @@ function tdomf_random_string($length)
 function tdomf_create_form_page($form_id = 1) {
    global $current_user;
 
-   $post = array (
-	   "post_content"   => "[tdomf_form$form_id]",
-	   "post_title"     => __("Submit A Post","tdomf"),
-	   "post_author"    => $current_user->ID,
-	   "post_status"    => 'publish',
-	   "post_type"      => "page"
-   );
-   $post_ID = wp_insert_post($post);
-
-   $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
-   if($pages == false) {
-     $pages = array( $post_ID );
-   } else {
-     $pages = array_merge( $pages, array( $post_ID ) );
+   if(tdomf_form_exists($form_id)){
+     
+     $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
+     if($form_name == false || empty($form_name)) {
+       $form_name = __("Submit A Post","tdomf");
+     }
+     
+     $post = array (
+       "post_content"   => "[tdomf_form$form_id]",
+       "post_title"     => $form_name,
+       "post_author"    => $current_user->ID,
+       "post_status"    => 'publish',
+       "post_type"      => "page"
+     );
+     $post_ID = wp_insert_post($post);
+  
+     $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
+     if($pages == false) {
+       $pages = array( $post_ID );
+     } else {
+       $pages = array_merge( $pages, array( $post_ID ) );
+     }
+     tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$pages,$form_id);
+     
+     return $post_ID;
    }
-   tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$pages,$form_id);
    
-   return $post_ID;
+   return false;
 }
 
 // Handle actions for this form
@@ -735,7 +758,7 @@ function tdomf_handle_options_actions() {
             //From email
 
       if(trim($_POST['tdomf_from_email']) == "") {
-       	tdomf_set_option_form(TDOMF_OPTION_FROM_EMAIL,false);
+       	tdomf_set_option_form(TDOMF_OPTION_FROM_EMAIL,false,$form_id);
        } else {
         tdomf_set_option_form(TDOMF_OPTION_FROM_EMAIL,$_POST['tdomf_from_email'],$form_id);
        }
@@ -743,7 +766,7 @@ function tdomf_handle_options_actions() {
        // Form name
        
        if(trim($_POST['tdomf_form_name']) == "") {
-        tdomf_set_option_form(TDOMF_OPTION_NAME,"");
+        tdomf_set_option_form(TDOMF_OPTION_NAME,"",$form_id);
        } else {
         tdomf_set_option_form(TDOMF_OPTION_NAME,strip_tags($_POST['tdomf_form_name']),$form_id);
        }
@@ -751,7 +774,7 @@ function tdomf_handle_options_actions() {
        // Form description
        
        if(trim($_POST['tdomf_form_descp']) == "") {
-       	tdomf_set_option_form(TDOMF_OPTION_DESCRIPTION,false);
+       	tdomf_set_option_form(TDOMF_OPTION_DESCRIPTION,false,$form_id);
        } else {
         tdomf_set_option_form(TDOMF_OPTION_DESCRIPTION,$_POST['tdomf_form_descp'],$form_id);
        }
@@ -775,7 +798,13 @@ function tdomf_handle_options_actions() {
       if($widget_count < 1){ $widget_count = 1; }
       tdomf_set_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$widget_count,$form_id);
       
-       tdomf_log_message("Options Saved for Form ID $form_id");
+      //Submit page instead of post
+      //
+      $use_page = false;
+      if(isset($_POST['tdomf_use_page'])) { $use_page = true; }
+      tdomf_set_option_form(TDOMF_OPTION_SUBMIT_PAGE,$use_page,$form_id);
+
+      tdomf_log_message("Options Saved for Form ID $form_id");
        
   } else if(isset($_REQUEST['delete'])) {
       

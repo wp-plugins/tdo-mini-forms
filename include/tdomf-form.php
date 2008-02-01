@@ -159,8 +159,15 @@ function tdomf_create_post($args) {
 #	   "post_date"      => $post_date,
 #    "post_date_gmt"  => $post_date_gmt,
 #	   "comment_status" => get_option('default_comment_status'),
-#	   "ping_status"    => get_option('default_ping_status')
+#	   "ping_status"    => get_option('default_ping_status').
    );
+   //
+   // submit a page instead of a post
+   //   
+   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+     $post['post_type'] = 'page';
+   }
+   //
    $post_ID = wp_insert_post($post);
 
    tdomf_log_message("Post with id $post_ID (and default title $def_title) created as draft.");
