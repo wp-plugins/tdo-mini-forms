@@ -6,17 +6,17 @@ Requires at least: 2.3
 Tested up to: 2.3.1
 Stable Tag: 0.9.4
 
-This plugin allows you to add a form to your website that allows your readers (including non-registered) to submit posts.
+This plugin allows you to add custom forms to your website that allows your readers (including non-registered) to submit posts.
 
 == Description ==
 
-This plugin allows you to add a form to your website that allows non-registered users and/or subscribers (configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
+This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.9.4, to name a few, includes an image captcha widget, a theme widget to display the form in your sidebar, word and/or character limit in submissions and several fixes!**
+**Version 0.10, adds multiple form support, ability to submit posts and increase the number of form widgets!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
-Administrators can configure the form using drag and drop "widgets". They are based on the same model as Wordpress' built-in Theme widgets and it is possible to write your own. With 0.7, more options are available and it is now much easier to integrate with your theme. You don't even need to modify your theme any more to display submitter information!
+Administrators can configure the forms using drag and drop "widgets". They are based on the same model as Wordpress' built-in Theme widgets and it is possible to write your own. With 0.7, more options are available and it is now much easier to integrate with your theme. You don't even need to modify your theme any more to display submitter information and you can even add a form as a sidebar widget to your form.
 
 Registered users have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
 
@@ -24,9 +24,10 @@ Registered users have access to a "Your Submissions" page which lists their curr
 
 = Features =
 
-* Highly customisable: Create your form using a Widget interface.
+* Highly customisable: Create your forms using a Widget interface.
+* Create as many forms as you like
+* Submit pages instead of posts
 * Simple Question and/or Image Captcha.
-* Posting Policy
 * Add Custom Fields to your Forms.
 * QuickTags support for Forms.
 * Upload Files and can be attached to posts. Uses Wordpress' core to create thumbnails if applicable.
@@ -38,6 +39,8 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Can automatically modified author template tag with info about submitter.
 * Can, optionally, automatically allow submissions to be published.
 * And many more...
+
+**Version 0.10 is a big upgrade. You will not be able to use previous versions about this install**
 
 **Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
 
@@ -71,11 +74,11 @@ You can use the button in the options menu to create a page or instead you can a
 
 `[tdomf_form1]` 
 
-to any post or page. The plugin will replace this with the form.
+to any post or page. The plugin will replace this with your Form 1. If you have multiple forms, each form has an ID. Just replace the '1' with the correct form ID.
 
 You can add it to your template directly using this template tag:
 
-`<?php tdomf_the_form(); ?>`
+`<?php tdomf_the_form(1); ?>`
 
 = How do I display the submitter info? =
 
@@ -119,7 +122,7 @@ Another suggestion, but much less secure and not recommended, is to have the pag
 
 = I want submissions, even from unregistered users, be published automatically!! =
 
-Why? It opens your site up to spammers and other nefarious uses. However, people keep asking for this feature. You can disable moderation in the options menu and all posts will be published. However such posts get passed through Wordpress' kses filters automatically to remove nasty scripts.
+Why? It opens your site up to spammers and other nefarious uses. However, people keep asking for this feature. You can disable moderation in the options menu for a specific form and all posts will be published. However such posts get passed through Wordpress' kses filters automatically to remove nasty scripts.
 
 = When people submit posts with YouTube embedded code, it gets stripped! =
 
