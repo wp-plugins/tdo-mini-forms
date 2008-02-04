@@ -81,7 +81,7 @@ $_SESSION['hash_func_'.$form_id] = $hash_func;
 // image type:
 // possible values: "jpg", "png", "gif"
 // jpg doesn't support transparency (transparent bg option ends up white)
-// png isn't supported by old browsers (see http://www.libpng.org/pub/png/pngstatus.html)
+// png isn't supported by old browsers (see http://www.libpng.org/pub/png/pngstatushtml)
 // gif may not be supported by your GD Lib.
 $output = "png";
 
@@ -89,14 +89,14 @@ $output = "png";
 // dictionary is easier to recognise
 // - both for humans and computers, so use random string if you're paranoid.
 $use_dict = 1;
-// if your server is NOT set up to deny web access to files beginning ".ht"
+// if your server is NOT set up to deny web access to files beginning "ht"
 // then you should ensure the dictionary file is kept outside the web directory
-// eg: if www.foo.com/index.html points to c:\website\www\index.html
+// eg: if www.foo.com/indexhtml points to c:\website\www\indexhtml
 // then the dictionary should be placed in c:\website\dict.txt
 // test your server's config by trying to access the dictionary through a web browser
 // you should NOT be able to view the contents.
 // can leave this blank if not using dictionary
-$dict_location = "./.ht_freecap_words";
+$dict_location = "./ht_freecap_words";
 
 // used to calculate image width, and for non-dictionary word generation
 $max_word_length = 6;
@@ -125,7 +125,7 @@ $max_attempts = 20;
 // the fonts included with freeCap *only* include lowercase alphabetic characters
 // so are not suitable for most other uses
 // to increase security, you really should add other fonts
-$font_locations = Array("./.ht_freecap_font1.gdf","./.ht_freecap_font2.gdf","./.ht_freecap_font3.gdf","./.ht_freecap_font4.gdf","./.ht_freecap_font5.gdf");
+$font_locations = Array("./ht_freecap_font1.gdf","./ht_freecap_font2.gdf","./ht_freecap_font3.gdf","./ht_freecap_font4.gdf","./ht_freecap_font5.gdf");
 
 // background:
 // 0=transparent (if jpg, white)
@@ -140,7 +140,7 @@ $bg_type = 2;
 $blur_bg = false;
 // for bg_type 3, which images should we use?
 // if you add your own, make sure they're fairly 'busy' images (ie a lot of shapes in them)
-$bg_images = Array("./.ht_freecap_im1.jpg","./.ht_freecap_im2.jpg","./.ht_freecap_im3.jpg","./.ht_freecap_im4.jpg","./.ht_freecap_im5.jpg");
+$bg_images = Array("./ht_freecap_im1.jpg","./ht_freecap_im2.jpg","./ht_freecap_im3.jpg","./ht_freecap_im4.jpg","./ht_freecap_im5.jpg");
 // for non-transparent backgrounds only:
 	// if 0, merges CAPTCHA with bg
 	// if 1, write CAPTCHA over bg

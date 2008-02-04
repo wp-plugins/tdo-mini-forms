@@ -218,6 +218,8 @@ Author URI: http://thedeadone.net
 // - Can now set a form to submit pages instead of posts.
 // - Fixed a bug where customfield textfield would submit empty values for the
 //    custom field if you had magic quotes turned off.
+// - Update the "Freecap" Image Captcha so that the files get included in 
+//    the release zip Wordpress creates.
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
