@@ -1,18 +1,18 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface,
 Requires at least: 2.3
 Tested up to: 2.3.1
-Stable Tag: 0.9.4
+Stable Tag: 0.10
 
-This plugin allows you to add custom forms to your website that allows your readers (including non-registered) to submit posts.
+This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
 == Description ==
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.10, adds multiple form support, ability to submit posts and increase the number of form widgets!**
+**Version 0.10, adds multiple form support, ability to submit pages and increase the number of form widgets!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -25,8 +25,9 @@ Registered users have access to a "Your Submissions" page which lists their curr
 = Features =
 
 * Highly customisable: Create your forms using a Widget interface.
-* Create as many forms as you like
-* Submit pages instead of posts
+* Create as many forms as you like.
+* Put a form in your sidebar using a widget for your Theme.
+* Submit pages instead of posts.
 * Simple Question and/or Image Captcha.
 * Add Custom Fields to your Forms.
 * QuickTags support for Forms.
@@ -82,19 +83,19 @@ You can add it to your template directly using this template tag:
 
 = How do I display the submitter info? =
 
-There are options to automatically modify the the_author tag with submitter information if available and also to append submitter information to the end of the post. 
-
-If thats not good enough for you, you can use the template tag:
+There are options to automatically modify the the_author tag with submitter information if available and also to append submitter information to the end of the post. If thats not good enough for you, you can use the template tag:
 
 `<?php tdomf_the_submitter(); ?>`
 
 = What template tags are available? =
 
-`<?php if(tdomf_can_current_user_see_form()) { ?> Link to form <?php } ?>`
+(Replace '1' with the ID of the form you are interested in)
 
-`<?php echo tdomf_get_the_form(); ?>`
+`<?php if(tdomf_can_current_user_see_form(1)) { ?> Link to form <?php } ?>`
 
-`<?php tdomf_the_form(); ?>`
+`<?php echo tdomf_get_the_form(1); ?>`
+
+`<?php tdomf_the_form(1); ?>`
 
 These tags must be used within the loop:
 
@@ -122,13 +123,13 @@ Another suggestion, but much less secure and not recommended, is to have the pag
 
 = I want submissions, even from unregistered users, be published automatically!! =
 
-Why? It opens your site up to spammers and other nefarious uses. However, people keep asking for this feature. You can disable moderation in the options menu for a specific form and all posts will be published. However such posts get passed through Wordpress' kses filters automatically to remove nasty scripts.
+You can disable moderation in the options menu for a specific form and all posts will be published. However such posts get passed through Wordpress' kses filters automatically to remove nasty scripts.
 
 = When people submit posts with YouTube embedded code, it gets stripped! =
 
 Enable moderation and it'll work. If you disable moderation, posts get passed through kses to remove nasty scripts before being published. This removes YouTube code. If you have to approve posts, you can make sure no-one has snuck in something tricky.
 
-Alternativily you can use a custom field. Add the Custom Field widget to your form, set it as a URL and ask your submitters to add the URL of the YouTube video they want to include. Then in your theme, you can use the Custom Fields template tags to automatically display the YouTube video underneath the submitted post! 
+Alternativily you can use a custom field. Add the Custom Field widget to your form, set it as a URL and ask your submitters to add the URL of the YouTube video they want to include. Then in your theme, you can use the Custom Fields template tags to automatically display the YouTube video underneath the submitted post. Or you can use another plugin that gives you tags to support YouTube and have the Custom Field append the YouTube link with the tags to your post.
 
 = Can we use TinyMCE or FckEditor for writing posts? =
 
@@ -198,6 +199,10 @@ Then you host has restricted where you can create and upload files. Safe mode is
 The best solution is to use a folder to store uploads that does not break safe mode. If you can upload with the normal wordpress interface then you can use something like <path to your wordpress install>/wp-content/uploads. Remember also that you cannot use symbolic links in your path to get around open_basedir restrictions.
 
 You can enable extra log messages from the options screen to see more detailed messages about file uploading. You can also check your "phpinfo()" from the main TDOMF page.
+
+= Having submitted posts not included on your main page =
+
+This is outside the scope of TDOMF as TDOMF only enables people to submit posts. However you can use a plugin like [Advanced Category Excluder Plugin](http://wordpress.org/extend/plugins/advanced-category-excluder/ "Advanced Category Excluder Plugin"). This plugin has nothing to do with me. You could have posts submitted to a specific category that is excluded from your main blog.
 
 = Credits =
 
@@ -390,3 +395,14 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 * Add "credits" to readme.txt for various places I pull source and other stuff from
 * Added a "Read More..." `<!--more-->` tag to the quick tags
 * Fixed Bug when multiple notifications to submitter when post is edited after approval
+
+= v0.10: 12th Feburary 2007 =
+
+* Suppressed errors for is_dir and other file functions just in case of open_basedir settings!
+* Use "get_bloginfo('charset')" in htmlentities in widget control. Hopefully this will finally resolve the issues with foreign lanaguage characters
+* Multiple Form Support
+* Widgets that validate know if it's for preview or post. Certain validation should only occur at post like captcha and "who am I" info for example.
+* Option to specify the max number of instances of a multi-instant widget per form
+* Can now set a form to submit pages instead of posts.
+* Fixed a bug where customfield textfield would submit empty values for the custom field if you had magic quotes turned off.
+* Update the "Freecap" Image Captcha so that the files get included in the release zip Wordpress creates.

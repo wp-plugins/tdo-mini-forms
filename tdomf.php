@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.10 Beta
+Version: 0.10
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -202,23 +202,23 @@ Author URI: http://thedeadone.net
 // - Add "credits" to readme.txt for various places I pull source and other
 //    stuff from
 // - Added a "Read More..." <!--more--> tag to the quick tags
-// - Fixed Bug when multiple notifications to submitter when post is edited 
+// - Fixed Bug when multiple notifications to submitter when post is edited
 //    after approval
 //
-// v0.x.x: TBD
-// - Suppressed errors for is_dir and other file functions just in case of 
+// v0.10: 12th Feburary 2007
+// - Suppressed errors for is_dir and other file functions just in case of
 //    open_basedir settings!
 // - Use "get_bloginfo('charset')" in htmlentities in widget control. Hopefully
 //    this will finally resolve the issues with foreign lanaguage characters
 // - Multiple Form Support
-// - Widgets that validate know if it's for preview or post. Certain validation 
+// - Widgets that validate know if it's for preview or post. Certain validation
 //    should only occur at post like captcha and "who am I" info for example.
 // - Option to specify the max number of instances of a multi-instant widget per
 //    form
 // - Can now set a form to submit pages instead of posts.
 // - Fixed a bug where customfield textfield would submit empty values for the
 //    custom field if you had magic quotes turned off.
-// - Update the "Freecap" Image Captcha so that the files get included in 
+// - Update the "Freecap" Image Captcha so that the files get included in
 //    the release zip Wordpress creates.
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -249,7 +249,7 @@ New Features
   * Submit new style to include in TDOMF
 - Email verification of non-registered users
 - AJAX support
-- Edit Posts 
+- Edit Posts
   * Using same/similar form as what the post was submitted with
   * Create Edit-Post only forms
   * Unregistered user editing (requires some sort of magic code)
@@ -285,7 +285,7 @@ Existing Widget Improvements
 - Content
   * TinyMCE Integration
   * Allow users to define their own quicktags
-  * Mechanism to allow sumitter to select where the link/image for upload should go 
+  * Mechanism to allow sumitter to select where the link/image for upload should go
 - Custom Field: Textarea
   * TinyMCE Integration
   * Allow users to define their own quicktags
@@ -339,9 +339,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "22");
+define("TDOMF_BUILD", "23");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.10 Beta");
+define("TDOMF_VERSION", "0.10");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -541,8 +541,8 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
   }
 
-  
-  
+
+
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
