@@ -220,6 +220,10 @@ Author URI: http://thedeadone.net
 //    custom field if you had magic quotes turned off.
 // - Update the "Freecap" Image Captcha so that the files get included in
 //    the release zip Wordpress creates.
+//
+// v0.10.x: XXX
+// - Fixed a bug when if you inserted an upload as an attachment it would 
+//     overwrite the contents of the post.
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

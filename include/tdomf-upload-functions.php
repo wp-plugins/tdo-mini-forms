@@ -512,7 +512,13 @@ function tdomf_widget_upload_post($args) {
   $options = tdomf_widget_upload_get_options($tdomf_form_id);
   
   $modifypost = false;
-  if($options['post-title'] || $options['a'] || $options['img']) {
+  if($options['post-title'] ||
+     $options['a'] || 
+     $options['img'] || 
+     $options['attach-a'] ||
+     $options['attach-thumb-a'] ||
+     $options['thumb-a']
+     ) {
     // Grab existing data
     $post = wp_get_single_post($post_ID, ARRAY_A);
     if(!empty($post['post_content'])) {
