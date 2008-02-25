@@ -28,7 +28,7 @@ require_once($wp_config);
 
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
+load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 
 // Get and verify Form Id
 //

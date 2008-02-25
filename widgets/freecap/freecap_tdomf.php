@@ -37,7 +37,7 @@ $form_id = intval($_REQUEST['tdomf_form_id']);
 
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
+load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 
 session_start();
 

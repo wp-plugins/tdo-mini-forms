@@ -3,19 +3,18 @@
 Name: "Custom Fields"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Add a custom field to your form!
-Version: 0.5
+Version: 0.6
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-function tdomf_widget_customfields_gen_fmt($index,$value,$form_id){
+function tdomf_widget_customfields_gen_fmt($index,$value,$options){
   $value = strval($value);
   if(empty($value) || trim($value) == "") {
     return "";
   }
-  $options = tdomf_widget_customfields_get_options($index,$form_id);
   $title = $options['title'];
   $key = $options['key'];
   
@@ -29,7 +28,6 @@ function tdomf_widget_customfields_gen_fmt($index,$value,$form_id){
 function tdomf_widget_customfields_append($post_ID,$options,$index){
   // Grab value
   $value = get_post_meta($post_ID,$options['key'],true);
-  $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
   // select of course has to be a special case!
   if($options['type'] == 'select') {
     $value = tdomf_widget_customfields_select_convert($value,$options);
@@ -37,7 +35,7 @@ function tdomf_widget_customfields_append($post_ID,$options,$index){
   if(!empty($value) && (!is_string($value) || trim($value) != "") )
   {
     // Gen Format
-    $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value,$form_id));
+    $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value,$options));
     if($fmt != "") {
       // Grab existing data
       $post = wp_get_single_post($post_ID, ARRAY_A);
@@ -522,7 +520,7 @@ function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$tdomf_form_id);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$options);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -796,7 +794,7 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   }
   
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$text,$tdomf_form_id);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$text,$options);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -910,7 +908,7 @@ function tdomf_widget_customfields_checkbox_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$tdomf_form_id);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$options);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -1203,7 +1201,7 @@ function tdomf_widget_customfields_select_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$message,$tdomf_form_id);
+    $output .= tdomf_widget_customfields_gen_fmt($number,$message,$options);
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;

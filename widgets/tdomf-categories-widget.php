@@ -3,7 +3,7 @@
 Name: "Categories"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget allows users to select categories for their submissions
-Version: 0.5
+Version: 0.6
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -311,7 +311,6 @@ function tdomf_widget_categories_post($args,$params) {
     $postfix1 = "-$number"; 
   }
   extract($args);
-  $options = tdomf_widget_categories_get_options($args['tdomf_form_id']);
 
   // Grab existing data
   $post = wp_get_single_post($post_ID, ARRAY_A);

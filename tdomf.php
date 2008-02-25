@@ -224,6 +224,9 @@ Author URI: http://thedeadone.net
 // v0.10.x: XXX
 // - Fixed a bug when if you inserted an upload as an attachment it would 
 //     overwrite the contents of the post.
+// - Fix to categories widget where widget on other forms than the default
+//     would forget it's settings at post time.
+// - Custom Field widget was ignoring append format for multi-forms 
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -232,11 +235,11 @@ TODO for future versions
 
 Known Bugs
 - Invalid markup is used in several form elements
-- Fix Image Captcha so that it is included in Wordpress download Zip
 
 Spam Protection
 - Integration with Akismet
 - Spam Button on moderation page
+- Throttle number of submissions per day (or hour/min) per ip (or user) (should probably be able to add several rules)
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -256,12 +259,14 @@ New Features
 - Edit Posts
   * Using same/similar form as what the post was submitted with
   * Create Edit-Post only forms
+  * Allow various controls and access for forms: per category and by access roles
+  * Editing Post implies adding/removing comments too (can replace comment submission form)
   * Unregistered user editing (requires some sort of magic code)
 - Manage Downloads page
-- Throttle number of submissions per day (or hour/min) per ip (or user)
-- Option to display the moderation menu like the "comment moderation" page (i.e. with little extracts of the posts)
+- Option to display the moderation menu like the "comment moderation" page (i.e. with little extracts of the posts/pages)
 - Get input during validation of form (for capatchas)
 - Option to use "Post ready for review" instead of draft for unapproved submitted posts
+- On Options and Widgets Page, set the "title" of the Form links to the given title of the form
 
 New Form Options
 - Force Preview before submission
@@ -279,7 +284,10 @@ New Widgets
 - Widget to allow user to enter a date to post the submission (as in future post)
 
 Existing Widget Improvements
+- Make Widget-Form menu independant of Wordpress code (the current code will break in Wordpress 2.5)
 - Any widget with a size or length field should be customisable.
+- Any static text used in widgets need to be customisable.
+- Copy Widget to another Form
 - Upload Files
   * Multiple Instances
   * Thumbnail size
@@ -290,10 +298,12 @@ Existing Widget Improvements
   * TinyMCE Integration
   * Allow users to define their own quicktags
   * Mechanism to allow sumitter to select where the link/image for upload should go
+  * Default Value
 - Custom Field: Textarea
   * TinyMCE Integration
   * Allow users to define their own quicktags
   * Mechanism to allow sumitter to select where the link/image for upload should go
+  * Default Value
 - Custom Field
   * Radio Groups
   * Multiple Checkboxes (grid-layout)
@@ -304,11 +314,14 @@ Existing Widget Improvements
   * Required support
 - Tags
   * Select from existing tag list or tag cloud
+  * Hide if form is for pages  
 - 1 Question Captcha
   * Random questions for Captcha
 - Category
   * Include specific categories
   * Multiple default categories
+  * Co-operate with "Set Category from GET variables" Widget
+  * Hide if form is for pages
 - Notify Me
   * Option to always notify submitter
 - Image Captcha
@@ -318,6 +331,10 @@ Existing Widget Improvements
   * Option to have the text popup (would require a HTML space for the link)
 - Set Category from GET variables
   * Add options (or at least information) for this widget
+  * Co-operate with "Categories" Widget
+  * Hide if form is for pages
+- Who Am I
+  * Integration with WP-OpenID
 
 Template Tags
 - Log
@@ -458,7 +475,7 @@ define("TDOMF_DB_TABLE_WIDGETS", "tdomf_table_widgets");
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
-load_plugin_textdomain('tdomf',PLUGINDIR.TDOMF_FOLDER);
+load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //
