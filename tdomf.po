@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TDO Mini Forms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-11 10:08-0000\n"
-"PO-Revision-Date: 2008-02-11 10:09-0000\n"
+"POT-Creation-Date: 2008-03-12 17:11-0000\n"
+"PO-Revision-Date: 2008-03-12 17:11-0000\n"
 "Last-Translator: Mark Cunningham <Mark.Cunningham@gmail.com>\n"
 "Language-Team: Mark Cunningham <Mark.Cunningham@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -11,14 +11,142 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: English\n"
 "X-Poedit-Country: IRELAND\n"
-"X-Poedit-KeywordsList: _;_e\n"
+"X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: C:\\Documents and Settings\\markcu\\My Documents\\Personal Stuff\\tdomf\\tdomf_svn_https\\trunk\n"
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:27
+msgid "TDOMF: No Form id!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:32
+msgid "TDOMF: Bad Form Id"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:40
+msgid "TDOMF: Bad data submitted. <i>register_globals</i> is enabled. This must be set to disabled."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:49
+msgid "TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:90
+#, php-format
+msgid "Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:92
+#, php-format
+msgid "Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-form-post.php:96
+#, php-format
+msgid "Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:154
+#, php-format
+msgid "Could not move uploaded file %s to storage area!<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:158
+#, php-format
+msgid "Files with %s extensions are forbidden.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:164
+#, php-format
+msgid "Sorry but %s was too big. It exceeded the server configuration.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:167
+#, php-format
+msgid "Sorry but %s was too big. It was greater than %s. It exceeded the configured maximum.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:170
+#, php-format
+msgid "Sorry but only part of %s was uploaded.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:173
+msgid "Sorry file does not exist.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:176
+#, php-format
+msgid "Upload of %s failed for an unknown reason. (%s)<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:233
+#, php-format
+msgid "The file must be of type %s!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:244
+#, php-format
+msgid "File %s has a bad extension and cannot be upload!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:266
 msgid "Your files will be kept on the server for 1 hour. You must submit your post before then."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:270
+#, php-format
+msgid "Max File Size: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:271
+#, php-format
+msgid "Allowable File Types: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:277
+#, php-format
+msgid "<i>%s</i> (%s) Uploaded"
 msgstr ""
 
 #: C:\Documents
@@ -37,6 +165,81 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/tdomf-upload-inline.php:291
 msgid "Delete All!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:487
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-post-panel.php:118
+msgid "TDOMF"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:490
+msgid "Options"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:493
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:17
+msgid "Widgets"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:497
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:500
+msgid "Moderation"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:497
+#, php-format
+msgid "Awaiting Moderation (%d)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:500
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:115
+msgid "Moderation Disabled"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:504
+msgid "Manage"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:507
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:51
+msgid "Log"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/tdomf.php:510
+msgid "Uninstall"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:192
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:511
+#, php-format
+msgid "Form %d"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:199
+#, php-format
+msgid "Form Arrangement for Form %d: \"%s\""
 msgstr ""
 
 #: C:\Documents
@@ -67,6 +270,13 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:328
+#, php-format
+msgid "Saved Settings. <a href='%s'>See your form &raquo</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:330
 msgid "Saved Settings."
 msgstr ""
@@ -75,12 +285,6 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-form.php:335
 msgid "Please select a form to modify!"
-msgstr ""
-
-#: C:\Documents
-#: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-post-panel.php:118
-msgid "TDOMF"
 msgstr ""
 
 #: C:\Documents
@@ -121,8 +325,22 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-post-panel.php:167
+#, php-format
+msgid "This post was submitted from IP %s."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-post-panel.php:169
 msgid "No IP was recorded when this post was submitted."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-edit-post-panel.php:172
+#, php-format
+msgid "Submitted from Form %d."
 msgstr ""
 
 #: C:\Documents
@@ -135,12 +353,6 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:16
 msgid "Form Style Sheet"
-msgstr ""
-
-#: C:\Documents
-#: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-editor.php:17
-msgid "Widgets"
 msgstr ""
 
 #: C:\Documents
@@ -188,14 +400,35 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:207
+#, php-format
+msgid "Last %d Banned Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:209
 msgid "Previous Trusted Users"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:210
+#, php-format
+msgid "Last %d Trusted Users"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:212
 msgid "Previous Submitters"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:213
+#, php-format
+msgid "Last %d Submitters"
 msgstr ""
 
 #: C:\Documents
@@ -354,8 +587,22 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:410
+#, php-format
+msgid "Last %d Banned IPs"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:412
 msgid "Previous IPs"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:413
+#, php-format
+msgid "Last %d IPs"
 msgstr ""
 
 #: C:\Documents
@@ -409,8 +656,92 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:596
+#, php-format
+msgid "Banned IPs: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:616
+#, php-format
+msgid "Reset IPs: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:634
+#, php-format
+msgid "IP %s banned"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:650
+#, php-format
+msgid "IP %s is un-banned"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:673
+#, php-format
+msgid "Banned users: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:688
+#, php-format
+msgid "Reset %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:706
+#, php-format
+msgid "Trusted users: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:719
+#, php-format
+msgid "User %d banned"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:728
+#, php-format
+msgid "User %d trusted"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-manage.php:736
+#, php-format
+msgid "User %d reset"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:116
+#, php-format
+msgid "Moderation is currently disabled. You can enable it on the <a href=\"%s\">options</a> page."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:147
 msgid "Previous Published Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:148
+#, php-format
+msgid "Last %d Published Submissions"
 msgstr ""
 
 #: C:\Documents
@@ -421,8 +752,22 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:151
+#, php-format
+msgid "Last %d Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:153
 msgid "Previous Unmoderated Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:154
+#, php-format
+msgid "Last %d Unmoderated Submissions"
 msgstr ""
 
 #: C:\Documents
@@ -531,6 +876,41 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:344
+#, php-format
+msgid "Deleted posts: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:364
+#, php-format
+msgid "Published posts: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:374
+#, php-format
+msgid "Unpublished posts: %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:390
+#, php-format
+msgid "Published post <a href=\"%s\">%d</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-moderation.php:396
+#, php-format
+msgid "Unpublished post %d."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:12
 msgid "General Options for TDOMF"
 msgstr ""
@@ -583,6 +963,13 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:83
 msgid "This only counts for submitters who register with your blog and submit using a user account. You can have the user automatically changed to \"trusted\" after a configurable number of approved submissions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:83
+#, php-format
+msgid "You can change a users status (to/from trusted or banned) using the <a href=\"%s\">Manage</a> menu"
 msgstr ""
 
 #: C:\Documents
@@ -686,6 +1073,13 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:181
+#, php-format
+msgid "Form id %d does not exist!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:202
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:205
 msgid "Copy"
@@ -712,8 +1106,22 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:218
+#, php-format
+msgid "Form %d Options"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:228
 msgid "Create a page with this form automatically &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:232
+#, php-format
+msgid "Widgets for Form %d &raquo;"
 msgstr ""
 
 #: C:\Documents
@@ -779,6 +1187,12 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:339
+msgid "(default role for new users)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:351
 msgid "Who gets notified?"
 msgstr ""
@@ -823,6 +1237,8 @@ msgstr ""
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:409
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:450
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:455
 msgid "Preview"
 msgstr ""
 
@@ -908,14 +1324,135 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:45
-msgid "Welcome to TDO Mini Forms"
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:593
+msgid "Submit A Post"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:51
-msgid "Log"
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:640
+#, php-format
+msgid "A page with the form has been created. <a href='%s'>View page &raquo;</a><br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:789
+#, php-format
+msgid "Saved Options for Form %d. <a href='%s'>See your form &raquo</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:791
+#, php-format
+msgid "Saved Options for Form %d."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:819
+#, php-format
+msgid "Form %d deleted.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:821
+#, php-format
+msgid "Could not delete Form %d!<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:824
+msgid "You cannot delete the last form! There must be at least one form in the system.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:827
+#, php-format
+msgid "Form %d is not valid!<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:838
+#, php-format
+msgid "Form %d copied with id %d.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:841
+#, php-format
+msgid "Failed to copy Form %d!<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:848
+msgid "New Form"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:851
+#, php-format
+msgid "New form created with %d.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:854
+msgid "Failed to create new Form!<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:880
+msgid "ERROR: <em>register_globals</em> is enabled. This is a security risk and also prevents TDO Mini Forms from working."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:896
+#, php-format
+msgid "<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"%s\">Configure on Options Page &raquo;</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:898
+msgid "<b>Warning</b>: Only users who can <i>already publish posts</i>, can seet this form!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:910
+#, php-format
+msgid "<b>Error</b>: No default author set! <a href=\"%s\">Create dummy user for default author automatically &raquo;</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:917
+#, php-format
+msgid "<b>Error</b>: Current Default Author does not exist! <a href=\"%s\">Create dummy user for default author automatically &raquo;</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-options.php:921
+#, php-format
+msgid "<b>Error</b>: Default author can publish posts. Default author should not be able to publish posts! <a href=\"%s\">Create a dummy user for default author automatically &raquo;</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:45
+msgid "Welcome to TDO Mini Forms"
 msgstr ""
 
 #: C:\Documents
@@ -934,6 +1471,20 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:88
 msgid "Stats"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:95
+#, php-format
+msgid "You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:124
+#, php-format
+msgid "<a href='%s'>My Amazon Wishlist</a>"
 msgstr ""
 
 #: C:\Documents
@@ -998,6 +1549,50 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:171
+#, php-format
+msgid "Newsfeed could not be loaded.  Check the <a href=\"%s\">thedeadone.net</a> to check for updates."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:186
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:12
+#, php-format
+msgid "<a href=\"%s\">\"%s\"</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:188
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:14
+#, php-format
+msgid "<a href=\"%s\">\"%s\"</a> submitted by %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:191
+#, php-format
+msgid "<a href=\"%s\">\"%s\"</a> using form %d"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:193
+#, php-format
+msgid "<a href=\"%s\">\"%s\"</a> submitted by %s using form %d"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-overview.php:203
+#, php-format
+msgid "Awaiting Approval (%d)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:25
 msgid "Deleting Options... "
 msgstr ""
@@ -1058,6 +1653,13 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:155
 msgid "Removing info from remaining users (this may take a few minutes depending on number of users)... "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-uninstall.php:171
+#, php-format
+msgid "Deleting Form %d... "
 msgstr ""
 
 #: C:\Documents
@@ -1148,6 +1750,48 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:68
+#, php-format
+msgid "You are logged on from the banned IP %s. If this is in error please contact the <a href='mailto:%s'>admins</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:70
+#, php-format
+msgid "You are banned from using this functionality on this site. If this is in error please contact the <a href='mailto:%s'>admins</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:75
+#, php-format
+msgid "Good to see you again <b>%s</b>! "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:77
+#, php-format
+msgid "Welcome back <b>%s</b>!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:79
+#, php-format
+msgid "Welcome <b>%s</b>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:83
+#, php-format
+msgid "From here you can submit posts to the %s using the form below and check on the status of your submissions."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:88
 msgid "Configure Options"
 msgstr ""
@@ -1166,6 +1810,13 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:97
+#, php-format
+msgid "Your Last %d Approved Submissions"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/admin/tdomf-your-submissions.php:105
 msgid "Your Sumissions waiting Moderation"
 msgstr ""
@@ -1178,8 +1829,119 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-db.php:35
+msgid "Default Form"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-db.php:37
+msgid "Imported from default form"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-db.php:344
+#, php-format
+msgid "Copy of %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:24
+#, php-format
+msgid "You (%s) are banned from using this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:37
+#, php-format
+msgid "Your IP %s does not currently have permissions to use this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:48
+#, php-format
+msgid "You (%s) do not currently have permissions to use this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:50
+msgid "Unregistered users do not currently have permissions to use this form."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:82
+msgid "Error! Could not generate a preview!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:84
+#, php-format
+msgid "This is a preview of your submission:%s\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:300
+#, php-format
+msgid "Form %d does not exist."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:322
+msgid "ERROR: <a href=\"http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8\">session_start()</a> has not been called yet!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:323
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-hacks.php:72
 msgid "This may be due to..."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:327
+#, php-format
+msgid "Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:331
+msgid "Another Plugin conflicts with TDOMF. To confirm this, disable all your plugins and then renable only TDOMF. If this error disappears than another plugin is causing the problem."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:340
+msgid "ERROR: <a href=\"http://ie2.php.net/register_globals\"><i>register_globals</i></a> is enabled in your PHP environment!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:452
+msgid "Send"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-form.php:457
+msgid "Post"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-hacks.php:71
+#, php-format
+msgid "TDOMF ERROR: Headers have already been sent in file %s on line %d before <a href=\"http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8\">session_start()</a> could be called."
 msgstr ""
 
 #: C:\Documents
@@ -1196,8 +1958,165 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:123
+#, php-format
+msgid "[%s] Please moderate this new post request from %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:127
+#, php-format
+msgid ""
+"A new post with title \"%s\" from %s is awaiting your approval.\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:128
+#, php-format
+msgid ""
+"It was submitted using Form ID %d (\"%s\")\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:129
+#, php-format
+msgid ""
+"This was submitted from IP %s.\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:130
+#, php-format
+msgid ""
+"You can view this post from %s.\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:131
+#, php-format
+msgid ""
+"You can moderate this submission from %s.\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:132
+#, php-format
+msgid ""
+"Content of the post: \r\n"
+"\r\n"
+" %s \r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:152
+#, php-format
+msgid ""
+"Best Regards\r\n"
+"\r\n"
+"TDOMF @ %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:193
+#, php-format
+msgid "[%s] Your entry \"%s\" has been approved!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:195
+#, php-format
+msgid ""
+"This is just a quick email to notify you that your post has been approved and published online. You can see it at %s.\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:196
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:240
+msgid "Best Regards"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:237
+#, php-format
+msgid "[%s] Your entry \"%s\" has been rejected! :("
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:239
+#, php-format
+msgid ""
+"We are sorry to inform you that your post \"%s\" has been rejected.\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:319
+msgid "Do you wish to be notified when your post is approved (or rejected)?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:322
+msgid "Email for notification:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-notify.php:337
+msgid "You must specify a valid email address to send the notification to."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-template-functions.php:153
+#, php-format
+msgid "This post was submitted by %s."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-template-functions.php:192
+#, php-format
+msgid "<p>[<a href=\"%s\">Approve</a>] [<a href=\"%s\">Reject</a>]</p>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:47
+msgid "TDOMF Errors"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:64
 msgid "TDOMF Log"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:78
+#, php-format
+msgid "TDOMF Moderation Queue (%d)"
 msgstr ""
 
 #: C:\Documents
@@ -1208,7 +2127,107 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:812
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:99
+#, php-format
+msgid "<a href=\"%s\">Moderate (%d)</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:103
+#, php-format
+msgid "<a href=\"%s\">Configure</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:106
+#, php-format
+msgid "<a href=\"%s\">Manage</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:109
+#, php-format
+msgid "<a href=\"%s\">Create Form</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-theme-widgets.php:113
+#, php-format
+msgid "<a href=\"%s\">Log</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:473
+msgid "Download Link"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:672
+msgid "Failed to move uploaded file from temporary location!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:700
+msgid "SESSION has not be started! Something is wrong with your TDOMF installation."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:703
+#, php-format
+msgid "No files have been uploaded yet. You must upload a minimum of %d files."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:715
+#, php-format
+msgid "You must upload a minimum of %d files."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:765
+#, php-format
+msgid ""
+"File %s was uploaded with submission.\r\n"
+"Path: %s\r\n"
+"Size: %s\r\n"
+"Type: %s\r\n"
+"URL (can only be accessed by administrators until post published):\r\n"
+"%s\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:767
+#, php-format
+msgid ""
+"User Command:\r\n"
+"\"%s %s\"\r\n"
+"\r\n"
+"%s\r\n"
+"\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:774
+msgid "No files uploaded with this post!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:818
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:326
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:418
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:659
 msgid "Title: "
@@ -1216,98 +2235,159 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:816
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:822
 msgid "Path to store uploads (should not be publically accessible):"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:820
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:826
 msgid "Allowed File Types:"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:826
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:832
 msgid "Use filename as post title (as long as the content widget doesn't set it)"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:836
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:837
+#, php-format
+msgid "Max File Size in bytes. Example: 1024 = %s, 1048576 = %s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:842
 msgid "Minimum File Uploads <i>(0 indicates file uploads optional)</i>"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:841
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:847
 msgid "Maximum File Uploads"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:848
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:854
 msgid "Do not use TDOMF handler for URL of download"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:851
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:857
 msgid "URL of uploaded file area:"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:857
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:863
 msgid "Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:863
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:869
 msgid "Insert Uploaded Files as Attachments on post (this will also generate a thumbnail using Wordpress core if upload is an image)"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:870
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:876
 msgid "Add link to Attachment page to post content"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:877
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:883
 msgid "Add thumbnail link to Attachment page to post content (if thumbnail avaliable)"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:884
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:890
 msgid "Add thumbnail as download link to post content (if thumbnail avaliable)"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:892
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:898
 msgid "Add download link to post content"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:897
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:903
 msgid "Add download link as image tag to post content"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:904
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:910
 msgid "Add Download Link as custom value"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:907
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-upload-functions.php:913
 msgid "Name of Custom Key:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:269
+msgid "Post Title (Required): "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:271
+msgid "Post Title: "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:281
+msgid "Post Text (Required): "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:283
+msgid "Post Text: "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:287
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:685
+#, php-format
+msgid "<small>Allowable Tags: %s</small>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:290
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:688
+#, php-format
+msgid "<small>Max Word Limit: %d</small>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:293
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:691
+#, php-format
+msgid "<small>Max Character Limit: %d</small>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:333
+msgid "Text: "
 msgstr ""
 
 #: C:\Documents
@@ -1333,6 +2413,9 @@ msgstr ""
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:663
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:667
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:671
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:488
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:625
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:826
 msgid "Required"
 msgstr ""
 
@@ -1351,43 +2434,125 @@ msgstr ""
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:429
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:633
 msgid "Use Quicktags"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:431
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:644
 msgid "Character Limit <i>(0 indicates no limit)</i>"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:433
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:645
 msgid "Word Limit <i>(0 indicates no limit)</i>"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:435
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:648
 msgid "Cols"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:436
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:652
 msgid "Rows"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:438
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:657
 msgid "Restrict Tags"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:440
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:663
 msgid "Allowable Tags"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:457
+msgid "You must specify a post title."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:462
+msgid "You must specify some post text."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:483
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:730
+#, php-format
+msgid "You have exceeded the max character length by %d characters"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:492
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:739
+#, php-format
+msgid "You have exceeded the max word count by %d words"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:576
+#, php-format
+msgid "You are currently logged in as <a href=\"%s\">%s</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:578
+msgid "You can configure this form &raquo;"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:586
+#, php-format
+msgid "We do not know who you are. Please supply your name and email address. Alternatively you can <a href=\"%s\">log in</a> if you have a user account or <a href=\"%s\">register</a> for a user account if you do not have one."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:593
+msgid "Name:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:595
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:608
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:621
+msgid " (Required)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:606
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:464
+msgid "Email:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:619
+msgid "Webpage:"
 msgstr ""
 
 #: C:\Documents
@@ -1410,6 +2575,50 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:685
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:699
+#, php-format
+msgid "Submitted by %s."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:694
+msgid "unknown"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:722
+msgid "You must specify a name."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:727
+msgid "You must specify a email address."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:734
+msgid "Your email address does not look correct."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:739
+msgid "You must specify a valid webpage."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/include/tdomf-widget-functions.php:746
+msgid "Your webpage URL does not look correct.<br/>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:28
 msgid "1 Question Captcha Widgets"
 msgstr ""
@@ -1418,6 +2627,25 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:29
 msgid "How many 1 Question Captcha widgets would you like?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:94
+msgid "What year is it?"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:95
+msgid "2008"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-1qcaptcha-widget.php:141
+#, php-format
+msgid "You must answer the captcha question. Hint: the answer is \"%s\"."
 msgstr ""
 
 #: C:\Documents
@@ -1447,7 +2675,7 @@ msgstr ""
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:221
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:294
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:292
 #: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:113
 msgid "Title:"
 msgstr ""
@@ -1502,172 +2730,362 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:77
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:294
+#, php-format
+msgid "<b>This post will be categorized under</b>:<br/>%s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-categories-widget.php:360
+#, php-format
+msgid ""
+"This post will be categorized under:\r\n"
+"%s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:75
 msgid "Custom Fields Widgets"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:78
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:76
 msgid "How many Custom Fields widgets would you like?"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:301
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:299
 msgid "Custom Field Key:"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:309
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:307
 msgid "Include in Preview"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:316
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:314
 msgid "Append Custom Field to Post Content"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:322
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:320
 msgid "Format to use:"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:324
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:322
 msgid "= Value of Custom Field"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:325
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:323
 msgid "= Custom Field Key"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:326
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:324
 msgid "= Title"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:373
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:371
 msgid "Type: "
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:375
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:373
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:483
 msgid "Text Field"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:376
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:374
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:593
 msgid "Hidden"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:377
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:375
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:620
 msgid "Text Area"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:378
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:376
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:821
 msgid "Check Box"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:379
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:957
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:377
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:955
 msgid "Select"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:383
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:381
 msgid "Radio Group"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:968
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:459
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:678
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:863
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1133
+msgid "(Required)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:466
+msgid "URL:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:491
+msgid "Size:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:496
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:628
+msgid "Default Value:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:503
+msgid "Text"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:506
+msgid "Email (only valid email addresses will be accepted)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:509
+msgid "URL (only valid URLs will be accepted)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:538
+#, php-format
+msgid "You must enter a value for %s!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:542
+#, php-format
+msgid "The URL \"%s\" does not look correct."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:546
+#, php-format
+msgid "The email address \"%s\" does not look correct."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:565
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:771
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:925
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1224
+msgid "Custom Field: "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:595
+msgid "Value:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:639
+msgid "Format like Post Content <i>(convert new lines to paragraphs, etc.)</i>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:714
+#, php-format
+msgid "You must specify some text for \"%s\"."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:716
+msgid "You are missing some text!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:831
+msgid "Required Setting (<i>checkbox must be this value or the post cannot be submitted</i>)"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:836
+msgid "Default Setting"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:880
+#, php-format
+msgid "You must select \"%s\"."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:882
+msgid "You must select the checkbox!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:886
+#, php-format
+msgid "You must not select \"%s\"."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:888
+msgid "You must not select the checkbox!"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:932
+msgid "Checked"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:934
+msgid "Not checked"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:966
 msgid "You must specify a value for Item name and Item value"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:986
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:984
 msgid "That value already exists!"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1017
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1015
 msgid "Please select item to remove from the list!"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1024
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1075
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1022
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1073
 msgid "Default selected options will be: "
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1043
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1041
 msgid "Allow multiple selections"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1048
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1046
 msgid "How many rows?"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1050
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1048
 msgid "<i>(1 row will create a drop down list)</i>"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1055
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1053
 msgid "Remove"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1056
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1054
 msgid "Make Current Selection Default"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1106
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1104
 msgid "Name/Text of Item"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1112
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1110
 msgid "Value of Item"
 msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
-#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1117
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-customfield-widget.php:1115
 msgid "Append Item"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-getcat-widget.php:40
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-getcat-widget.php:73
+msgid "Set Category from GET variables"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-iagree-widget.php:19
+msgid "I agree with the <a href='#'>posting policy</a>."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-iagree-widget.php:20
+msgid "You must agree with <a href='#'>posting policy</a> policy before submission!"
 msgstr ""
 
 #: C:\Documents
@@ -1691,6 +3109,44 @@ msgstr ""
 
 #: C:\Documents
 #: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-imagecaptcha-widget.php:77
+#, php-format
+msgid "If you can't read the word in the image, <a href=\"%s\">click here</a>"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-imagecaptcha-widget.php:79
+msgid "What is the word in the image? "
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-imagecaptcha-widget.php:105
+msgid "You must enter the word in the image as you see it."
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-tags-widget.php:30
+msgid "Tags (separate multiple tags with commas: cats, pet food, dogs):"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-tags-widget.php:46
+#, php-format
+msgid "<b>Post will be sumbmitted with these tags</b>:<br/>%s"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-tags-widget.php:81
+msgid "Post tagged with\r\n"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:28
 msgid "Text Widgets"
 msgstr ""
@@ -1705,5 +3161,18 @@ msgstr ""
 #: and Settings\markcu\My Documents\Personal
 #: Stuff\tdomf\tdomf_svn_https\trunk/widgets/tdomf-text-widget.php:119
 msgid "Text:"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/freecap/freecap_tdomf.php:52
+msgid "To avoid spam, please do NOT enter the text if"
+msgstr ""
+
+#: C:\Documents
+#: and Settings\markcu\My Documents\Personal
+#: Stuff\tdomf\tdomf_svn_https\trunk/widgets/freecap/freecap_tdomf.php:53
+#, php-format
+msgid "this site is not %s"
 msgstr ""
 
