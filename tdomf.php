@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.10
+Version: 0.10.1
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -221,12 +221,12 @@ Author URI: http://thedeadone.net
 // - Update the "Freecap" Image Captcha so that the files get included in
 //    the release zip Wordpress creates.
 //
-// v0.10.x: XXX
-// - Fixed a bug when if you inserted an upload as an attachment it would 
+// v0.10.1: 13th March 2007
+// - Fixed a bug when if you inserted an upload as an attachment it would
 //     overwrite the contents of the post.
 // - Fix to categories widget where widget on other forms than the default
 //     would forget it's settings at post time.
-// - Custom Field widget was ignoring append format for multi-forms 
+// - Custom Field widget was ignoring append format for multi-forms
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -314,7 +314,7 @@ Existing Widget Improvements
   * Required support
 - Tags
   * Select from existing tag list or tag cloud
-  * Hide if form is for pages  
+  * Hide if form is for pages
 - 1 Question Captcha
   * Random questions for Captcha
 - Category
@@ -360,9 +360,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "23");
+define("TDOMF_BUILD", "24");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.10");
+define("TDOMF_VERSION", "0.10.1");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)

@@ -3,8 +3,8 @@ Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface,
 Requires at least: 2.3
-Tested up to: 2.3.1
-Stable Tag: 0.10
+Tested up to: 2.3.3
+Stable Tag: 0.10.1
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -20,7 +20,7 @@ Administrators can configure the forms using drag and drop "widgets". They are b
 
 Registered users have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
 
-* [Demo Site]( http://thedeadone.net/tdomf/ )
+* [Demo Site]( http://thedeadone.net/demos/tdomf/ )
 
 = Features =
 
@@ -58,6 +58,12 @@ On the options menu, there is a button to automatically create a page with the n
 = Upgrade Instructions from versions previous to 0.7 =
 
 Before installing the new version of TDO Mini Forms, delete the TDOMiniForms from your `.../wp-content/plugins/` folder. Now simply follow the installation instructions above. You will need to re-configure the plugin again, however previously submitted posts and other user information will be retained from your previous installation of the plugin.
+
+= Configuration =
+
+Please check the Frequently Asked Questions for answers to many of the common issues that arise.
+
+If you are using the wp-cache or wp-super-cache plugins, please make sure that any page that uses a TDO Mini Forms form is **not** cache. If you cache the form it'll contain an old "key" and will cause "Bad Data" error messages.
 
 == Frequently Asked Questions ==
 
@@ -406,3 +412,10 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 * Can now set a form to submit pages instead of posts.
 * Fixed a bug where customfield textfield would submit empty values for the custom field if you had magic quotes turned off.
 * Update the "Freecap" Image Captcha so that the files get included in the release zip Wordpress creates.
+
+= v0.10.1: 13th March 2007 =
+
+* Fixed a bug when if you inserted an upload as an attachment it would overwrite the contents of the post.
+* Fix to categories widget where widget on other forms than the default  would forget it's settings at post time.
+* Custom Field widget was ignoring append format for multi-forms 
+
