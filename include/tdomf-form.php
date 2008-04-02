@@ -61,9 +61,9 @@ function tdomf_preview_form($args) {
    global $tdomf_form_widgets_preview;
 
    $form_id = intval($args['tdomf_form_id']);
-   
+
    do_action('tdomf_preview_form_start',$form_id);
-   
+
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"\n<p>\n",
                                       "after_widget"=>"\n</p>\n",
@@ -90,9 +90,9 @@ function tdomf_validate_form($args,$preview = false) {
    global $tdomf_form_widgets_validate;
 
    $form_id = intval($args['tdomf_form_id']);
-   
+
    do_action('tdomf_validate_form_start',$form_id);
-   
+
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"",
                                       "after_widget"=>"<br/>\n",
@@ -124,7 +124,7 @@ function tdomf_create_post($args) {
 
    $form_id = intval($args['tdomf_form_id']);
    do_action('tdomf_create_post_start',$form_id);
-   
+
    tdomf_log_message("Attempting to create a post based on submission");
 
    // Default submitter
@@ -145,7 +145,7 @@ function tdomf_create_post($args) {
    //
 #  $post_date = current_time('mysql');
 #  $post_date_gmt = get_gmt_from_date($post_date);
-   
+
    // Build post and post it as draft
    //
    $post = array (
@@ -163,7 +163,7 @@ function tdomf_create_post($args) {
    );
    //
    // submit a page instead of a post
-   //   
+   //
    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
      $post['post_type'] = 'page';
    }
@@ -194,7 +194,7 @@ function tdomf_create_post($args) {
    //
    add_post_meta($post_ID, TDOMF_KEY_FORM_ID, $form_id, true);
 
-   
+
    tdomf_log_message("Let the widgets do their work on newly created $post_ID");
 
    // Disable kses protection! It seems to get over-protective of non-registered
@@ -204,7 +204,7 @@ function tdomf_create_post($args) {
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
      kses_remove_filters();
    }
-   
+
    // Widgets:post
    //
    $message = "";
@@ -229,7 +229,7 @@ function tdomf_create_post($args) {
      wp_delete_post($post_ID);
      return "<font color='red'>$message</font>\n";
    }
-   
+
    // Submitted post count!
    //
    $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
@@ -245,7 +245,7 @@ function tdomf_create_post($args) {
    $send_moderator_email = true;
    if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
       tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
-      // Use update post instead of publish post because in WP2.3, 
+      // Use update post instead of publish post because in WP2.3,
       // update_post doesn't seem to add the date correctly!
       // Also when it updates a post, if comments aren't set, sets them to
       // empty! (Not so in WP2.2!)
@@ -261,7 +261,7 @@ function tdomf_create_post($args) {
         $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
         if(current_user_can('publish_posts') || $user_status == TDOMF_USER_STATUS_TRUSTED) {
            tdomf_log_message("Publishing post $post_ID!");
-           // Use update post instead of publish post because in WP2.3, 
+           // Use update post instead of publish post because in WP2.3,
            // update_post doesn't seem to add the date correctly!
            // Also when it updates a post, if comments aren't set, sets them to
            // empty! (Not so in WP2.2!)
@@ -287,7 +287,7 @@ function tdomf_create_post($args) {
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
      kses_init_filters();
    }
-   
+
    return intval($post_ID);
 }
 
@@ -297,9 +297,9 @@ function tdomf_generate_form($form_id = 1) {
   global $tdomf_form_widgets;
 
   if(!tdomf_form_exists($form_id)) {
-    return sprintf(__("Form %d does not exist.",'tdomf'),$form_id); 
+    return sprintf(__("Form %d does not exist.",'tdomf'),$form_id);
   }
-  
+
   // AJAX is currently not supported
   //
   $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
@@ -308,16 +308,16 @@ function tdomf_generate_form($form_id = 1) {
   if($form != NULL) {
     return $form;
   }
-  
+
   // Okay, all checks pass! Now create form
   $form = "";
 
   // Error checks
-  
+
   if(!isset($_SESSION)) {
     headers_sent($filename,$linenum);
     tdomf_log_message( "session_start() has not been called before generating form! Form will not work.",TDOMF_LOG_ERROR);
-    if(!get_option(TDOMF_OPTION_DISABE_ERROR_MESSAGES)) {
+      if(!get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
       $form .= "<p><font color=\"red\"><b>";
       $form .= __('ERROR: <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> has not been called yet!',"tdomf");
       $form .= "</b> ".__('This may be due to...','tdomf');
@@ -327,26 +327,26 @@ function tdomf_generate_form($form_id = 1) {
         $form .= sprintf(__('Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s.',"tdomf"),$filename);
         $form .= "</li>";
       }
-      $form .= "<li>";    
+      $form .= "<li>";
       $form .= sprintf(__('Another Plugin conflicts with TDOMF. To confirm this, disable all your plugins and then renable only TDOMF. If this error disappears than another plugin is causing the problem.',"tdomf"),$filename);
       $form .= "</li>";
       $form .= "</li></ol></font></p>";
     }
   }
-  
-  if(ini_get('register_globals')){
-    if(!get_option(TDOMF_OPTION_DISABE_ERROR_MESSAGES)) {
+
+  if(ini_get('register_globals')  && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
+    if(!get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
       $form .= "<p><font color=\"red\"><b>";
       $form .= __('ERROR: <a href="http://ie2.php.net/register_globals"><i>register_globals</i></a> is enabled in your PHP environment!',"tdomf");
       $form .= "</font></p>";
     }
    tdomf_log_message('register_globals is enabled!',TDOMF_LOG_ERROR);
-  } 
-  
+  }
+
   // AJAX or normal POST headers...
-  
+
   do_action('tdomf_generate_form_start',$form_id);
-  
+
   if(!$use_ajax) {
      $post_args = array();
      if(isset($_SESSION['tdomf_form_post_'.$form_id])) {
@@ -417,7 +417,7 @@ EOT;
 
   // Form id
   $form .= "\n<input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' />\n";
-  
+
   // Process widgets
   //
   if(!$use_ajax) {
@@ -460,7 +460,7 @@ EOT;
 
   $form .= '</tr></table>';
   $form .= "\n</form>\n";
-  
+
   return $form;
 }
 
@@ -471,7 +471,7 @@ function tdomf_form_filter($content=''){
        (preg_match('|<!--tdomf_form.*-->|', $content) <= 0 && preg_match('|\[tdomf_form.*\]|', $content) <= 0)) {
    	return $content;
    }
-   
+
    $forms = array();
    if(preg_match_all('|<!--tdomf_form.*-->|', $content, $matches) > 0) {
      foreach($matches[0] as $match) {
@@ -482,7 +482,7 @@ function tdomf_form_filter($content=''){
        }
      }
    }
-   
+
    if(preg_match_all('|\[tdomf_form.*\]|', $content, $matches) > 0) {
      foreach($matches[0] as $match) {
        $match = str_replace('[tdomf_form','',trim($match));
@@ -498,7 +498,7 @@ function tdomf_form_filter($content=''){
      // make sure to swallow paragraph markers as well so the form is valid xhtml
      $content = preg_replace("|(<p>)*(\n)*\[tdomf_form$id\](\n)*(</p>)*|", $form, $content);
    }
-   
+
    return $content;
 }
 add_filter('the_content', 'tdomf_form_filter');

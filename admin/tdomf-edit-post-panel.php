@@ -5,7 +5,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for the tdomf edit panel on the post page //
 ////////////////////////////////////////////////////
 
-# TODO: nonce support
+# @TODO: nonce support
 
 // Grab a list of user ids of all users, to use in the drop-down menu
 //
@@ -19,7 +19,27 @@ function tdomf_get_all_users() {
 
 // Add the sidebar panel
 //
-add_action('dbx_post_sidebar', 'tdomf_show_edit_post_panel');
+function tdomf_edit_post_panel_admin_head() {
+  // Wordpress 2.5 introduced add_meta_box
+  if(function_exists('add_meta_box')) {
+     add_meta_box(
+          'tdomf',
+          __('TDOMF', "tdomf"),
+          'tdomf_show_edit_post_panel',
+          'post' );
+     add_meta_box(
+          'tdomf',
+          __('TDOMF', "tdomf"),
+          'tdomf_show_edit_post_panel',
+          'page' );
+  } else {
+     add_action('dbx_post_sidebar', 'tdomf_show_edit_post_panel');
+     add_action('dbx_page_sidebar', 'tdomf_show_edit_post_panel');
+  }
+}
+add_action( 'admin_head', 'tdomf_edit_post_panel_admin_head' );
+
+
 //
 // Show the Edit Post Panel
 //
@@ -43,7 +63,7 @@ function tdomf_show_edit_post_panel() {
   $submitter_id = get_post_meta($post->ID, TDOMF_KEY_USER_ID, true);
 
   $submitter_ip = get_post_meta($post->ID, TDOMF_KEY_IP, true);
-  
+
   $form_id  = get_post_meta($post->ID, TDOMF_KEY_FORM_ID, true);
 
   // use JavaScript SACK library for AJAX
@@ -71,7 +91,7 @@ function tdomf_show_edit_post_panel() {
               mysack.setVar( "tdomf_web", web.value );
            }
            mysack.encVar( "cookie", document.cookie, false );
-           mysack.onError = function() { alert('AJAX error in looking up tdomf' )};
+           mysack.onError = function() { alert('<?php _e('AJAX error in looking up tdomf','tdomf'); ?>' )};
            mysack.runAJAX();
 
            return true;
@@ -114,9 +134,11 @@ function tdomf_show_edit_post_panel() {
         //]]>
         </SCRIPT>
 
+     <?php if(!function_exists('add_meta_box')) { ?>
         <fieldset class="dbx-box">
         <h3 id="posttdomf" class="dbx-handle"><?php _e('TDOMF', "tdomf"); ?></h3>
                 <div class="dbx-content">
+     <?php } ?>                
                 <fieldset>
                 <legend>
                 <input id="tdomf_flag" type="checkbox" name="tdomf_flag" <?php if($tdomf_flag){ ?>checked<?php } ?> <?php if(!$can_edit){ ?> disabled <?php } ?> onClick="tdomf_update_panel();" />
@@ -134,6 +156,10 @@ function tdomf_show_edit_post_panel() {
                 <input id="tdomf_submitter_is_user" type="radio" name="tdomf_submitter" value="tdomf_submitter_is_user" <?php if(!empty($submitter_id)) { ?>checked<?php } ?> <?php if(!$can_edit || !$tdomf_flag){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" />
                 <?php _e('Submitter is an existing user','tdomf'); ?></label>
 
+                <?php if(function_exists('add_meta_box')) { ?>
+                  <br/><br/>
+                <?php } ?>
+                
                 <select id="tdomf_submitter_user" name="tdomf_submitter_user" <?php if(!$can_edit || !$tdomf_flag || empty($submitter_id)){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" >
                 <?php $users = tdomf_get_all_users();
                       foreach($users as $user) {
@@ -149,16 +175,43 @@ function tdomf_show_edit_post_panel() {
                 <input id="tdomf_submitter_not_user" type="radio" name="tdomf_submitter" value="tdomf_submitter_not_user" <?php if(empty($submitter_id)) { ?>checked<?php } ?> <?php if(!$can_edit || !$tdomf_flag){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" />
                 <?php _e("Submitter does not have a user account","tdomf"); ?></label>
 
-                <label for="tdomf_submitter_name" class="selectit">Name
+                <?php if(function_exists('add_meta_box')) { ?>
+                  <br/><br/>
+                <?php } ?>
+
+                <?php if(!function_exists('add_meta_box')) { ?>
+                <label for="tdomf_submitter_name" class="selectit"><?php _e("Name","tdomf"); ?>
+                <?php } ?>
                 <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_NAME, true),ENT_QUOTES,get_bloginfo('charset')); ?>" name="tdomf_submitter_name" id="tdomf_submitter_name" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <?php if(function_exists('add_meta_box')) { ?>
+                <label for="tdomf_submitter_name" class="selectit"><?php _e("Name","tdomf"); ?>
+                <?php } ?>
                 </label>
 
-                <label for="tdomf_submitter_email" class="selectit">Email
+                <?php if(function_exists('add_meta_box')) { ?>
+                  <br/><br/>
+                <?php } ?>
+                
+                <?php if(!function_exists('add_meta_box')) { ?>
+                <label for="tdomf_submitter_email" class="selectit"><?php _e("Email","tdomf"); ?>
+                <?php } ?>
                 <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_EMAIL, true),ENT_QUOTES,get_bloginfo('charset')); ?>" name="tdomf_submitter_email" id="tdomf_submitter_email" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <?php if(function_exists('add_meta_box')) { ?>
+                <label for="tdomf_submitter_email" class="selectit"><?php _e("Email","tdomf"); ?>
+                <?php } ?>
                 </label>
 
-                <label for="tdomf_submitter_web" class="selectit">Webpage
+                <?php if(function_exists('add_meta_box')) { ?>
+                  <br/><br/>
+                <?php } ?>
+                
+                <?php if(!function_exists('add_meta_box')) { ?>
+                <label for="tdomf_submitter_web" class="selectit"><?php _e("Webpage","tdomf"); ?>
+                <?php }?>
                 <input type="textfield" value="<?php echo htmlentities(get_post_meta($post->ID, TDOMF_KEY_WEB, true),ENT_QUOTES,get_bloginfo('charset')); ?>" name="tdomf_submitter_web" id="tdomf_submitter_web" onClick="tdomf_update_panel();" <?php if(!$can_edit || !$tdomf_flag || !empty($submitter_id)){ ?> disabled <?php } ?> />
+                <?php if(function_exists('add_meta_box')) { ?>
+                <label for="tdomf_submitter_web" class="selectit"><?php _e("Webpage","tdomf"); ?>
+                <?php }?>
                 </label>
 
                 <br/><br/>
@@ -172,10 +225,12 @@ function tdomf_show_edit_post_panel() {
                 printf(__("Submitted from Form %d.","tdomf"),$form_id); } ?>
                 </fieldset>
 
-                 <p><input type="button" value="Update &raquo;" onclick="tdomf_ajax_edit_post(this.form.tdomf_flag, tdomf_submitter_is_user, tdomf_submitter_user, tdomf_submitter_name, tdomf_submitter_email, tdomf_submitter_web);" />
+                 <p><input type="button" value="<?php _e("Update &raquo;","tdomf"); ?>" onclick="tdomf_ajax_edit_post(this.form.tdomf_flag, tdomf_submitter_is_user, tdomf_submitter_user, tdomf_submitter_name, tdomf_submitter_email, tdomf_submitter_web);" />
 
+     <?php if(!function_exists('add_meta_box')) { ?>
                 </div>
         </fieldset>
+     <?php } ?>
 
 <?php
 }
@@ -192,7 +247,7 @@ function tdomf_save_post() {
     if($_POST['tdomf_flag'] == "false") {
       delete_post_meta($post_id, TDOMF_KEY_FLAG);
       tdomf_log_message("Removed post $post_id from TDOMF");
-      die("alert('TDOMF: Post $post_id is no longer managed by TDOMF!')");
+      die("alert('".sprintf(__('TDOMF: Post %d is no longer managed by TDOMF!','tdomf'),$post_id)."')");
     } else {
       add_post_meta($post_id, TDOMF_KEY_FLAG, true, true);
       if(isset($_POST["tdomf_user"])) {
@@ -200,7 +255,7 @@ function tdomf_save_post() {
         delete_post_meta($post_id, TDOMF_KEY_USER_ID);
         add_post_meta($post_id, TDOMF_KEY_USER_ID, $user_id, true);
         tdomf_log_message("Submitter info for post $post_id added");
-        die("alert('TDOMF: Submitter info for post $post_id updated')");
+        die("alert('".sprintf(__('TDOMF: Submitter info for post %d updated','tdomf'),$post_id)."')");
       } else {
         // do this so that we *know* that submitter user is not used
         delete_post_meta($post_id, TDOMF_KEY_USER_ID);
@@ -214,11 +269,11 @@ function tdomf_save_post() {
         delete_post_meta($post_id, TDOMF_KEY_WEB);
         add_post_meta($post_id, TDOMF_KEY_WEB, $web, true);
         tdomf_log_message("Submitter info for post $post_id added");
-        die("alert('TDOMF: Submitter info for post $post_id updated')");
+        die("alert('".sprintf(__('TDOMF: Submitter info for post %d updated','tdomf'),$post_id)."')");
       }
   }
   tdomf_log_message("Error captured in EditPostPanel:tdomf_save_post");
-  die("alert('TDOMF: Error! Incomplete information provided!')");
+  die("alert('<?php _e('TDOMF: Error! Incomplete information provided!','tdomf'); ?>')");
 }
 
 ?>

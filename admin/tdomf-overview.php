@@ -5,6 +5,55 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Admin Overview Page //
 /////////////////////////
 
+function tdomf_overview_admin_head() {
+   global $wp_version;
+   if(tdomf_wp25() && preg_match('/page=tdo-mini-forms/',$_SERVER[REQUEST_URI])) {
+   ?>
+   <style type="text/css">
+      #zeitgeist {
+	background: #eee;
+	border: 1px solid #c5c5c5;
+	float: right;
+	font-size: 90%;
+	margin-bottom: .5em;
+	margin-left: 1em;
+	margin-top: .5em;
+	padding: 1em;
+	width: 40%;
+      }
+      #zeitgeist h2, fieldset legend a {
+	background: none;
+}
+
+* html #zeitgeist h2 {
+	padding-top: 10px;
+}
+
+#zeitgeist h3 {
+	border-bottom: 1px solid #ccc;
+	font-size: 16px;
+	margin: 1em 0 0;
+}
+
+#zeitgeist h3 cite {
+	font-size: 12px;
+	font-style: normal;
+}
+
+#zeitgeist li, #zeitgeist p {
+	margin: .2em 0;
+}
+
+#zeitgeist ul {
+	margin: 0 0 .3em .6em;
+	padding: 0 0 0 .6em;
+}
+   </style>
+   <?php
+   }
+}
+add_action( 'admin_head', 'tdomf_overview_admin_head' );
+
 // Return a count of posts from unregistered users
 //
 function tdomf_get_unregistered_users_posts_count() {

@@ -11,6 +11,8 @@ function tdomf_show_general_options() {
     
     <h2><?php _e('General Options for TDOMF', 'tdomf') ?></h2>
 
+    <?php if(tdomf_wp25()) { tdomf_options_form_list(); } ?>
+    
     <p><?php _e("Global options for this plugin and applies to all forms.","tdomf"); ?></p>
     
     <form method="post" action="admin.php?page=tdomf_show_options_menu">
@@ -153,6 +155,26 @@ function tdomf_show_general_options() {
 	<b><?php _e("Enable 'Your Submissions' page ","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_your_submissions" id="tdomf_your_submissions"  <?php if($your_submissions) echo "checked"; ?> >
 	</p>
+
+  <?php if(tdomf_wp25()) { ?>
+  
+  <h3><?php _e('Max Widget Control Size',"tdomf"); ?></h3>
+
+	<p>
+	<?php _e('You can limit or increase the max size of the control form of a widget in the Form Widget screen. A value of 0 disables this feature.',"tdomf"); ?>
+	</p>
+
+	<p>
+	<b><?php _e("Max Widget Width","tdomf"); ?></b>
+	<input type="text" name="widget_max_width" id="widget_max_width" size="3" value="<?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH)); ?>" />
+	</p>
+
+  <p>
+	<b><?php _e("Max Widget Height","tdomf"); ?></b>
+	<input type="text" name="widget_max_height" id="widget_max_height" size="3" value="<?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)); ?>" />
+	</p>
+      
+  <?php } ?>
   
     <br/><br/>
 
@@ -194,6 +216,7 @@ function tdomf_show_form_options($form_id) {
             tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$updated_pages,$form_id);
           } ?>
     
+    <?php if(tdomf_wp23()) { ?>
     <div class="wrap">
     <?php if(function_exists('wp_nonce_url')) { ?>
        <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_options_menu&delete=$form_id", 'tdomf-delete-form-'.$form_id); ?>">
@@ -212,13 +235,35 @@ function tdomf_show_form_options($form_id) {
       <?php _e("View &raquo;","tdomf"); ?></a>
     <?php } ?>
     </div>
+          <?php } ?>
     
     <div class="wrap">
     
     <h2><?php printf(__("Form %d Options","tdomf"),$form_id); ?></h2>
     
-    
-    
+    <?php if(tdomf_wp25()) { ?>
+    <?php tdomf_options_form_list($form_id); ?>
+    <ul class="subsubsub">
+    <?php if(function_exists('wp_nonce_url')) { ?>
+       <li><a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_options_menu&delete=$form_id", 'tdomf-delete-form-'.$form_id); ?>">
+          <?php _e("Delete","tdomf"); ?></a> |</li>
+       <li><a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_options_menu&copy=$form_id&form=$form_id", 'tdomf-copy-form-'.$form_id); ?>">
+          <?php _e("Copy","tdomf"); ?></a> |</li> 
+    <?php } else { ?>
+       <li><a href="admin.php?page=tdomf_show_options_menu&delete=<?php echo $form_id; ?>"><?php _e("Delete","tdomf"); ?></a> |</li>
+       <li><a href="admin.php?page=tdomf_show_options_menu&copy=<?php echo $form_id; ?>"><?php _e("Copy","tdomf"); ?></a> |</li> 
+    <?php } ?>
+    <?php if($updated_pages != false) { ?>
+      <li><a href="<?php echo get_permalink($updated_pages[0]); ?>" title="<?php _e("Live on your blog!","tdomf"); ?>" ><?php _e("View Page &raquo;","tdomf"); ?></a> |</li>
+    <?php } ?>
+    <?php if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id) && get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
+      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
+      <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
+    <?php } ?>
+     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?><a></li>  
+    </ul>
+          <?php } ?>
+
           <?php if($updated_pages == false) { ?>
           
              <?php $create_form_link = "admin.php?page=tdomf_show_options_menu&action=create_form_page&form=$form_id";
@@ -226,10 +271,11 @@ function tdomf_show_form_options($form_id) {
           	$create_form_link = wp_nonce_url($create_form_link, 'tdomf-create-form-page');
           } ?>
     <p><a href="<?php echo $create_form_link; ?>"><?php _e("Create a page with this form automatically &raquo;","tdomf"); ?></a></p>
-
           <?php } ?>
-    
-    <p><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets for Form %d &raquo;","tdomf"),$form_id); ?></a></p>
+          
+    <?php if(tdomf_wp23()) { ?>
+          <p><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets for Form %d &raquo;","tdomf"),$form_id); ?></a></p>
+    <?php } ?>
     
     <form method="post" action="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>">
 
@@ -336,14 +382,19 @@ function tdomf_show_form_options($form_id) {
    <?php if(isset($def_role)) { ?>
              <label for="tdomf_access_<?php echo ($def_role); ?>">
              <input value="tdomf_access_<?php echo ($def_role); ?>" type="checkbox" name="tdomf_access_<?php echo ($def_role); ?>" id="tdomf_access_<?php echo ($def_role); ?>"  <?php if(isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?> onClick="tdomf_def_role()" <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> disabled <?php } ?> />
-             <?php echo $wp_roles->role_names[$def_role]." ".__("(default role for new users)"); ?>
+             <?php if(function_exists('translate_with_context')) {
+                   $role_name = translate_with_context($wp_roles->role_names[$def_role]);
+                   } else { $role_name = $wp_roles->role_names[$def_role]; } ?>
+             <?php echo $role_name." ".__("(default role for new users)"); ?>
              </label><br/>
           <?php } ?>
 
           <?php foreach($access_roles as $role) { ?>
              <label for="tdomf_access_<?php echo ($role); ?>">
              <input value="tdomf_access_<?php echo ($role); ?>" type="checkbox" name="tdomf_access_<?php echo ($role); ?>" id="tdomf_access_<?php echo ($role); ?>" <?php if(isset($wp_roles->role_objects[$role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?> <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> disabled <?php } ?> />
-             <?php echo $wp_roles->role_names[$role]; ?>
+             <?php if(function_exists('translate_with_context')) {
+                   echo translate_with_context($wp_roles->role_names[$role]);
+                   } else { echo $wp_roles->role_names[$role]; } ?>
              </label><br/>
           <?php } ?>
 	 </p>
@@ -361,7 +412,10 @@ function tdomf_show_form_options($form_id) {
 	           && isset($role->capabilities['publish_posts'])) { ?>
 		     <label for="tdomf_notify_<?php echo ($role->name); ?>">
 		     <input value="tdomf_notify_<?php echo ($role->name); ?>" type="checkbox" name="tdomf_notify_<?php echo ($role->name); ?>" id="tdomf_notify_<?php echo ($role->name); ?>" <?php if($notify_roles != false && in_array($role->name,$notify_roles)) { ?>checked<?php } ?> />
-		      <?php echo $wp_roles->role_names[$role->name]; ?> <br/>
+          <?php if(function_exists('translate_with_context')) {
+                   echo translate_with_context($wp_roles->role_names[$role->name]);
+                   } else { echo $wp_roles->role_names[$role->name]; } ?>
+          <br/>
 		     </label>
 		     <?php
 		  }
@@ -480,19 +534,13 @@ function tdomf_show_form_options($form_id) {
   <?php }
 }
 
-// Display the menu to configure options for this plugin
+// Show the list of forms
 //
-function tdomf_show_options_menu() {
-  global $wpdb, $wp_roles;
-
-  $new_form_id = tdomf_handle_options_actions();
-  $selected_form_id = intval($_REQUEST['form']);
-
+function tdomf_options_form_list($form_id_in=false) {
+  if(tdomf_wp23()) {
   ?>
-
   <div class="wrap">
-
-  <?php if(isset($_REQUEST['form']) || $new_form_id != false) { ?>
+  <?php if($form_id_in != false) { ?>
     <a href="admin.php?page=tdomf_show_options_menu"><?php _e("General Options"); ?></a> |
   <?php } else { ?> 
     <b><?php _e("General Options"); ?></b> | 
@@ -501,14 +549,12 @@ function tdomf_show_options_menu() {
     <?php $form_ids = tdomf_get_form_ids();
           if(!empty($form_ids)) {
             foreach($form_ids as $form_id) { ?>
-              <?php if($form_id->form_id == $new_form_id) { ?>
-                <b>
-              <?php } else if($form_id->form_id == $selected_form_id && $new_form_id == false) { ?>
+              <?php if($form_id->form_id == $form_id_in) { ?>
                 <b>
               <?php } else { ?>
                 <a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id->form_id; ?>">
               <?php } ?>
-              <?php printf(__("Form %d","tdomf"),$form_id->form_id); ?><?php if($form_id->form_id == $new_form_id) { ?></b><?php } else if($form_id->form_id == $selected_form_id && $new_form_id == false) { ?></b><?php } else {?></a><?php } ?>
+              <?php printf(__("Form %d","tdomf"),$form_id->form_id); ?><?php if($form_id->form_id == $form_id_in) { ?></b><?php } else {?></a><?php } ?>
                  |
             <?php }
           }
@@ -520,14 +566,42 @@ function tdomf_show_options_menu() {
       <a href="admin.php?page=tdomf_show_options_menu&new"><?php _e("New Form &raquo;","tdomf"); ?></a>
     <?php } ?>
   </div>
-  
-  <?php 
-  
-  if($new_form_id!= false) {
+  <?php } else { ?>
+    <ul class="subsubsub">
+       <li><a href="admin.php?page=tdomf_show_options_menu" <?php if($form_id_in == false) { ?> class="current" <?php } ?>><?php _e("General Options"); ?></a> |</li>
+       <?php $form_ids = tdomf_get_form_ids();
+          if(!empty($form_ids)) {
+            foreach($form_ids as $form_id) { ?>
+                <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id->form_id; ?>"<?php if($form_id->form_id == $form_id_in) { ?> class="current" <?php } ?>">
+                <?php printf(__("Form %d","tdomf"),$form_id->form_id); ?></a> |</li>
+            <?php }
+          } ?>
+        <?php if(function_exists('wp_nonce_url')) { ?>
+        <li><a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_options_menu&new", 'tdomf-new-form'); ?>">
+          <?php _e("New Form &raquo;","tdomf"); ?></a></li>
+    <?php } else { ?>
+      <li><a href="admin.php?page=tdomf_show_options_menu&new"><?php _e("New Form &raquo;","tdomf"); ?></a></li>
+    <?php } ?>
+   </ul>
+  <?php } 
+}
+
+// Display the menu to configure options for this plugin
+//
+function tdomf_show_options_menu() {
+  global $wpdb, $wp_roles;
+
+  $new_form_id = tdomf_handle_options_actions();
+  $selected_form_id = intval($_REQUEST['form']);
+
+ if($new_form_id!= false) {
+    if(tdomf_wp23()) { tdomf_options_form_list(intval($new_form_id)); }
     tdomf_show_form_options(intval($new_form_id));
   } else if(isset($_REQUEST['form'])) {
+    if(tdomf_wp23()) { tdomf_options_form_list($selected_form_id); }
     tdomf_show_form_options($selected_form_id);
   } else {
+    if(tdomf_wp23()) { tdomf_options_form_list(); }
     tdomf_show_general_options();
   }
 }
@@ -692,10 +766,22 @@ function tdomf_handle_options_actions() {
       $your_submissions = false;
       if(isset($_POST['tdomf_your_submissions'])) { $your_submissions = true; }
       update_option(TDOMF_OPTION_YOUR_SUBMISSIONS,$your_submissions);
+
+      // default widget max sizes
+      
+      if(tdomf_wp25()) {
+        
+        $widget_max_width = intval($_POST['widget_max_width']);
+        update_option(TDOMF_OPTION_WIDGET_MAX_WIDTH,$widget_max_width);
+        
+        $widget_max_height = intval($_POST['widget_max_height']);
+        update_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT,$widget_max_height);
+        
+      }
       
       $message .= "Options Saved!<br/>";
       tdomf_log_message("Options Saved");
-
+      
   } else if(isset($_REQUEST['save_settings']) && isset($_REQUEST['tdomf_form_id'])) {
     
       check_admin_referer('tdomf-options-save');
@@ -876,7 +962,7 @@ function tdomf_get_error_messages($show_links=true) {
   $roles = $wp_roles->role_objects;
   $message = "";
   
-  if(ini_get('register_globals')){
+  if(ini_get('register_globals') && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
     $message .= "<font color=\"red\"><strong>".__("ERROR: <em>register_globals</em> is enabled. This is a security risk and also prevents TDO Mini Forms from working.")."</strong></font>";
   }
   

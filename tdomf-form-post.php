@@ -35,7 +35,7 @@ if(!tdomf_form_exists($form_id)){
 // Security Check
 //
 if(!isset($_SESSION['tdomf_key_'.$form_id]) || $_SESSION['tdomf_key_'.$form_id] != $_POST['tdomf_key_'.$form_id]) {
-   if(ini_get('register_globals')){
+   if(ini_get('register_globals') && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
      tdomf_log_message('register_globals is enabled. This will prevent TDOMF from operating.',TDOMF_LOG_ERROR);
      exit(__("TDOMF: Bad data submitted. <i>register_globals</i> is enabled. This must be set to disabled.","tdomf"));
    } else  if(!isset($_SESSION) || !isset($_SESSION['tdomf_key_'.$form_id]) || trim($_SESSION['tdomf_key_'.$form_id]) == "") {

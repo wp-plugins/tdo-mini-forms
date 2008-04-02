@@ -138,6 +138,7 @@ function tdomf_show_your_submissions_menu() {
      }
      .tdomf_form fieldset {
        margin-bottom: 10px;
+       border: 0;
      }
      </style>
       

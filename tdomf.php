@@ -2,8 +2,8 @@
 /*
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
-Description: This plugin allows you to provide a form so that your registered and non-registered users can submit posts.</a>
-Version: 0.10.1
+Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
+Version: 0.10.2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -227,6 +227,15 @@ Author URI: http://thedeadone.net
 // - Fix to categories widget where widget on other forms than the default
 //     would forget it's settings at post time.
 // - Custom Field widget was ignoring append format for multi-forms
+//
+// v0.10.2: 2nd April 2007
+// - Fixed a bug if you reload the image capatcha, it would not longer verify
+// - Added a flag TDOMF_HIDE_REGISTER_GLOBAL_ERROR in tdomf.php that can be set
+//     to true to hide the register_global errors that get displayed.
+// - WP2.5 only: Can now set a max width or height for widgets control on the 
+//     Form Widgets screen.
+// - Compatibily with Wordpress 2.5
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -267,6 +276,7 @@ New Features
 - Get input during validation of form (for capatchas)
 - Option to use "Post ready for review" instead of draft for unapproved submitted posts
 - On Options and Widgets Page, set the "title" of the Form links to the given title of the form
+- Turn Forms into multiple steps
 
 New Form Options
 - Force Preview before submission
@@ -282,11 +292,13 @@ New Form Options
 New Widgets
 - Widget to allow users to enable/disable comments and trackbacks on their submission
 - Widget to allow user to enter a date to post the submission (as in future post)
+- Widget that inputs only title
 
 Existing Widget Improvements
 - Make Widget-Form menu independant of Wordpress code (the current code will break in Wordpress 2.5)
 - Any widget with a size or length field should be customisable.
 - Any static text used in widgets need to be customisable.
+- Fixed sizes for Widget Control windows
 - Copy Widget to another Form
 - Upload Files
   * Multiple Instances
@@ -294,6 +306,9 @@ Existing Widget Improvements
   * Limit size of image by w/h
   * Image cropping
   * Title field for file links/attachment pages
+  * Nicer integration: background uploading using iframe
+  * Prevent submission until files uploaded
+  * Progress bar
 - Content
   * TinyMCE Integration
   * Allow users to define their own quicktags
@@ -360,7 +375,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "24");
+define("TDOMF_BUILD", "26");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.10.1");
 
@@ -472,10 +487,45 @@ define('TDOMF_KEY_FORM_ID',"_tdomf_form_id");
 define("TDOMF_DB_TABLE_FORMS", "tdomf_table_forms");
 define("TDOMF_DB_TABLE_WIDGETS", "tdomf_table_widgets");
 
+//////////////////
+// 0.10.2 Settings
+
+// Set to true if you want to hide the register_global errors. Do this only if
+// you know what you are doing!
+define("TDOMF_HIDE_REGISTER_GLOBAL_ERROR", false);
+
+define('TDOMF_OPTION_WIDGET_MAX_WIDTH',"tdomf_form_widget_max_width");
+define('TDOMF_OPTION_WIDGET_MAX_LENGTH',"tdomf_form_widget_max_length");
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
+
+//////////////////////////////////////////////////////////////////////////
+// A potential fix for WordpressMU (WordpressMU is officially unsupported)
+//
+require_once(ABSPATH . 'wp-includes/pluggable.php');
+
+// Is this a Wordpress < 2.5 install?
+//
+function tdomf_wp23() {
+  global $wp_db_version;
+  #if($wp_db_verison <= 6124)
+  #  return true;
+  return !tdomf_wp25();
+}
+
+// Is this a Wordpress >= 2.5 install?
+//
+function tdomf_wp25() {
+  global $wp_db_version;
+  if($wp_db_version >= 7558) {
+    return true;
+  }
+  return false;
+}
+
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //
@@ -484,13 +534,13 @@ load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
-    add_menu_page(__('TDOMF', 'tdomf'), __('TDOMF', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
+    add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
 
     // Options
-    add_submenu_page( TDOMF_FOLDER , __('Options', 'tdomf'), __('Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
+    add_submenu_page( TDOMF_FOLDER , __('Form Manager and Options', 'tdomf'), __('Form Manager and Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
     //
     // Generate Form
-    add_submenu_page( TDOMF_FOLDER , __('Widgets', 'tdomf'), __('Widgets', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
+    add_submenu_page( TDOMF_FOLDER , __('Form Widgets', 'tdomf'), __('Form Widgets', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
     //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
@@ -555,6 +605,8 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_PREVIEW,true);
     add_option(TDOMF_OPTION_TRUST_COUNT,-1);
     add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
+    add_option(TDOMF_OPTION_WIDGET_MAX_WIDTH,500);
+    add_option(TDOMF_OPTION_WIDGET_MAX_LENGTH,400);
   }
 
   // Pre 0.9.3 (beta)/16
@@ -562,7 +614,11 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
   }
 
-
+  // Pre WP 2.5/0.10.2
+  if(intval(get_option(TDOMF_VERSION_CURRENT)) < 26) {
+    add_option(TDOMF_OPTION_WIDGET_MAX_WIDTH,500);
+    add_option(TDOMF_OPTION_WIDGET_MAX_LENGTH,400);
+  }
 
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {

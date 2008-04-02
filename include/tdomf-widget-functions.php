@@ -107,7 +107,7 @@ function tdomf_register_form_widget($id, $name, $callback) {
    global $tdomf_form_widgets,$tdomf_form_widgets;
    $id = sanitize_title($id);
    if(isset($tdomf_form_widgets[$id])) {
-      tdomf_log_message("tdomf_register_form_widget: Widget $id already exists. Overwriting...");
+      tdomf_log_message_extra("tdomf_register_form_widget: Widget $id already exists. Overwriting...");
    }
    #tdomf_log_message_extra("Loading Widget $id...");
    $tdomf_form_widgets[$id]['name'] = $name;
@@ -121,11 +121,11 @@ function tdomf_register_form_widget_control($id, $name, $control_callback, $widt
    global $tdomf_form_widgets_control,$tdomf_form_widgets;
    $id = sanitize_title($id);
    if(!isset($tdomf_form_widgets[$id])) {
-   		 tdomf_log_message("Control: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 tdomf_log_message_extra("Control: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
    }
    if(isset($tdomf_form_widgets_control[$id])) {
-         tdomf_log_message("tdomf_register_form_widget_control: Widget $id already exists. Overwriting...");
+         tdomf_log_message_extra("tdomf_register_form_widget_control: Widget $id already exists. Overwriting...");
    }
    #tdomf_log_message_extra("Loading Widget Control $id...");
    $tdomf_form_widgets_control[$id]['name'] = $name;
@@ -141,11 +141,11 @@ function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax
    global $tdomf_form_widgets_preview,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
-   		 tdomf_log_message("Preview: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 tdomf_log_message_extra("Preview: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
    }
    if(isset($tdomf_form_widgets_preview[$id])) {
-      tdomf_log_message("Preview widget $id already exists. Overwriting...");
+      tdomf_log_message_extra("Preview widget $id already exists. Overwriting...");
    }
    #tdomf_log_message_extra("Loading Widget Preview $id...");
    $tdomf_form_widgets_preview[$id]['name'] = $name;
@@ -160,11 +160,11 @@ function tdomf_register_form_widget_validate($id, $name, $validate_callback, $aj
    global $tdomf_form_widgets_validate,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
-   		 tdomf_log_message("Validate: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 tdomf_log_message_extra("Validate: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
    }
    if(isset($tdomf_form_widgets_validate[$id])) {
-      tdomf_log_message("Widget $id already exists. Overwriting...");
+      tdomf_log_message_extra("Widget $id already exists. Overwriting...");
    }
    #tdomf_log_message_extra("Loading Widget Validate $id...");
    $tdomf_form_widgets_validate[$id]['name'] = $name;
@@ -179,11 +179,11 @@ function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = tru
    global $tdomf_form_widgets_post,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
-   		 tdomf_log_message("Post: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 tdomf_log_message_extra("Post: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
    }
    if(isset($tdomf_form_widgets_post[$id])) {
-      tdomf_log_message("tdomf_register_form_widget_post: Widget $id already exists. Overwriting...");
+      tdomf_log_message_extra("tdomf_register_form_widget_post: Widget $id already exists. Overwriting...");
    }
    #tdomf_log_message_extra("Loading Widget Post $id...");
    $tdomf_form_widgets_post[$id]['name'] = $name;
@@ -198,11 +198,11 @@ function tdomf_register_form_widget_adminemail($id, $name, $post_callback) {
    global $tdomf_form_widgets_adminemail,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
-   		 tdomf_log_message("Admin Email: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 tdomf_log_message_extra("Admin Email: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
    		 return;
    }
    if(isset($tdomf_form_widgets_adminemail[$id])) {
-      tdomf_log_message("tdomf_register_form_widget_adminemail: Widget $id already exists. Overwriting...");
+      tdomf_log_message_extra("tdomf_register_form_widget_adminemail: Widget $id already exists. Overwriting...");
    }
    $tdomf_form_widgets_adminemail[$id]['name'] = $name;
    $tdomf_form_widgets_adminemail[$id]['cb'] = $post_callback;
@@ -360,7 +360,7 @@ function tdomf_widget_content_post($args) {
     $post = add_magic_quotes($post);
   }
   $post_content = $post['post_content'];
-  if(!isset($content_title)) {
+  if($options['title-enable'] && !isset($content_title)) {
     $content_title = $post['post_title'];
   }
   

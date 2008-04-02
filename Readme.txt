@@ -3,8 +3,8 @@ Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface,
 Requires at least: 2.3
-Tested up to: 2.3.3
-Stable Tag: 0.10.1
+Tested up to: 2.5
+Stable Tag: 0.10.2
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -12,7 +12,7 @@ This plugin allows you to add custom posting forms to your website that allows y
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.10, adds multiple form support, ability to submit pages and increase the number of form widgets!**
+**Version 0.10.2 provides compatibility with Wordpress 2.5!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -229,11 +229,11 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
-2. The Moderation page (v0.6)
-3. "Your Submissions" page for registered users
-4. The Moderation page (v0.7) for approved submissions
-5. The overview page
-6. Constructing your form using "widgets"
+2. The Moderation page (v0.6) (Wordpress 2.3)
+3. "Your Submissions" page for registered users (Wordpress 2.3)
+4. The Moderation page (v0.7) for approved submissions (Wordpress 2.3)
+5. The overview page (Wordpress 2.3)
+6. Constructing your form using "widgets" (Wordpress 2.3)
 
 == Known Bugs == 
 
@@ -419,3 +419,9 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 * Fix to categories widget where widget on other forms than the default  would forget it's settings at post time.
 * Custom Field widget was ignoring append format for multi-forms 
 
+= v0.10.11: 2nd April 2007 =
+
+* Fixed a bug if you reload the image capatcha, it would not longer verify
+* Added a flag TDOMF_HIDE_REGISTER_GLOBAL_ERROR in tdomf.php that can be set to true to hide the register_global errors that get displayed.
+* WP2.5 only: Can now set a max width or height for widgets control on the Form Widgets screen.
+* Compatibily with Wordpress 2.5

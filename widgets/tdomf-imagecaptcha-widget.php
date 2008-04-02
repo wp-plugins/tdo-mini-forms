@@ -62,7 +62,6 @@ function new_freecap_$tdomf_form_id()
 	{
 		// extract image name from image source (i.e. cut off ?randomness)
 		thesrc = document.getElementById("freecap_$tdomf_form_id").src;
-		thesrc = thesrc.substring(0,thesrc.lastIndexOf(".")+4);
 		// add ?(random) to prevent browser/isp caching
 		document.getElementById("freecap_$tdomf_form_id").src = thesrc+"?"+Math.round(Math.random()*100000);
 	} else {

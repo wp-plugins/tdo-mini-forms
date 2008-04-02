@@ -476,7 +476,7 @@ function tdomf_widget_upload_get_options($form_id) {
        $options['attach-thumb-a'] = false;
        $options['thumb-a'] = false;
        $options['url'] = get_bloginfo('wpurl').'/wp-content/uploads/';
-       $options['nohandler'] = false;
+       $options['nohandler'] = true;
     }
     if(!isset($options['url'])){ $options['url'] = get_bloginfo('wpurl').'/wp-content/uploads/'; }
   return $options;
@@ -621,45 +621,107 @@ function tdomf_widget_upload_post($args) {
             $content .= "<p><a href=\"".get_permalink($attachment_ID)."\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")</a></p>";
           }
           
-          // Did Wordpress generate a thumbnail?
-          if(isset($attachment_metadata['thumb'])) {
-             // Wordpress 2.3 uses basename and generates only the "name" of the thumb,
-             // in general it creates it in the same place as the file!
-             $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['thumb'];
-             if(file_exists($thumbpath)) {
-                
-                add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
-                
-                // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
-                // if there is a thumb by using basename and the file path of the actual file
-                // attachment
-                //
-                // Use direct links *or* wrapper
-                //
-                if($options['nohandler'] && trim($options['url']) != "") {
-                  $thumburi = $options['url']."/$post_ID/".$attachment_metadata['thumb'];
-                } else {
-                  $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
-                }
-                
-                //$attachment_metadata['thumb'] = $thumb_uri;
-                //$attachment_metadata['thumb'] = $thumbpath;
-                
-                // add thumbnail link to attachment page
-                if($options['attach-thumb-a']) {
-                  $modifypost = true;
-                  $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-                }
-                // add thumbnail link directly to file
-                if($options['thumb-a']) {
-                  $modifypost = true;
-                  $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-                }
-             } else {
-                tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
-             }
-          } 
+          if(tdomf_wp23()) {
+            // Did Wordpress generate a thumbnail?
+            if(isset($attachment_metadata['thumb'])) {
+               // Wordpress 2.3 uses basename and generates only the "name" of the thumb,
+               // in general it creates it in the same place as the file!
+               $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['thumb'];
+               if(file_exists($thumbpath)) {
+                  
+                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                  
+                  // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
+                  // if there is a thumb by using basename and the file path of the actual file
+                  // attachment
+                  //
+                  // Use direct links *or* wrapper
+                  //
+                  if($options['nohandler'] && trim($options['url']) != "") {
+                    $thumburi = $options['url']."/$post_ID/".$attachment_metadata['thumb'];
+                  } else {
+                    $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                  }
+                  
+                  //$attachment_metadata['thumb'] = $thumb_uri;
+                  //$attachment_metadata['thumb'] = $thumbpath;
+                  
+                  // add thumbnail link to attachment page
+                  if($options['attach-thumb-a']) {
+                    $modifypost = true;
+                    $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                  }
+                  // add thumbnail link directly to file
+                  if($options['thumb-a']) {
+                    $modifypost = true;
+                    $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                  }
+               } else {
+                  tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
+               }
+            }
+          } else {
+            
+            // In Wordpress 2.5 the attachment data structure is changed, 
+            // it only generates a thumbnail if it needs to...
+            if(isset($attachment_metadata['sizes']['thumbnail'])) {
+              // btw there also seems to be a "medium" size sometimes generated
+              $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['sizes']['thumbnail']['file'];
+              if(file_exists($thumbpath)) {
+                  
+                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                  
+                  // Use direct links *or* wrapper
+                  //
+                  if($options['nohandler'] && trim($options['url']) != "") {
+                    $thumburi = $options['url']."/$post_ID/".$attachment_metadata['sizes']['thumbnail']['file'];
+                  } else {
+                    $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                  }
+                  
+                  // add thumbnail link to attachment page
+                  if($options['attach-thumb-a']) {
+                    $modifypost = true;
+                    $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                  }
+                  // add thumbnail link directly to file
+                  if($options['thumb-a']) {
+                    $modifypost = true;
+                    $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                  }
+               } else {
+                  tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
+               }
+            }
+            // Thumbnail not generated automatically, this means that the image
+            // is smaller than a thumbnail => use as thumbnail
+            if(wp_attachment_is_image($attachment_ID) && ($options['attach-thumb-a'] || $options['thumb-a'])) {
 
+              $modifypost = true;
+              
+              $sizeit = "";
+              $h = get_option("thumbnail_size_h");
+              $w = get_option("thumbnail_size_w");
+              if($attachment_metadata['height'] > $h || $attachment_metadata['width'] > $w) { 
+                if($attachment_metadata['height'] > $attachment_metadata['width']) {
+                  $sizeit = " height=\"${h}px\" "; 
+                } else {
+                  $sizeit = " height=\"${w}px\" ";
+                }
+              }
+              
+              // add thumbnail link to attachment page
+              if($options['attach-thumb-a']) {
+                 $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$uri\" $sizeit alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+              }
+              // add just the image (no point linking to thumbnail)
+              if($options['thumb-a']) {
+                 $content .= "<p><img src=\"$uri\" $sizeit alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></p>";
+              }
+            }
+            
+          }
+          
           // Add meta data
           // 
           wp_update_attachment_metadata( $attachment_ID, $attachment_metadata );

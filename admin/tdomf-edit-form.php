@@ -13,7 +13,8 @@ function tdomf_load_edit_form_scripts() {
   // Need these scripts for drag and drop but only on this page, not every page!
   wp_enqueue_script( 'interface' );
 }
-add_action("load-tdomf_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
+// @BUG: this could break with a different lank "tdo-mini-forms" links to name of menu, not file name
+add_action("load-tdo-mini-forms_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
 
 // Stuff to do in the header of the page
 //
@@ -23,13 +24,260 @@ function tdomf_form_admin_head() {
    do_action('tdomf_control_form_start',$form_id);
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
 ?>
-   <?php if(function_exists('wp_admin_css')) {
+   <?php if(tdomf_wp23() && function_exists('wp_admin_css')) {
             wp_admin_css( 'css/widgets' ); 
-         } else { 
+         } else if(!tdomf_wp25()) { 
             // pre-Wordpress 2.3
             ?>
             <link rel="stylesheet" href="widgets.css?version=<?php bloginfo('version'); ?>" type="text/css" />
-   <?php } ?>
+         <?php } else { ?>
+            <style type='text/css' >
+            body {
+	height: 100%;
+}
+
+#sbadmin #zones {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+}
+
+#sbreset {
+	float: left;
+	margin: 1px 0;
+}
+
+.dropzone {
+	border: 1px solid #bbb;
+	float: left;
+	margin-right: 10px;
+	padding: 5px;
+	background-color: #f0f8ff;
+}
+
+.dropzone h3 {
+	text-align: center;
+	color: #333;
+}
+
+.dropzone input {
+	display: none;
+}
+
+.dropzone ul {
+	float: left;
+	list-style-type: none;
+	width: 240px;
+	margin: 0;
+	min-height: 200px;
+	padding: 0;
+	display: block;
+}
+
+* .module {
+	width: 238px;
+	padding: 0;
+	margin: 5px 0;
+	cursor: move;
+	display: block;
+	border: 1px solid #ccc;
+	background-color: #fbfbfb;
+	position: relative;
+	text-align: left;
+	line-height: 25px;
+}
+
+* .handle {
+	display: block;
+	width: 216px;
+	padding: 0 10px;
+	position: relative;
+	border-top: 1px solid #f2f2f2;
+	border-right: 1px solid #e8e8e8;
+	border-bottom: 1px solid #e8e8e8;
+	border-left: 1px solid #f2f2f2;
+}
+
+* .popper {
+	margin: 0;
+	display: inline;
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	overflow: hidden;
+	text-align: center;
+	height: 16px;
+	font-size: 18px;
+	line-height: 14px;
+	cursor: pointer;
+	padding: 0 3px 1px;
+	border-top: 4px solid #6da6d1;
+	background: url( ../images/fade-butt.png ) -5px 0px;
+}
+
+* html .popper {
+	padding: 1px 6px 0;
+	font-size: 16px;
+}
+
+#sbadmin p.submit {
+	padding-right: 10px;
+	clear: left;
+}
+
+.placemat {
+	cursor: default;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+
+.placemat h4 {
+	text-align: center;
+}
+
+.placemat span {
+	background-color: #ffe;
+	border: 1px solid #ccc;
+	padding: 0 10px 10px;
+	position: absolute;
+	text-align: justify;
+}
+
+#palettediv {
+	border: 1px solid #bbb;
+	background-color: #f0f8ff;
+	height:auto;
+	margin-top: 10px;
+	padding-bottom: 10px;
+}
+
+#palettediv:after, #zones:after, .dropzone:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+#palettediv, #zones, .dropzone {
+	display: block;
+	min-height: 1px;
+}
+
+* html #palettediv, * html #zones, * html .dropzone {
+	height: 1%;
+}
+
+#palettediv h3 {
+	text-align: center;
+	color: #333;
+	min-height: 1px;
+}
+
+#palettediv ul {
+	padding: 0 0 0 10px;
+}
+
+#palettediv .module {
+	margin-right: 10px;
+	float: left;
+	width: 120px;
+}
+
+#palettediv .handle {
+	height: 40px;
+	font-size: 90%;
+	width: 110px;
+	padding: 0 5px;
+}
+
+#palettediv .popper {
+	visibility: hidden;
+}
+
+* html #palettediv ul {
+	margin: 0;
+	padding: 0 0 0 10px;
+}
+
+#controls {
+	height: 0px;
+}
+
+.control {
+	position: absolute;
+	display: block;
+	background: #f9fcfe;
+	padding: 0;
+}
+
+.controlhandle {
+	cursor: move;
+	background-color: #6da6d1;
+	border-bottom: 2px solid #448abd;
+	color: #333;
+	display: block;
+	margin: 0 0 5px;
+	padding: 4px;
+	font-size: 120%;
+}
+
+.controlcloser {
+	cursor: pointer;
+	font-size: 120%;
+	display: block;
+	position: absolute;
+	top: 2px;
+	right: 8px;
+	padding: 0 3px;
+	font-weight: bold;
+}
+
+.controlform {
+	margin: 20px 30px;
+  overflow: auto;
+  <?php if(intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH)) != 0) { ?>
+  width: <?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH)); ?>px;
+  <?php } ?>
+  <?php if(intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)) != 0) { ?>
+  height: <?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)); ?>px;
+  <?php } ?>
+}
+
+.controlform p {
+	text-align: center;
+}
+
+.control .checkbox {
+	border: none;
+	background: transparent;
+}
+
+.hidden {
+	display: none;
+}
+
+#shadow {
+	background: black;
+	display: none;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+}
+
+#dragHelper {
+	position: absolute;
+}
+
+#dragHelper li.module {
+	display: block;
+	float: left;
+}
+            </style>
+         <?php } ?>
+   
         <!--[if IE 7]>
         <style type="text/css">
                 #palette { float: <?php echo ( get_bloginfo( 'text_direction' ) == 'rtl' ) ? 'right' : 'left'; ?>; }
@@ -40,10 +288,20 @@ function tdomf_form_admin_head() {
 	var cols = ['tdomf_form-1'];
 	var widgets = [<?php foreach($tdomf_form_widgets as $id => $w) { ?>'<?php echo $id; ?>',<?php } ?> ];
 	var controldims = new Array;
+  <?php $max_w = intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH));
+        $max_h = intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)); ?>
 	<?php foreach($tdomf_form_widgets_control as $id => $w) { ?>
       controldims['#<?php echo $id; ?>control'] = new Array;
-      controldims['#<?php echo $id; ?>control']['width'] = <?php echo $w['width']; ?>;
-      controldims['#<?php echo $id; ?>control']['height'] = <?php echo $w['height']; ?>;
+      <?php if($max_w > 0) { ?>
+        controldims['#<?php echo $id; ?>control']['width'] = <?php if($max_w < intval($w['width'])){ echo ($max_w + 40); } else { echo $w['width']; } ?>;
+      <?php } else { ?>
+        controldims['#<?php echo $id; ?>control']['width'] = <?php echo $w['width']; ?>;
+      <?php } ?>   
+      <?php if($max_h > 0) { ?>
+        controldims['#<?php echo $id; ?>control']['height'] = <?php if($max_h < intval($w['height'])){ echo ($max_h + 60); } else { echo $w['height']; } ?>;
+      <?php } else { ?>
+        controldims['#<?php echo $id; ?>control']['height'] = <?php echo $w['height']; ?>;
+      <?php } ?>
 	<?php } ?>
 
       function initWidgets() {
@@ -179,7 +437,7 @@ function tdomf_show_form_menu() {
 
   <?php do_action( 'tdomf_widget_page_top', $form_id ); ?>
 
-  <?php if(count($form_ids) > 1) { ?>
+  <?php if(count($form_ids) > 1 && tdomf_wp23()) { ?>
     <div class="wrap">
     <?php foreach($form_ids as $single_form_id) { ?>
       
@@ -198,6 +456,16 @@ function tdomf_show_form_menu() {
 <div class="wrap">
 		<h2><?php printf(__("Form Arrangement for Form %d: \"%s\"","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id)); ?></h2>
 
+    <?php if(count($form_ids) > 1 && tdomf_wp25()) { ?>
+      <ul class="subsubsub">
+    <?php foreach($form_ids as $single_form_id) { ?>
+      <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $single_form_id->form_id; ?>"<?php if($single_form_id->form_id == $form_id) { ?> class="current" <?php } ?>>
+          <?php printf(__("Form %d","tdomf"),$single_form_id->form_id); ?></a>
+          |</li>
+      <?php } ?>
+      </ul>
+  <?php } ?>
+    
 		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Widgets will be executed and displayed in order from top to bottom.',"tdomf"); ?></p>
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
@@ -207,6 +475,11 @@ function tdomf_show_form_menu() {
 			<p class="submit">
 				<input type="submit" value="<?php _e("Save Changes &raquo;","tdomf"); ?>" />
 			</p>
+      
+      <?php if(tdomf_wp25()) { ?>
+      <br/><br/>
+      <?php } ?>
+      
 			<div id="zones">
 							<input type="hidden" id="tdomf_form-1order" name="tdomf_form-1order" value="" />
 
