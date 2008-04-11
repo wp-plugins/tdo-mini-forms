@@ -239,6 +239,7 @@ Author URI: http://thedeadone.net
 // v0.10.3: N/A
 // - Fixed a bug in the random_string generator: it did not validate input and 
 //     I've been using a value that's too big (which meant it could return 0)
+// - Fixed double thumbnail issue in WP2.5
 //
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -692,11 +692,12 @@ function tdomf_widget_upload_post($args) {
                } else {
                   tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
                }
-            }
-            // Thumbnail not generated automatically, this means that the image
-            // is smaller than a thumbnail => use as thumbnail
-            if(wp_attachment_is_image($attachment_ID) && ($options['attach-thumb-a'] || $options['thumb-a'])) {
+            } else if(wp_attachment_is_image($attachment_ID) && ($options['attach-thumb-a'] || $options['thumb-a'])) {
+              // Thumbnail not generated automatically, this means that the image
+              // is smaller than a thumbnail => use as thumbnail
 
+              tdomf_log_message("No thumbnail created => image is too small. Use image as thumbnail.",TDOMF_LOG_ERROR);
+              
               $modifypost = true;
               
               $sizeit = "";
