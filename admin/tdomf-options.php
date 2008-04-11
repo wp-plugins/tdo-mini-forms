@@ -641,6 +641,11 @@ function tdomf_create_dummy_user() {
 //
 function tdomf_random_string($length)
 {
+    // Error check input
+    //
+    if($length > 32) { $length = 32; }
+    if($length <= 0) { $length = 1; }
+  
     // Generate random 32 charecter string
     $string = md5(time());
 
