@@ -39,9 +39,9 @@ $form_id = intval($_REQUEST['tdomf_form_id']);
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 
-session_start();
+$form_data = tdomf_get_form_data($form_id);
 
-// TODO: Don't change word when on preview: isset($_POST['tdomf_form1_preview'])
+// @TODO: Don't change word when on preview: isset($_POST['tdomf_form1_preview'])
 
 //////////////////////////////////////////////////////
 ////// User Defined Vars:
@@ -76,7 +76,7 @@ $seed_func = "mt_srand";
 // crc32 supported by PHP4.0.1+
 $hash_func = "sha1";
 // store in session so can validate in form processor
-$_SESSION['hash_func_'.$form_id] = $hash_func;
+$form_data['hash_func_'.$form_id] = $hash_func;
 
 // image type:
 // possible values: "jpg", "png", "gif"
@@ -205,12 +205,14 @@ $im2 = ImageCreate($width, $height);
 //////////////////////////////////////////////////////
 ////// Avoid Brute Force Attacks:
 //////////////////////////////////////////////////////
-if(empty($_SESSION['freecap_attempts_'.$form_id]))
+if(empty($form_data['freecap_attempts_'.$form_id]))
 {
-	$_SESSION['freecap_attempts_'.$form_id] = 1;
+	$form_data['freecap_attempts_'.$form_id] = 1;
+  tdomf_save_form_data($form_id,$form_data);
 } else {
-	$_SESSION['freecap_attempts_'.$form_id]++;
-
+	$form_data['freecap_attempts_'.$form_id]++;
+  tdomf_save_form_data($form_id,$form_data);
+  
 	// if more than ($max_attempts) refreshes, block further refreshes
 	// can be negated by connecting with new session id
 	// could get round this by storing num attempts in database against IP
@@ -218,9 +220,9 @@ if(empty($_SESSION['freecap_attempts_'.$form_id]))
 	// in short, there's little point trying to avoid brute forcing
 	// the best way to protect against BF attacks is to ensure the dictionary is not
 	// accessible via the web or use random string option
-	if($_SESSION['freecap_attempts_'.$form_id]>$max_attempts)
+	if($form_data['freecap_attempts_'.$form_id]>$max_attempts)
 	{
-		$_SESSION['freecap_word_hash_'.$form_id] = false;
+		$form_data['freecap_word_hash_'.$form_id] = false;
 
 		$bg = ImageColorAllocate($im,255,255,255);
 		ImageColorTransparent($im,$bg);
@@ -229,8 +231,10 @@ if(empty($_SESSION['freecap_attempts_'.$form_id]))
 		// depending on how rude you want to be :-)
 		//ImageString($im,5,0,20,"bugger off you spamming bastards!",$red);
 		ImageString($im,5,15,20,"service no longer available",$red);
-
-		sendImage($im);
+    
+    tdomf_save_form_data($form_id,$form_data);
+		
+    sendImage($im);
 	}
 }
 
@@ -373,7 +377,8 @@ if($use_dict==1)
 // so even if your site is 100% secure, someone else's site on your server might not be
 // hence, even if attackers can read the session file, they can't get the freeCap word
 // (though most hashes are easy to brute force for simple strings)
-$_SESSION['freecap_word_hash_'.$form_id] = $hash_func($word);
+$form_data['freecap_word_hash_'.$form_id] = $hash_func($word);
+tdomf_save_form_data($form_id,$form_data);
 
 
 //////////////////////////////////////////////////////
@@ -599,6 +604,7 @@ for($i=0 ; $i<strlen($word) ; $i++)
 
 	$j = $rand_func(0,sizeof($font_locations)-1);
 	$font = ImageLoadFont($font_locations[$j]);
+  
 	ImageString($im2, $font, $word_start_x+($font_widths[$j]*$i), $word_start_y, $word{$i}, $text_colour2);
 }
 // use last pixelwidth

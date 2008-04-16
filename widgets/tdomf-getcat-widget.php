@@ -37,7 +37,7 @@ function tdomf_widget_getcat($args) {
 
   return "<input type='hidden' name='$tdomf_getcat_var_name' id='$tdomf_getcat_var_name' value='$getcat' />";
 }
-tdomf_register_form_widget("getcat", __("Set Category from GET variables","tdomf"), 'tdomf_widget_getcat');
+tdomf_register_form_widget("getcat", __("Set Category from GET variables","tdomf"), 'tdomf_widget_getcat', array("new-post"));
 
 // This is processed once the post is saved.
 //
@@ -70,6 +70,6 @@ function tdomf_widget_getcat_post($args,$params) {
   // no errors so return NULL
   return NULL;
 }
-tdomf_register_form_widget_post("getcat", __("Set Category from GET variables","tdomf"),'tdomf_widget_getcat_post');
+tdomf_register_form_widget_post("getcat", __("Set Category from GET variables","tdomf"),'tdomf_widget_getcat_post',true,array("new-post"));
 
 ?>

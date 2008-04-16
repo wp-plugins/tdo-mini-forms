@@ -80,10 +80,6 @@ function tdomf_upload_download_handler(){
    $file_ID = $_GET['id'];
    $use_thumb = isset($_GET['thumb']);
    
-   // Session start
-   //
-   if (!isset($_SESSION)) session_start();
-   
    // Security check
    get_currentuserinfo();   
    if(!current_user_can("publish_posts")) {
@@ -348,27 +344,29 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
 //
 function tdomf_upload_preview_handler(){
    $id = $_GET['tdomf_upload_preview'];
-   $key = $_GET['key'];
    $form_id = intval($_GET['form']);
-
-   // Session start
-   //
-   if (!isset($_SESSION)) session_start();
+   $form_data = tdomf_get_form_data($form_id); 
    
-   // Security check   
-   if($_SESSION['tdomf_upload_preview_key_'.$form_id] != $key) {
-     return;
-   }
+   $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+   if($tdomf_verify == false || $tdomf_verify == 'default') {
+     $key = $_GET['key'];
+      if($form_data['tdomf_upload_preview_key_'.$form_id] != $key) {
+        return;
+      }
+   } else if($tdomf_verify == 'wordpress_nonce' && 
+             !wp_verify_nonce($_GET['key'],'tdomf-form-upload-preview-'.$form_id)) {
+    return;
+  }
    
-   if(!isset($_SESSION['uploadfiles_'.$form_id][$id])) {
+   if(!isset($form_data['uploadfiles_'.$form_id][$id])) {
      tdomf_log_message("(preview) No file with that id! $id",TDOMF_LOG_ERROR);
      return;
    }
       
-   $filepath = $_SESSION['uploadfiles_'.$form_id][$id]['path'];
+   $filepath = $form_data['uploadfiles_'.$form_id][$id]['path'];
    if(!empty($filepath)) {
 
-     $type = $_SESSION['uploadfiles_'.$form_id][$id]['type'];
+     $type = $form_data['uploadfiles_'.$form_id][$id]['type'];
      
      // Check if file exists
      //
@@ -510,6 +508,7 @@ tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload')
 function tdomf_widget_upload_post($args) {
   extract($args);
   $options = tdomf_widget_upload_get_options($tdomf_form_id);
+  $form_data = tdomf_get_form_data($tdomf_form_id);
   
   $modifypost = false;
   if($options['post-title'] ||
@@ -530,7 +529,7 @@ function tdomf_widget_upload_post($args) {
   }
   
   $filecount = 0;
-  $theirfiles = $_SESSION['uploadfiles_'.$tdomf_form_id];
+  $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
   for($i =  0; $i < $options['max']; $i++) {
     if(!file_exists($theirfiles[$i]['path'])) {
       unset($theirfiles[$i]);
@@ -759,13 +758,12 @@ tdomf_register_form_widget_post('upload-files','Upload Files', 'tdomf_widget_upl
 function tdomf_widget_upload_validate($args,$preview) {
   extract($args);
   $options = tdomf_widget_upload_get_options($tdomf_form_id);
-  if(!isset($_SESSION)) {
-    return $before_widget.__("SESSION has not be started! Something is wrong with your TDOMF installation.","tdomf").$after_widget;
-  }
-  if($options['min'] > 0 && !isset($_SESSION['uploadfiles_'.$tdomf_form_id])) {
+  $form_data = tdomf_get_form_data($tdomf_form_id);
+
+  if($options['min'] > 0 && !isset($form_data['uploadfiles_'.$tdomf_form_id])) {
     return $before_widget.sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files.","tdomf"),$options['min']).$after_widget;
   }
-  $theirfiles = $_SESSION['uploadfiles_'.$tdomf_form_id];
+  $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
   $filecount = 0;
   for($i =  0; $i < $options['max']; $i++) {
     if(!file_exists($theirfiles[$i]['path'])) {
@@ -787,15 +785,31 @@ tdomf_register_form_widget_validate('upload-files','Upload Files', 'tdomf_widget
 function tdomf_widget_upload_preview($args) {
   extract($args);
   $options = tdomf_widget_upload_get_options($tdomf_form_id);
+  $form_data = tdomf_get_form_data($tdomf_form_id);
 
-  $random_string = tdomf_random_string(100);
-  $_SESSION['tdomf_upload_preview_key_'.$tdomf_form_id] = $random_string;
-  
+  // preview key
+  //
+  $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+  if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
+     $nonce_string = wp_create_nonce( 'tdomf-form-upload-preview-'.$tdomf_form_id );
+     $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $nonce_string;
+  } else if($tdomf_verify == 'none') {
+     unset($form_data["tdomf_upload_preview_key_".$tdomf_form_id]);
+  } else {
+     $upload_key = tdomf_random_string(100);
+     $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $upload_key;
+  }
+  tdomf_save_form_data($tdomf_form_id,$form_data);
+ 
   $output = $before_widget;
-  $theirfiles = $_SESSION['uploadfiles_'.$tdomf_form_id];
+  $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
   for($i =  0; $i < $options['max']; $i++) {
     if(file_exists($theirfiles[$i]['path'])) {
-      $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$random_string."&form=".$tdomf_form_id;
+      if(isset($form_data["tdomf_upload_preview_key_".$tdomf_form_id])) {
+         $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$form_data["tdomf_upload_preview_key_".$tdomf_form_id]."&form=".$tdomf_form_id;
+      } else {
+         $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&form=".$tdomf_form_id;
+      }
       if($options['a']) {
         $output .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($theirfiles[$i]['path'])).")</a></p>";
       }

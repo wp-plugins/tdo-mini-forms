@@ -55,10 +55,36 @@ add_action("wp_head","tdomf_auto_fix_authors");
 // if it's already been started
 //
 function tdomf_start_session() {
+   
   // No need to start session for these templates
   if(is_robots() || is_feed() || is_trackback()) {
     return;
   }
+  
+  // internal session data
+  //
+  if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == 'db') {
+     if(!tdomf_session_start()) {
+        if(headers_sent($filename,$linenum)) { ?>
+      <p><font color="red">
+      <b><?php printf(__('TDOMF ERROR: Headers have already been sent in file %s on line %d before session could be setup could be called.',"tdomf"),$filename,$linenum); ?></b>
+      <?php _e('This may be due to...','tdomf'); ?>
+      <ul>
+      <?php if ( !defined('WP_USE_THEMES') || !constant('WP_USE_THEMES') ) { ?>
+        <li><?php _e("Another plugin inserting HTML before TDOMF's get_header action is activated. You can confirm this by disabling all your other plugins and checking if this error is still reported.","tdomf"); ?></li>
+      <?php } ?>
+        <li><?php _e('Your current wordpress theme inserting HTML before calling the template tag "get_header". This may be as simple as a blank new line. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. You can also check your theme where it calls "get_header".',"tdomf"); ?></li>
+      </ul>
+      </font></p>
+    <?php 
+        }
+        tdomf_log_message("Headers are already sent before TDOMF could setup session_start in file $filename on line $linenum",TDOMF_LOG_ERROR);     
+     }
+     return;
+  } 
+
+  // Use session_start 
+
   if(!headers_sent() && !isset($_SESSION)) {
     session_start();
     return;

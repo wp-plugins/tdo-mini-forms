@@ -5,6 +5,51 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // TDOMF Debug Info  //
 ///////////////////////
 
+// http://ie2.php.net/time
+function timeDiff($time, $opt = array()) {
+    // The default values
+    $defOptions = array(
+        'to' => 0,
+        'parts' => 1,
+        'precision' => 'second',
+        'distance' => TRUE,
+        'separator' => ', '
+    );
+    $opt = array_merge($defOptions, $opt);
+    // Default to current time if no to point is given
+    (!$opt['to']) && ($opt['to'] = time());
+    // Init an empty string
+    $str = '';
+    // To or From computation
+    $diff = ($opt['to'] > $time) ? $opt['to']-$time : $time-$opt['to'];
+    // An array of label => periods of seconds;
+    $periods = array(
+        __('decade','tdomf') => 315569260,
+        __('year','tdomf') => 31556926,
+        __('month','tdomf') => 2629744,
+        __('week','tdomf') => 604800,
+        __('day','tdomf') => 86400,
+        __('hour','tdomf') => 3600,
+        __('minute','tdomf') => 60,
+        __('second','tdomf') => 1
+    );
+    // Round to precision
+    if ($opt['precision'] != 'second') 
+        $diff = round(($diff/$periods[$opt['precision']])) * $periods[$opt['precision']];
+    // Report the value is 'less than 1 ' precision period away
+    (0 == $diff) && ($str = 'less than 1 '.$opt['precision']);
+    // Loop over each period
+    foreach ($periods as $label => $value) {
+        // Stitch together the time difference string
+        (($x=floor($diff/$value))&&$opt['parts']--) && $str.=($str?$opt['separator']:'').($x.' '.$label.($x>1?'s':''));
+        // Stop processing if no more parts are going to be reported.
+        if ($opt['parts'] == 0 || $label == $opt['precision']) break;
+        // Get ready for the next pass
+        $diff -= $x*$value;
+    }
+    $opt['distance'] && $str.=($str&&$opt['to']>$time)? __(' ago','tdomf'):__(' away','tdomf');
+    return $str;
+}
  ?>
 
  <?php if(current_user_can('manage_options')) { ?>
@@ -54,8 +99,27 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
       <?php } }
       } ?>
       </table>
+
+            <?php $sessions = tdomf_get_sessions(); if($sessions != false && !empty($sessions)) { ?>
+        <h2><?php _e('Active Sessions', 'tdomf') ?></h2>
+        <p><?php printf(__("There is currently %d active sessions.","tdomf"),count($sessions)); ?></p>
+        <table border="1">
+          <tr>
+          <td><?php _e("Session Key","tdomf"); ?></td>
+          <td><?php _e("Idle","tdomf"); ?></td>
+          <td><?php _e("Session Data","tdomf"); ?></td>
+          </tr>
+        <?php foreach($sessions as $session) { ?>
+          <tr>
+          <td><?php echo $session->session_key; ?></td>
+          <td><?php echo timeDiff($session->session_timestamp); ?></td>
+          <td><?php echo htmlentities($session->session_data); ?></td>
+          </tr>
+        <?php } ?>
+        </table>
+      <?php }?>
       
-  </div>
+      </div>
 
  <?php } ?>
 

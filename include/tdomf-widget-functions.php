@@ -5,6 +5,14 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Manage Widgets //
 ////////////////////
 
+function tdomf_starts_with($haystack, $needle){
+    return strpos($haystack, $needle) === 0;
+}
+
+function tdomf_ends_with($haystack, $needle){
+    return strrpos($haystack, $needle) === strlen($haystack)-strlen($needle);
+}
+
 // Load widgets from widget directory
 //
 function tdomf_load_widgets() {
@@ -100,10 +108,33 @@ $tdomf_form_widgets_post = array();
 //
 $tdomf_form_widgets_adminemail = array();
 
+// Filter list of widgets by mode (if a mode set for that widget)
+//
+function tdomf_filter_widgets($mode,$widgets = false) {
+  global $tdomf_form_widgets;
+  if(!is_array($widgets)) {
+    $widgets = $tdomf_form_widgets;
+  }
+  $retWidgets = array();
+  foreach($widgets as $id => $w) {
+     if(!isset($w['modes']) || !is_array($w['modes']) || empty($w['modes']) ) {
+       $retWidgets[$id] = $w;
+     } else {
+       $modes = $w['modes'];
+       foreach($modes as $m) {
+         if(strstr($mode,$m) == $m) {
+           $retWidgets[$id] = $w;
+           break;
+         }
+       }
+     }
+  }
+  return $retWidgets;
+}
 
 // All Widgets need to register with this function
 //
-function tdomf_register_form_widget($id, $name, $callback) {
+function tdomf_register_form_widget($id, $name, $callback, $modes = array()) {
    global $tdomf_form_widgets,$tdomf_form_widgets;
    $id = sanitize_title($id);
    if(isset($tdomf_form_widgets[$id])) {
@@ -113,6 +144,7 @@ function tdomf_register_form_widget($id, $name, $callback) {
    $tdomf_form_widgets[$id]['name'] = $name;
    $tdomf_form_widgets[$id]['cb'] = $callback;
    $tdomf_form_widgets[$id]['params'] = array_slice(func_get_args(), 3);
+   $tdomf_form_widgets[$id]['modes'] = $modes;
 }
 
 // Widgets that require configuration must register with this function
@@ -133,11 +165,12 @@ function tdomf_register_form_widget_control($id, $name, $control_callback, $widt
    $tdomf_form_widgets_control[$id]['width'] = $width;
    $tdomf_form_widgets_control[$id]['height'] = $height;
    $tdomf_form_widgets_control[$id]['params'] = array_slice(func_get_args(), 5);
+   $tdomf_form_widgets_control[$id]['modes'] = $modes;
 }
 
 // Widgets that provide a preview must register with this function
 //
-function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax = true) {
+function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax = true, $modes = array()) {
    global $tdomf_form_widgets_preview,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -152,11 +185,12 @@ function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax
    $tdomf_form_widgets_preview[$id]['cb'] = $preview_callback;
    $tdomf_form_widgets_preview[$id]['ajax'] = $ajax;
    $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_preview[$id]['modes'] = $modes;
 }
 
 // Widgets that vaidate input *before* input
 //
-function tdomf_register_form_widget_validate($id, $name, $validate_callback, $ajax = true) {
+function tdomf_register_form_widget_validate($id, $name, $validate_callback, $ajax = true, $modes = array()) {
    global $tdomf_form_widgets_validate,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -171,11 +205,12 @@ function tdomf_register_form_widget_validate($id, $name, $validate_callback, $aj
    $tdomf_form_widgets_validate[$id]['cb'] = $validate_callback;
    $tdomf_form_widgets_validate[$id]['ajax'] = $ajax;
    $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_validate[$id]['modes'] = $modes;
 }
 
 // Widgets that modify the post *after* submission 
 //
-function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = true) {
+function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = true, $modes = array()) {
    global $tdomf_form_widgets_post,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -190,11 +225,12 @@ function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = tru
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
    $tdomf_form_widgets_post[$id]['ajax'] = $ajax;
    $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_post[$id]['modes'] = $modes;
 }
 
 // Widgets that create info for the admin notification
 //
-function tdomf_register_form_widget_adminemail($id, $name, $post_callback) {
+function tdomf_register_form_widget_adminemail($id, $name, $post_callback, $modes = array()) {
    global $tdomf_form_widgets_adminemail,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -207,6 +243,7 @@ function tdomf_register_form_widget_adminemail($id, $name, $post_callback) {
    $tdomf_form_widgets_adminemail[$id]['name'] = $name;
    $tdomf_form_widgets_adminemail[$id]['cb'] = $post_callback;
    $tdomf_form_widgets_adminemail[$id]['params'] = array_slice(func_get_args(), 3);
+   $tdomf_form_widgets_adminemail[$id]['modes'] = $modes;
 }
 
 // Return the default widget order!
@@ -582,7 +619,7 @@ function tdomf_widget_whoami($args) {
     $our_uri = $_SERVER['REQUEST_URI'];
     $login_uri = get_bloginfo('wpurl').'/wp-login.php?redirect_to='.$our_uri;
     $reg_uri = get_bloginfo('wpurl').'/wp-register.php?redirect_to='.$our_uri;
-
+       
     $output .= "<p>".sprintf(__("We do not know who you are. Please supply your name and email address. Alternatively you can <a href=\"%s\">log in</a> if you have a user account or <a href=\"%s\">register</a> for a user account if you do not have one.","tdomf"),$login_uri,$reg_uri)."</p>";
 
     if($options['name-enable']) {

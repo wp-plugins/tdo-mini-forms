@@ -17,44 +17,46 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 /////////////////////////////////////
 // How many widgets do you want?
 //
-function tdomf_widget_categories_number_bottom(){
-  $form_id = tdomf_edit_form_form_id();
-  $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
-  if($count <= 0){ $count = 1; } 
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max == false){ $max = 9; }
-  if($count <= 0){ $count = 1; }
-  if($count > ($max+1)){ $count = ($max+1); }
-  
-  if($max > 1) {
-  ?>
-  <div class="wrap">
-    <form method="post">
-      <h2><?php _e("Categories Widgets","tdomf"); ?></h2>
-      <p style="line-height: 30px;"><?php _e("How many Categories widgets would you like?","tdomf"); ?>
-      <select id="tdomf-widget-categories-number" name="tdomf-widget-categories-number" value="<?php echo $count; ?>">
-      <?php for($i = 1; $i < ($max+1); $i++) { ?>
-        <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
-      <?php } ?>
-      </select>
-      <span class="submit">
-        <input type="submit" value="Save" id="tdomf-widget-categories-number-submit" name="tdomf-widget-categories-number-submit" />
-      </span>
-      </p>
-    </form>
-  </div>
-  <?php 
+function tdomf_widget_categories_number_bottom($form_id,$mode){
+  if(strstr($mode,'new-post') == 'new-post') {
+    $form_id = tdomf_edit_form_form_id();
+    $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
+    if($count <= 0){ $count = 1; } 
+    $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+    if($max == false){ $max = 9; }
+    if($count <= 0){ $count = 1; }
+    if($count > ($max+1)){ $count = ($max+1); }
+    
+    if($max > 1) {
+    ?>
+    <div class="wrap">
+      <form method="post">
+        <h2><?php _e("Categories Widgets","tdomf"); ?></h2>
+        <p style="line-height: 30px;"><?php _e("How many Categories widgets would you like?","tdomf"); ?>
+        <select id="tdomf-widget-categories-number" name="tdomf-widget-categories-number" value="<?php echo $count; ?>">
+        <?php for($i = 1; $i < ($max+1); $i++) { ?>
+          <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
+        <?php } ?>
+        </select>
+        <span class="submit">
+          <input type="submit" value="Save" id="tdomf-widget-categories-number-submit" name="tdomf-widget-categories-number-submit" />
+        </span>
+        </p>
+      </form>
+    </div>
+    <?php 
+    }
   }
 }
-add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom');
+add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom',10,2);
 
 // TODO: Update multi-widget init
 
 ///////////////////////////////////////
 // Initilise multiple category widgets!
 //
-function tdomf_widget_categories_init($form_id){
-  if(tdomf_form_exists($form_id)) {   
+function tdomf_widget_categories_init($form_id,$mode){
+  if(tdomf_form_exists($form_id) && strstr($mode,'new-post') == 'new-post') {   
      $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
      $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
      if($max <= 1){ $count = 1; }
@@ -75,21 +77,21 @@ function tdomf_widget_categories_init($form_id){
      }
   }
 }
-add_action('tdomf_create_post_start','tdomf_widget_categories_init');
-add_action('tdomf_generate_form_start','tdomf_widget_categories_init');
-add_action('tdomf_preview_form_start','tdomf_widget_categories_init');
-add_action('tdomf_control_form_start','tdomf_widget_categories_init');
-add_action('tdomf_widget_page_top','tdomf_widget_categories_init');
+add_action('tdomf_create_post_start','tdomf_widget_categories_init',10,2);
+add_action('tdomf_generate_form_start','tdomf_widget_categories_init',10,2);
+add_action('tdomf_preview_form_start','tdomf_widget_categories_init',10,2);
+add_action('tdomf_control_form_start','tdomf_widget_categories_init',10,2);
+add_action('tdomf_widget_page_top','tdomf_widget_categories_init',10,2);
 
-function tdomf_widget_categories_handle_number($form_id) {
-  if(tdomf_form_exists($form_id)) {   
+function tdomf_widget_categories_handle_number($form_id,$mode) {
+  if(tdomf_form_exists($form_id) && strstr($mode,'new-post') == 'new-post') {   
      if (isset($_POST['tdomf-widget-categories-number-submit']) ) {
        $count = $_POST['tdomf-widget-categories-number'];
        if($count > 0){ tdomf_set_option_widget('tdomf_categories_widget_count',$count,$form_id); }
      }
   }
 }
-add_action('tdomf_widget_page_top','tdomf_widget_categories_handle_number');
+add_action('tdomf_widget_page_top','tdomf_widget_categories_handle_number',10,2);
 
 // Get Options for this widget
 //

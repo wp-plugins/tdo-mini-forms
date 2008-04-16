@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.10.2
+Version: 0.10.3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -236,9 +236,16 @@ Author URI: http://thedeadone.net
 //     Form Widgets screen.
 // - Compatibily with Wordpress 2.5
 //
-// v0.10.3: N/A
+// v0.10.3: 16th April 2008
 // - Fixed a bug in the random_string generator: it did not validate input and 
 //     I've been using a value that's too big (which meant it could return 0)
+// - Widgets now support "modes" which means widgets can be filtered per form 
+//     type. Right now that means widgets that don't support pages will not 
+//     appear, if the form is for submitting pages.
+// - Can now choose how to verify an input form: original, wordpress nonce or 
+//     none at all
+// - Implemented a workaround for register_global and unavaliablity of 
+//     $_SESSION on some hosts
 // - Fixed double thumbnail issue in WP2.5
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +310,7 @@ Existing Widget Improvements
 - Make Widget-Form menu independant of Wordpress code (the current code will break in Wordpress 2.5)
 - Any widget with a size or length field should be customisable.
 - Any static text used in widgets need to be customisable.
+- Widget code hacker
 - Fixed sizes for Widget Control windows
 - Copy Widget to another Form
 - Upload Files
@@ -380,9 +388,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "27");
+define("TDOMF_BUILD", "28");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.10.2");
+define("TDOMF_VERSION", "0.10.3");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -501,6 +509,13 @@ define("TDOMF_HIDE_REGISTER_GLOBAL_ERROR", false);
 
 define('TDOMF_OPTION_WIDGET_MAX_WIDTH',"tdomf_form_widget_max_width");
 define('TDOMF_OPTION_WIDGET_MAX_LENGTH',"tdomf_form_widget_max_length");
+
+//////////////////
+// 0.10.3 Settings
+
+define('TDOMF_OPTION_VERIFICATION_METHOD',"tdomf_verify");
+define('TDOMF_OPTION_FORM_DATA_METHOD',"tdomf_form_data");
+define('TDOMF_DB_TABLE_SESSIONS',"tdomf_table_sessions");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation
@@ -625,6 +640,18 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_WIDGET_MAX_LENGTH,400);
   }
 
+  if(get_option(TDOMF_OPTION_VERIFICATION_METHOD) == false) {
+    add_option(TDOMF_OPTION_VERIFICATION_METHOD,'wordpress_nonce');
+  }
+  
+  if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == false) {
+    if(ini_get('register_globals')) {
+       add_option(TDOMF_OPTION_FORM_DATA_METHOD,'db');
+    } else {
+       add_option(TDOMF_OPTION_FORM_DATA_METHOD,'session');
+    }
+  }
+  
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);

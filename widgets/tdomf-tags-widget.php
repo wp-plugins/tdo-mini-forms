@@ -33,7 +33,7 @@ if(function_exists('wp_set_post_tags')) {
     $output .= $after_widget;
     return $output;
     }
-  tdomf_register_form_widget('tags','Tags', 'tdomf_widget_tags');
+  tdomf_register_form_widget('tags','Tags', 'tdomf_widget_tags', array("new-post"));
   
   ////////////////////////
   // Preview tags
@@ -50,7 +50,7 @@ if(function_exists('wp_set_post_tags')) {
     
     return "";
   }
-  tdomf_register_form_widget_preview('tags','Tags', 'tdomf_widget_tags_preview');
+  tdomf_register_form_widget_preview('tags','Tags', 'tdomf_widget_tags_preview', true, array("new-post"));
   
   
   ////////////////////////
@@ -66,7 +66,7 @@ if(function_exists('wp_set_post_tags')) {
    
     return NULL;
   }
-  tdomf_register_form_widget_post('tags','Tags', 'tdomf_widget_tags_post');
+  tdomf_register_form_widget_post('tags','Tags', 'tdomf_widget_tags_post', true, array("new-post"));
   
   ///////////////////////////////////////////////////////////
   // Show what tags are on the post to admins for moderating
@@ -88,7 +88,7 @@ if(function_exists('wp_set_post_tags')) {
     
     return "";
   }
-  tdomf_register_form_widget_adminemail('tags','Tags', 'tdomf_widget_tags_adminemail');
+  tdomf_register_form_widget_adminemail('tags','Tags', 'tdomf_widget_tags_adminemail', array("new-post"));
 
 }
 

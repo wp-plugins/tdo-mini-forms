@@ -21,7 +21,14 @@ add_action("load-tdo-mini-forms_page_tdomf_show_form_menu","tdomf_load_edit_form
 function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
    $form_id = tdomf_edit_form_form_id();
-   do_action('tdomf_control_form_start',$form_id);
+   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+     $mode = "new-page";
+   } else {
+     $mode = "new-post";
+   }
+   do_action('tdomf_control_form_start',$form_id,$mode);
+   $widgets = tdomf_filter_widgets($mode,$tdomf_form_widgets);
+   $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);
    if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
 ?>
    <?php if(tdomf_wp23() && function_exists('wp_admin_css')) {
@@ -286,11 +293,11 @@ function tdomf_form_admin_head() {
    <script type="text/javascript">
    // <![CDATA[
 	var cols = ['tdomf_form-1'];
-	var widgets = [<?php foreach($tdomf_form_widgets as $id => $w) { ?>'<?php echo $id; ?>',<?php } ?> ];
+	var widgets = [<?php foreach($widgets as $id => $w) { ?>'<?php echo $id; ?>',<?php } ?> ];
 	var controldims = new Array;
   <?php $max_w = intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH));
         $max_h = intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)); ?>
-	<?php foreach($tdomf_form_widgets_control as $id => $w) { ?>
+	<?php foreach($widgets_control as $id => $w) { ?>
       controldims['#<?php echo $id; ?>control'] = new Array;
       <?php if($max_w > 0) { ?>
         controldims['#<?php echo $id; ?>control']['width'] = <?php if($max_w < intval($w['width'])){ echo ($max_w + 40); } else { echo $w['width']; } ?>;
@@ -305,7 +312,7 @@ function tdomf_form_admin_head() {
 	<?php } ?>
 
       function initWidgets() {
-        <?php foreach($tdomf_form_widgets_control as $id => $w) { ?>
+        <?php foreach($widgets_control as $id => $w) { ?>
           jQuery('#<?php echo $id; ?>popper').click(function() {popControl('#<?php echo $id; ?>control');});
           jQuery('#<?php echo $id; ?>closer').click(function() {unpopControl('#<?php echo $id; ?>control');});
           jQuery('#<?php echo $id; ?>control').Draggable({handle: '.controlhandle', zIndex: 1000});
@@ -428,14 +435,22 @@ function tdomf_show_form_menu() {
   tdomf_handle_editformmenu_actions();
 
   $form_ids = tdomf_get_form_ids();
-  
   $form_id = tdomf_edit_form_form_id();
   
   $widget_order = tdomf_get_option_form(TDOMF_OPTION_FORM_ORDER,$form_id);
 
-  ?>
+  if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+    $mode = "new-page";
+  } else {
+    $mode = "new-post";
+  }
+  $widgets = tdomf_filter_widgets($mode,$tdomf_form_widgets);
+  $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);  
+  
+  
+  do_action( 'tdomf_widget_page_top', $form_id, $mode );
 
-  <?php do_action( 'tdomf_widget_page_top', $form_id ); ?>
+  ?>
 
   <?php if(count($form_ids) > 1 && tdomf_wp23()) { ?>
     <div class="wrap">
@@ -496,8 +511,8 @@ function tdomf_show_form_menu() {
 					<?php
 					if ( is_array( $widget_order ) ) {
 						foreach ( $widget_order as $id ) {
-						    if(isset($tdomf_form_widgets[$id]['name'])) { ?>
-							<li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $tdomf_form_widgets[$id]['name']; ?> <?php if(isset($tdomf_form_widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
+						    if(isset($widgets[$id]['name'])) { ?>
+							<li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $widgets[$id]['name']; ?> <?php if(isset($widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
 							<?php }
 						}
 					} ?>
@@ -511,9 +526,9 @@ function tdomf_show_form_menu() {
 
 				<ul id="palette">
         				
-				<?php foreach($tdomf_form_widgets as $id => $w) {
+				<?php foreach($widgets as $id => $w) {
 					if ( !is_array( $widget_order ) || !in_array($id,$widget_order)) {?>
-					<li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $w['name']; ?> <?php if(isset($tdomf_form_widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
+					<li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $w['name']; ?> <?php if(isset($widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
 				<?php } } ?>
 				</ul>
 			</div>
@@ -540,12 +555,12 @@ function tdomf_show_form_menu() {
 			</p>
 
 			<div id="controls">
-               <?php foreach($tdomf_form_widgets_control as $id => $w) { ?>
+               <?php foreach($widgets_control as $id => $w) { ?>
 			   <div class="hidden" id="<?php echo $id; ?>control">
-				   <span class="controlhandle"><?php echo $tdomf_form_widgets_control[$id]['name']; ?></span>
+				   <span class="controlhandle"><?php echo $widgets_control[$id]['name']; ?></span>
 					<span id="<?php echo $id; ?>closer" class="controlcloser">&#215;</span>
 					<div class="controlform">
-						<?php $w['cb']($form_id,$tdomf_form_widgets_control[$id]['params']); ?>
+						<?php $w['cb']($form_id,$widgets_control[$id]['params']); ?>
                   <input type="hidden" id="<?php echo $id; ?>-submit" name="<?php echo $id; ?>-submit" value="1" />
 					</div>
 				</div>
@@ -557,7 +572,7 @@ function tdomf_show_form_menu() {
 
 	<div id="shadow"> </div>
 
-  <?php do_action( 'tdomf_widget_page_bottom' ); ?>
+  <?php do_action( 'tdomf_widget_page_bottom', $form_id, $mode ); ?>
   
   <?php
 }

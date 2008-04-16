@@ -58,6 +58,9 @@ function tdomf_reset_options() {
   delete_option(TDOMF_LOG);
   delete_option(TDOMF_OPTION_WIDGET_MAX_WIDTH);
   delete_option(TDOMF_OPTION_WIDGET_MAX_LENGTH);
+  delete_option(TDOMF_OPTION_WIDGET_MAX_WIDTH);
+  delete_option(TDOMF_OPTION_VERIFICATION_METHOD);
+  delete_option(TDOMF_OPTION_FORM_DATA_METHOD);
   
   echo "<span style='color:green;'>";
   _e("DONE","tdomf");  

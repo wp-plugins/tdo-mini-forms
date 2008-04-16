@@ -176,6 +176,52 @@ function tdomf_show_general_options() {
       
   <?php } ?>
   
+  <h3><?php _e('Form Verification Options',"tdomf"); ?></h3>
+    
+  <?php $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD); ?>
+  
+  <p>
+	<?php _e('You can use these options to set how a submission is verified as coming from a form created by TDOMF. You shouldn\'t need to modify these settings unless you are having a problem with "Bad Data" or invalid session keys',"tdomf"); ?>
+	</p>
+
+  <p>
+  <input type="radio" name="tdomf_verify" value="default"<?php if($tdomf_verify == "default" || $tdomf_verify == false){ ?> checked <?php } ?>> 
+  <?php _e('Use TDO-Mini-Forms internal Method',"tdomf"); ?>
+  <br>
+
+  <?php if(function_exists('wp_nonce_field')){ ?>  
+  <input type="radio" name="tdomf_verify" value="wordpress_nonce"<?php if($tdomf_verify == "wordpress_nonce"){ ?> checked <?php } ?>>
+  <?php _e("Use Wordpress nonce Method","tdomf"); ?>
+  <br>
+  <?php } ?>
+  
+  <input type="radio" name="tdomf_verify" value="none"<?php if($tdomf_verify == "none"){ ?> checked <?php } ?>>
+  <?php if($tdomf_verify == "none"){ ?><font color="red"><?php } ?>
+  <?php _e("Disable Verification (not recommended)","tdomf"); ?>
+  <?php if($tdomf_verify == "none"){ ?></font><?php } ?>
+  </p>
+  
+  <h3><?php _e('Form Session Data',"tdomf"); ?></h3>
+    
+  <?php $tdomf_form_data = get_option(TDOMF_OPTION_FORM_DATA_METHOD); ?>
+  
+  <p>
+	<?php _e('The original and default method for moving data around for a form in use, uses <code>$_SESSION</code>. However this does not work on every platform, specifically if <code>register_globals</code> is enabled. The alternative method, using a database, should work in all cases as long as the user accepts the cookie. You shouldn\'t need to modify these settings unless you are having a problem with "Bad Data" or register_global.',"tdomf"); ?>
+	</p>
+
+  <p>
+  <input type="radio" name="tdomf_form_data" value="session"<?php if($tdomf_form_data == "session" || $tdomf_form_data == false){ ?> checked <?php } ?><?php if(ini_get('register_globals')) { ?> disabled <?php } ?>> 
+  <?php if(ini_get('register_globals')) { ?><del><?php } ?>
+  <?php _e('Use <code>$_SESSION</code> to handle from session data (may not work on all host configurations)',"tdomf"); ?>
+  <?php if(ini_get('register_globals')) { ?></del><?php } ?>
+  <br>
+
+  <input type="radio" name="tdomf_form_data" value="db"<?php if($tdomf_form_data == "db"){ ?> checked <?php } ?>>
+  <?php _e("Use database (and cookie) to store session data (should work in all cases)","tdomf"); ?>
+  <br>
+  
+  </p>
+    
     <br/><br/>
 
     <table border="0"><tr>
@@ -784,6 +830,13 @@ function tdomf_handle_options_actions() {
         
       }
       
+      // verification method
+      $tdomf_verify = $_POST['tdomf_verify'];
+      update_option(TDOMF_OPTION_VERIFICATION_METHOD,$tdomf_verify);
+      
+      $tdomf_form_data = $_POST['tdomf_form_data'];
+      update_option(TDOMF_OPTION_FORM_DATA_METHOD,$tdomf_form_data);
+      
       $message .= "Options Saved!<br/>";
       tdomf_log_message("Options Saved");
       
@@ -967,8 +1020,12 @@ function tdomf_get_error_messages($show_links=true) {
   $roles = $wp_roles->role_objects;
   $message = "";
   
-  if(ini_get('register_globals') && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
-    $message .= "<font color=\"red\"><strong>".__("ERROR: <em>register_globals</em> is enabled. This is a security risk and also prevents TDO Mini Forms from working.")."</strong></font>";
+  #if(ini_get('register_globals') && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
+  #  $message .= "<font color=\"red\"><strong>".__("ERROR: <em>register_globals</em> is enabled. This is a security risk and also prevents TDO Mini Forms from working.")."</strong></font>";
+  #}
+  
+  if(get_option(TDOMF_OPTION_VERIFICATION_METHOD) == 'none') {
+    $message .= __("Warning: Form input verification is disabled. This is a potential security risk.");
   }
   
   if(isset($_REQUEST['form'])) {

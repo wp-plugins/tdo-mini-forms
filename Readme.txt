@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface,
 Requires at least: 2.3
 Tested up to: 2.5
-Stable Tag: 0.10.2
+Stable Tag: 0.10.3
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -12,7 +12,7 @@ This plugin allows you to add custom posting forms to your website that allows y
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**Version 0.10.2 provides compatibility with Wordpress 2.5!**
+**With version 0.10.3, "Bad Data" errors and register_global issues should be a thing of the past!**
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 
@@ -41,7 +41,9 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Can, optionally, automatically allow submissions to be published.
 * And many more...
 
-**Version 0.10 is a big upgrade. You will not be able to use previous versions about this install**
+**Version 0.10.2 provides compatibility with Wordpress 2.5!**
+
+**Version 0.10 is a big upgrade. You will not be able to roll back to previous versions after this install**
 
 **Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
 
@@ -63,7 +65,7 @@ Before installing the new version of TDO Mini Forms, delete the TDOMiniForms fro
 
 Please check the Frequently Asked Questions for answers to many of the common issues that arise.
 
-If you are using the wp-cache or wp-super-cache plugins, please make sure that any page that uses a TDO Mini Forms form is **not** cache. If you cache the form it'll contain an old "key" and will cause "Bad Data" error messages.
+If you are using the wp-cache or wp-super-cache plugins, please make sure that any page that uses a TDO Mini Forms form is **not** cached. If you cache the form it'll may contain an old "key" and will cause "Bad Data" error messages and also you will not be able to preview or see admin messages.
 
 == Frequently Asked Questions ==
 
@@ -77,7 +79,9 @@ You can use the [TDOMF Support Forum]( http://thedeadone.net/forum ) or you can 
 
 = How do I add a form to a page or post? =
 
-You can use the button in the options menu to create a page or instead you can add:
+You can use the button in the options menu to create a page automatically.
+
+Or instead you can add:
 
 `[tdomf_form1]` 
 
@@ -109,6 +113,7 @@ These tags must be used within the loop:
 
 `<?php tdomf_the_submitter(); ?>`
 
+
 = I want to add custom fields! =
 
 With v0.9, you can! There is now a Custom Field widget avaliable to add to your form. Currenly only text fields and text areas are supported but future versions will support check boxes, drop down lists, radio groups, etc.
@@ -127,7 +132,7 @@ If you don't want people to have to register, you might try looking at this plug
 
 Another suggestion, but much less secure and not recommended, is to have the page where you have the form, password protected and only send the page link and password to the people you want to access the form.
 
-= I want submissions, even from unregistered users, be published automatically!! =
+= I want submissions, even from unregistered users, be published automatically! =
 
 You can disable moderation in the options menu for a specific form and all posts will be published. However such posts get passed through Wordpress' kses filters automatically to remove nasty scripts.
 
@@ -137,20 +142,9 @@ Enable moderation and it'll work. If you disable moderation, posts get passed th
 
 Alternativily you can use a custom field. Add the Custom Field widget to your form, set it as a URL and ask your submitters to add the URL of the YouTube video they want to include. Then in your theme, you can use the Custom Fields template tags to automatically display the YouTube video underneath the submitted post. Or you can use another plugin that gives you tags to support YouTube and have the Custom Field append the YouTube link with the tags to your post.
 
-= Can we use TinyMCE or FckEditor for writing posts? =
+= Can we use TinyMCE, FckEditor, Niced for writing posts? =
 
 I have spent some time exploring the use of TinyMCE (and to a lesser degree FckEditor) for TDO Mini Forms. Both libraries provide a WYSIWYG or "Rich Text" editors in place of your bog-standard text area. Wordpress' write screen using a heavily modified version of TinyMCE. I haven't settled on the right method to do this yet. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. Grab the latest copy and installed it somewhere on your website and then follow the directions on how to replace a text area with TinyMCE. This can be used to even change your comment input field.
-
-= I get "ERROR: register_globals is enabled" and/or "ERROR: register_globals is enabled in your PHP environment! =
-
-[register_globals](http://ie2.php.net/register_globals) is a PHP setting. Having it enabled is considered a security risk and Wordpress takes steps to plug the hole when it detects the setting. However these steps delete information used by the TDOMF form and will prevent it from operating correctly. 
-
-To resolve this, you have a number of options.
-
-* If you can access and modify your .htaccess you can disable `register_globals` by adding this line:
-`php_flag register_globals off`
-* Ask your host to turn off `register_globals'.
-* Modify Wordpress (ask on the [forums]( http://thedeadone.net/forum ) how to do that)
 
 = I want to add add tags to QuickTags such as embed video, etc.? =
 
@@ -210,6 +204,12 @@ You can enable extra log messages from the options screen to see more detailed m
 
 This is outside the scope of TDOMF as TDOMF only enables people to submit posts. However you can use a plugin like [Advanced Category Excluder Plugin](http://wordpress.org/extend/plugins/advanced-category-excluder/ "Advanced Category Excluder Plugin"). This plugin has nothing to do with me. You could have posts submitted to a specific category that is excluded from your main blog.
 
+= I'm getting "Bad Data" errors when I submit posts =
+
+* Make sure you disable any caching plugins on the form page. 
+* Try changing the Form Verification Options to "Wordpress nonce" (or "None" if you are really desperate)
+* Try changing the Form Session Method to use the database
+
 = Credits =
 
 I've used code in TDOMF that I've found in the wild so some credit is due to these authors for making their source code avaliable for re-use. 
@@ -226,6 +226,8 @@ Freecap (PHP Image capatcha) taken from (http://puremango.co.uk/)
 
 Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tutorial006.html)
 
+PHP Function to display a human readable time interval based on a function I found here (http://ie2.php.net/time)
+
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
@@ -237,9 +239,8 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 
 == Known Bugs == 
 
-* v0.6 had an incompatibility issue with the "Bad Behaviour" Wordpress plugin. This has not been confirmed with v0.7+.
-* It has been found that there is some incompatibility with v0.8 and the WP-Email plugin. I haven't tracked it down yet, but on my recent tests, it seemed to be playing nice with v0.9. Any info on this issue would be greated appreciated. 
-* If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper.
+* An issue with having the latest MoreFields plugin (v0.6.7) and TDO-Mini Forms (v0.10.2) has been reported. Not yet investigated. (http://thedeadone.net/forum/?p=212)
+* If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper. In v0.10.3, the default is to use direct links but you can switch back to the handler if this does not work correctly for you.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
 * Form does not validate as XHTML. I'll fix this soon I swear! :)
 
@@ -419,9 +420,17 @@ Customfield Select Box javascript based on (http://www.mredkj.com/tutorials/tuto
 * Fix to categories widget where widget on other forms than the default  would forget it's settings at post time.
 * Custom Field widget was ignoring append format for multi-forms 
 
-= v0.10.11: 2nd April 2007 =
+= v0.10.2: 2nd April 2007 =
 
 * Fixed a bug if you reload the image capatcha, it would not longer verify
 * Added a flag TDOMF_HIDE_REGISTER_GLOBAL_ERROR in tdomf.php that can be set to true to hide the register_global errors that get displayed.
 * WP2.5 only: Can now set a max width or height for widgets control on the Form Widgets screen.
 * Compatibily with Wordpress 2.5
+
+= v0.10.3: 16th April 2008 =
+
+* Fixed a bug in the random_string generator: it did not validate input and I've been using a value that's too big (which meant it could return 0)
+* Widgets now support "modes" which means widgets can be filtered per form type. Right now that means widgets that don't support pages will not appear, if the form is for submitting pages. 
+* Can now choose how to verify an input form: original, wordpress nonce or none at all
+* Implemented a workaround for register_global and unavaliablity of $_SESSION on some hosts
+* Fixed double thumbnail issue in WP2.5

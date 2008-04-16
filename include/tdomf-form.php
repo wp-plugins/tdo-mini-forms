@@ -61,20 +61,28 @@ function tdomf_preview_form($args) {
    global $tdomf_form_widgets_preview;
 
    $form_id = intval($args['tdomf_form_id']);
-
-   do_action('tdomf_preview_form_start',$form_id);
-
+   
+   // Set mode of page
+   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+     $mode = "new-page";
+   } else {
+     $mode = "new-post";
+   }
+   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
+   do_action('tdomf_preview_form_start',$form_id,$mode);
+   
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"\n<p>\n",
                                       "after_widget"=>"\n</p>\n",
                                       "before_title"=>"<b>",
-                                      "after_title"=>"</b><br/>" ),
+                                      "after_title"=>"</b><br/>",
+                                      "mode"=>$mode ),
                                       $args);
    $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $w) {
-	  if(isset($tdomf_form_widgets_preview[$w])) {
+	  if(isset($widgets[$w])) {
 		tdomf_log_message_extra("Looking at preview widget $w");
-		$message .= $tdomf_form_widgets_preview[$w]['cb']($widget_args,$tdomf_form_widgets_preview[$w]['params']);
+		$message .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
 	  }
    }
    if($message == "") {
@@ -90,19 +98,27 @@ function tdomf_validate_form($args,$preview = false) {
    global $tdomf_form_widgets_validate;
 
    $form_id = intval($args['tdomf_form_id']);
-
-   do_action('tdomf_validate_form_start',$form_id);
+   
+   // Set mode of page
+   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+     $mode = "new-page";
+   } else {
+     $mode = "new-post";
+   }
+   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_validate);
+   do_action('tdomf_validate_form_start',$form_id,$mode);
 
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"",
                                       "after_widget"=>"<br/>\n",
                                       "before_title"=>"<b>",
-                                      "after_title"=>"</b><br/>"),
+                                      "after_title"=>"</b><br/>",
+                                      "mode"=>$mode),
 							   $args);
    $widget_order = tdomf_get_widget_order($form_id,$preview);
    foreach($widget_order as $w) {
-	  if(isset($tdomf_form_widgets_validate[$w])) {
-		$temp_message = $tdomf_form_widgets_validate[$w]['cb']($widget_args,$preview,$tdomf_form_widgets_validate[$w]['params']);
+	  if(isset($widgets[$w])) {
+		$temp_message = $widgets[$w]['cb']($widget_args,$preview,$widgets[$w]['params']);
 		if($temp_message != NULL && trim($temp_message) != ""){
 		   $message .= $temp_message;
 		}
@@ -123,8 +139,16 @@ function tdomf_create_post($args) {
    global $wp_rewrite, $tdomf_form_widgets_post, $current_user;
 
    $form_id = intval($args['tdomf_form_id']);
-   do_action('tdomf_create_post_start',$form_id);
-
+   
+   // Set mode of page
+   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+     $mode = "new-page";
+   } else {
+     $mode = "new-post";
+   }
+   
+   do_action('tdomf_create_post_start',$form_id,$mode);
+   
    tdomf_log_message("Attempting to create a post based on submission");
 
    // Default submitter
@@ -145,7 +169,7 @@ function tdomf_create_post($args) {
    //
 #  $post_date = current_time('mysql');
 #  $post_date_gmt = get_gmt_from_date($post_date);
-
+   
    // Build post and post it as draft
    //
    $post = array (
@@ -163,7 +187,7 @@ function tdomf_create_post($args) {
    );
    //
    // submit a page instead of a post
-   //
+   //   
    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
      $post['post_type'] = 'page';
    }
@@ -194,7 +218,7 @@ function tdomf_create_post($args) {
    //
    add_post_meta($post_ID, TDOMF_KEY_FORM_ID, $form_id, true);
 
-
+   
    tdomf_log_message("Let the widgets do their work on newly created $post_ID");
 
    // Disable kses protection! It seems to get over-protective of non-registered
@@ -204,7 +228,7 @@ function tdomf_create_post($args) {
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
      kses_remove_filters();
    }
-
+   
    // Widgets:post
    //
    $message = "";
@@ -212,12 +236,14 @@ function tdomf_create_post($args) {
                                       "before_widget"=>"",
                                       "after_widget"=>"<br/>\n",
                                       "before_title"=>"<b>",
-                                      "after_title"=>"</b><br/>"),
+                                      "after_title"=>"</b><br/>",
+                                      "mode"=>$mode),
                                       $args);
    $widget_order = tdomf_get_widget_order($form_id);
+   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_post);
    foreach($widget_order as $w) {
-	  if(isset($tdomf_form_widgets_post[$w])) {
-      $temp_message = $tdomf_form_widgets_post[$w]['cb']($widget_args,$tdomf_form_widgets_post[$w]['params']);
+    if(isset($widgets[$w])) {
+      $temp_message = $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
       if($temp_message != NULL && trim($temp_message) != ""){
         $message .= $temp_message;
       }
@@ -229,7 +255,7 @@ function tdomf_create_post($args) {
      wp_delete_post($post_ID);
      return "<font color='red'>$message</font>\n";
    }
-
+   
    // Submitted post count!
    //
    $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
@@ -245,7 +271,7 @@ function tdomf_create_post($args) {
    $send_moderator_email = true;
    if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
       tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
-      // Use update post instead of publish post because in WP2.3,
+      // Use update post instead of publish post because in WP2.3, 
       // update_post doesn't seem to add the date correctly!
       // Also when it updates a post, if comments aren't set, sets them to
       // empty! (Not so in WP2.2!)
@@ -261,7 +287,7 @@ function tdomf_create_post($args) {
         $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
         if(current_user_can('publish_posts') || $user_status == TDOMF_USER_STATUS_TRUSTED) {
            tdomf_log_message("Publishing post $post_ID!");
-           // Use update post instead of publish post because in WP2.3,
+           // Use update post instead of publish post because in WP2.3, 
            // update_post doesn't seem to add the date correctly!
            // Also when it updates a post, if comments aren't set, sets them to
            // empty! (Not so in WP2.2!)
@@ -287,19 +313,40 @@ function tdomf_create_post($args) {
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
      kses_init_filters();
    }
-
+   
    return intval($post_ID);
 }
 
+// Generate Form Key and place it in Session for Post forms
+//
+function tdomf_generate_form_key($form_id) {
+ 
+  $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+  if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
+    $nonce_string = wp_create_nonce( 'tdomf-form-'.$form_id );
+    return "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$nonce_string' />";
+  } else if($tdomf_verify == 'none') {
+    // do nothing! Bad :(
+    return "";
+  }
+  
+  // default
+  $form_data = tdomf_get_form_data($form_id);  
+  $random_string = tdomf_random_string(100);
+  $form_data["tdomf_key_$form_id"] = $random_string;
+  tdomf_log_message_extra('Placing key '.$random_string.' in form_data: <pre>'.var_export($form_data,true)."</pre>");
+  tdomf_save_form_data($form_id,$form_data);
+  return "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$random_string' />";
+}
 // Create the form!
 //
 function tdomf_generate_form($form_id = 1) {
   global $tdomf_form_widgets;
 
   if(!tdomf_form_exists($form_id)) {
-    return sprintf(__("Form %d does not exist.",'tdomf'),$form_id);
+    return sprintf(__("Form %d does not exist.",'tdomf'),$form_id); 
   }
-
+  
   // AJAX is currently not supported
   //
   $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
@@ -308,54 +355,40 @@ function tdomf_generate_form($form_id = 1) {
   if($form != NULL) {
     return $form;
   }
-
+  
   // Okay, all checks pass! Now create form
   $form = "";
 
-  // Error checks
-
-  if(!isset($_SESSION)) {
-    headers_sent($filename,$linenum);
-    tdomf_log_message( "session_start() has not been called before generating form! Form will not work.",TDOMF_LOG_ERROR);
-      if(!get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
-      $form .= "<p><font color=\"red\"><b>";
-      $form .= __('ERROR: <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> has not been called yet!',"tdomf");
-      $form .= "</b> ".__('This may be due to...','tdomf');
-      $form .= "<ol>";
-      if ( !defined('WP_USE_THEMES') || !constant('WP_USE_THEMES') ) {
-        $form .= "<li>";
-        $form .= sprintf(__('Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s.',"tdomf"),$filename);
-        $form .= "</li>";
-      }
-      $form .= "<li>";
-      $form .= sprintf(__('Another Plugin conflicts with TDOMF. To confirm this, disable all your plugins and then renable only TDOMF. If this error disappears than another plugin is causing the problem.',"tdomf"),$filename);
-      $form .= "</li>";
-      $form .= "</li></ol></font></p>";
-    }
+  // Set mode of form
+  if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+     $mode = "new-page";
+  } else {
+     $mode = "new-post";
   }
-
-  if(ini_get('register_globals')  && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
-    if(!get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
-      $form .= "<p><font color=\"red\"><b>";
-      $form .= __('ERROR: <a href="http://ie2.php.net/register_globals"><i>register_globals</i></a> is enabled in your PHP environment!',"tdomf");
-      $form .= "</font></p>";
-    }
-   tdomf_log_message('register_globals is enabled!',TDOMF_LOG_ERROR);
-  }
+  $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
+  
+  // grab initial form data
+  //
+  $form_data = tdomf_get_form_data($form_id);
+    
+  // Grab widgets for this form
+  
+  do_action('tdomf_generate_form_start',$form_id,$mode);
 
   // AJAX or normal POST headers...
-
-  do_action('tdomf_generate_form_start',$form_id);
-
+  
   if(!$use_ajax) {
      $post_args = array();
-     if(isset($_SESSION['tdomf_form_post_'.$form_id])) {
-    	$post_args = $_SESSION['tdomf_form_post_'.$form_id];
-        unset($_SESSION['tdomf_form_post_'.$form_id]);
+     if(isset($form_data['tdomf_form_post_'.$form_id])) {
+        $post_args = $form_data['tdomf_form_post_'.$form_id];
+        unset($form_data['tdomf_form_post_'.$form_id]);
         if(isset($post_args['tdomf_post_message_'.$form_id])) {
            $form = $post_args['tdomf_post_message_'.$form_id];
+           unset($form_data['tdomf_post_message_'.$form_id]);
         }
         if(isset($post_args['tdomf_no_form_'.$form_id])) {
+           unset($post_args['tdomf_no_form_'.$form_id]);
+           tdomf_save_form_data($form_id,$form_data);
            return $form;
         }
      }
@@ -409,10 +442,7 @@ EOT;
     $redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
     $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form'.$form_id.'" name="tdomf_form'.$form_id.'" class="tdomf_form" >';
     $form .= "<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />";
-    $random_string = tdomf_random_string(100);
-    $_SESSION["tdomf_key_$form_id"] = $random_string;
-    $form .= "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$random_string' />";
-    tdomf_log_message_extra('Placing key '.$random_string.' in $_SESSION: <pre>'.var_export($_SESSION,true)."</pre>");
+    $form .= tdomf_generate_form_key($form_id);
   }
 
   // Form id
@@ -425,19 +455,21 @@ EOT;
                                        "after_widget"=>"\n</fieldset>\n",
                                        "before_title"=>"<legend>",
                                        "after_title"=>"</legend>",
-                                       "tdomf_form_id"=>$form_id),
+                                       "tdomf_form_id"=>$form_id,
+                                       "mode"=>$mode),
                                 $post_args);
   } else {
   	$widget_args = array( "before_widget"=>"<fieldset>\n",
                           "after_widget"=>"\n</fieldset>\n",
                           "before_title"=>"<legend>",
                           "after_title"=>"</legend>",
-                          "tdomf_form_id"=>$form_id);
+                          "tdomf_form_id"=>$form_id,
+                          "mode"=>$mode);
   }
   $widget_order = tdomf_get_widget_order($form_id);
   foreach($widget_order as $w) {
-	if(isset($tdomf_form_widgets[$w])) {
-		$form .= $tdomf_form_widgets[$w]['cb']($widget_args,$tdomf_form_widgets[$w]['params']);
+	if(isset($widgets[$w])) {
+		$form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
 		#$form .= "<br/>";
 	}
   }
@@ -451,12 +483,15 @@ EOT;
     }
     $form .= '<td width="10px"><input type="button" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomf_submit_post(); return false;" /></td>';
   } else {
+    // only need to add a clear butt if using the db form data storage as it doesn't automatically clear
+    if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == 'db') {
+       $form .= '<td width="10px"><input type="submit" value="'.__("Clear","tdomf").'" name="tdomf_form'.$form_id.'_clear" id="tdomf_form'.$form_id.'_clear" /></td>';
+    }
   	if(tdomf_widget_is_preview_avaliable($form_id)) {
     	$form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" /></td>';
     }
   	$form .= '<td width="10px"><input type="submit" value="'.__("Post","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" /></td>';
   }
-
 
   $form .= '</tr></table>';
   $form .= "\n</form>\n";
@@ -503,6 +538,58 @@ function tdomf_form_filter($content=''){
 }
 add_filter('the_content', 'tdomf_form_filter');
 
+function tdomf_get_form_data($form_id) {
+   $type = get_option(TDOMF_OPTION_FORM_DATA_METHOD);
+   if($type == "session") {
+      if(!isset($_SESSION)) { @session_start(); }
+      if(!isset($_SESSION)) {
+         headers_sent($filename,$linenum);
+         tdomf_log_message( "session_start() has not been called before generating form! Form will not work.",TDOMF_LOG_ERROR);
+         if(!get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) { ?>
+            <p><font color=\"red\"><b>
+            <?php _e('ERROR: <a href="http://www.google.com/search?client=opera&rls=en&q=php+session_start&sourceid=opera&ie=utf-8&oe=utf-8">session_start()</a> has not been called yet!',"tdomf"); ?>
+            </b> <?php _e('This may be due to...','tdomf'); ?>
+            <ol> <?php
+            if ( !defined('WP_USE_THEMES') || !constant('WP_USE_THEMES') ) { ?>
+              <li>
+              <?php printf(__('Your theme does not use the get_header template tag. You can confirm this by using the default or classic Wordpress theme and seeing if this error appears. If it does not use get_header, then you must call session_start at the beginning of %s.',"tdomf"),$filename); ?>
+              </li> <?php
+            } ?> 
+            <li>
+            <?php printf(__('Another Plugin conflicts with TDOMF. To confirm this, disable all your plugins and then renable only TDOMF. If this error disappears than another plugin is causing the problem.',"tdomf"),$filename); ?>
+            </li>
+            </li></ol></font></p> <?php
+         }
+     }
+     if(ini_get('register_globals')  && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
+       if(!get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) { ?>
+         <p><font color="red"><b>
+         <?php _e('ERROR: <a href="http://ie2.php.net/register_globals"><i>register_globals</i></a> is enabled in your PHP environment!',"tdomf"); ?>
+         </font></p>
+       <?php }
+      tdomf_log_message('register_globals is enabled!',TDOMF_LOG_ERROR);
+     }
+     if(isset($_SESSION['tdomf_form_data_'.$form_id])) { 
+        return $_SESSION['tdomf_form_data_'.$form_id];
+     } else {
+        return array();
+     }
+   } else if($type == "db") {
+     $data = tdomf_session_get();
+     if(!is_array($data)) { return array(); }
+     return $data;
+   }
+   tdomf_log_message("Invalid option set for FORM DATA METHOD: $type",TDOMF_LOG_ERROR);
+   return array();
+}
 
+function tdomf_save_form_data($form_id,$form_data) {
+   $type = get_option(TDOMF_OPTION_FORM_DATA_METHOD);
+   if($type == "session") {
+      $_SESSION['tdomf_form_data_'.$form_id] = $form_data;
+   } else if($type == "db") {
+      tdomf_session_set(0,$form_data);
+   }
+}
 
 ?>

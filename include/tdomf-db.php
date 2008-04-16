@@ -8,6 +8,7 @@ function tdomf_db_create_tables() {
   global $wpdb,$wp_roles, $table_prefix;
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
+  $table_session_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
 
   if($wpdb->get_var("show tables like '$table_form_name'") != $table_form_name) {
     
@@ -173,6 +174,28 @@ function tdomf_db_create_tables() {
       tdomf_log_message("Can't find db table $table_widget_name! Table not created.",TDOMF_LOG_ERROR);
     }
   }
+  
+  if($wpdb->get_var("show tables like '$table_session_name'") != $table_session_name 
+     && get_option(TDOMF_OPTION_FORM_DATA_METHOD) == "db" ) {
+    
+     tdomf_log_message("$table_session_name does not exist. Will create it now...");
+    
+     $sql = "CREATE TABLE " . $table_session_name . " (
+               session_key       varchar(255) NOT NULL,
+               session_data      longtext,
+               session_timestamp int(11),
+               PRIMARY KEY  (session_key)
+             );";
+      require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+      dbDelta($sql);
+      
+      if($wpdb->get_var("show tables like '$table_session_name'") == $table_session_name) {
+          tdomf_log_message("$table_session_name created successfully.",TDOMF_LOG_GOOD);
+      } else {
+          tdomf_log_message("Can't find db table $table_session_name! Table not created.",TDOMF_LOG_ERROR);
+      }
+  }
+     
   return true;
 }
 
@@ -181,6 +204,7 @@ function tdomf_db_delete_tables() {
   
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
+  $table_session_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   
@@ -197,8 +221,122 @@ function tdomf_db_delete_tables() {
       if($wpdb->query($sql)) {
         tdomf_log_message("Db table $table_widget_name deleted!");
       }
+  }
+  if($wpdb->get_var("show tables like '$table_session_name'") == $table_session_name) {
+      tdomf_log_message("Deleting db table $table_session_name...");
+      $sql = "DROP TABLE IF EXISTS " . $table_session_name . ";";
+      if($wpdb->query($sql)) {
+        tdomf_log_message("Db table $table_session_name deleted!");
+      }
   }   
   return false;
+}
+
+function tdomf_get_sessions() {
+  global $wpdb;
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  if($wpdb->get_var("show tables like '$table_name'") ==  $table_name) {
+      tdomf_session_cleanup();
+      $query = "SELECT * 
+                FROM $table_name 
+                ORDER BY session_key ASC";
+      return $wpdb->get_results($query);
+  } 
+  return false;
+}
+
+function tdomf_session_start() {
+   tdomf_session_cleanup();
+   if(!isset($_COOKIE['tdomf_'.COOKIEHASH])) {
+      #$session_key = tdomf_random_string(15);
+      $session_key = uniqid();
+      return setcookie('tdomf_'.COOKIEHASH, $session_key, 0, COOKIEPATH, COOKIE_DOMAIN);
+   }
+   return true;
+}
+
+function tdomf_session_set($key=0,$data) {
+  global $wpdb;
+  
+  // grab session key
+  //
+  if($key == 0 && !isset($_COOKIE['tdomf_'.COOKIEHASH])) {
+     return false; 
+  } else if($key == 0) {
+     $key = $_COOKIE['tdomf_'.COOKIEHASH];
+  }
+ 
+  // session exists?
+  //
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  $query = "SELECT * 
+            FROM $table_name 
+            WHERE session_key = '" .$wpdb->escape($key)."'";
+  $session = $wpdb->get_row( $query );
+
+  if(!is_array($data)) {
+    tdomf_log_message("Bad data in session, reseting to empty array!",TDOMF_LOG_ERROR);
+    $data = array();
+  }
+  
+  $data = maybe_serialize($data);   
+  $ts = time();
+
+  // if option doesn't exist - add
+  //
+  if($session == NULL) {
+    $query = "INSERT INTO $table_name" .
+             "(session_key, session_data, session_timestamp) " .
+              "VALUES ('".$wpdb->escape($key)."',
+                       '" .$wpdb->escape($data)."',
+                       ".$wpdb->escape($ts).")";
+    $retValue = $wpdb->query($query);
+    return $retValue;
+  } else {
+    // if option does exist - check if it has changed
+    //
+    $current_data = maybe_unserialize($session->session_data);
+    if($current_data != $data) {
+        // it's changed! So update
+      //
+      $query = "UPDATE $table_name 
+                SET session_data = '".$wpdb->escape($data)."',  
+                    session_timestamp = $ts  
+                WHERE session_key = '" .$wpdb->escape($key)."'";
+      $retValue = $wpdb->query($query);
+      return $retValue;
+    }
+  }
+  return false;
+}
+
+function tdomf_session_get($key=0) {
+  global $wpdb;
+  
+  // grab session key
+  //
+  if($key == 0 && !isset($_COOKIE['tdomf_'.COOKIEHASH])) {
+     #var_dump($_COOKIE);
+     return false; 
+  } else if($key == 0) {
+     $key = $_COOKIE['tdomf_'.COOKIEHASH];
+  }
+   
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  $query = "SELECT * 
+            FROM $table_name 
+            WHERE session_key = '" .$wpdb->escape($key)."'";
+  $retValue = $wpdb->get_row( $query );
+  return maybe_unserialize($retValue->session_data);
+}
+
+function tdomf_session_cleanup() {
+   global $wpdb;
+   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+   $cutoff = time() - (60*60*24);
+   $query = "DELETE FROM $table_name 
+             WHERE session_timestamp <= " . $cutoff;
+   return $wpdb->query( $query );
 }
 
 function tdomf_set_option_widget($key,$value,$form_id = 1) {

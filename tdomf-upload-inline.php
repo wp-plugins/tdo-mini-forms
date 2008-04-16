@@ -16,7 +16,7 @@
 
 // Session start
 //
-if (!isset($_SESSION)) session_start();
+#if (!isset($_SESSION)) session_start();
 
 // Load up Wordpress
 //
@@ -40,17 +40,32 @@ if(isset($_REQUEST['tdomf_form_id'])){
 }
 if(!tdomf_form_exists($form_id)) {
   tdomf_log_message("Inline Upload Form: A form id of a non-existant form used $form_id!",TDOMF_LOG_BAD);
-  unset($_SESSION['tdomf_form_id']);
+  #unset($form_data['tdomf_form_id']);
+  #tdomf_save_form_data($form_id,$form_data);
   exit("TDOMF: Bad Form ID");
 }
 
+// Get form data
+//
+$form_data = tdomf_get_form_data($form_id);
+// is form good?
+$all_good = true; 
 
 // First pass security check
 //
-if(isset($_SESSION['tdomf_upload_key_'.$form_id]) && $_SESSION['tdomf_upload_key_'.$form_id] != $_POST['tdomf_upload_key_'.$form_id]){
-   #tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
-   unset($_SESSION['tdomf_upload_key_'.$form_id]); // prevents any "operations" on uploads
-   #exit("TDOMF: Bad data submitted");
+$tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+if($tdomf_verify == false || $tdomf_verify == 'default') {
+  if(isset($form_data['tdomf_upload_key_'.$form_id]) && $form_data['tdomf_upload_key_'.$form_id] != $_POST['tdomf_upload_key_'.$form_id]){
+     #tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
+     unset($form_data['tdomf_upload_key_'.$form_id]); // prevents any "operations" on uploads
+     $all_good = false;
+     #exit("TDOMF: Bad data submitted");
+  }
+} else if($tdomf_verify == 'wordpress_nonce') {
+  if(!wp_verify_nonce($_POST['tdomf_upload_key_'.$form_id],'tdomf-form-upload-'.$form_id)) {
+    unset($form_data['tdomf_upload_key_'.$form_id]);
+    $all_good = false;
+  }
 }
 
 // URL for this form
@@ -60,13 +75,17 @@ $tdomf_upload_inline_url = TDOMF_URLPATH . 'tdomf-upload-inline.php';
 //
 if(!tdomf_can_current_user_see_form($form_id)) {
   tdomf_log_message("Someone with no permissions tried to access the inline-uplaod form!",TDOMF_LOG_BAD);
-  unset($_SESSION['tdomf_upload_key_'.$form_id]);
+  unset($form_data['tdomf_upload_key_'.$form_id]);
+  $all_good = false;
+  tdomf_save_form_data($form_id,$form_data);
   exit("TDOMF: Bad permissions");
 }
 
 // Widget in use check
 //
 if(!in_array("upload-files",tdomf_get_widget_order($form_id))) {
+  unset($form_data['tdomf_upload_key_'.$form_id]);
+  tdomf_save_form_data($form_id,$form_data);
   exit("TDOMF: Upload feature not yet enabled");
 }
 
@@ -90,9 +109,9 @@ $count = 0;
 
 // Double check files in $_SESSION!
 //
-if(isset($_SESSION['uploadfiles_'.$form_id])) {
+if(isset($form_data['uploadfiles_'.$form_id])) {
   $sessioncount = 0;
-  $mysessionfiles = $_SESSION['uploadfiles_'.$form_id];
+  $mysessionfiles = $form_data['uploadfiles_'.$form_id];
   for($i =  0; $i < $options['max']; $i++) {
     if(!file_exists($mysessionfiles[$i]['path'])) {
       unset($mysessionfiles[$i]);
@@ -108,7 +127,7 @@ $allowed_exts = split(" ",strtolower($options['types']));
 
 // Only do actions if key is good!
 //
-if(isset($_SESSION['tdomf_upload_key_'.$form_id])) {
+if($all_good) {
 
   // Delete files at user request
   //
@@ -118,7 +137,7 @@ if(isset($_SESSION['tdomf_upload_key_'.$form_id])) {
     }
     $mysessionfiles = array();
     $sessioncount = 0;
-    unset($_SESSION['uploadfiles_'.$form_id]);
+    unset($form_data['uploadfiles_'.$form_id]);
   }
 
   // Only worry about uploaded files if the upload secruity key is good
@@ -182,7 +201,7 @@ if(isset($_SESSION['tdomf_upload_key_'.$form_id])) {
     }
     // Store in session!
     $mysessionfiles = array_merge($myfiles, $mysessionfiles);
-    $_SESSION['uploadfiles_'.$form_id] = $mysessionfiles;
+    $form_data['uploadfiles_'.$form_id] = $mysessionfiles;
     // Recount
     $sessioncount = 0;
     for($i =  0; $i < $options['max']; $i++) {
@@ -195,9 +214,22 @@ if(isset($_SESSION['tdomf_upload_key_'.$form_id])) {
 
 // Create new security key
 //
-unset($_SESSION['tdomf_upload_key_'.$form_id]);
-$random_string = tdomf_random_string(100);
-$_SESSION["tdomf_upload_key_".$form_id] = $random_string;
+unset($form_data['tdomf_upload_key_'.$form_id]);
+tdomf_save_form_data($form_id,$form_data);
+$form_data = tdomf_get_form_data($form_id);
+//
+if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
+  $nonce_string = wp_create_nonce( 'tdomf-form-upload-'.$form_id );
+  $form_data["tdomf_upload_key_".$form_id] = $nonce_string;
+} else if($tdomf_verify == 'none') {
+    // do nothing! Bad :(
+} else {
+  $upload_key = tdomf_random_string(100);
+  $form_data["tdomf_upload_key_".$form_id] = $upload_key;
+}
+//
+tdomf_save_form_data($form_id,$form_data);
+$form_data = tdomf_get_form_data($form_id);
 
 // Now the fun bit, the actually form!
 //
@@ -259,7 +291,9 @@ function validateForm() {
 <?php } ?>
 
 <form name="tdomf_upload_inline_form" id="tdomf_upload_inline_form" enctype="multipart/form-data" method="post" action="<?php echo $tdomf_upload_inline_url; ?>"  >
-  <input type='hidden' id='tdomf_upload_key_<?php echo $form_id; ?>' name='tdomf_upload_key_<?php echo $form_id; ?>' value='<?php echo $random_string ?>' >
+  <?php if(isset($form_data['tdomf_upload_key_'.$form_id])) { ?>
+  <input type='hidden' id='tdomf_upload_key_<?php echo $form_id; ?>' name='tdomf_upload_key_<?php echo $form_id; ?>' value='<?php echo $form_data['tdomf_upload_key_'.$form_id]; ?>' >
+  <?php } ?>
   <input type='hidden' name='MAX_FILE_SIZE' value='<?php echo $options['size']; ?>' />
   <input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='<?php echo $form_id; ?>' />
   <?php if($sessioncount > 0) { ?>

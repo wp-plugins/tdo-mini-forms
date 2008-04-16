@@ -4,8 +4,6 @@
 // Process Form Request //
 //////////////////////////
 
-if (!isset($_SESSION)) session_start();
-
 // Load up Wordpress
 //
 $wp_config = realpath("../../../wp-config.php");
@@ -32,23 +30,35 @@ if(!tdomf_form_exists($form_id)){
   exit(__("TDOMF: Bad Form Id","tdomf"));
 }
 
+// Get Form Data for verficiation check
+//
+$form_data = tdomf_get_form_data($form_id);
+
 // Security Check
 //
-if(!isset($_SESSION['tdomf_key_'.$form_id]) || $_SESSION['tdomf_key_'.$form_id] != $_POST['tdomf_key_'.$form_id]) {
-   if(ini_get('register_globals') && !TDOMF_HIDE_REGISTER_GLOBAL_ERROR){
-     tdomf_log_message('register_globals is enabled. This will prevent TDOMF from operating.',TDOMF_LOG_ERROR);
-     exit(__("TDOMF: Bad data submitted. <i>register_globals</i> is enabled. This must be set to disabled.","tdomf"));
-   } else  if(!isset($_SESSION) || !isset($_SESSION['tdomf_key_'.$form_id]) || trim($_SESSION['tdomf_key_'.$form_id]) == "") {
-     tdomf_log_message('Key is missing from $_SESSION: contents of $_SESSION:<pre>'.var_export($_SESSION,true)."</pre>",TDOMF_LOG_BAD);
-   }
-   $session_key = $_SESSION['tdomf_key_'.$form_id];
-   $post_key = $_POST['tdomf_key_'.$form_id];
-   $ip = $_SERVER['REMOTE_ADDR'];
-   tdomf_log_message("Form ($form_id) submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
-   unset($_SESSION['tdomf_key_'.$form_id]);
-   exit(__("TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again.","tdomf"));
+$tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+if($tdomf_verify == false || $tdomf_verify == 'default') {
+  if(!isset($form_data['tdomf_key_'.$form_id]) || $form_data['tdomf_key_'.$form_id] != $_POST['tdomf_key_'.$form_id]) {
+     if(!isset($form_data) || !isset($form_data['tdomf_key_'.$form_id]) || trim($form_data['tdomf_key_'.$form_id]) == "") {
+       tdomf_log_message('Key is missing from $form_data: contents of $form_data:<pre>'.var_export($form_data,true)."</pre>",TDOMF_LOG_BAD);
+     }
+     $session_key = $form_data['tdomf_key_'.$form_id];
+     $post_key = $_POST['tdomf_key_'.$form_id];
+     $ip = $_SERVER['REMOTE_ADDR'];
+     tdomf_log_message("Form ($form_id) submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
+     unset($form_data['tdomf_key_'.$form_id]);
+     tdomf_save_form_data($form_id,$form_data);
+     exit(__("TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again.","tdomf"));
+  }
+  unset($form_data['tdomf_key_'.$form_id]);
+} else if($tdomf_verify == 'wordpress_nonce') {
+  if(!wp_verify_nonce($_POST['tdomf_key_'.$form_id],'tdomf-form-'.$form_id)) {
+    $post_key = $_POST['tdomf_key_'.$form_id];
+    $ip = $_SERVER['REMOTE_ADDR'];    
+    tdomf_log_message("Form ($form_id) submitted with bad nonce key (post = $post_key) from $ip !",TDOMF_LOG_BAD);
+    exit(__("TDOMF: Bad data submitted. Please return to the previous page and reload it. Then try submitting your post again.","tdomf"));
+  }
 }
-unset($_SESSION['tdomf_key_'.$form_id]);
 
 function tdomf_fixslashesargs() {
     if (get_magic_quotes_gpc()) {
@@ -73,6 +83,7 @@ $message = tdomf_check_permissions_form($form_id);
 // Now either generate a preview or create a post
 //
 $save_post_info = FALSE;
+$hide_form = true;
 if($message == NULL) {
   if(isset($_POST['tdomf_form'.$form_id.'_send'])) {
 
@@ -95,10 +106,12 @@ if($message == NULL) {
       } else {
         $message = sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$retVal);
         $save_post_info = TRUE;
+        $hide_form = FALSE;
         tdomf_fixslashesargs();
       }
     } else {
       $save_post_info = TRUE;
+      $hide_form = false;
       tdomf_fixslashesargs();
     }
   } else if(isset($_POST['tdomf_form'.$form_id.'_preview'])) {
@@ -107,30 +120,46 @@ if($message == NULL) {
     tdomf_fixslashesargs();
 
        $save_post_info = TRUE;
+       $hide_form = false;
 	   $message = tdomf_validate_form($_POST,true);
 	   if($message == NULL) {
 		  $message = tdomf_preview_form($_POST);
 	   }
-	}
+	} else if(isset($_POST['tdomf_form'.$form_id.'_clear'])) {
+    $message = NULL;
+    $save_post_info = false;
+    $hide_form = false;
+  }
 }
+
+// update form data *after* widgets have done their work!
+//
+$form_data = tdomf_get_form_data($form_id);
 
 if(!isset($post_id) || get_post_status($post_id) != 'publish') {
   // Go back to form with args
   //
   $redirect_url = $_POST['redirect'];
+
   if($save_post_info) {
     $args = $_POST;
   } else {
     $args = array();
-    $args['tdomf_no_form_'.$form_id] = true;
+  }
+  if($hide_form) {
+     $args['tdomf_no_form_'.$form_id] = true;
   }
   $args['tdomf_post_message_'.$form_id] = $message;
-  $_SESSION['tdomf_form_post_'.$form_id] = $args;
+  $form_data['tdomf_form_post_'.$form_id] = $args;
 } else {
-  unset($_SESSION['tdomf_form_post_'.$form_id]);
+  unset($form_data['tdomf_form_post_'.$form_id]);
   $redirect_url = get_permalink($post_id);
 }
+
+// save it!
 //
+tdomf_save_form_data($form_id,$form_data);
+
 header("Location: $redirect_url");
 exit;
 ?>

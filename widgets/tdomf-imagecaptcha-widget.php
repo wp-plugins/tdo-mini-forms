@@ -44,10 +44,11 @@ add_action('tdomf_widget_page_top','tdomf_widget_imagecaptcha_handle_number');
 //
 function tdomf_widget_imagecaptcha($args,$params) {
   extract($args);
-
+  $form_data = tdomf_get_form_data($tdomf_form_id);
   if(!isset($args['imagecaptcha'])) {
-    $_SESSION['freecap_attempts_'.$tdomf_form_id] = 0;
-    $_SESSION['freecap_word_hash_'.$tdomf_form_id] = false;
+    $form_data['freecap_attempts_'.$tdomf_form_id] = 0;
+    $form_data['freecap_word_hash_'.$tdomf_form_id] = false;
+    tdomf_save_form_data($tdomf_form_id,$form_data);
   }
 
   $output  = $before_widget;
@@ -89,17 +90,18 @@ EOT;
 function tdomf_widget_imagecaptcha_validate($args,$preview,$params) {
   if($preview) { return NULL; }
   extract($args);
+  $form_data = tdomf_get_form_data($tdomf_form_id);
   
   // all freeCap words are lowercase.
 	// font #4 looks uppercase, but trust me, it's not...
-	if($_SESSION['hash_func_'.$tdomf_form_id](strtolower($args["imagecaptcha_".$tdomf_form_id]))==$_SESSION['freecap_word_hash_'.$tdomf_form_id])
+	if($form_data['hash_func_'.$tdomf_form_id](strtolower($args["imagecaptcha_".$tdomf_form_id]))==$form_data['freecap_word_hash_'.$tdomf_form_id])
 	{
 		// reset freeCap session vars
 		// cannot stress enough how important it is to do this
 		// defeats re-use of known image with spoofed session id
-		$_SESSION['freecap_attempts_'.$tdomf_form_id] = 0;
-		$_SESSION['freecap_word_hash_'.$tdomf_form_id] = false;
-    
+		$form_data['freecap_attempts_'.$tdomf_form_id] = 0;
+		$form_data['freecap_word_hash_'.$tdomf_form_id] = false;
+    tdomf_save_form_data($tdomf_form_id,$form_data);
 	} else {
 		return $before_widget.__("You must enter the word in the image as you see it.","tdomf").$after_widget;
 	}
