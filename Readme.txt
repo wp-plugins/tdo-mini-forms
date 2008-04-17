@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface,
 Requires at least: 2.3
 Tested up to: 2.5
-Stable Tag: 0.10.3
+Stable Tag: 0.10.4
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -390,7 +390,7 @@ PHP Function to display a human readable time interval based on a function I fou
 * Customfield now supports select and checkbox options
 * Added po file for translation
 
-= v0.9.4: 7th January 2007 = 
+= v0.9.4: 7th January 2008 = 
 
 * Added "Set Category from get variables" widget
 * If moderation turned off, when post published, redirect to published post page.
@@ -403,7 +403,7 @@ PHP Function to display a human readable time interval based on a function I fou
 * Added a "Read More..." `<!--more-->` tag to the quick tags
 * Fixed Bug when multiple notifications to submitter when post is edited after approval
 
-= v0.10: 12th Feburary 2007 =
+= v0.10: 12th Feburary 2008 =
 
 * Suppressed errors for is_dir and other file functions just in case of open_basedir settings!
 * Use "get_bloginfo('charset')" in htmlentities in widget control. Hopefully this will finally resolve the issues with foreign lanaguage characters
@@ -414,16 +414,16 @@ PHP Function to display a human readable time interval based on a function I fou
 * Fixed a bug where customfield textfield would submit empty values for the custom field if you had magic quotes turned off.
 * Update the "Freecap" Image Captcha so that the files get included in the release zip Wordpress creates.
 
-= v0.10.1: 13th March 2007 =
+= v0.10.1: 13th March 2008 =
 
 * Fixed a bug when if you inserted an upload as an attachment it would overwrite the contents of the post.
 * Fix to categories widget where widget on other forms than the default  would forget it's settings at post time.
 * Custom Field widget was ignoring append format for multi-forms 
 
-= v0.10.2: 2nd April 2007 =
+= v0.10.2: 2nd April 2008 =
 
 * Fixed a bug if you reload the image capatcha, it would not longer verify
-* Added a flag TDOMF_HIDE_REGISTER_GLOBAL_ERROR in tdomf.php that can be set to true to hide the register_global errors that get displayed.
+* Added a flag `TDOMF_HIDE_REGISTER_GLOBAL_ERROR` in `tdomf.php` that can be set to true to hide the `register_globals` errors that get displayed.
 * WP2.5 only: Can now set a max width or height for widgets control on the Form Widgets screen.
 * Compatibily with Wordpress 2.5
 
@@ -434,3 +434,8 @@ PHP Function to display a human readable time interval based on a function I fou
 * Can now choose how to verify an input form: original, wordpress nonce or none at all
 * Implemented a workaround for register_global and unavaliablity of $_SESSION on some hosts
 * Fixed double thumbnail issue in WP2.5
+
+= v0.10.4: 17th April 2008 =
+
+* Fixed a bug that made TDOMF incompatible with PHP5 (see uniqid)
+* Fixed a bug where some widgets were not making it to the form when the form is generated. This was a mistake in the "modes" support added in v0.10.3.

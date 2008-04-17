@@ -365,7 +365,6 @@ function tdomf_generate_form($form_id = 1) {
   } else {
      $mode = "new-post";
   }
-  $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
   
   // grab initial form data
   //
@@ -374,7 +373,8 @@ function tdomf_generate_form($form_id = 1) {
   // Grab widgets for this form
   
   do_action('tdomf_generate_form_start',$form_id,$mode);
-
+  $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
+  
   // AJAX or normal POST headers...
   
   if(!$use_ajax) {

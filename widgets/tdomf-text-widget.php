@@ -134,8 +134,8 @@ function tdomf_widget_text_init($form_id){
      else if($count > ($max+1)){ $count = $max + 1; }
      
      for($i = 1; $i <= $count; $i++) {
-       tdomf_register_form_widget("text-$i","Text $i", 'tdomf_widget_text',$i);
-       tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 400, 300, $i);
+       tdomf_register_form_widget("text-$i","Text $i", 'tdomf_widget_text', array(), $i);
+       tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 400, 300, array(), $i);
      }
   }
 }

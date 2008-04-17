@@ -249,7 +249,7 @@ function tdomf_session_start() {
    tdomf_session_cleanup();
    if(!isset($_COOKIE['tdomf_'.COOKIEHASH])) {
       #$session_key = tdomf_random_string(15);
-      $session_key = uniqid();
+      $session_key = uniqid(tdomf_random_string(3));
       return setcookie('tdomf_'.COOKIEHASH, $session_key, 0, COOKIEPATH, COOKIE_DOMAIN);
    }
    return true;

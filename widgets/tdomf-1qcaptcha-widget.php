@@ -53,14 +53,14 @@ function tdomf_widget_1qcaptcha_init($form_id){
     if($max <= 1){ $count = 1; }
     else if($count > ($max+1)){ $count = $max + 1; }
   
-    tdomf_register_form_widget("1qcaptcha","1 Question Captcha 1", 'tdomf_widget_1qcaptcha',1);
-    tdomf_register_form_widget_control("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_control', 350, 150, 1);
-    tdomf_register_form_widget_validate("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_validate', true, 1);
+    tdomf_register_form_widget("1qcaptcha","1 Question Captcha 1", 'tdomf_widget_1qcaptcha', array(), 1);
+    tdomf_register_form_widget_control("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_control', 350, 150, array(), 1);
+    tdomf_register_form_widget_validate("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_validate', true, array(), 1);
     
     for($i = 2; $i <= $count; $i++) {
-      tdomf_register_form_widget("1qcaptcha-$i","1 Question Captcha $i", 'tdomf_widget_1qcaptcha',$i);
-      tdomf_register_form_widget_control("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_control', 350, 150, $i);
-      tdomf_register_form_widget_validate("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_validate', true, $i);
+      tdomf_register_form_widget("1qcaptcha-$i","1 Question Captcha $i", 'tdomf_widget_1qcaptcha', array(), $i);
+      tdomf_register_form_widget_control("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_control', 350, 150, array(), $i);
+      tdomf_register_form_widget_validate("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_validate', true, array(), $i);
     }
   }
 }

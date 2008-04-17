@@ -143,13 +143,13 @@ function tdomf_register_form_widget($id, $name, $callback, $modes = array()) {
    #tdomf_log_message_extra("Loading Widget $id...");
    $tdomf_form_widgets[$id]['name'] = $name;
    $tdomf_form_widgets[$id]['cb'] = $callback;
-   $tdomf_form_widgets[$id]['params'] = array_slice(func_get_args(), 3);
+   $tdomf_form_widgets[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets[$id]['modes'] = $modes;
 }
 
 // Widgets that require configuration must register with this function
 //
-function tdomf_register_form_widget_control($id, $name, $control_callback, $width = 360, $height = 130) {
+function tdomf_register_form_widget_control($id, $name, $control_callback, $width = 360, $height = 130, $modes = array()) {
    global $tdomf_form_widgets_control,$tdomf_form_widgets;
    $id = sanitize_title($id);
    if(!isset($tdomf_form_widgets[$id])) {
@@ -164,7 +164,7 @@ function tdomf_register_form_widget_control($id, $name, $control_callback, $widt
    $tdomf_form_widgets_control[$id]['cb'] = $control_callback;
    $tdomf_form_widgets_control[$id]['width'] = $width;
    $tdomf_form_widgets_control[$id]['height'] = $height;
-   $tdomf_form_widgets_control[$id]['params'] = array_slice(func_get_args(), 5);
+   $tdomf_form_widgets_control[$id]['params'] = array_slice(func_get_args(), 6);
    $tdomf_form_widgets_control[$id]['modes'] = $modes;
 }
 
@@ -184,7 +184,7 @@ function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax
    $tdomf_form_widgets_preview[$id]['name'] = $name;
    $tdomf_form_widgets_preview[$id]['cb'] = $preview_callback;
    $tdomf_form_widgets_preview[$id]['ajax'] = $ajax;
-   $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 5);
    $tdomf_form_widgets_preview[$id]['modes'] = $modes;
 }
 
@@ -204,7 +204,7 @@ function tdomf_register_form_widget_validate($id, $name, $validate_callback, $aj
    $tdomf_form_widgets_validate[$id]['name'] = $name;
    $tdomf_form_widgets_validate[$id]['cb'] = $validate_callback;
    $tdomf_form_widgets_validate[$id]['ajax'] = $ajax;
-   $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 5);
    $tdomf_form_widgets_validate[$id]['modes'] = $modes;
 }
 
@@ -224,7 +224,7 @@ function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = tru
    $tdomf_form_widgets_post[$id]['name'] = $name;
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
    $tdomf_form_widgets_post[$id]['ajax'] = $ajax;
-   $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 5);
    $tdomf_form_widgets_post[$id]['modes'] = $modes;
 }
 
@@ -242,7 +242,7 @@ function tdomf_register_form_widget_adminemail($id, $name, $post_callback, $mode
    }
    $tdomf_form_widgets_adminemail[$id]['name'] = $name;
    $tdomf_form_widgets_adminemail[$id]['cb'] = $post_callback;
-   $tdomf_form_widgets_adminemail[$id]['params'] = array_slice(func_get_args(), 3);
+   $tdomf_form_widgets_adminemail[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets_adminemail[$id]['modes'] = $modes;
 }
 
