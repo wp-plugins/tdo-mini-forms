@@ -50,18 +50,9 @@ function timeDiff($time, $opt = array()) {
     $opt['distance'] && $str.=($str&&$opt['to']>$time)? __(' ago','tdomf'):__(' away','tdomf');
     return $str;
 }
- ?>
 
- <?php if(current_user_can('manage_options')) { ?>
- 
-   <div class="wrap">
-  
-      <h2><?php _e('TDOMF Debug', 'tdomf') ?></h2>
-  
-      <!-- @TODO: Text Ouput -->
-      <!-- @TODO: HTML Output -->
-      
-      <table border="0">
+function tdomfinfo_html_display() { ?>
+    <table border="0">
       <?php $alloptions = wp_load_alloptions();
             foreach($alloptions as $id => $val) {
               if($id == TDOMF_LOG) { ?>
@@ -102,8 +93,8 @@ function timeDiff($time, $opt = array()) {
       <?php } }
       } ?>
       </table>
-
-            <?php $sessions = tdomf_get_sessions(); if($sessions != false && !empty($sessions)) { ?>
+      
+      <?php $sessions = tdomf_get_sessions(); if($sessions != false && !empty($sessions)) { ?>
         <h2><?php _e('Active Sessions', 'tdomf') ?></h2>
         <p><?php printf(__("There is currently %d active sessions.","tdomf"),count($sessions)); ?></p>
         <table border="1">
@@ -121,6 +112,112 @@ function timeDiff($time, $opt = array()) {
         <?php } ?>
         </table>
       <?php }?>
+      
+      <?php
+}
+
+function tdomfinfo_html_text() { ?>
+    <textarea rows="200" cols="100"><table border="0">
+      <?php $alloptions = wp_load_alloptions();
+            foreach($alloptions as $id => $val) {
+              if($id == TDOMF_LOG) { ?>
+                <tr>
+                   <td><?php echo $id; ?></td>
+                   <td><a href="admin.php?page=tdomf_show_log_menu"><?php _e("View Log","tdomf"); ?></td>
+                </tr>
+              <?php } else if(preg_match('#^tdomf_.+#',$id)) { ?>
+                <tr>
+                   <td><?php echo $id; ?></td>
+                   <td><?php echo htmlentities(strval($val)); ?></td>
+                </tr>
+              <?php }
+            } ?>
+      <?php $form_ids = tdomf_get_form_ids();
+      foreach($form_ids as $form_id) {
+        $name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?>
+        <tr><td colspan="2"><b><center>Form <?php echo $form_id->form_id ?></center></b></td></tr>
+        <tr>
+          <td>Name</td>
+          <td><?php echo $name; ?></td>
+          </tr>
+        <?php $options = tdomf_get_options_form($form_id->form_id);
+        foreach($options as $option => $value) { ?>
+          <tr>
+          <td><?php echo $option; ?></td>
+          <td><?php var_dump($value); ?></td>
+          </tr>
+        <?php } 
+        $widgets = tdomf_get_widgets_form($form_id->form_id);
+      if(!empty($widgets)) { ?>
+        <tr><td colspan="2"><center>Widgets for Form <?php echo $form_id->form_id ?></center></td></tr>
+      <?php foreach($widgets as $widget) { ?>
+        <tr>
+          <td><?php echo $widget->widget_key; ?></td>
+          <td><?php echo htmlentities($widget->widget_value); ?></td>
+          </tr>
+      <?php } }
+      } ?>
+      </table></textarea>
+      
+      <?php
+}
+
+function tdomfinfo_text_display() { ?>
+    <pre>
+^**Option** ^ **Value** ^ <?php $alloptions = wp_load_alloptions(); foreach($alloptions as $id => $val) {
+      if(preg_match('#^tdomf_.+#',$id) && $id != TDOMF_LOG) { ?> 
+| <?php echo $id; ?> | <?php echo htmlentities(strval($val)); ?> | <?php } } 
+      $form_ids = tdomf_get_form_ids();
+      foreach($form_ids as $form_id) {
+        $name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?>
+
+        
+== Form <?php echo $form_id->form_id ?> ==
+
+= Name = 
+<?php echo $name; ?>
+
+<?php $options = tdomf_get_options_form($form_id->form_id);
+        foreach($options as $option => $value) { ?>
+= <?php echo $option; ?> =
+<?php var_dump($value); ?>
+
+<?php } 
+        $widgets = tdomf_get_widgets_form($form_id->form_id);
+      if(!empty($widgets)) { ?>
+          
+== Widgets for Form ==
+
+<?php foreach($widgets as $widget) { ?>
+= <?php echo $widget->widget_key; ?> =
+<?php echo htmlentities($widget->widget_value); ?>
+
+
+<?php } }
+      } ?>
+      </pre> <?php
+}
+
+ ?>
+
+ <?php if(current_user_can('manage_options')) { ?>
+ 
+   <div class="wrap">
+  
+      <h2><?php _e('TDOMF Debug', 'tdomf') ?></h2>
+  
+      <?php if(isset($_REQUEST['html'])) { 
+               tdomfinfo_html_text(); 
+            } else if(isset($_REQUEST['text'])) {
+               tdomfinfo_text_display();
+            } else { ?>
+<br/><br/>
+<a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR; ?>tdomf-info.php&text"><?php _e("View as Text (useful for pasting into emails)","tdomf"); ?></a>
+<br/><br/>
+<a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR; ?>tdomf-info.php&html"><?php _e("View as HTML raw (useful for pasting into html supported forums and emails)","tdomf"); ?></a>
+<br/><br/>
+            <?php tdomfinfo_html_display();
+            } ?>
       
       </div>
 

@@ -449,7 +449,7 @@ function tdomf_delete_form($form_id) {
 }
 
 function tdomf_create_form($form_name = '',$options = array()) {
-  global $wpdb;
+  global $wpdb,$wp_roles;
   $defaults = array( TDOMF_OPTION_DESCRIPTION => '',
                      TDOMF_OPTION_CREATEDPAGES => false,
                      TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS => true,
@@ -470,6 +470,32 @@ function tdomf_create_form($form_name = '',$options = array()) {
          "VALUES ('$form_name','".$wpdb->escape($options)."')";
   $result = $wpdb->query( $sql );
   return $wpdb->insert_id;
+}
+
+function tdomf_import_form($form_id,$options,$widgets,$caps) {
+  global $wp_roles, $wpdb;
+  
+  foreach($options as $option_name => $option_value) {
+      if($option_name != TDOMF_OPTION_CREATEDPAGES) {
+          tdomf_set_option_form($option_name,$option_value,$form_id);
+      }
+  }
+  
+  foreach($widgets as $widget) {
+     tdomf_set_option_widget($widget->widget_key,maybe_unserialize($widget->widget_value),$form_id);
+  }
+
+  if(!isset($wp_roles)) {
+      $wp_roles = new WP_Roles();
+  }
+  $roles = $wp_roles->role_objects;
+  foreach($roles as $role) {
+      if(in_array($role->name,$caps)){
+         $role->add_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id);
+      } else {
+         $role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id);
+     }
+  }
 }
 
 function tdomf_copy_form($form_id) {

@@ -225,7 +225,7 @@ function tdomf_show_general_options() {
     <a name="spam" /><h3><?php _e('Spam Protection',"tdomf"); ?></h3>
     
     <p>
-    <?php printf(__('You can now enable spam protection for new submissions. The online service Akismet is used to identify if a submission is spam or not. Submissions marked as spam cab be deleted automatically after a month. You can moderate spam from the <a href="%s">Manage</a> screen.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu"); ?>
+    <?php printf(__('You can now enable spam protection for new submissions. The online service Akismet is used to identify if a submission is spam or not. Submissions marked as spam cab be deleted automatically after a month. You can moderate spam from the <a href="%s">Moderation</a> screen.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu&f=3"); ?>
     </p>
     
     <?php $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
@@ -666,6 +666,35 @@ function tdomf_show_form_options($form_id) {
               <p><b><?php _e("No Throttling Rules currently set.","tdomf"); ?></b></p>
           <?php } ?>
     
+     <a name="import" />
+          
+     <h3><?php _e('Export/Import Form Settings',"tdomf"); ?></h3>
+     
+     <p>
+	<?php _e('The textbox below contains the export of data for this form including widgets. If you wish to import a form, paste its settings here and click Import.',"tdomf"); ?>
+	</p>
+     
+     <?php $form_data['options'] = tdomf_get_options_form($form_id);
+           $form_data['options'][TDOMF_OPTION_FORM_NAME] = tdomf_get_option_form(TDOMF_OPTION_FORM_NAME,$form_id);
+           $form_data['widgets'] = tdomf_get_widgets_form($form_id); 
+           $form_data['caps'] = array();
+           if(!isset($wp_roles)) {
+              $wp_roles = new WP_Roles();
+           }
+           $roles = $wp_roles->role_objects;
+           foreach($roles as $role) {
+              if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
+                  $form_data['caps'][] = $role->name;
+              }
+           }
+           $form_export = maybe_serialize($form_data); ?>
+     <p>
+     <textarea cols="100" rows="10" name="tdomf_import" id="tdomf_import"><?php echo $form_export; ?></textarea>
+     <br/>
+     <input type="submit" name="tdomf_import_button" id="tdomf_import_button" value="<?php _e("Import","tdomf"); ?> &raquo;">
+     </p>
+     
+          
   <table border="0"><tr>
 
     <td>
@@ -906,7 +935,29 @@ function tdomf_handle_options_actions() {
      
      $message .= "Throttle rule added!<br/>";
      tdomf_log_message("Added a new throttle rule: " . var_export($rule,true));
+  
+  } else if(isset($_REQUEST['tdomf_import_button'])) {
      
+     check_admin_referer('tdomf-options-save');
+
+     $form_id = intval($_REQUEST['tdomf_form_id']);
+     
+     $form_import = $_REQUEST['tdomf_import'];
+     if(get_magic_quotes_gpc()) {
+         $form_import = stripslashes($form_import);
+     }
+     
+     $form_data = maybe_unserialize($form_import);
+     
+     if(is_array($form_data)) {
+         tdomf_import_form($form_id,$form_data['options'],$form_data['widgets'],$form_data['caps']);
+         tdomf_log_message("Form import succeeded",TDOMF_LOG_GOOD);
+         $message = __("Form import successful<br/>","tdomf");
+     } else {
+         tdomf_log_message("Form import failed " . var_export($form_data,true),TDOMF_LOG_ERROR);
+         $message = __("Form import failed<br/>","tdomf");
+     }
+
   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create_dummy_user') {
      check_admin_referer('tdomf-create-dummy-user');
      tdomf_create_dummy_user();

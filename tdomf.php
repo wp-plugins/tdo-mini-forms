@@ -253,7 +253,7 @@ Author URI: http://thedeadone.net
 // - Fixed a bug where some widgets were not making it to the form when the form
 //     is generated. This was a mistake in the "modes" support added in v0.10.3.
 //
-// v0.x.y: TBD
+// v0.11.0: TBD
 // - Fixed a small behaviour issue in generate form where it would keep the 
 //     preview, even after reloading the page!
 // - Integreted with Akismet for Spam protection
@@ -264,13 +264,14 @@ Author URI: http://thedeadone.net
 // - Published Posts can now be automatically queued!
 // - Fixed "Your Submissions" links for users who are not-admin such as Editors
 // - Can add throttling rules to form
+// - Can now view tdomfinfo() in text and html-code formats
+// - Import and Export individual Form settings
 //
 /*
-   - Text output of tdomfinfo
-   - Exporting/Importing Form settings
    - Random Questions
    - Author Widget
    - Image Template Tags
+   - Modifying Email Message
  */
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -329,7 +330,6 @@ New Widgets
 - Insert Text into Form Widget
 
 Existing Widget Improvements
-- Make Widget-Form menu independant of Wordpress code (the current code will break in Wordpress 2.5)
 - Any widget with a size or length field should be customisable.
 - Any static text used in widgets need to be customisable.
 - Textfield Class (support numeric, date, email, webpage, etc.)
@@ -365,14 +365,12 @@ Existing Widget Improvements
   * Required support
 - Tags
   * Select from existing tag list or tag cloud
-  * Hide if form is for pages
 - 1 Question Captcha
   * Random questions for Captcha
 - Category
   * Include specific categories
   * Multiple default categories
   * Co-operate with "Set Category from GET variables" Widget
-  * Hide if form is for pages
 - Notify Me
   * Option to always notify submitter
 - Image Captcha
@@ -383,7 +381,6 @@ Existing Widget Improvements
 - Set Category from GET variables
   * Add options (or at least information) for this widget
   * Co-operate with "Categories" Widget
-  * Hide if form is for pages
 - Who Am I
   * Integration with WP-OpenID?
 
@@ -679,6 +676,15 @@ function tdomf_new_features() {
     
     $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#throttle";
     $features .= "<li>".sprintf(__('<a href="%s">Add submission throttling rules to your form!</a>','tdomf'),$link)."</li>";
+
+    if(current_user_can('manage_options')) {
+        $link = "admin.php?page=".TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR."tdomf-info.php&text";
+        $link2 = "admin.php?page=".TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR."tdomf-info.php&html";
+        $features .= "<li>".sprintf(__('View tdomfinfo() in <a href="%s">text</a> and <a href="%s">html-code</a>. Useful for copying and pasting!',"tdomf"),$link,$link2)."</li>";
+    }
+    
+    $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#import";
+    $features .= "<li>".sprintf(__('<a href="%s">Import and export individual form settings</a>','tdomf'),$link)."</li>";
   }
   // 30 = 0.11 beta1
   

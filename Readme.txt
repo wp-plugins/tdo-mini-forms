@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet
 Requires at least: 2.3
 Tested up to: 2.5
 Stable Tag: 0.10.4
@@ -12,7 +12,7 @@ This plugin allows you to add custom posting forms to your website that allows y
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-**With version 0.10.3, "Bad Data" errors and register_global issues should be a thing of the past!**
+** Verision 0.11 provides intregration with Akismet, Submission Throttling, Import and Export of Form settings, Queuing Approved Post and numerous bug fixes! **
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -26,6 +26,7 @@ Registered users have access to a "Your Submissions" page which lists their curr
 
 = Features =
 
+* Integration with Akismet to prevent Spam
 * Highly customisable: Create your forms using a Widget interface.
 * Create as many forms as you like.
 * Put a form in your sidebar using a widget for your Theme.
@@ -41,7 +42,11 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Can automatically create a page with form for you.
 * Can automatically modified author template tag with info about submitter.
 * Can, optionally, automatically allow submissions to be published.
+* Throttle number of submissions by user and/or IP
+* Optionally Queue published posts 
 * And many more...
+
+**With version 0.10.3, "Bad Data" errors and register_global issues should be a thing of the past!**
 
 **Version 0.10.2 provides compatibility with Wordpress 2.5!**
 
