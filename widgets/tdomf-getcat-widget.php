@@ -14,7 +14,9 @@ Author URI: http://thedeadone.net
 
 // TODO: Control UI
 
+global $tdomf_getcat_var_name;
 $tdomf_getcat_var_name = 'tdcat';
+global $tdomf_getcat_overwrite;
 $tdomf_getcat_overwrite = true;
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }

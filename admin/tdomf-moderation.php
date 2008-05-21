@@ -5,6 +5,59 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Moderate Posts page //
 /////////////////////////
 
+function tdomf_get_queued_posts($offset = 0, $limit = 0) {
+  global $wpdb;
+	$query = "SELECT ID, post_title, post_status ";
+	$query .= "FROM $wpdb->posts ";
+	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+    $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
+       $query .= "AND post_status = 'future' ";
+ 	$query .= "ORDER BY ID DESC ";
+   if($limit > 0) {
+      $query .= "LIMIT $limit ";
+   }
+   if($offset > 0) {
+      $query .= "OFFSET $offset ";
+   }
+	return $wpdb->get_results( $query );
+}
+
+function tdomf_get_queued_posts_count($offset = 0, $limit = 0) {
+  global $wpdb;
+	$query = "SELECT ID, post_title, post_status ";
+	$query .= "FROM $wpdb->posts ";
+	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+    $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
+       $query .= "AND post_status = 'future' ";
+	return intval($wpdb->get_var( $query ));
+}
+
+function tdomf_get_spam_posts($offset = 0, $limit = 0) {
+   global $wpdb;
+   $query = "SELECT ID, post_title, meta_value, post_status ";
+   $query .= "FROM $wpdb->posts ";
+   $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+   $query .= "WHERE meta_key = '".TDOMF_KEY_SPAM."' ";
+   $query .= "ORDER BY ID DESC ";
+   if($limit > 0) {
+      $query .= "LIMIT $limit ";
+   }
+   if($offset > 0) {
+      $query .= "OFFSET $offset ";
+   }
+	return $wpdb->get_results( $query );
+}
+
+function tdomf_get_spam_posts_count() {
+   global $wpdb;
+   $query = "SELECT count(ID) ";
+   $query .= "FROM $wpdb->posts ";
+   $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+   $query .= "WHERE meta_key = '".TDOMF_KEY_SPAM."' ";
+   return intval($wpdb->get_var( $query ));
+}
+
+
 // make a post draft
 //
 function tdomf_unpublish_post($post_id) {
@@ -15,6 +68,37 @@ function tdomf_unpublish_post($post_id) {
    wp_update_post($postargs);
 }
 
+// publish a post
+//
+function tdomf_publish_post($post_ID) {
+   $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
+   $current_ts = time();
+   $ts = tdomf_queue_date($form_id,$current_ts);
+   if($current_ts == $ts) {
+        $post = array (
+          "ID"             => $post_ID,
+          "post_status"    => 'publish',
+          "comment_status" => get_option('default_comment_status'),
+          );
+    } else {
+        $post_date = tdomf_timestamp_wp_sql($ts);
+        $post_date_gmt = get_gmt_from_date($post_date);
+        tdomf_log_message("Future Post Date = $post_date!");
+        $post = array (
+          "ID"             => $post_ID,
+          "post_status"    => 'future',
+          "comment_status" => get_option('default_comment_status'),
+          "post_date"      => $post_date,
+          "post_date_gmt"  => $post_date_gmt,
+          );
+    }
+     // Use update post instead of publish post because in WP2.3, 
+     // update_post doesn't seem to add the date correctly! 
+     // Also when it updates a post, if comments aren't set, sets them to
+     // empty! (Not so in WP2.2!)
+    wp_update_post($post);
+    /*wp_publish_post($post_ID);*/
+}
 
 // grab a list of all submitted posts
 //
@@ -49,30 +133,53 @@ function tdomf_get_submitted_posts_count() {
 //
 function tdomf_get_unmoderated_posts($offset = 0, $limit = 0) {
   global $wpdb;
-	$query = "SELECT ID, post_title, meta_value, post_status  ";
-	$query .= "FROM $wpdb->posts ";
-	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+  
+   /* Using subqueries... only works on newer SQL version, not the minmum 
+      supported by WP. Use the second method below */
+      
+   /*$query = "SELECT ID, post_title, meta_value, post_status  ";
+   $query .= "FROM $wpdb->posts ";
+   $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
    $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
    $query .= "AND post_status = 'draft' ";
-   	$query .= "ORDER BY ID DESC ";
+     $query .= "AND $wpdb->posts.ID NOT IN (SELECT post_id FROM $wpdb->postmeta ";
+     $query .=  "WHERE meta_key = '".TDOMF_KEY_SPAM."' ) "; 
+   $query .= "ORDER BY ID DESC "; */
+  
+   $query = "SELECT $wpdb->posts.ID, $wpdb->posts.post_title, $wpdb->postmeta.meta_value, $wpdb->posts.post_status
+             FROM $wpdb->posts 
+             LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) 
+             LEFT JOIN $wpdb->postmeta tdopm ON $wpdb->posts.id =
+                       tdopm.post_id AND tdopm.meta_key ='".TDOMF_KEY_SPAM."' 
+             WHERE tdopm.post_id IS NULL AND post_status = 'draft' AND $wpdb->postmeta.meta_key='".TDOMF_KEY_FLAG."'
+             ORDER BY $wpdb->posts.ID DESC ";
+
    if($limit > 0) {
-         $query .= "LIMIT $limit ";
-      }
-      if($offset > 0) {
-         $query .= "OFFSET $offset ";
+      $query .= "LIMIT $limit ";
    }
-	return $wpdb->get_results( $query );
+   if($offset > 0) {
+      $query .= "OFFSET $offset ";
+   } 
+             
+  /*$wpdb->show_errors();*/
+  $result = $wpdb->get_results( $query );
+  
+  /*$query = "SELECT version() ";
+  var_dump($wpdb->get_results( $query ));*/
+  
+  return $result;
 }
 
 // Return a count of unmoderated posts
 //
 function tdomf_get_unmoderated_posts_count() {
-  global $wpdb;
-	$query = "SELECT count(ID) ";
-	$query .= "FROM $wpdb->posts ";
-	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
-   $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
-   $query .= "AND post_status = 'draft' ";
+    global $wpdb;
+    $query = "SELECT count($wpdb->posts.ID)
+             FROM $wpdb->posts 
+             LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) 
+             LEFT JOIN $wpdb->postmeta tdopm ON $wpdb->posts.id =
+                       tdopm.post_id AND tdopm.meta_key ='_tdomf_spam_flag' 
+             WHERE tdopm.post_id IS NULL AND post_status = 'draft' AND $wpdb->postmeta.meta_key='_tdomf_flag' ";
 	return intval($wpdb->get_var( $query ));
 }
 
@@ -132,6 +239,12 @@ function tdomf_show_mod_posts_menu() {
    } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "2") {
       $posts = tdomf_get_submitted_posts($offset,$limit);
       $max = tdomf_get_submitted_posts_count();
+   } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "3") {
+      $posts = tdomf_get_spam_posts($offset,$limit);
+      $max = tdomf_get_spam_posts_count();
+   } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "4") {
+      $posts = tdomf_get_queued_posts($offset,$limit);
+      $max = tdomf_get_queued_posts_count();
    } else {
    	$posts = tdomf_get_unmoderated_posts($offset,$limit);
    	$max = tdomf_get_unmoderated_posts_count();
@@ -149,6 +262,12 @@ function tdomf_show_mod_posts_menu() {
    <?php } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "2") { ?>
        <h2><?php if($offset > 0) { _e("Previous Submissions","tdomf"); }
                else { printf(__('Last %d Submissions', 'tdomf'),$limit); } ?></h2>
+   <?php } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "3") { ?>
+       <h2><?php if($offset > 0) { _e("Previous Spam Submissions","tdomf"); }
+               else { printf(__('Last %d Spam Submissions', 'tdomf'),$limit); } ?></h2>
+   <?php } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "4") { ?>
+       <h2><?php if($offset > 0) { _e("Previous Scheduled Submissions","tdomf"); }
+               else { printf(__('Last %d Scheduled Submissions', 'tdomf'),$limit); } ?></h2>
    <?php } else { ?>
        <h2><?php if($offset > 0) { _e("Previous Unmoderated Submissions","tdomf"); }
             else { printf(__('Last %d Unmoderated Submissions', 'tdomf'),$limit); } ?></h2>
@@ -162,6 +281,10 @@ function tdomf_show_mod_posts_menu() {
       <select name="f">
       <option value="0" <?php if(!isset($_REQUEST['f']) || (isset($_REQUEST['f']) && $_REQUEST['f'] == "0")){ ?> selected <?php } ?>><?php _e("Unpublished (Awaiting approval)","tdomf"); ?>
         <option value="1" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "1"){ ?> selected <?php } ?>><?php _e("Published","tdomf"); ?>
+        <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+            <option value="3" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "3"){ ?> selected <?php } ?>><?php printf(__("Spam (%d)","tdomf"),tdomf_get_spam_posts_count()); ?>
+        <?php } ?>
+        <option value="4" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "4"){ ?> selected <?php } ?>><?php _e("Scheduled","tdomf"); ?>        
         <option value="2" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "2"){ ?> selected <?php } ?>><?php _e("All","tdomf"); ?>
       </select>
       <input type="submit" name="submit" value="Show" />
@@ -172,7 +295,6 @@ function tdomf_show_mod_posts_menu() {
 
    <?php if(count($posts) <= 0) { _e("There are no posts to moderate.","tdomf"); }
          else { ?>
-
 
 <script type="text/javascript">
 <!--
@@ -203,7 +325,7 @@ function getNumChecked(form)
 </script>
 
    <form method="post" action="admin.php?page=tdomf_show_mod_posts_menu" id="moderateposts" name="moderateposts" >
-
+    
    <table class="widefat">
    <tr>
     <th scope="col" style="text-align: center"><input type="checkbox" onclick="checkAll(document.getElementById('moderateposts'));" /></th>
@@ -215,16 +337,28 @@ function getNumChecked(form)
       <th scope="col"><?php _e("Form","tdomf"); ?></th>
     <?php } ?>
     <th scope="col"><?php _e("Status","tdomf"); ?></th>
-    <th scope="col" colspan="4" style="text-align: center">Actions</th>
+    <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+        <th scope="col" colspan="5" style="text-align: center"><?php _e("Actions","tdomf"); ?></th>
+    <?php } else { ?>
+        <th scope="col" colspan="4" style="text-align: center"><?php _e("Actions","tdomf"); ?></th>
+    <?php } ?>
    </tr>
 
    <?php $i = 0;
          foreach($posts as $p) {
          $i++;
-		 if(($i%2) == 0) { ?>
-		  <tr id='x' class=''>
+         
+         #class='unapproved'
+         $is_spam = get_post_meta($p->ID, TDOMF_KEY_SPAM); 
+                  
+         if($is_spam) { ?>
+      <tr id='post-<?php echo $p->ID; ?>' class='spam' style='background:#CCCCFF;'>
+         <?php } else if($p->post_status == 'future') { ?>
+             <tr id='post-<?php echo $p->ID; ?>' class='future' style='background:#99FF99;'>
+         <?php } else if(($i%2) == 0) { ?>
+		  <tr id='post-<?php echo $p->ID; ?>' class=''>
 	     <?php } else { ?>
-		  <tr id='x' class='alternate'>
+		  <tr id='post-<?php echo $p->ID; ?>' class='alternate'>
          <?php } ?>
 
                <td><input type="checkbox" name="moderateposts[]" value="<?php echo $p->ID; ?>" /></td>
@@ -263,14 +397,49 @@ function getNumChecked(form)
                  </td>
            <?php } ?>
            
-		       <td><?php _e($p->post_status,"tdomf"); ?></td>
+		       <td>
+               
+               <?php if($is_spam && $p->post_status == 'draft') { ?>
+                      <?php _e('Spam',"tdomf"); ?>
+                   <?php } else { 
+                       switch($p->post_status) {
+                           case 'draft':
+                              _e('Draft',"tdomf");
+                              break;
+                           case 'publish':
+                               _e('Published',"tdomf");
+                               break;
+                           case 'future':
+                               _e('Scheduled',"tdomf");
+                               break;
+                           default:
+                               echo _e($p->post_status,"tdomf");
+                               break;
+                       }
+                       if($is_spam) { _e(' (Spam)',"tdomf"); } 
+                   } ?>
+               </td>
+               
 		       <td><a href="<?php echo get_permalink($p->ID); ?>" class="edit"><?php _e("View","tdomf"); ?></a></td>
 
 		       <td>
 
 		       <?php if(isset($_REQUEST['f'])) { $farg = "&f=".$_REQUEST['f']; } ?>
 
-		       <?php if($p->post_status == "draft") { ?>
+               <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+                   <td>
+                   <?php if($is_spam) { ?>
+                       <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-hamit_'.$p->ID); ?>" class="notspam"><?php _e("Not Spam","tdomf"); ?></a>
+                   <?php } else { ?>
+                       <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-spamit_'.$p->ID); ?>" class="isspam"><?php _e("Spam It","tdomf"); ?></a>
+                   <?php } ?>
+                   </td>
+               <?php } ?>
+               
+               <td>
+               <?php if($is_spam) { ?>
+                   <!-- N/A -->
+		       <?php } else if($p->post_status == "draft") { ?>
 		          <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-publish_'.$p->ID); ?>" class="publish"><?php _e("Publish","tdomf"); ?></a>
 		       <?php } else { ?>
 		          <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=unpublish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-unpublish_'.$p->ID); ?>" class="draft"><?php _e("Un-Publish","tdomf"); ?></a>
@@ -293,6 +462,9 @@ function getNumChecked(form)
    <input type="hidden" name="f" id="f" value="<?php echo $farg; ?>" />
 
    <p class="submit">
+    <?php if(get_option(TDOMF_OPTION_SPAM) && (!isset($_REQUEST['f']) || $_REQUEST['f'] == '0')) { ?>
+        <input type="submit" name="recheck_button" value="<?php _e("Recheck Unmoderated Submissions for Spam"); ?>" />
+	<?php } ?>
     <input type="submit" name="delete_button" class="delete" value="<?php _e("Delete Checked Posts &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to delete'); return false } return confirm('You are about to delete ' + numchecked + ' posts permanently \n  \'Cancel\' to stop, \'OK\' to delete.')" />
     <?php if(!isset($_REQUEST['f']) || $_REQUEST['f'] == '0' || $_REQUEST['f'] == '2') { ?>
 	<input type="submit" name="publish_button" value="<?php _e("Publish Checked Posts &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to publish ' + numchecked + ' posts \n  \'Cancel\' to stop, \'OK\' to publish')" />
@@ -300,6 +472,14 @@ function getNumChecked(form)
 	<?php if(isset($_REQUEST['f']) && ($_REQUEST['f'] == '1' || $_REQUEST['f'] == '2')) { ?>
 	<input type="submit" name="unpublish_button" value="<?php _e("Un-Publish Checked Posts &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to un-publish ' + numchecked + ' posts \n  \'Cancel\' to stop, \'OK\' to publish')" />
 	<?php } ?>
+    <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+        <?php if(!isset($_REQUEST['f']) || $_REQUEST['f'] == '1' || $_REQUEST['f'] == '2' || $_REQUEST['f'] == '0') { ?>
+        <input type="submit" name="spam_button" value="<?php _e("Mark Checked Posts as Spam &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to mark ' + numchecked + ' as spam \n  \'Cancel\' to stop, \'OK\' to publish')" />
+        <?php } ?>
+        <?php if($_REQUEST['f'] == '1' || $_REQUEST['f'] == '2' || $_REQUEST['f'] == '3' ) { ?>
+        <input type="submit" name="notspam_button" value="<?php _e("Mark Checked Posts as Not Spam &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to mark ' + numchecked + ' as not being spam \n  \'Cancel\' to stop, \'OK\' to publish')" />
+        <?php } ?>
+    <?php } ?>
 	<?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-moderate-bulk'); } ?>
    </p>
 
@@ -332,7 +512,23 @@ function getNumChecked(form)
 function tdomf_moderation_handler() {
    $message = "";
 
-   if(isset($_REQUEST['delete_button'])) {
+   if(isset($_REQUEST['recheck_button'])) {
+       check_admin_referer('tdomf-moderate-bulk');
+       $posts = tdomf_get_unmoderated_posts();
+       $list = "";
+       if(count($posts) > 0) {
+           foreach($posts as $post) {
+               if(!tdomf_check_submissions_spam($post->ID)) {
+                   $list .= $post->ID.", ";
+               }
+           }
+       }
+       if($list != "") {
+           tdomf_log_message("These posts are actually spam: $list");
+           $message = sprintf(__("Marked these posts as spam: %s","tdomf"),$list);
+       }
+   }
+   else if(isset($_REQUEST['delete_button'])) {
       check_admin_referer('tdomf-moderate-bulk');
       $posts = $_REQUEST['moderateposts'];
       $list = "";
@@ -347,17 +543,9 @@ function tdomf_moderation_handler() {
       $posts = $_REQUEST['moderateposts'];
       $list = "";
       foreach($posts as $p) {
-         // Use update post instead of publish post because in WP2.3, 
-         // update_post doesn't seem to add the date correctly! 
-         // Also when it updates a post, if comments aren't set, sets them to
-         // empty! (Not so in WP2.2!)
-         $post = array (
-           "ID"             => $p,
-           "post_status"    => 'publish',
-           "comment_status" => get_option('default_comment_status'),
-           );
-         wp_update_post($post);
-         wp_publish_post($p);
+         // if we're going to publish the post, then it's not spam!
+         tdomf_ham_post($p);
+         tdomf_publish_post($p);
          $list .= "<a href=\"".get_permalink($p)."\">".$p."</a>,";
       }
       tdomf_log_message("Published $list posts");
@@ -372,20 +560,40 @@ function tdomf_moderation_handler() {
       }
       tdomf_log_message("Unpublished $list posts");
       $message = sprintf(__("Unpublished posts: %s","tdomf"),$list);
+   } else if(isset($_REQUEST['spam_button'])) {
+       check_admin_referer('tdomf-moderate-bulk');
+       $posts = $_REQUEST['moderateposts'];
+       $list = "";
+       foreach($posts as $p) {
+           if(!get_post_meta($p, TDOMF_KEY_SPAM)) {
+              tdomf_spam_post($p);
+              $list .= $p.",";
+           }
+       }
+       if($list != "") {
+           tdomf_log_message("Spammed $list posts");
+           $message = sprintf(__("Marked these posts as spam: %s","tdomf"),$list);
+       }
+   } else if(isset($_REQUEST['notspam_button'])) {
+       check_admin_referer('tdomf-moderate-bulk');
+       $posts = $_REQUEST['moderateposts'];
+       $list = "";
+       foreach($posts as $p) {
+         if(!get_post_meta($p, TDOMF_KEY_SPAM)) {
+            tdomf_ham_post($p);
+            $list .= $p.",";
+         }
+       }
+       if($list != "") {
+           tdomf_log_message("Hammed $list posts");
+           $message = sprintf(__("Marked these posts as not being spam: %s","tdomf"),$list);
+       }
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'publish') {
       $post_id = $_REQUEST['post'];
       check_admin_referer('tdomf-publish_'.$post_id);
-       // Use update post instead of publish post because in WP2.3, 
-       // update_post doesn't seem to add the date correctly! 
-       // Also when it updates a post, if comments aren't set, sets them to
-       // empty! (Not so in WP2.2!)
-       $post = array (
-         "ID"             => $post_id,
-         "post_status"    => 'publish',
-         "comment_status" => get_option('default_comment_status'),
-         );
-       wp_update_post($post);      
-      #wp_publish_post($post_id);
+      // if we're going to publish the post, then it's not spam!
+      tdomf_ham_post($post_id);
+      tdomf_publish_post($post_id);
       tdomf_log_message("Published post $post_id");
       $message = sprintf(__("Published post <a href=\"%s\">%d</a>.","tdomf"),get_permalink($post_id),$post_id);
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'unpublish') {
@@ -394,6 +602,22 @@ function tdomf_moderation_handler() {
       tdomf_unpublish_post($post_id);
       tdomf_log_message("Unpublished post $post_id");
       $message = sprintf(__("Unpublished post %d.","tdomf"),$post_id);
+   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'spamit') {
+      $post_id = $_REQUEST['post'];
+      check_admin_referer('tdomf-spamit_'.$post_id);
+      if(!get_post_meta($post_id, TDOMF_KEY_SPAM)) {
+         tdomf_spam_post($post_id);
+         tdomf_log_message("Post $post_id submitted as spam");
+         $message = sprintf(__("Post %d flagged as spam","tdomf"),$post_id);
+      }
+   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'hamit') {
+      $post_id = $_REQUEST['post'];
+      check_admin_referer('tdomf-hamit_'.$post_id);
+      if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
+         tdomf_ham_post($post_id);
+         tdomf_log_message("Post $post_id submitted as ham");
+         $message = sprintf(__("Post %d flagged as not being spam","tdomf"),$post_id);
+      }
    }
 
    if(!empty($message)) { ?>

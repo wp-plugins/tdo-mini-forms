@@ -11,7 +11,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Checks if current user/ip has permissions to post!
 //
 function tdomf_check_permissions_form($form_id = 1) {
-   global $current_user;
+   global $current_user, $wpdb;
 
    get_currentuserinfo();
 
@@ -39,6 +39,39 @@ function tdomf_check_permissions_form($form_id = 1) {
 	 }
   }
 
+  // Throttling Rules
+  //
+  $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
+  if(is_array($rules) && !empty($rules)) {
+      foreach($rules as $rule_id => $rule) {
+          $query = "SELECT ID, post_status, post_date ";
+          $query .= "FROM $wpdb->posts ";
+          $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+          if($rule['type'] == 'ip') {
+              $query .= "WHERE meta_key = '".TDOMF_KEY_IP."' ";
+              $query .= "AND meta_value = '$ip' ";
+          } else if($rule['type'] == 'user') {
+              $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
+              $query .= "AND meta_value = '".$current_user->ID."' ";
+          }
+          if($rule['sub_type'] == 'unapproved') {
+              $query .= "AND post_status = 'draft' ";
+          }
+          if($rule['opt1']) {
+              $timestamp = tdomf_timestamp_wp_sql(time() - $rule['time']);
+              $query .= "AND post_date > '$timestamp' ";
+          }
+          $query .= "ORDER BY post_date ASC ";
+          $query .= "LIMIT " . ($rule['count'] + 1);
+          $results = $wpdb->get_results( $query );
+          #var_dump($results);
+          if(count($results) >= $rule['count']) {
+              tdomf_log_message("IP $ip blocked by Throttle Rule $rule_id",TDOMF_LOG_BAD);
+              return __("You have hit your submissions quota. Please wait until your submissions are approved.","tdomf");
+          }
+      }
+  }
+  
   // Users who can access form
   //
   if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
@@ -132,6 +165,35 @@ function tdomf_validate_form($args,$preview = false) {
    return NULL;
 }
 
+function tdomf_timestamp_wp_sql( $timestamp, $gmt = 0 ) {
+   return ( $gmt ) ? gmdate( 'Y-m-d H:i:s', $timestamp ) : gmdate( 'Y-m-d H:i:s', ( $timestamp + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+}
+
+function tdomf_queue_date($form_id,$current_ts)  {
+    tdomf_log_message("Current ts is $current_ts");
+    $queue_period = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
+    if($queue_period > 0) {
+        tdomf_log_message("Queue period is $queue_period");
+        global $wpdb;
+        $query = "SELECT DISTINCT(ID), post_date
+          FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+          WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
+                AND $wpdb->postmeta.meta_value='".$form_id."'
+          ORDER BY post_date DESC 
+          LIMIT 1 ";
+          $results = $wpdb->get_results($query);
+          if(count($results) > 0) {
+              $last_ts = strtotime($results[0]->post_date);
+              tdomf_log_message("Got latest ts of $last_ts");
+              $next_ts = $last_ts + $queue_period;
+              if($next_ts > $current_ts) {
+                  tdomf_log_message("Sticking post in queue!");
+                  return $next_ts;
+              }
+          }
+    }
+    return $current_ts;
+}
 
 // Creates a post using args
 //
@@ -165,11 +227,6 @@ function tdomf_create_post($args) {
    //
    $def_title = tdomf_get_log_timestamp();
 
-   // Submission date
-   //
-#  $post_date = current_time('mysql');
-#  $post_date_gmt = get_gmt_from_date($post_date);
-   
    // Build post and post it as draft
    //
    $post = array (
@@ -203,7 +260,7 @@ function tdomf_create_post($args) {
    if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)){
      tdomf_log_message("Logging default submitter info (user $user_id) for this post $post_ID");
      add_post_meta($post_ID, TDOMF_KEY_USER_ID, $user_id, true);
-     add_post_meta($post_ID, TDOMF_KEY_USER_NAME, $user->user_login, true);
+     add_post_meta($post_ID, TDOMF_KEY_USER_NAME, $current_user->user_login, true);
      update_usermeta($user_id, TDOMF_KEY_FLAG, true);
    }
 
@@ -256,59 +313,111 @@ function tdomf_create_post($args) {
      return "<font color='red'>$message</font>\n";
    }
    
-   // Submitted post count!
-   //
-   $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
-   if($submitted_count == false) {
-      $submitted_count = 0;
-   }
-   $submitted_count++;
-   update_option(TDOMF_STAT_SUBMITTED,$submitted_count);
-   tdomf_log_message("post $post_ID is number $submitted_count submission!");
 
-   // publish (maybe)
-   //
    $send_moderator_email = true;
-   if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
-      tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
-      // Use update post instead of publish post because in WP2.3, 
-      // update_post doesn't seem to add the date correctly!
-      // Also when it updates a post, if comments aren't set, sets them to
-      // empty! (Not so in WP2.2!)
-      $post = array (
-        "ID"             => $post_ID,
-        "post_status"    => 'publish',
-        "comment_status" => get_option('default_comment_status'),
-        );
-      wp_update_post($post);
-      $send_moderator_email = false;
-   } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-        $testuser = new WP_User($user_id,$user->user_login);
-        $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
-        if(current_user_can('publish_posts') || $user_status == TDOMF_USER_STATUS_TRUSTED) {
-           tdomf_log_message("Publishing post $post_ID!");
-           // Use update post instead of publish post because in WP2.3, 
-           // update_post doesn't seem to add the date correctly!
-           // Also when it updates a post, if comments aren't set, sets them to
-           // empty! (Not so in WP2.2!)
-           $post = array (
+   
+   // Spam check
+   //
+   add_post_meta($post_ID, TDOMF_KEY_USER_AGENT, $_SERVER['HTTP_USER_AGENT'], true);
+   add_post_meta($post_ID, TDOMF_KEY_REFERRER, $_SERVER['HTTP_REFERER'], true);
+   if(tdomf_check_submissions_spam($post_ID)) {
+     
+       // Submitted post count!
+       //
+       $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
+       if($submitted_count == false) {
+          $submitted_count = 0;
+       }
+       $submitted_count++;
+       update_option(TDOMF_STAT_SUBMITTED,$submitted_count);
+       tdomf_log_message("post $post_ID is number $submitted_count submission!");
+       
+     // publish (maybe)
+     //
+     if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
+        tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
+        // Use update post instead of publish post because in WP2.3, 
+        // update_post doesn't seem to add the date correctly!
+        // Also when it updates a post, if comments aren't set, sets them to
+        // empty! (Not so in WP2.2!)
+        
+        // Schedule date
+        //
+        $current_ts = time();
+        $ts = tdomf_queue_date($form_id,$current_ts);
+        if($current_ts == $ts) {
+            $post = array (
               "ID"             => $post_ID,
               "post_status"    => 'publish',
               "comment_status" => get_option('default_comment_status'),
               );
-           wp_update_post($post);
-           #wp_publish_post($post_ID);
-           $send_moderator_email = false;
+        } else {
+            $post_date = tdomf_timestamp_wp_sql($ts);
+            $post_date_gmt = get_gmt_from_date($post_date);
+            tdomf_log_message("Future Post Date = $post_date!");
+            $post = array (
+              "ID"             => $post_ID,
+              "post_status"    => 'future',
+              "comment_status" => get_option('default_comment_status'),
+              "post_date"      => $post_date,
+              "post_date_gmt"  => $post_date_gmt,
+              );
         }
+        
+        wp_update_post($post);
+        $send_moderator_email = false;
+     } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+          $testuser = new WP_User($user_id,$user->user_login);
+          $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
+          if(current_user_can('publish_posts') || $user_status == TDOMF_USER_STATUS_TRUSTED) {
+             tdomf_log_message("Publishing post $post_ID!");
+             // Use update post instead of publish post because in WP2.3, 
+             // update_post doesn't seem to add the date correctly!
+             // Also when it updates a post, if comments aren't set, sets them to
+             // empty! (Not so in WP2.2!)
+             
+            // Schedule date
+            //
+            $current_ts = time();
+            $ts = tdomf_queue_date($form_id,$current_ts);
+            if($current_ts == $ts) {
+                $post = array (
+                  "ID"             => $post_ID,
+                  "post_status"    => 'publish',
+                  "comment_status" => get_option('default_comment_status'),
+                  );
+            } else {
+                $post_date = tdomf_timestamp_wp_sql($ts);
+                $post_date_gmt = get_gmt_from_date($post_date);
+                tdomf_log_message("Future Post Date = $post_date!");
+                $post = array (
+                  "ID"             => $post_ID,
+                  "post_status"    => 'future',
+                  "comment_status" => get_option('default_comment_status'),
+                  "post_date"      => $post_date,
+                  "post_date_gmt"  => $post_date_gmt,
+                  );
+            }
+             wp_update_post($post);
+             #wp_publish_post($post_ID);
+             $send_moderator_email = false;
+          }
+     }
+   } else {
+     // it's spam :(
+     
+     if(get_option(TDOMF_OPTION_SPAM_NOTIFY) == 'none') {
+       $send_moderator_email = false;
+     }
    }
-
+   
    // Notify admins
    //
    if($send_moderator_email){
       tdomf_notify_admins($post_ID,$form_id);
    }
 
-   // Renable filters so we dont' break anything else!
+   // Re-enable filters so we dont' break anything else!
    //
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
      kses_init_filters();
@@ -382,9 +491,11 @@ function tdomf_generate_form($form_id = 1) {
      if(isset($form_data['tdomf_form_post_'.$form_id])) {
         $post_args = $form_data['tdomf_form_post_'.$form_id];
         unset($form_data['tdomf_form_post_'.$form_id]);
+        tdomf_save_form_data($form_id,$form_data);
         if(isset($post_args['tdomf_post_message_'.$form_id])) {
            $form = $post_args['tdomf_post_message_'.$form_id];
            unset($form_data['tdomf_post_message_'.$form_id]);
+           tdomf_save_form_data($form_id,$form_data);
         }
         if(isset($post_args['tdomf_no_form_'.$form_id])) {
            unset($post_args['tdomf_no_form_'.$form_id]);
@@ -484,9 +595,9 @@ EOT;
     $form .= '<td width="10px"><input type="button" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomf_submit_post(); return false;" /></td>';
   } else {
     // only need to add a clear butt if using the db form data storage as it doesn't automatically clear
-    if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == 'db') {
+    /*if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == 'db') {
        $form .= '<td width="10px"><input type="submit" value="'.__("Clear","tdomf").'" name="tdomf_form'.$form_id.'_clear" id="tdomf_form'.$form_id.'_clear" /></td>';
-    }
+    }*/
   	if(tdomf_widget_is_preview_avaliable($form_id)) {
     	$form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" /></td>';
     }

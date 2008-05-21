@@ -58,6 +58,9 @@ function timeDiff($time, $opt = array()) {
   
       <h2><?php _e('TDOMF Debug', 'tdomf') ?></h2>
   
+      <!-- @TODO: Text Ouput -->
+      <!-- @TODO: HTML Output -->
+      
       <table border="0">
       <?php $alloptions = wp_load_alloptions();
             foreach($alloptions as $id => $val) {

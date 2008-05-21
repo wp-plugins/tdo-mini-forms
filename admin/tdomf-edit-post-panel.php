@@ -65,6 +65,8 @@ function tdomf_show_edit_post_panel() {
   $submitter_ip = get_post_meta($post->ID, TDOMF_KEY_IP, true);
 
   $form_id  = get_post_meta($post->ID, TDOMF_KEY_FORM_ID, true);
+  
+  $is_spam = (get_option(TDOMF_OPTION_SPAM) && get_post_meta($post->ID, TDOMF_KEY_SPAM, true));
 
   // use JavaScript SACK library for AJAX
   wp_print_scripts( array( 'sack' ));
@@ -146,7 +148,7 @@ function tdomf_show_edit_post_panel() {
                 </legend>
 
                 <br/>
-
+                                
                 <?php if(!empty($submitter_id) && $submitter_id == get_option(TDOMF_DEFAULT_AUTHOR)) { ?>
                   <span style="color:red;font-size:larger;"><?php _e('The submitter of this post is set as the "default user"! Please correct!','tdomf'); ?></span>
                   <br/><br/>
@@ -216,6 +218,10 @@ function tdomf_show_edit_post_panel() {
 
                 <br/><br/>
 
+                <?php if($is_spam) { ?>
+                    <span style="color:red;font-size:larger;"><?php _e("Akismet thinks this post is spam!",'tdomf'); ?></span>
+                <?php } ?>
+              
                 <?php if(!empty($submitter_ip)) { ?>
                   <?php printf(__("This post was submitted from IP %s.","tdomf"),$submitter_ip); ?>
                 <?php } else { ?>

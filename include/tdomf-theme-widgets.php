@@ -75,7 +75,7 @@ function tdomf_theme_widgets_init() {
         if(!empty($posts)) {
           echo $before_widget;
           echo $before_title;
-          printf(__('TDOMF Moderation Queue (%d)', 'tdomf'),tdomf_get_unmoderated_posts_count());
+          printf(__('Awaiting Approval (%d)', 'tdomf'),tdomf_get_unmoderated_posts_count());
           if(current_user_can('edit_others_posts')) { 
             echo "<a href=\"".get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&f=0\" title=\"Moderate Submissions...\">&raquo;</a>";
           }
@@ -87,6 +87,21 @@ function tdomf_theme_widgets_init() {
           echo '</ul>';
           echo $after_widget;
         }
+      }
+      
+      
+      if(get_option(TDOMF_OPTION_SPAM)) {
+         $spam_count = tdomf_get_spam_posts_count(); 
+         if($spam_count > 0) {
+             echo $before_widget;
+             echo $before_title;
+             printf(__('Spam Queue (%d)', 'tdomf'),$spam_count);
+             if(current_user_can('edit_others_posts')) {
+                echo '<a href="'.get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&f=3" title="'.__("Moderate Spam...","tdomf").'">&raquo;</a>';
+             }
+             echo $after_title;
+             echo $after_widget;
+         }
       }
       
       echo $before_widget;

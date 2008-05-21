@@ -116,19 +116,38 @@ function tdomf_notify_admins($post_ID,$form_id){
   $moderate_all_link = get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu';
   
   //View link
+  //
   $view_post = get_permalink($post_ID);
+
+  //Spam links
+  //
+  $is_spam = get_post_meta($p->ID, TDOMF_KEY_SPAM); 
+  $spam_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$post_ID";
+  $spam_link = wp_nonce_url($spam_link,'tdomf-spamit_'.$post_ID);
+  $ham_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$post_ID";
+  $ham_link = wp_nonce_url($ham_link,'tdomf-hamit_'.$post_ID);
   
   // Subject line
   //
-  $subject = sprintf(__("[%s] Please moderate this new post request from %s","tdomf"),get_bloginfo('title'),$submitter_name);
-
+  if($is_spam && !get_option(TDOMF_OPTION_SPAM)) {
+     $subject = sprintf(__("[SPAM] [%s] Please moderate this spam post","tdomf"),get_bloginfo('title'));
+  } else {
+     $subject = sprintf(__("[%s] Please moderate this new post request from %s","tdomf"),get_bloginfo('title'),$submitter_name);
+  }
+  
   // Email Body
   //
   $email_msg  = sprintf(__("A new post with title \"%s\" from %s is awaiting your approval.\r\n\r\n","tdomf"),$title,$submitter_string);
+  if($is_spam && !get_option(TDOMF_OPTION_SPAM) ) {
+      $email_msg = sprintf(__("This post is considered SPAM. You can mark it as not being spam from %s\r\n\r\n","tdomf"),$ham_link);
+  }
   $email_msg .= sprintf(__("It was submitted using Form ID %d (\"%s\")\r\n\r\n","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id));
   $email_msg .= sprintf(__("This was submitted from IP %s.\r\n\r\n","tdomf"),$ip);
   $email_msg .= sprintf(__("You can view this post from %s.\r\n\r\n","tdomf"),$view_post); 
   $email_msg .= sprintf(__("You can moderate this submission from %s.\r\n\r\n","tdomf"),$moderate_all_link);
+  if(!$is_spam && !get_option(TDOMF_OPTION_SPAM)) {
+      $email_msg .= sprintf(__("You can flag this post as spam from %s.\r\n\r\n","tdomf"),$spam_link);
+  }
   $email_msg .= sprintf(__("Content of the post: \r\n\r\n %s \r\n\r\n","tdomf"),$content);
   
    // Widgets:adminemail
@@ -174,7 +193,12 @@ function tdomf_notify_poster_approved($post_id) {
    
    $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true);
    delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
-   
+
+   if(get_post_meta($post_id,TDOMF_KEY_SPAM,true)) {
+      tdomf_log_message_extra("tdomf_notify_poster_approved: post $post_id is spam -- do nothing.");
+      return $post_id;
+   }
+      
    if($email != false) {
       tdomf_log_message_extra("tdomf_notify_poster_approved: $email");
    }
@@ -219,9 +243,14 @@ function tdomf_notify_poster_rejected($post_id) {
    global $wpdb;
    
    tdomf_log_message_extra("tdomf_notify_poster_rejected: $email");
-   
+
    $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true); 
    delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
+
+   if(get_post_meta($post_id,TDOMF_KEY_SPAM,true)) {
+      tdomf_log_message_extra("tdomf_notify_poster_rejected: post $post_id is spam -- do nothing.");
+      return $post_id;
+   }
    
    if(tdomf_check_email_address($email)){
 

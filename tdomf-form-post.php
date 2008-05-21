@@ -99,6 +99,10 @@ if($message == NULL) {
         $post_id = $retVal;
         if(get_post_status($post_id) == 'publish') {
           $message = sprintf(__("Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service.","tdomf"),get_permalink($post_id));
+        } else if(get_post_status($post_id) == 'future') {
+            $message = __("Your post submission has been accepted and should appear shortly.","tdomf");
+        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) { 
+          $message = __("Your submission is being flagged as spam! Sorry.","tdomf");
         } else {
           $message = sprintf(__("Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service.","tdomf"),get_bloginfo('admin_email'));
         }

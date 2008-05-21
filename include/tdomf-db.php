@@ -633,6 +633,9 @@ function tdomf_form_exists($form_id) {
 }
 
 function tdomf_is_moderation_in_use(){
+  // moderation is automatically enabled if spam protection turned on!
+  if(get_option(TDOMF_OPTION_SPAM)) { return true; }
+  
   $form_ids = tdomf_get_form_ids();
   $retValue = false;
   foreach($form_ids as $form_id) {

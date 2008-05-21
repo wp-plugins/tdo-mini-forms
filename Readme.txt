@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface,
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget
 Requires at least: 2.3
 Tested up to: 2.5
 Stable Tag: 0.10.4
@@ -13,6 +13,8 @@ This plugin allows you to add custom posting forms to your website that allows y
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
 **With version 0.10.3, "Bad Data" errors and register_global issues should be a thing of the past!**
+
+TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
 

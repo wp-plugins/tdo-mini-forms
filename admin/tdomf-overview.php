@@ -25,8 +25,10 @@ function tdomf_overview_admin_head() {
 	background: none;
 }
 
-* html #zeitgeist h2 {
+/** html*/ 
+#zeitgeist h2 {
 	padding-top: 10px;
+  width: 100%;
 }
 
 #zeitgeist h3 {
@@ -94,9 +96,15 @@ function tdomf_overview_menu()  {
     <h2><?php _e('Welcome to TDO Mini Forms', 'tdomf') ?></h2>
 
     <div id="zeitgeist">
-        
-    	  <h2><?php _e('Latest Activity', 'tdomf') ?></h2>
 
+        <?php $features = tdomf_new_features(); 
+              if($features) { ?>
+                <h2><?php printf(__("Newest Features in %s","tdomf"),TDOMF_VERSION); ?></h2>
+                <?php echo $features; ?>
+        <?php } ?>
+    
+    	  <h2><?php _e('Latest Activity', 'tdomf') ?></h2>
+        
     	  <h3><?php _e('Log', 'tdomf') ?><?php if(current_user_can('manage_options')) { ?><a href="admin.php?page=tdomf_show_log_menu" title="Full Log...">&raquo;</a><?php } ?></h3>
 
     	  <p><?php echo tdomf_get_log(5); ?></p>
@@ -106,7 +114,7 @@ function tdomf_overview_menu()  {
           <?php $posts = tdomf_get_unmoderated_posts(0,10);
           if(!empty($posts)) { ?>
             
-        	  <h3><?php _e('Latest Submissions', 'tdomf'); ?><?php if(current_user_can('edit_others_posts')) { ?><a href="admin.php?page=tdomf_show_mod_posts_menu&f=0" title="Moderate Submissions...">&raquo;</a><?php } ?></h3>
+        	  <h3><?php _e('Latest Submissions', 'tdomf'); ?><?php if(current_user_can('edit_others_posts')) { ?><a href="admin.php?page=tdomf_show_mod_posts_menu&f=0" title="<?php _e("Moderate Submissions...","tdomf"); ?>">&raquo;</a><?php } ?></h3>
 
           <ul>
 
@@ -117,7 +125,14 @@ function tdomf_overview_menu()  {
     	  </ul>
 
     	  <?php } ?>
-        
+
+          <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+              <?php $spam_count = tdomf_get_spam_posts_count(); 
+              if($spam_count > 0) { ?>
+                  <h3><?php printf(__('There are %d spam submissions','tdomf'),$spam_count); ?><?php if(current_user_can('edit_others_posts')) { ?><a href="admin.php?page=tdomf_show_mod_posts_menu&f=3" title="<?php _e("Moderate Spam...","tdomf"); ?>">&raquo;</a><?php } ?></h3>
+              <?php } ?>
+          <?php } ?>
+          
           <?php $posts = tdomf_get_published_posts(0,10);
                 if(!empty($posts)) { ?>
 
@@ -136,24 +151,27 @@ function tdomf_overview_menu()  {
 
     	  <h3><?php _e('Stats', 'tdomf'); ?></h3>
 
-          <?php $stat_sub_ever  = get_option('TDOMF_STAT_SUBMITTED');
+          <?php $stat_sub_ever  = get_option(TDOMF_STAT_SUBMITTED);
                 $stat_unmod     = tdomf_get_unmoderated_posts_count();
                 $stat_sub_cur   = tdomf_get_submitted_posts_count();
-                $stat_mod       = $stat_sub_cur - $stat_unmod; ?>
+                $stat_mod       = $stat_sub_cur - $stat_unmod; 
+                $stat_spam      = get_option(TDOMF_STAT_SPAM); ?>
 
-    	  <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved.","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_mod); ?>
+          <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+              <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved. %d spam submissions have been caught by Akismet","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_mod,$stat_spam); ?>
+          <?php } else { ?>
+              <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved.","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_mod); ?>
+          <?php } ?>
         
-        <?php /* TODO: Latest from thedeadone.net forum. Current forum plugin does not yet support RSS! */ ?>
-        
-        <?php /* $rss = fetch_rss('http://wordpress.org/support/rss/tags/tdo-mini-forms');
+        <?php $rss = fetch_rss('http://thedeadone.net/forum/?cat=6&feed=rss');
                if ( isset($rss->items) && 0 != count($rss->items) ) {
                  $rss->items = array_slice($rss->items, 0, 5); 
-                 echo "<h3>".__('Latest Wordpress.org Comments','tdomf')."</h3><ul>";
+                 echo "<h3>".__('Latest Support Forum Topics','tdomf')."</h3><ul>";
                  foreach ($rss->items as $item) { ?>
                  <li><a href='<?php echo wp_filter_kses($item['link']); ?>'><?php echo wp_specialchars($item['title']); ?></a></li>
         <?php    }
                  echo "</ul>";
-              } */ ?>
+              } ?>
         
     </div>
 
@@ -181,7 +199,11 @@ function tdomf_overview_menu()  {
       <li><a href="admin.php?page=tdomf_show_options_menu"><?php _e("Configure TDO Mini Forms","tdomf"); ?></a></li>
       <li><a href="admin.php?page=tdomf_show_form_menu"><?php _e("Form Widgets","tdomf"); ?></a></li>
       <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
-      <li><a href="users.php?page=tdomf_your_submissions"><?php _e("Your Submissions Page","tdomf"); ?></a></li>
+          <?php if(current_user_can('edit_users')) { ?>
+                <li><a href="users.php?page=tdomf_your_submissions"><?php _e("Your Submissions Page","tdomf"); ?></a></li>
+          <?php } else { ?>
+                <li><a href="profile.php?page=tdomf_your_submissions"><?php _e("Your Submissions Page","tdomf"); ?></a></li>
+          <?php } ?>
       <?php } ?>
       <?php if(current_user_can('manage_options')) { ?>
       <li><a href="<?php echo TDOMF_URLPATH; ?>tdomf-phpinfo.php"><?php _e("phpinfo()","tdomf"); ?></a></li>
@@ -205,7 +227,7 @@ function tdomf_overview_menu()  {
 
       if ( isset($rss->items) && 0 != count($rss->items) )
       {
-        $rss->items = array_slice($rss->items, 0, 1);
+        $rss->items = array_slice($rss->items, 0, 4);
         foreach ($rss->items as $item)
         {
         ?>
@@ -247,16 +269,15 @@ function tdomf_dashboard_status() {
     $posts = tdomf_get_unmoderated_posts(0,15);
     if(!empty($posts)) { 
       ?>
-      <div>
-      <h3>      
-        <?php printf(__('Awaiting Approval (%d)', 'tdomf'),tdomf_get_unmoderated_posts_count()); ?>
-        <a href="<?php echo get_bloginfo('wpurl'); ?>/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&f=0" title="Moderate Submissions...">&raquo;</a>
-      </h3>
-      <ul>
-      <?php foreach($posts as $p) {
-              echo tdomf_get_post_list_line($p); } ?>
-      </ul>
-      </div>
+      <p>
+      <?php printf(__('You have <a href="%s">%d submissions</a> waiting for approval.', 'tdomf'),"admin.php?page=tdomf_show_mod_posts_menu&f=0",tdomf_get_unmoderated_posts_count()); ?>
+      <?php if(get_option(TDOMF_OPTION_SPAM)) { 
+                $spam_count = tdomf_get_spam_posts_count(); 
+                if($spam_count > 0) { ?>
+                  <?php printf(__('There are <a href="%s">%d spam submissions</a> in the queue.','tdomf'),"admin.php?page=tdomf_show_mod_posts_menu&f=3",$spam_count); ?>
+              <?php }
+            } ?>
+      </p>
       <?php
     }
   }

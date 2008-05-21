@@ -222,8 +222,47 @@ function tdomf_show_general_options() {
   
   </p>
     
-    <br/><br/>
+    <a name="spam" /><h3><?php _e('Spam Protection',"tdomf"); ?></h3>
+    
+    <p>
+    <?php printf(__('You can now enable spam protection for new submissions. The online service Akismet is used to identify if a submission is spam or not. Submissions marked as spam cab be deleted automatically after a month. You can moderate spam from the <a href="%s">Manage</a> screen.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu"); ?>
+    </p>
+    
+    <?php $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
+          $tdomf_spam_akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+          if($tdomf_spam_akismet_key == false) {
+            $tdomf_spam_akismet_key = get_option('wordpress_api_key');
+          }
+          $tdomf_spam_notify = get_option(TDOMF_OPTION_SPAM_NOTIFY);
+          $tdomf_spam_auto_delete = get_option(TDOMF_OPTION_SPAM_AUTO_DELETE); ?>
+          
+          <p>
+          <b><?php _e("Enable Spam Protection ","tdomf"); ?></b>
+	        <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  <?php if($tdomf_spam) echo "checked"; ?> >
+          </p>
+          
+          <p>
+          <b><?php _e("Your Akismet Key","tdomf"); ?></b>
+	        <input type="text" name="tdomf_spam_akismet_key" id="tdomf_spam_akismet_key" size="8" value="<?php echo $tdomf_spam_akismet_key; ?>" />
+          </p>
+          
+          <p>
+          <input type="radio" name="tdomf_spam_notify" value="live"<?php if($tdomf_spam_notify == "live"){ ?> checked <?php } ?>>
+          <?php _e("Recieve normal moderation emails for suspected spam submissions","tdomf"); ?>
+          <br/>
+          
+          <input type="radio" name="tdomf_spam_notify" value="none"<?php if($tdomf_spam_notify == "none" || $tdomf_spam_notify == false){ ?> checked <?php } ?>>
+          <?php _e("Recieve no notification of spam submissions","tdomf"); ?>
+          <br/>
+          </p>
 
+          <p>
+          <b><?php _e("Automatically Delete Spam older than a month ","tdomf"); ?></b>
+	        <input type="checkbox" name="tdomf_spam_auto_delete" id="tdomf_spam_auto_delete"  <?php if($tdomf_spam_auto_delete) echo "checked"; ?> >
+          </p>
+          
+    <br/><br/>
+          
     <table border="0"><tr>
 
     <td>
@@ -277,7 +316,11 @@ function tdomf_show_form_options($form_id) {
       <a href="<?php echo get_permalink($updated_pages[0]); ?>" title="<?php _e("Live on your blog!","tdomf"); ?>" ><?php _e("View &raquo;","tdomf"); ?></a> |
     <?php } ?>
     <?php if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id) && get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
-      <a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
+        <?php if(current_user_can('edit_users')) { ?>
+                <a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
+        <?php } else { ?>
+                <a href="profile.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
+          <?php } ?>
       <?php _e("View &raquo;","tdomf"); ?></a>
     <?php } ?>
     </div>
@@ -554,11 +597,75 @@ function tdomf_show_form_options($form_id) {
 
     <?php $use_page = tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id); ?>
 
-	</p>
+	<p>
 	<b><?php _e("Submit Page","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_use_page" id="tdomf_use_page"  <?php if($use_page) echo "checked"; ?> >
 	</p>
   
+    <a name="queue" />
+    
+    <h3><?php _e('Queue Published Submissions',"tdomf"); ?></h3>
+
+	<p>
+	<?php _e('You can set submissions from this form that are published/approved to be queued before appearing on the site. Just set the period of time between each post and TDOMF will schedule approved submissions from this form. A value of 0 or -1 disables this option.',"tdomf"); ?>
+	</p>
+    
+    <?php $tdomf_queue_period = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id)); ?>
+
+	<p>
+	<input type="text" name="tdomf_queue_period" id="tdomf_queue_period" size="5" value="<?php echo htmlentities($tdomf_queue_period,ENT_QUOTES,get_bloginfo('charset')); ?>" />
+    <?php _e("Seconds (1 day = 86400 seconds)","tdomf"); ?>
+	</p>
+
+    <a name="throttle" />
+    
+    <h3><?php _e('Throttling Rules',"tdomf"); ?></h3>
+
+	<p>
+	<?php _e('You can add rules to throttle input based on registered user accounts and/or IP addresses.',"tdomf"); ?>
+	</p>
+   
+    <?php printf(__("<table border=\"0\">
+                     <tr><td>Only %s submissions per</td>
+                     <td>%s</td>
+                     <td>%s(optionally) per %s Seconds (1 hour = 3600 seconds)</td>
+                     <td>%s</td>
+                     </tr>
+                     </table>","tdomf"),
+                     '<input type="text" name="tdomf_throttle_rule_count" id="tdomf_throttle_rule_count" size="3" value="10" /> 
+                      <select id="tdomf_throttle_rule_sub_type" name="tdomf_throttle_rule_sub_type" >
+                      <option value="unapproved" selected />'.__("unapproved","tdomf").'
+                      <option value="any" />'.__("any","tdomf").'
+                      </select>',
+                     '<input type="radio" name="tdomf_throttle_rule_user_type" id="tdomf_throttle_rule_user_type" value="user" />'.__("registered user","tdomf").'<br/>
+                      <input type="radio" name="tdomf_throttle_rule_user_type" id="tdomf_throttle_rule_user_type" value="ip" checked />'.__("IP","tdomf"),
+                     '<input type="checkbox" name="tdomf_throttle_rule_opt1" id="tdomf_throttle_rule_opt1" checked >',
+                     '<input type="text" name="tdomf_throttle_rule_time" id="tdomf_throttle_rule_time" size="3" value="3600" />',
+                     '<input type="submit" name="tdomf_add_throttle_rule" id="tdomf_add_throttle_rule" value="'.__("Add","tdomf").' &raquo;">'); ?>
+
+    <?php $throttle_rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id); 
+          if(is_array($throttle_rules) && !empty($throttle_rules)) { ?>
+    
+    <p><b><?php _e("Current Throttle Rules","tdomf"); ?></b>
+    <ul>
+    <?php  foreach($throttle_rules as $id => $throttle_rule) {
+             $option_string = "";
+             if($throttle_rule['opt1']) {
+                 $option_string = sprintf(__("per %s Seconds","tdomf"),$throttle_rule['time']);
+             }
+        ?>
+        <li>
+        <?php printf(__("(%d) Only %d %s submissions per %s %s","tdomf"),$id,$throttle_rule['count'],$throttle_rule['sub_type'],$throttle_rule['type'],$option_string); ?>
+        <input type="submit" name="tdomf_remove_throttle_rule_<?php echo $id; ?>" id="tdomf_remove_throttle_rule_<?php echo $id; ?>" value="<?php _e("Remove","tdomf"); ?> &raquo;">
+        </li>
+    <?php } ?>
+    </ul>
+    </p>
+    
+          <?php } else { ?>
+              <p><b><?php _e("No Throttling Rules currently set.","tdomf"); ?></b></p>
+          <?php } ?>
+    
   <table border="0"><tr>
 
     <td>
@@ -753,8 +860,54 @@ function tdomf_handle_options_actions() {
   	$wp_roles = new WP_Roles();
   }
   $roles = $wp_roles->role_objects;
+  
+  $remove_throttle_rule = false;
+  $rule_id = 0;
+  if(isset($_REQUEST['tdomf_form_id'])) {
+      $form_id = intval($_REQUEST['tdomf_form_id']);
+      $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
+      if(is_array($rules)) {
+          foreach($rules as $id => $r) {
+              if(isset($_REQUEST["tdomf_remove_throttle_rule_$id"])) {
+                  $remove_throttle_rule = true;
+                  $rule_id = $id;
+                  break;
+              }
+          }
+      }
+  }
+  
+  if($remove_throttle_rule) {
+      check_admin_referer('tdomf-options-save');
+      
+      unset($rules[$rule_id]);
+      tdomf_set_option_form(TDOMF_OPTION_THROTTLE_RULES,$rules,$form_id);
+      
+      $message .= "Throttle rule removed!<br/>";
+      tdomf_log_message("Removed throttle rule");
+      
+  } else if(isset($_REQUEST['tdomf_add_throttle_rule'])) {
+     
+     check_admin_referer('tdomf-options-save');
 
-  if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create_dummy_user') {
+     $form_id = intval($_REQUEST['tdomf_form_id']);
+     
+     $rule = array();
+     $rule['sub_type'] = $_REQUEST['tdomf_throttle_rule_sub_type'];
+     $rule['count'] = $_REQUEST['tdomf_throttle_rule_count'];
+     $rule['type'] = $_REQUEST['tdomf_throttle_rule_user_type'];
+     $rule['opt1'] = isset($_REQUEST['tdomf_throttle_rule_opt1']);
+     $rule['time'] = intval($_REQUEST['tdomf_throttle_rule_time']);
+                            
+     $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
+     if(!is_array($rules)) { $rules = array(); }
+     $rules[] = $rule;
+     tdomf_set_option_form(TDOMF_OPTION_THROTTLE_RULES,$rules,$form_id);
+     
+     $message .= "Throttle rule added!<br/>";
+     tdomf_log_message("Added a new throttle rule: " . var_export($rule,true));
+     
+  } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create_dummy_user') {
      check_admin_referer('tdomf-create-dummy-user');
      tdomf_create_dummy_user();
      $message = "Dummy user created for Default Author!<br/>";
@@ -831,11 +984,37 @@ function tdomf_handle_options_actions() {
       }
       
       // verification method
+      
       $tdomf_verify = $_POST['tdomf_verify'];
       update_option(TDOMF_OPTION_VERIFICATION_METHOD,$tdomf_verify);
       
       $tdomf_form_data = $_POST['tdomf_form_data'];
       update_option(TDOMF_OPTION_FORM_DATA_METHOD,$tdomf_form_data);
+      
+      // spam options
+      
+      $tdomf_spam = isset($_POST['tdomf_spam']);
+      update_option(TDOMF_OPTION_SPAM,$tdomf_spam);
+      
+      if($tdomf_spam) {
+        $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
+        $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+        if(get_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
+            if(!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key)){
+               update_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key);
+               update_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev);
+            } else {
+              $message .= "<font color='red'>".sprintf(__("The key: %s has not been recognised by akismet. Spam protection has been disabled.","tdomf"),$tdomf_spam_akismet_key)."</font><br/>";
+              update_option(TDOMF_OPTION_SPAM,false);
+            }
+        }
+      }
+      
+      $tdomf_spam_notify = $_POST['tdomf_spam_notify'];
+      update_option(TDOMF_OPTION_SPAM_NOTIFY,$tdomf_spam_notify);
+      
+      $tdomf_spam_auto_delete = $_POST['tdomf_spam_auto_delete'];
+      update_option(TDOMF_OPTION_SPAM_AUTO_DELETE,$tdomf_spam_auto_delete);
       
       $message .= "Options Saved!<br/>";
       tdomf_log_message("Options Saved");
@@ -948,6 +1127,11 @@ function tdomf_handle_options_actions() {
       if(isset($_POST['tdomf_use_page'])) { $use_page = true; }
       tdomf_set_option_form(TDOMF_OPTION_SUBMIT_PAGE,$use_page,$form_id);
 
+      // Queue period
+      //
+      $tdomf_queue_period = intval($_POST['tdomf_queue_period']);
+      tdomf_set_option_form(TDOMF_OPTION_QUEUE_PERIOD,$tdomf_queue_period,$form_id);
+      
       tdomf_log_message("Options Saved for Form ID $form_id");
        
   } else if(isset($_REQUEST['delete'])) {

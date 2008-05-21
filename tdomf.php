@@ -253,6 +253,25 @@ Author URI: http://thedeadone.net
 // - Fixed a bug where some widgets were not making it to the form when the form
 //     is generated. This was a mistake in the "modes" support added in v0.10.3.
 //
+// v0.x.y: TBD
+// - Fixed a small behaviour issue in generate form where it would keep the 
+//     preview, even after reloading the page!
+// - Integreted with Akismet for Spam protection
+// - Fixed an issue with "get category" widget where it would forget it's 
+//     settings occasionally
+// - Increased the number of tdomf news items and added an list of the latest
+//     topics from the forum to the overview page
+// - Published Posts can now be automatically queued!
+// - Fixed "Your Submissions" links for users who are not-admin such as Editors
+// - Can add throttling rules to form
+//
+/*
+   - Text output of tdomfinfo
+   - Exporting/Importing Form settings
+   - Random Questions
+   - Author Widget
+   - Image Template Tags
+ */
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -261,11 +280,6 @@ TODO for future versions
 
 Known Bugs
 - Invalid markup is used in several form elements
-
-Spam Protection
-- Integration with Akismet
-- Spam Button on moderation page
-- Throttle number of submissions per day (or hour/min) per ip (or user) (should probably be able to add several rules)
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -283,7 +297,7 @@ New Features
 - Email verification of non-registered users
 - AJAX support
 - Edit Posts
-  * Using same/similar form as what the post was submitted with
+  * Using same/similar form as what the post was submitted with?
   * Create Edit-Post only forms
   * Allow various controls and access for forms: per category and by access roles
   * Editing Post implies adding/removing comments too (can replace comment submission form)
@@ -294,6 +308,7 @@ New Features
 - Option to use "Post ready for review" instead of draft for unapproved submitted posts
 - On Options and Widgets Page, set the "title" of the Form links to the given title of the form
 - Turn Forms into multiple steps
+- Shortcode Support
 
 New Form Options
 - Force Preview before submission
@@ -310,13 +325,16 @@ New Widgets
 - Widget to allow users to enable/disable comments and trackbacks on their submission
 - Widget to allow user to enter a date to post the submission (as in future post)
 - Widget that inputs only title
+- Login/Register/Who Am I Widget
+- Insert Text into Form Widget
 
 Existing Widget Improvements
 - Make Widget-Form menu independant of Wordpress code (the current code will break in Wordpress 2.5)
 - Any widget with a size or length field should be customisable.
 - Any static text used in widgets need to be customisable.
+- Textfield Class (support numeric, date, email, webpage, etc.)
+- Textarea Class
 - Widget code hacker
-- Fixed sizes for Widget Control windows
 - Copy Widget to another Form
 - Upload Files
   * Multiple Instances
@@ -367,7 +385,7 @@ Existing Widget Improvements
   * Co-operate with "Categories" Widget
   * Hide if form is for pages
 - Who Am I
-  * Integration with WP-OpenID
+  * Integration with WP-OpenID?
 
 Template Tags
 - Log
@@ -393,9 +411,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "29");
+define("TDOMF_BUILD", "30");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.10.4");
+define("TDOMF_VERSION", "0.11");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -522,6 +540,24 @@ define('TDOMF_OPTION_VERIFICATION_METHOD',"tdomf_verify");
 define('TDOMF_OPTION_FORM_DATA_METHOD',"tdomf_form_data");
 define('TDOMF_DB_TABLE_SESSIONS',"tdomf_table_sessions");
 
+//////////////////////
+// 0.11 Settings
+
+define('TDOMF_OPTION_SPAM',"tdomf_spam_protection");
+define('TDOMF_OPTION_SPAM_AKISMET_KEY',"tdomf_akismet_key");
+define('TDOMF_OPTION_SPAM_AKISMET_KEY_PREV',"tdomf_akismet_key_prev");
+define('TDOMF_OPTION_SPAM_NOTIFY',"tdomf_spam_notify");
+define('TDOMF_OPTION_SPAM_AUTO_DELETE',"tdomf_spam_auto_delete");
+define('TDOMF_VERSION_LAST', "tdomf_version_last");
+define('TDOMF_KEY_SPAM',"_tdomf_spam_flag");
+define('TDOMF_KEY_USER_AGENT',"_tdomf_user_agent");
+define('TDOMF_KEY_REFERRER',"_tdomf_referrer");
+define('TDOMF_STAT_SPAM', "tdomf_stat_spam");
+
+define('TDOMF_OPTION_QUEUE_PERIOD', "tdomf_queue_period");
+define('TDOMF_OPTION_THROTTLE_RULES', "tdomf_throttle_rules");
+
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -559,7 +595,14 @@ function tdomf_wp25() {
 add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
-    add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
+    
+    $unmod_count = tdomf_get_unmoderated_posts_count();
+    
+    /*if(tdomf_wp25() && $unmod_count > 0) {
+        add_menu_page(__('TDO Mini Forms', 'tdomf'), sprintf(__("TDO Mini Forms <span id='awaiting-mod' class='count-%d'><span class='comment-count'>%d</span></span>", 'tdomf'), $unmod_count, $unmod_count), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
+    } else {*/
+        add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
+    /*}*/
 
     // Options
     add_submenu_page( TDOMF_FOLDER , __('Form Manager and Options', 'tdomf'), __('Form Manager and Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
@@ -569,7 +612,7 @@ function tdomf_add_menus()
     //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
-       add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), tdomf_get_unmoderated_posts_count()), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
+            add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     else {
       add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation Disabled', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
@@ -599,20 +642,52 @@ require_once('include'.DIRECTORY_SEPARATOR.'tdomf-log-functions.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-hacks.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-widget-functions.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-spam.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-form.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-form.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
+
+/////////////////////////
+// What's new since... //
+/////////////////////////
+
+function tdomf_new_features() {
+  $last_version = get_option(TDOMF_VERSION_LAST);
+  $features = "";
+  
+  if($last_version == false) { return false; }
+  
+  // 29 = 0.10.4
+  if($last_version <= 29) {
+    
+    $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu#spam";
+    $features .= "<li>".sprintf(__('<a href="%s">Integration with Akismet for SPAM protection</a>','tdomf'),$link)."</li>";
+
+    $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#queue";
+    $features .= "<li>".sprintf(__('<a href="%s">Automatically schedule approved posts!</a>','tdomf'),$link)."</li>";
+    
+    $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#throttle";
+    $features .= "<li>".sprintf(__('<a href="%s">Add submission throttling rules to your form!</a>','tdomf'),$link)."</li>";
+  }
+  // 30 = 0.11 beta1
+  
+  if(!empty($features)) {
+    return "<ul>".$features."</ul>";
+  }
+  
+  return false;
+}
 
 /////////////////////////
 // Start/Init/Upgrade //
@@ -659,6 +734,7 @@ function tdomf_init(){
   
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
+    update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));
     update_option(TDOMF_VERSION_CURRENT,TDOMF_BUILD);
   }
 }

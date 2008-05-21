@@ -188,8 +188,22 @@ function tdomf_content_adminbuttons_filter($content=''){
             
        $delete_link = get_bloginfo('wpurl')."/wp-admin/post.php?action=delete&post=$post_ID";
        $delete_link = wp_nonce_url($delete_link,'delete-post_'.$post_ID);
-     
-       return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>]</p>',"tdomf"),$publish_link,$delete_link);
+       
+       if(get_option(TDOMF_OPTION_SPAM)) {
+           $spam_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$post_ID";
+           $spam_link = wp_nonce_url($spam_link,'tdomf-spamit_'.$post_ID);
+         
+           $ham_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$post_ID";
+           $ham_link = wp_nonce_url($ham_link,'tdomf-hamit_'.$post_ID);
+           
+            if(get_post_meta($post_ID, TDOMF_KEY_SPAM)) {
+                 return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>] [<a href="%s">Not Spam</a>]</p>',"tdomf"),$publish_link,$delete_link,$ham_link);
+            } else {
+                 return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>] [<a href="%s">Spam</a>]</p>',"tdomf"),$publish_link,$delete_link,$spam_link);
+            }
+       } else {
+           return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>]</p>',"tdomf"),$publish_link,$delete_link);
+       }
    }
    return $content;
 }
