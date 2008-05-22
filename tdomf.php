@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.10.4
+Version: 0.11
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -232,19 +232,19 @@ Author URI: http://thedeadone.net
 // - Fixed a bug if you reload the image capatcha, it would not longer verify
 // - Added a flag TDOMF_HIDE_REGISTER_GLOBAL_ERROR in tdomf.php that can be set
 //     to true to hide the register_global errors that get displayed.
-// - WP2.5 only: Can now set a max width or height for widgets control on the 
+// - WP2.5 only: Can now set a max width or height for widgets control on the
 //     Form Widgets screen.
 // - Compatibily with Wordpress 2.5
 //
 // v0.10.3: 16th April 2008
-// - Fixed a bug in the random_string generator: it did not validate input and 
+// - Fixed a bug in the random_string generator: it did not validate input and
 //     I've been using a value that's too big (which meant it could return 0)
-// - Widgets now support "modes" which means widgets can be filtered per form 
-//     type. Right now that means widgets that don't support pages will not 
+// - Widgets now support "modes" which means widgets can be filtered per form
+//     type. Right now that means widgets that don't support pages will not
 //     appear, if the form is for submitting pages.
-// - Can now choose how to verify an input form: original, wordpress nonce or 
+// - Can now choose how to verify an input form: original, wordpress nonce or
 //     none at all
-// - Implemented a workaround for register_global and unavaliablity of 
+// - Implemented a workaround for register_global and unavaliablity of
 //     $_SESSION on some hosts
 // - Fixed double thumbnail issue in WP2.5
 //
@@ -253,11 +253,11 @@ Author URI: http://thedeadone.net
 // - Fixed a bug where some widgets were not making it to the form when the form
 //     is generated. This was a mistake in the "modes" support added in v0.10.3.
 //
-// v0.11.0: TBD
-// - Fixed a small behaviour issue in generate form where it would keep the 
+// v0.11.0: 22nd May 2008
+// - Fixed a small behaviour issue in generate form where it would keep the
 //     preview, even after reloading the page!
 // - Integreted with Akismet for Spam protection
-// - Fixed an issue with "get category" widget where it would forget it's 
+// - Fixed an issue with "get category" widget where it would forget it's
 //     settings occasionally
 // - Increased the number of tdomf news items and added an list of the latest
 //     topics from the forum to the overview page
@@ -266,12 +266,13 @@ Author URI: http://thedeadone.net
 // - Can add throttling rules to form
 // - Can now view tdomfinfo() in text and html-code formats
 // - Import and Export individual Form settings
+// - Top Submitter Theme Widget
 //
 /*
    - Random Questions
-   - Author Widget
    - Image Template Tags
    - Modifying Email Message
+   - Username widget
  */
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -281,6 +282,8 @@ TODO for future versions
 
 Known Bugs
 - Invalid markup is used in several form elements
+- Display of Widgets in WP2.5 seems a little funky
+- The Image Capatcha widget has a little bit odd behaviour
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -325,6 +328,7 @@ New Form Options
 New Widgets
 - Widget to allow users to enable/disable comments and trackbacks on their submission
 - Widget to allow user to enter a date to post the submission (as in future post)
+- Widget to allow submitter to copy the submission to another email
 - Widget that inputs only title
 - Login/Register/Who Am I Widget
 - Insert Text into Form Widget
@@ -408,7 +412,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "30");
+define("TDOMF_BUILD", "31");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.11");
 
@@ -592,9 +596,9 @@ function tdomf_wp25() {
 add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
-    
+
     $unmod_count = tdomf_get_unmoderated_posts_count();
-    
+
     /*if(tdomf_wp25() && $unmod_count > 0) {
         add_menu_page(__('TDO Mini Forms', 'tdomf'), sprintf(__("TDO Mini Forms <span id='awaiting-mod' class='count-%d'><span class='comment-count'>%d</span></span>", 'tdomf'), $unmod_count, $unmod_count), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     } else {*/
@@ -662,18 +666,18 @@ require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
 function tdomf_new_features() {
   $last_version = get_option(TDOMF_VERSION_LAST);
   $features = "";
-  
+
   if($last_version == false) { return false; }
-  
+
   // 29 = 0.10.4
   if($last_version <= 29) {
-    
+
     $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu#spam";
     $features .= "<li>".sprintf(__('<a href="%s">Integration with Akismet for SPAM protection</a>','tdomf'),$link)."</li>";
 
     $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#queue";
     $features .= "<li>".sprintf(__('<a href="%s">Automatically schedule approved posts!</a>','tdomf'),$link)."</li>";
-    
+
     $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#throttle";
     $features .= "<li>".sprintf(__('<a href="%s">Add submission throttling rules to your form!</a>','tdomf'),$link)."</li>";
 
@@ -682,16 +686,20 @@ function tdomf_new_features() {
         $link2 = "admin.php?page=".TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR."tdomf-info.php&html";
         $features .= "<li>".sprintf(__('View tdomfinfo() in <a href="%s">text</a> and <a href="%s">html-code</a>. Useful for copying and pasting!',"tdomf"),$link,$link2)."</li>";
     }
-    
+
     $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#import";
     $features .= "<li>".sprintf(__('<a href="%s">Import and export individual form settings</a>','tdomf'),$link)."</li>";
+
+    $link = get_bloginfo('wpurl')."/wp-admin/widgets.php";
+    $features .= "<li>".sprintf(__('New widget for your theme: <a href="%s">Top Submitters</a>','tdomf'),$link)."</li>";
   }
-  // 30 = 0.11 beta1
-  
+  // 30 = 0.11b
+  // 31 = 0.11
+
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }
-  
+
   return false;
 }
 
@@ -729,7 +737,7 @@ function tdomf_init(){
   if(get_option(TDOMF_OPTION_VERIFICATION_METHOD) == false) {
     add_option(TDOMF_OPTION_VERIFICATION_METHOD,'wordpress_nonce');
   }
-  
+
   if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == false) {
     if(ini_get('register_globals')) {
        add_option(TDOMF_OPTION_FORM_DATA_METHOD,'db');
@@ -737,7 +745,7 @@ function tdomf_init(){
        add_option(TDOMF_OPTION_FORM_DATA_METHOD,'session');
     }
   }
-  
+
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));
