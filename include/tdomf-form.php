@@ -165,7 +165,7 @@ function tdomf_validate_form($args,$preview = false) {
    return NULL;
 }
 
-function tdomf_timestamp_wp_sql( $timestamp, $gmt = 0 ) {
+function tdomf_timestamp_wp_sql( $timestamp, $gmt = false ) {
    return ( $gmt ) ? gmdate( 'Y-m-d H:i:s', $timestamp ) : gmdate( 'Y-m-d H:i:s', ( $timestamp + ( get_option( 'gmt_offset' ) * 3600 ) ) );
 }
 
@@ -179,6 +179,7 @@ function tdomf_queue_date($form_id,$current_ts)  {
           FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
           WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
                 AND $wpdb->postmeta.meta_value='".$form_id."'
+                AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
           ORDER BY post_date DESC 
           LIMIT 1 ";
           $results = $wpdb->get_results($query);
@@ -641,6 +642,9 @@ function tdomf_form_filter($content=''){
 
    foreach($forms as $id => $form ) {
      $content = preg_replace('|<!--tdomf_form$id-->|', '[tdomf_form$id]', $content);
+     // prep form: the $ and \\ are special operators in preg_replace replacement string
+     $form = str_replace('$','\\$',$form);
+     $form = str_replace('\\\\','\\\\\\\\',$form);
      // make sure to swallow paragraph markers as well so the form is valid xhtml
      $content = preg_replace("|(<p>)*(\n)*\[tdomf_form$id\](\n)*(</p>)*|", $form, $content);
    }

@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.11
+Version: 0.11.1
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -268,13 +268,23 @@ Author URI: http://thedeadone.net
 // - Import and Export individual Form settings
 // - Top Submitter Theme Widget
 //
+// v0.11.1: 23rd May 2008
+// - Fixed a mistake in the post scheduling, GMT offset would kick in if time
+//     greater than an hour
+// - Added times and list of scheduled posts to Your Submissions
+// - Corrected some formatting mistakes on the options page
+// - Added a pot file and removed the po file.
+// - Using a dollar sign plus a value in a input field would cause the first two
+//    digits to disappear - now fixed.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 /*
    - Random Questions
    - Image Template Tags
    - Modifying Email Message
    - Username widget
  */
-////////////////////////////////////////////////////////////////////////////////
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
@@ -412,9 +422,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "31");
+define("TDOMF_BUILD", "32");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.11");
+define("TDOMF_VERSION", "0.11.1");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -695,6 +705,7 @@ function tdomf_new_features() {
   }
   // 30 = 0.11b
   // 31 = 0.11
+  // 32 = 0.11.1 (bug fixes)
 
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

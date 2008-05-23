@@ -222,7 +222,7 @@ function tdomf_show_general_options() {
   
   </p>
     
-    <a name="spam" /><h3><?php _e('Spam Protection',"tdomf"); ?></h3>
+    <h3 id="spam"><?php _e('Spam Protection',"tdomf"); ?></h3>
     
     <p>
     <?php printf(__('You can now enable spam protection for new submissions. The online service Akismet is used to identify if a submission is spam or not. Submissions marked as spam cab be deleted automatically after a month. You can moderate spam from the <a href="%s">Moderation</a> screen.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu&f=3"); ?>
@@ -349,7 +349,7 @@ function tdomf_show_form_options($form_id) {
       <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
       <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
     <?php } ?>
-     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?><a></li>  
+     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a></li>  
     </ul>
           <?php } ?>
 
@@ -368,14 +368,14 @@ function tdomf_show_form_options($form_id) {
     
     <form method="post" action="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>">
 
-    <h3><?php _e('Form Name',"tdomf"); ?> </h3>
+    <h3><?php _e('Form Name',"tdomf"); ?></h3>
     
     <p>
     <?php _e('You can give this form a name to make it easier to identify. The name will also be used on the "Your Submissions" page if the form is included. HTML tags will be stripped.','tdomf'); ?>
     </p>
     
      <?php $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id); ?>
-	</p>
+	<p>
 	<b><?php _e("Form Name","tdomf"); ?></b>
 	<input type="text" name="tdomf_form_name" id="tdomf_form_name" value="<?php if($form_name) { echo htmlentities(stripslashes($form_name),ENT_QUOTES,get_bloginfo('charset')); } ?>" />
 	</p>
@@ -602,9 +602,7 @@ function tdomf_show_form_options($form_id) {
 	<input type="checkbox" name="tdomf_use_page" id="tdomf_use_page"  <?php if($use_page) echo "checked"; ?> >
 	</p>
   
-    <a name="queue" />
-    
-    <h3><?php _e('Queue Published Submissions',"tdomf"); ?></h3>
+    <h3 id="queue"><?php _e('Queue Published Submissions',"tdomf"); ?></h3>
 
 	<p>
 	<?php _e('You can set submissions from this form that are published/approved to be queued before appearing on the site. Just set the period of time between each post and TDOMF will schedule approved submissions from this form. A value of 0 or -1 disables this option.',"tdomf"); ?>
@@ -617,9 +615,7 @@ function tdomf_show_form_options($form_id) {
     <?php _e("Seconds (1 day = 86400 seconds)","tdomf"); ?>
 	</p>
 
-    <a name="throttle" />
-    
-    <h3><?php _e('Throttling Rules',"tdomf"); ?></h3>
+    <h3 id="throttle"><?php _e('Throttling Rules',"tdomf"); ?></h3>
 
 	<p>
 	<?php _e('You can add rules to throttle input based on registered user accounts and/or IP addresses.',"tdomf"); ?>
@@ -666,9 +662,7 @@ function tdomf_show_form_options($form_id) {
               <p><b><?php _e("No Throttling Rules currently set.","tdomf"); ?></b></p>
           <?php } ?>
     
-     <a name="import" />
-          
-     <h3><?php _e('Export/Import Form Settings',"tdomf"); ?></h3>
+     <h3 id="import"><?php _e('Export/Import Form Settings',"tdomf"); ?></h3>
      
      <p>
 	<?php _e('The textbox below contains the export of data for this form including widgets. If you wish to import a form, paste its settings here and click Import.',"tdomf"); ?>
@@ -754,7 +748,7 @@ function tdomf_options_form_list($form_id_in=false) {
        <?php $form_ids = tdomf_get_form_ids();
           if(!empty($form_ids)) {
             foreach($form_ids as $form_id) { ?>
-                <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id->form_id; ?>"<?php if($form_id->form_id == $form_id_in) { ?> class="current" <?php } ?>">
+                <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id->form_id; ?>"<?php if($form_id->form_id == $form_id_in) { ?> class="current" <?php } ?>>
                 <?php printf(__("Form %d","tdomf"),$form_id->form_id); ?></a> |</li>
             <?php }
           } ?>

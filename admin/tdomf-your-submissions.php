@@ -9,11 +9,29 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 //
 function tdomf_get_user_published_posts($user_id = 0, $offset = 0, $limit = 0) {
   global $wpdb;
-	$query = "SELECT ID, post_title, meta_value, post_status, post_modified_gmt, post_modified ";
+	$query = "SELECT ID, post_title, meta_value, post_status, post_modified_gmt, post_modified, post_date, post_date_gmt ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
    $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
    $query .= "AND post_status = 'publish' ";
+   $query .= "AND meta_value = '$user_id' ";
+   	$query .= "ORDER BY ID DESC ";
+   if($limit > 0) {
+         $query .= "LIMIT $limit ";
+      }
+      if($offset > 0) {
+         $query .= "OFFSET $offset ";
+   }
+	return $wpdb->get_results( $query );
+}
+
+function tdomf_get_user_scheduled_posts($user_id = 0, $offset = 0, $limit = 0) {
+  global $wpdb;
+	$query = "SELECT ID, post_title, meta_value, post_status, post_modified_gmt, post_modified, post_date, post_date_gmt ";
+	$query .= "FROM $wpdb->posts ";
+	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+   $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
+   $query .= "AND post_status = 'future' ";
    $query .= "AND meta_value = '$user_id' ";
    	$query .= "ORDER BY ID DESC ";
    if($limit > 0) {
@@ -45,6 +63,16 @@ function tdomf_get_user_draft_posts($user_id = 0, $offset = 0, $limit = 0) {
 	return $wpdb->get_results( $query );
 }
 
+function tdomf_get_post_time( $d = 'U', $gmt = false, $post ) { // returns timestamp
+	if ( $gmt )
+		$time = $post->post_date_gmt;
+	else
+		$time = $post->post_date;
+
+	$time = mysql2date($d, $time);
+	return apply_filters('get_the_time', $time, $d, $gmt);
+}
+
 // Show the page!
 //
 function tdomf_show_your_submissions_menu() {
@@ -58,6 +86,9 @@ function tdomf_show_your_submissions_menu() {
   $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
   $app_posts = tdomf_get_user_published_posts($current_user->ID,0,5);
   $mod_posts = tdomf_get_user_draft_posts($current_user->ID);
+  $mod_total = count($mod_posts);
+  $fut_posts = tdomf_get_user_scheduled_posts($current_user->ID);
+  $fut_total = count($fut_posts);
  
   ?>
 
@@ -93,16 +124,47 @@ function tdomf_show_your_submissions_menu() {
       <?php } ?>
 
     <?php if($tdomf_flag && ($sub_total > 0 || $app_total > 0)) { ?>
+        
+        <?php if($fut_total > 0) { ?>
+            <h3><?php printf(__('Your Next %d Scheduled Submissions','tdomf'),$fut_total); ?></h3>
+            <ul>
+         <?php foreach($fut_posts as $p) { ?>
+          <li>
+          <?php $t_time = get_the_time(__('Y/m/d g:i:s A'));
+                $m_time = $p->post_date;
+                $time = tdomf_get_post_time('G', true, $p);
+                if ( ( abs(time() - $time) ) < 86400 ) {
+                    $h_time = sprintf( __('%s from now'), human_time_diff( $time ) );
+                } else {
+                    $h_time = mysql2date(__('Y/m/d'), $m_time);
+                } ?>
+                <?php printf(__("<a href='%s'>%s</a> will be published %s","tdomf"),get_permalink($p->ID),$p->post_title,"<abbr title='$t_time'>$h_time</abbr>"); ?>
+          </li>
+         <?php } ?>
+    	  </ul>
+        <?php } ?>
+        
        <?php if($app_total > 0) { ?>
-         <h3><?php printf(__('Your Last %d Approved Submissions','tdomf'),5); ?></h3>
+         <h3><?php printf(__('Your Last %d Published Submissions','tdomf'),($app_total < 5) ? $app_total : 5 ); ?></h3>
          <ul>
          <?php foreach($app_posts as $p) { ?>
-          <li><a href="<?php echo get_permalink($p->ID); ?>">"<?php echo $p->post_title; ?>"</a> approved on <?php echo mysql2date("jS F, g:iA", $p->post_modified); ?></li>
+          <li>
+          <?php $t_time = get_the_time(__('Y/m/d g:i:s A'));
+                $m_time = $p->post_date;
+                $time = tdomf_get_post_time('G', true, $p);
+                if ( ( abs(time() - $time) ) < 86400 ) {
+                    $h_time = sprintf( __('%s ago'), human_time_diff( $time ) );
+                } else {
+                    $h_time = mysql2date(__('Y/m/d'), $m_time);
+                } ?>
+                <?php printf(__("<a href='%s'>%s</a> approved %s","tdomf"),get_permalink($p->ID),$p->post_title,"<abbr title='$t_time'>$h_time</abbr>"); ?>
+          </li>
          <?php } ?>
     	  </ul>
        <?php } ?>
-       <?php if(($sub_total - $app_total)> 0) { ?>
-         <h3><?php _e('Your Sumissions waiting Moderation','tdomf'); ?></h3>
+       
+       <?php if(($mod_total)> 0) { ?>
+         <h3><?php _e('Your Sumissions awaiting Moderation','tdomf'); ?></h3>
          <ul>
          <?php foreach($mod_posts as $p) { ?>
           <li>"<?php echo $p->post_title; ?>"</li>
