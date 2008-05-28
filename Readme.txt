@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
 Requires at least: 2.3
 Tested up to: 2.5
 Stable Tag: 0.11.1
@@ -12,7 +12,7 @@ This plugin allows you to add custom posting forms to your website that allows y
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable).
 
-** Verision 0.11 provides intregration with Akismet, Submission Throttling, Import and Export of Form settings, Queuing Approved Post, Top Submitter theme widget and numerous bug fixes! **
+**Verision 0.11 provides intregration with Akismet, Submission Throttling, Import and Export of Form settings, Queuing Approved Post, Top Submitter theme widget and numerous bug fixes!**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -256,7 +256,6 @@ PHP Function to display a human readable time interval based on a function I fou
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
 * Form does not validate as XHTML. I'll fix this soon I swear! :)
 * Display of individual form widgets seems a little funky at times but works
-* The Image Capatcha widget has some strange behaviour using the wordpress_nonce session option
 * An clash with using the WP-United plugin and TDO-Mini Forms (v0.10.4) has been reported. Not yet investigated. (http://thedeadone.net/forum/?p=266)
 
 == Version History ==

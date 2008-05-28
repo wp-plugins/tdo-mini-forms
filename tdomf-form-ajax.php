@@ -1,11 +1,141 @@
 <?php
 
-# The Wordpress Wiki gives a great tutorial on how to use the build in
-# AJAX support for viewer-based plugins: http://codex.wordpress.org/AJAX_in_Plugins
-#
-# However I have not yet implemented AJAX support for tdomf. See:
-# http://thedeadone.net/blog/dropping-ajax-in-tdo-mini-forms-v07/
+// Load up Wordpress
+//
+$wp_config = realpath("../../../wp-config.php");
+if (!file_exists($wp_config)) {
+   exit("Can't find wp-config.php");
+}
+require_once($wp_config);
 
-die( "alert('Not Implemented');" );
+global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 
+// loading text domain for language translation
+//
+load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
+
+// Form id
+//
+if(!isset($_POST['tdomf_form_id'])) {
+  tdomf_log_message("tdomf-form-post: No Form ID set!",TDOMF_LOG_BAD);
+  die( "alert('".__("TDOMF: No Form id!","tdomf")."');" );
+}
+$form_id = intval($_POST['tdomf_form_id']);
+if(!tdomf_form_exists($form_id)){
+  tdomf_log_message("tdomf-form-post: Bad form id %d!",TDOMF_LOG_BAD);
+  die( "tdomfDisplayMessage$form_id('TDOMF: Bad Form Id','full');" );
+}
+
+function tdomf_ajax_exit($form_id, $message, $full = false) {
+    global $form_id;
+    $message = str_replace("'","\\'",$message);
+    $message = str_replace("\n"," ",$message);
+    #$message = htmlentities($message,ENT_COMPAT);
+    if($full) {
+        die( "tdomfDisplayMessage$form_id('$message','full');" );
+    }  else {
+        die( "tdomfDisplayMessage$form_id('$message','');" );
+    }
+}
+
+// Get Form Data for verficiation check
+//
+$form_data = tdomf_get_form_data($form_id);
+
+// Security Check
+//
+$tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+if($tdomf_verify == false || $tdomf_verify == 'default') {
+  if(!isset($form_data['tdomf_key_'.$form_id]) || $form_data['tdomf_key_'.$form_id] != $_POST['tdomf_key_'.$form_id]) {
+     if(!isset($form_data) || !isset($form_data['tdomf_key_'.$form_id]) || trim($form_data['tdomf_key_'.$form_id]) == "") {
+       tdomf_log_message('Key is missing from $form_data: contents of $form_data:<pre>'.var_export($form_data,true)."</pre>",TDOMF_LOG_BAD);
+     }
+     $session_key = $form_data['tdomf_key_'.$form_id];
+     $post_key = $_POST['tdomf_key_'.$form_id];
+     $ip = $_SERVER['REMOTE_ADDR'];
+     tdomf_log_message("Form ($form_id) submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
+     unset($form_data['tdomf_key_'.$form_id]);
+     tdomf_save_form_data($form_id,$form_data);
+     tdomf_ajax_exit($form_id,__("<font color='red'>TDOMF: Bad data submitted. Please reload the page and try submitting your post again.</font>","tdomf"),true);
+  }
+  unset($form_data['tdomf_key_'.$form_id]);
+} else if($tdomf_verify == 'wordpress_nonce') {
+  if(!wp_verify_nonce($_POST['tdomf_key_'.$form_id],'tdomf-form-'.$form_id)) {
+    $post_key = $_POST['tdomf_key_'.$form_id];
+    $ip = $_SERVER['REMOTE_ADDR'];    
+    tdomf_log_message("Form ($form_id) submitted with bad nonce key (post = $post_key) from $ip !",TDOMF_LOG_BAD);
+    tdomf_ajax_exit($form_id,__("<font color='red'>TDOMF: Bad data submitted. Please reload the page and try submitting your post again.</font>","tdomf"));
+  }
+}
+
+function tdomf_fixslashesargs() {
+    if (get_magic_quotes_gpc()) {
+      tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes!");
+      if(!function_exists('stripslashes_array')) {
+        function stripslashes_array($array) {
+            return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
+        }
+      }
+      $_COOKIE = stripslashes_array($_COOKIE);
+      #$_FILES = stripslashes_array($_FILES);
+      #$_GET = stripslashes_array($_GET);
+      $_POST = stripslashes_array($_POST);
+      $_REQUEST = stripslashes_array($_REQUEST);
+    }
+}
+
+// Double check user permissions
+//
+$message = tdomf_check_permissions_form($form_id);
+if($message != NULL) {
+    tdomf_ajax_exit($form_id,$message,true);
+}
+
+if(!isset($_POST['tdomf_action'])) {
+    tdomf_ajax_exit($form_id,__("TDOMF (AJAX) ERROR: no action set!","tdomf"),true);
+}
+
+// Now either generate a preview or create a post
+//
+if($_POST['tdomf_action'] == "post") {
+    tdomf_log_message("Someone is attempting to submit something");
+    $message = tdomf_validate_form($_POST,false);
+    if($message == NULL) {
+      $args = $_POST;
+      $args['ip'] = $_SERVER['REMOTE_ADDR'];
+      $retVal = tdomf_create_post($args);
+      // If retVal is an int it's a post id
+      if(is_int($retVal)) {
+        $post_id = $retVal;
+        if(get_post_status($post_id) == 'publish') {
+          tdomf_ajax_exit($form_id,sprintf(__("Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service.","tdomf"),get_permalink($post_id)),true);
+        } else if(get_post_status($post_id) == 'future') {
+            tdomf_ajax_exit($form_id,__("Your post submission has been accepted and should appear shortly.","tdomf"),true);
+        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
+            tdomf_ajax_exit($form_id,__("Your submission is being flagged as spam! Sorry.","tdomf"),true);
+        } else {
+            tdomf_ajax_exit($form_id,sprintf(__("Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service.","tdomf"),get_bloginfo('admin_email')),true);
+        }
+      // If retVal is a string, something went wrong!
+      } else {
+        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$retVal));
+      }
+    } else {
+        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$message));    
+    }
+} else if($_POST['tdomf_action'] == "preview") {
+   // For preview, remove magic quote slashes!
+   tdomf_fixslashesargs();
+   $message = tdomf_validate_form($_POST,true);
+   if($message == NULL) {
+      $message = tdomf_preview_form($_POST);
+      tdomf_ajax_exit($form_id,$message);
+   } else {
+       tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$message));
+   }
+} else {
+    tdomf_ajax_exit($form_id,sprintf(__("TDOMF (AJAX) ERROR: unrecognised action %s!","tdomf"),$_POST['action']),true);
+}
+
+tdomf_ajax_exit($form_id,__("ERROR! Should never reach here.","tdomf"),true);
 ?>

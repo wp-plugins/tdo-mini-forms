@@ -688,6 +688,18 @@ function tdomf_show_form_options($form_id) {
      <input type="submit" name="tdomf_import_button" id="tdomf_import_button" value="<?php _e("Import","tdomf"); ?> &raquo;">
      </p>
      
+     <h3 id="ajax"><?php _e('AJAX',"tdomf"); ?> </h3>
+
+	<p>
+	<?php _e('You can now enable your form to use AJAX to submit posts. The form handles graceful fallback to the non-ajax version for no-javascript browsers and accessibilty.',"tdomf"); ?>
+    </p>
+
+    <?php $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX,$form_id); ?>
+
+	<p>
+	<b><?php _e("Use AJAX","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_ajax" id="tdomf_ajax"  <?php if($ajax) echo "checked"; ?> >
+	</p>
           
   <table border="0"><tr>
 
@@ -1176,6 +1188,11 @@ function tdomf_handle_options_actions() {
       //
       $tdomf_queue_period = intval($_POST['tdomf_queue_period']);
       tdomf_set_option_form(TDOMF_OPTION_QUEUE_PERIOD,$tdomf_queue_period,$form_id);
+      
+      // ajax
+      //
+      $tdomf_ajax = isset($_POST['tdomf_ajax']);
+      tdomf_set_option_form(TDOMF_OPTION_AJAX,$tdomf_ajax,$form_id);
       
       tdomf_log_message("Options Saved for Form ID $form_id");
        

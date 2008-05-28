@@ -138,8 +138,8 @@ function tdomf_validate_form($args,$preview = false) {
    } else {
      $mode = "new-post";
    }
-   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_validate);
    do_action('tdomf_validate_form_start',$form_id,$mode);
+   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_validate);
 
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"",
@@ -448,6 +448,7 @@ function tdomf_generate_form_key($form_id) {
   tdomf_save_form_data($form_id,$form_data);
   return "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$random_string' />";
 }
+
 // Create the form!
 //
 function tdomf_generate_form($form_id = 1) {
@@ -456,18 +457,6 @@ function tdomf_generate_form($form_id = 1) {
   if(!tdomf_form_exists($form_id)) {
     return sprintf(__("Form %d does not exist.",'tdomf'),$form_id); 
   }
-  
-  // AJAX is currently not supported
-  //
-  $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
-
-  $form = tdomf_check_permissions_form($form_id);
-  if($form != NULL) {
-    return $form;
-  }
-  
-  // Okay, all checks pass! Now create form
-  $form = "";
 
   // Set mode of form
   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
@@ -476,18 +465,91 @@ function tdomf_generate_form($form_id = 1) {
      $mode = "new-post";
   }
   
-  // grab initial form data
-  //
-  $form_data = tdomf_get_form_data($form_id);
-    
-  // Grab widgets for this form
-  
+  $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
+  if($use_ajax) {
+      $mode .= "-ajax";
+  }
+
+  $form = tdomf_check_permissions_form($form_id);
+  if($form != NULL) {
+    return $form;
+  }
+
   do_action('tdomf_generate_form_start',$form_id,$mode);
+
+  // initilise some variables
+  //
   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
+  $form = "";
+  $form_data = tdomf_get_form_data($form_id);
+  $form_name = 'tdomf_form'.$form_id;
   
-  // AJAX or normal POST headers...
+  if($use_ajax) {
+      wp_print_scripts( array( 'jquery' ));
+      wp_print_scripts( array( 'sack' ));
+      $ajax_script = TDOMF_URLPATH.'tdomf-form-ajax.php';
+      $form .= <<<EOT
+  <script type="text/javascript">
+  //<!-- [CDATA[
+     function ajaxProgressStart$form_id() {
+        var w = jQuery('#ajaxProgress$form_id').width();
+        var h = jQuery('#ajaxProgress$form_id').height();
+        var offset = jQuery('#$form_name').offset();
+        var x = offset.left + ((jQuery('#$form_name').width() - w) / 2);
+        var y = offset.top + ((jQuery('#$form_name').height() - h) / 2);
+        jQuery('#ajaxProgress$form_id').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
+        jQuery('#ajaxProgress$form_id').attr('class','progress');
+        ajaxShadow$form_id();
+    }
+    function ajaxShadow$form_id() {
+        var offset = jQuery('#$form_name').offset();
+        var w = jQuery('#$form_name').width();
+        var h = jQuery('#$form_name').height();
+        jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+        jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
+        jQuery('#shadow$form_id').fadeTo('fast', 0.2);
+    }
+    function ajaxUnshadow$form_id() {
+        jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#shadow').hide()});
+    }
+    function ajaxProgressStop$form_id() {
+        jQuery('#ajaxProgress$form_id').attr('class','hidden');
+        jQuery('#ajaxProgress$form_id').hide();
+        ajaxUnshadow$form_id();
+    }
+  function tdomfSubmit$form_id(action) {
+    ajaxProgressStart$form_id();
+    var mysack = new sack("$ajax_script" );
+    mysack.execute = 1;
+    mysack.method = 'POST';
+    mysack.setVar( "tdomf_action", action );
+    for(i=0; i<document.$form_name.elements.length; i++) {
+        mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
+    }
+    mysack.onError = function() { alert('AJAX Error' )};
+    mysack.runAJAX();
+    return true;
+  }
+  function tdomfDisplayMessage$form_id(message, mode) {
+    if(mode == "full") {
+        document.getElementById('tdomf_ajax_message$form_id').innerHTML = "";
+        document.$form_name.innerHTML = message;
+    } else {
+        document.getElementById('tdomf_ajax_message$form_id').innerHTML = message;
+    }
+    ajaxProgressStop$form_id();
+  }
+  //]] -->
+  </script>
+EOT;
+        // "shadow" is used to darken form when doing some processing
+        $form .= "<div id='shadow$form_id' class='shadow'></div>";
+        // ajaxProgress displays a message during processing
+        $form .= "<div id='ajaxProgress$form_id' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>";
+        // any messages from the backend appear in this div
+        $form .= "<div id='tdomf_ajax_message$form_id' class='tdomf_ajax_message'></div>";
+  } 
   
-  if(!$use_ajax) {
      $post_args = array();
      if(isset($form_data['tdomf_form_post_'.$form_id])) {
         $post_args = $form_data['tdomf_form_post_'.$form_id];
@@ -504,107 +566,43 @@ function tdomf_generate_form($form_id = 1) {
            return $form;
         }
      }
-  } else {
-     wp_print_scripts( array( 'sack' ));
-     $ajax_script = TDOMF_URLPATH.'tdomf-form-ajax.php';
-  	 $form .= <<<EOT
-
-  <script type="text/javascript">
-  //<![CDATA[
-  function tdomf_submit_post()
-  {
-      var mysack = new sack("$ajax_script" );
-
-	    mysack.execute = 1;
-	    mysack.method = 'POST';
-        mysack.setVar( "action", "post" );
-
-	    // How do I get values from dynamically chosen widgets into a value I can pass to the backend?
-
-	    mysack.onError = function() { alert('AJAX Error' )};
-	    mysack.runAJAX();
-
-  	return true;
-  }
-  function tdomf_preview_post()
-  {
-     var mysack = new sack("$ajax_script" );
-     mysack.execute = 1;
-	 mysack.method = 'POST';
-
-	 mysack.setVar( "action", "preview" );
-
-	 // How do I get values from dynamically chosen widgets into a value I can pass to the backend?
-
-     mysack.onError = function() { alert('AJAX Error' )};
-     mysack.runAJAX();
-
-     return true;
-  }
-  //]]>
-  </script>
-EOT;
-  }
-
-  // Ajax or POST setup
+  
+  $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH."tdomf-form-post.php\" id='$form_name' name='$form_name' class='tdomf_form' >";
+   
+  // generate key
   //
-  if($use_ajax) {
-  	$form .= "<div id='tdomf_form".$form_id."_msg_div'></div>\n<form>";
-  } else {
-    $redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
-    $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH.'tdomf-form-post.php" id="tdomf_form'.$form_id.'" name="tdomf_form'.$form_id.'" class="tdomf_form" >';
-    $form .= "<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />";
-    $form .= tdomf_generate_form_key($form_id);
-  }
-
+  $form .= tdomf_generate_form_key($form_id);
+  
   // Form id
+  //
   $form .= "\n<input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' />\n";
 
+  $redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
+  $form .= "<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />";
+  
   // Process widgets
   //
-  if(!$use_ajax) {
-  	$widget_args = array_merge( array( "before_widget"=>"<fieldset>\n",
+      $widget_args = array_merge( array( "before_widget"=>"<fieldset>\n",
                                        "after_widget"=>"\n</fieldset>\n",
                                        "before_title"=>"<legend>",
                                        "after_title"=>"</legend>",
                                        "tdomf_form_id"=>$form_id,
                                        "mode"=>$mode),
                                 $post_args);
-  } else {
-  	$widget_args = array( "before_widget"=>"<fieldset>\n",
-                          "after_widget"=>"\n</fieldset>\n",
-                          "before_title"=>"<legend>",
-                          "after_title"=>"</legend>",
-                          "tdomf_form_id"=>$form_id,
-                          "mode"=>$mode);
-  }
   $widget_order = tdomf_get_widget_order($form_id);
   foreach($widget_order as $w) {
-	if(isset($widgets[$w])) {
-		$form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
-		#$form .= "<br/>";
-	}
+      if(isset($widgets[$w])) {
+          $form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+      }
   }
 
   // Form buttons
   //
   $form .= '<table border="0" align="left"><tr>';
-  if($use_ajax) {
-    if(tdomf_widget_is_preview_avaliable($form_id)) {
-	    	$form .= '<td width="10px"><input type="button" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomf_preview_post(); return false;" /></td>';
-    }
-    $form .= '<td width="10px"><input type="button" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomf_submit_post(); return false;" /></td>';
-  } else {
-    // only need to add a clear butt if using the db form data storage as it doesn't automatically clear
-    /*if(get_option(TDOMF_OPTION_FORM_DATA_METHOD) == 'db') {
-       $form .= '<td width="10px"><input type="submit" value="'.__("Clear","tdomf").'" name="tdomf_form'.$form_id.'_clear" id="tdomf_form'.$form_id.'_clear" /></td>';
-    }*/
-  	if(tdomf_widget_is_preview_avaliable($form_id)) {
-    	$form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" /></td>';
-    }
-  	$form .= '<td width="10px"><input type="submit" value="'.__("Post","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" /></td>';
+  if(tdomf_widget_is_preview_avaliable($form_id)) {
+      $form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id.'(\'preview\'); return false;" /></td>';
   }
-
+  $form .= '<td width="10px"><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id.'(\'post\'); return false;" /></td>';
   $form .= '</tr></table>';
   $form .= "\n</form>\n";
 

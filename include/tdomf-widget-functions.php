@@ -60,7 +60,7 @@ function tdomf_widget_is_preview_avaliable($form_id = 1) {
    return false;
 }
 
-// AJAX allowed (Not currently supported)
+// AJAX allowed
 //
 function tdomf_widget_is_ajax_avaliable($form_id = 1) {
    global $tdomf_form_widgets_preview, $tdomf_form_widgets_validate, $tdomf_form_widgets_post;
@@ -329,16 +329,16 @@ function tdomf_widget_content($args) {
     if($options['char-limit'] > 0) {
       $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['char-limit'])."<br/>";
     }
-    if($options['quicktags']) {
+    if($options['quicktags'] == true) {
       $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget";
       if($options['allowable-tags'] != "" && $options['restrict-tags']) {
         $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
       }
-      $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
+      $output .= "\n<script src='$qt_path' type='text/javascript'></script>\n";
       $output .= "\n<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
     }
     $output .= '<textarea title="true" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >'.$content_content.'</textarea>';
-    if($options['quicktags']) {
+    if($options['quicktags'] == true) {
       $output .= "\n<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>\n";
     }
     

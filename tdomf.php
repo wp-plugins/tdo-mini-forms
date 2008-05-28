@@ -277,6 +277,12 @@ Author URI: http://thedeadone.net
 // - Using a dollar sign plus a value in a input field would cause the first two
 //    digits to disappear - now fixed.
 //
+// v0.1x: TBD
+// - AJAX (with fallback support)
+// - Small bug in that validation widgets were not being called properly if they
+//    use the action "tdomf_validate_form_start" (such as any multiple instant
+//    widgets like 1 Question Capatcha and the Image Capatcha
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -293,7 +299,6 @@ TODO for future versions
 Known Bugs
 - Invalid markup is used in several form elements
 - Display of Widgets in WP2.5 seems a little funky
-- The Image Capatcha widget has a little bit odd behaviour
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -422,9 +427,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "32");
+define("TDOMF_BUILD", "33");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.11.1");
+define("TDOMF_VERSION", "0.12");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -568,7 +573,6 @@ define('TDOMF_STAT_SPAM', "tdomf_stat_spam");
 define('TDOMF_OPTION_QUEUE_PERIOD', "tdomf_queue_period");
 define('TDOMF_OPTION_THROTTLE_RULES', "tdomf_throttle_rules");
 
-
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -706,7 +710,14 @@ function tdomf_new_features() {
   // 30 = 0.11b
   // 31 = 0.11
   // 32 = 0.11.1 (bug fixes)
-
+  if($last_version <= 32) {
+      
+      $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#ajax";
+      $features .= "<li>".sprintf(__('<a href="%s">AJAX support for forms!</a>','tdomf'),$link)."</li>";
+      
+  }
+  // 33 = 0.12b (ajax)
+  
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }

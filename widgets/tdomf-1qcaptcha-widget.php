@@ -122,6 +122,7 @@ function tdomf_widget_1qcaptcha($args,$params) {
 // Validate answer
 //
 function tdomf_widget_1qcaptcha_validate($args,$preview,$params) {
+    
   // don't bother validating for preview
   if($preview) {
     return NULL;
