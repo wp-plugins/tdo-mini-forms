@@ -26,13 +26,15 @@ if(!tdomf_form_exists($form_id)){
   die( "tdomfDisplayMessage$form_id('TDOMF: Bad Form Id','full');" );
 }
 
-function tdomf_ajax_exit($form_id, $message, $full = false) {
+function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false) {
     global $form_id;
     $message = str_replace("'","\\'",$message);
     $message = str_replace("\n"," ",$message);
     #$message = htmlentities($message,ENT_COMPAT);
     if($full) {
         die( "tdomfDisplayMessage$form_id('$message','full');" );
+    } else if ($preview) {
+        die( "tdomfDisplayMessage$form_id('$message','preview');" );
     }  else {
         die( "tdomfDisplayMessage$form_id('$message','');" );
     }
@@ -108,20 +110,24 @@ if($_POST['tdomf_action'] == "post") {
       if(is_int($retVal)) {
         $post_id = $retVal;
         if(get_post_status($post_id) == 'publish') {
-          tdomf_ajax_exit($form_id,sprintf(__("Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service.","tdomf"),get_permalink($post_id)),true);
+            if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
+                die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+            } else {
+                tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true);
+            }
         } else if(get_post_status($post_id) == 'future') {
-            tdomf_ajax_exit($form_id,__("Your post submission has been accepted and should appear shortly.","tdomf"),true);
-        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
-            tdomf_ajax_exit($form_id,__("Your submission is being flagged as spam! Sorry.","tdomf"),true);
+          tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id),true);
+        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) { 
+          tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),true);
         } else {
-            tdomf_ajax_exit($form_id,sprintf(__("Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service.","tdomf"),get_bloginfo('admin_email')),true);
+          tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id),true);
         }
       // If retVal is a string, something went wrong!
       } else {
-        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$retVal));
+        tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_ERROR,$form_id,false,false,$retVal));
       }
     } else {
-        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$message));    
+        tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_ERROR,$form_id,false,false,$message));    
     }
 } else if($_POST['tdomf_action'] == "preview") {
    // For preview, remove magic quote slashes!
@@ -129,7 +135,7 @@ if($_POST['tdomf_action'] == "post") {
    $message = tdomf_validate_form($_POST,true);
    if($message == NULL) {
       $message = tdomf_preview_form($_POST);
-      tdomf_ajax_exit($form_id,$message);
+      tdomf_ajax_exit($form_id,$message,false,true);
    } else {
        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$message));
    }

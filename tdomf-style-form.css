@@ -33,6 +33,12 @@
 .tdomf_form_preview p {
  margin-left: 15px;
 }
+.tdomf_form_message {
+ padding: 5px;
+ margin: 5px;
+ margin-bottom: 20px;
+ text-align: left;
+}
 #tdomf_upload_inline_form {
  text-align: left;
  background-color: white;

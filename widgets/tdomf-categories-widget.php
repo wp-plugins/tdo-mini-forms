@@ -64,15 +64,15 @@ function tdomf_widget_categories_init($form_id,$mode){
    
      tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
      tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 350, 510, array(), 1);
-     tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', true, array(), 1);
-     tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', true, array(), 1);
-     tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', true, array(), 1);
+     tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', array(), 1);
+     tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', array(), 1);
+     tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', array(), 1);
      
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);
        tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 350, 510, array(), $i);
-       tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', true, array(), $i);
-       tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', true, array(), $i);
+       tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', array(), $i);
+       tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', array(), $i);
        tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', true, array(), $i);
      }
   }

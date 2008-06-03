@@ -282,6 +282,8 @@ Author URI: http://thedeadone.net
 // - Small bug in that validation widgets were not being called properly if they
 //    use the action "tdomf_validate_form_start" (such as any multiple instant
 //    widgets like 1 Question Capatcha and the Image Capatcha
+// - Redirect to published post option
+// - Initial implementation of Form Hacker
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -305,16 +307,11 @@ New Features
 - Widget Manager Menu
   * Info about loaded widgets
   * Disable loading of specific widgets
-- File Editor (edit TDOMF files from within admin UI)
-  * Widgets
-  * TDOMF Core Files (with usual warnings)
-  * Restore
 - Style Sheet Editor
   * Preview
   * Select from pre-configured Styles
   * Submit new style to include in TDOMF
 - Email verification of non-registered users
-- AJAX support
 - Edit Posts
   * Using same/similar form as what the post was submitted with?
   * Create Edit-Post only forms
@@ -323,6 +320,7 @@ New Features
   * Unregistered user editing (requires some sort of magic code)
 - Manage Downloads page
 - Option to display the moderation menu like the "comment moderation" page (i.e. with little extracts of the posts/pages)
+- Authors of posts should be able to see "previews" of post
 - Get input during validation of form (for capatchas)
 - Option to use "Post ready for review" instead of draft for unapproved submitted posts
 - On Options and Widgets Page, set the "title" of the Form links to the given title of the form
@@ -335,10 +333,6 @@ New Form Options
 - Forms can be used to submit links
 - Select Form Style/include Custom CSS
 - Control who can access form not just by role but also by user, ip and capability.
-- Modify error messages for form
-  * Submitted post awaiting moderation
-  * Banned X and other insufficent priviliges messages
-- Prevent plugin from being activate if register_globals is enabled (if we can do AJAX, this may not be an issue)
 
 New Widgets
 - Widget to allow users to enable/disable comments and trackbacks on their submission
@@ -347,13 +341,14 @@ New Widgets
 - Widget that inputs only title
 - Login/Register/Who Am I Widget
 - Insert Text into Form Widget
+- Username as Title
+- Insert text into post
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
 - Any static text used in widgets need to be customisable.
 - Textfield Class (support numeric, date, email, webpage, etc.)
 - Textarea Class
-- Widget code hacker
 - Copy Widget to another Form
 - Upload Files
   * Multiple Instances
@@ -446,7 +441,6 @@ define("TDOMF_POSTS_INDEX",    0);
 define("TDOMF_USERS_INDEX",    1);
 define("TDOMF_IPS_INDEX",      2);
 define("TDOMF_OPTIONS_INDEX",  3);
-//$tdomf_ajax_progress_icon = get_bloginfo("wpurl")."/wp-content/plugins/tdomf/ajax-loader.gif";
 
 /////////////////
 // 0.6 Settings
@@ -573,6 +567,42 @@ define('TDOMF_STAT_SPAM', "tdomf_stat_spam");
 define('TDOMF_OPTION_QUEUE_PERIOD', "tdomf_queue_period");
 define('TDOMF_OPTION_THROTTLE_RULES', "tdomf_throttle_rules");
 
+///////
+// 0.12
+
+define('TDOMF_OPTION_REDIRECT',"tdomf_redirect");
+
+define('TDOMF_OPTION_MSG_SUB_PUBLISH',"tdomf_msg_sub_pub");
+define('TDOMF_OPTION_MSG_SUB_FUTURE',"tdomf_msg_sub_fut");
+define('TDOMF_OPTION_MSG_SUB_SPAM',"tdomf_msg_sub_spam");
+define('TDOMF_OPTION_MSG_SUB_MOD',"tdomf_msg_sub_mod");
+define('TDOMF_OPTION_MSG_SUB_ERROR',"tdomf_msg_sub_err");
+define('TDOMF_OPTION_MSG_PERM_BANNED_USER',"tdomf_msg_perm_ban_user");
+define('TDOMF_OPTION_MSG_PERM_BANNED_IP',"tdomf_msg_perm_ban_ip");
+define('TDOMF_OPTION_MSG_PERM_THROTTLE',"tdomf_msg_perm_throttle");
+define('TDOMF_OPTION_MSG_PERM_INVALID_USER',"tdomf_msg_perm_invaild_user");
+define('TDOMF_OPTION_MSG_PERM_INVALID_NOUSER',"tdomf_msg_perm_invaild_nouser");
+
+define("TDOMF_MACRO_SUBMISSIONERRORS", "%%SUBMISSIONERRORS%%");
+define("TDOMF_MACRO_SUBMISSIONURL", "%%SUBMISSIONURL%%");
+define("TDOMF_MACRO_SUBMISSIONDATE", "%%SUBMISSIONDATE%%");
+define("TDOMF_MACRO_SUBMISSIONTIME", "%%SUBMISSIONTIME%%");
+define("TDOMF_MACRO_SUBMISSIONTITLE", "%%SUBMISSIONTITLE%%");
+define("TDOMF_MACRO_USERNAME", "%%USERNAME%%");
+define("TDOMF_MACRO_IP", "%%IP%%");
+define("TDOMF_MACRO_FORMKEY", "%%FORMKEY%%");
+define("TDOMF_MACRO_FORMURL", "%%FORMURL%%");
+define("TDOMF_MACRO_FORMID", "%%FORMID%%");
+define("TDOMF_MACRO_FORMNAME", "%%FORMNAME%%");
+define("TDOMF_MACRO_FORMDESCRIPTION", "%%FORMDESCRIPTION%%");
+define("TDOMF_MACRO_FORMMESSAGE", "%%FORMMESSAGE%%");
+define("TDOMF_MACRO_WIDGET_START", "%%WIDGET:");
+define("TDOMF_MACRO_END", "%%");
+
+define('TDOMF_OPTION_FORM_HACK',"tdomf_form_hack");
+define('TDOMF_OPTION_FORM_HACK_ORIGINAL',"tdomf_form_hack_org");
+
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -625,6 +655,9 @@ function tdomf_add_menus()
     // Generate Form
     add_submenu_page( TDOMF_FOLDER , __('Form Widgets', 'tdomf'), __('Form Widgets', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
     //
+    // Form hacker
+    add_submenu_page( TDOMF_FOLDER , __('Form Hacker', 'tdomf'), __('Form Hacker', 'tdomf'), 'manage_options', 'tdomf_show_form_hacker', 'tdomf_show_form_hacker');
+    //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
             add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
@@ -663,6 +696,7 @@ require_once('include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 require_once('include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
+require_once('include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
@@ -672,6 +706,7 @@ require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
 require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
+require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
 
 /////////////////////////
 // What's new since... //
@@ -714,6 +749,9 @@ function tdomf_new_features() {
       
       $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#ajax";
       $features .= "<li>".sprintf(__('<a href="%s">AJAX support for forms!</a>','tdomf'),$link)."</li>";
+      
+      $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_form_hacker";
+      $features .= "<li>".sprintf(__('<a href="%s">Now you can hack your form!</a>','tdomf'),$link)."</li>";
       
   }
   // 33 = 0.12b (ajax)

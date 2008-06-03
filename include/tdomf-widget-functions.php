@@ -67,20 +67,7 @@ function tdomf_widget_is_ajax_avaliable($form_id = 1) {
    if(!tdomf_get_option_form(TDOMF_OPTION_AJAX,$form_id)) {
    	  return false;
    }
-   $widget_order = tdomf_get_option_form(TDOMF_OPTION_FORM_ORDER,$form_id);
-   foreach($widget_order as $id) {
-      if(tdomf_get_option_form(TDOMF_OPTION_PREVIEW,$form_id)
-      		&& isset($tdomf_form_widgets_preview[$id])
-      		&& !$tdomf_form_widgets_preview[$id]["ajax"]) {
-       	return false;
-      }
-	  if(isset($tdomf_form_widgets_validate[$id]) && !$tdomf_form_widgets_validate[$id]["ajax"]) {
-       	return false;
-      }
-	  if(isset($tdomf_form_widgets_post[$id]) && !$tdomf_form_widgets_post[$id]["ajax"]) {
-       	return false;
-      }
-   }
+   // deprecated (used to check widgets)
    return true;
 }
 
@@ -107,6 +94,10 @@ $tdomf_form_widgets_post = array();
 // Admin email notifications for Widgets
 //
 $tdomf_form_widgets_adminemail = array();
+//
+// Admin email notifications for Widgets
+//
+$tdomf_form_widgets_hack = array();
 
 // Filter list of widgets by mode (if a mode set for that widget)
 //
@@ -170,7 +161,7 @@ function tdomf_register_form_widget_control($id, $name, $control_callback, $widt
 
 // Widgets that provide a preview must register with this function
 //
-function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax = true, $modes = array()) {
+function tdomf_register_form_widget_preview($id, $name, $preview_callback, $modes = array()) {
    global $tdomf_form_widgets_preview,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -183,14 +174,13 @@ function tdomf_register_form_widget_preview($id, $name, $preview_callback, $ajax
    #tdomf_log_message_extra("Loading Widget Preview $id...");
    $tdomf_form_widgets_preview[$id]['name'] = $name;
    $tdomf_form_widgets_preview[$id]['cb'] = $preview_callback;
-   $tdomf_form_widgets_preview[$id]['ajax'] = $ajax;
    $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 5);
    $tdomf_form_widgets_preview[$id]['modes'] = $modes;
 }
 
 // Widgets that vaidate input *before* input
 //
-function tdomf_register_form_widget_validate($id, $name, $validate_callback, $ajax = true, $modes = array()) {
+function tdomf_register_form_widget_validate($id, $name, $validate_callback, $modes = array()) {
    global $tdomf_form_widgets_validate,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -203,14 +193,13 @@ function tdomf_register_form_widget_validate($id, $name, $validate_callback, $aj
    #tdomf_log_message_extra("Loading Widget Validate $id...");
    $tdomf_form_widgets_validate[$id]['name'] = $name;
    $tdomf_form_widgets_validate[$id]['cb'] = $validate_callback;
-   $tdomf_form_widgets_validate[$id]['ajax'] = $ajax;
    $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 5);
    $tdomf_form_widgets_validate[$id]['modes'] = $modes;
 }
 
 // Widgets that modify the post *after* submission 
 //
-function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = true, $modes = array()) {
+function tdomf_register_form_widget_post($id, $name, $post_callback, $modes = array()) {
    global $tdomf_form_widgets_post,$tdomf_form_widgets;
    $id = sanitize_title($id);
 	if(!isset($tdomf_form_widgets[$id])) {
@@ -223,7 +212,6 @@ function tdomf_register_form_widget_post($id, $name, $post_callback, $ajax = tru
    #tdomf_log_message_extra("Loading Widget Post $id...");
    $tdomf_form_widgets_post[$id]['name'] = $name;
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
-   $tdomf_form_widgets_post[$id]['ajax'] = $ajax;
    $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 5);
    $tdomf_form_widgets_post[$id]['modes'] = $modes;
 }
@@ -246,10 +234,28 @@ function tdomf_register_form_widget_adminemail($id, $name, $post_callback, $mode
    $tdomf_form_widgets_adminemail[$id]['modes'] = $modes;
 }
 
+// Widgets that create info for the admin notification
+//
+function tdomf_register_form_widget_hack($id, $name, $hack_callback, $modes = array()) {
+   global $tdomf_form_widgets_hack,$tdomf_form_widgets;
+   $id = sanitize_title($id);
+   if(!isset($tdomf_form_widgets[$id])) {
+   		 tdomf_log_message_extra("Hack: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 return;
+   }
+   if(isset($tdomf_form_widgets_hack[$id])) {
+      tdomf_log_message_extra("tdomf_register_form_widget_hack: Widget $id already exists. Overwriting...");
+   }
+   $tdomf_form_widgets_hack[$id]['name'] = $name;
+   $tdomf_form_widgets_hack[$id]['cb'] = $hack_callback;
+   $tdomf_form_widgets_hack[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_hack[$id]['modes'] = $modes;
+}
+
 // Return the default widget order!
 //
 function tdomf_get_form_widget_default_order() {
-   return array("who-am-i","content","notify-me");
+   return array("who-am-i","content","notifyme");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -347,6 +353,69 @@ function tdomf_widget_content($args) {
   return $output;
 }
 tdomf_register_form_widget('content','Content', 'tdomf_widget_content');
+
+// Hacked version
+//
+function tdomf_widget_content_hack($args) {
+  extract($args);
+  $options = tdomf_widget_content_get_options($tdomf_form_id);
+  if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
+  
+  $output = $before_widget;
+  
+  if($options['title'] != "") {
+    $output .= $before_title.$options['title'].$after_title;
+  }
+  
+  if($options['title-enable']) {
+    if($options['title-required']) {
+      $output .= "\t\t".'<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."\n\t\t\t<br/>\n";
+    } else {
+      $output .= "\t\t".'<label for="content_title">'.__("Post Title: ","tdomf")."\n\t\t\t<br/>\n";
+    }
+    $output .= "\t\t\t".'<input type="textfield" name="content_title" id="content_title" size="'.$options['title-size'].'" value="';
+    $output .= '<?php echo htmlentities($content_title,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />'."\n";
+    $output .= "\t\t</label>\n";
+    if($options['text-enable']) {
+      $output .= "\t\t<br/>\n\t\t<br/>\n";
+    }
+  }
+  
+  if($options['text-enable']) {
+    if($options['text-required']) {
+      $output .= "\t\t".'<label for="content_content" class="required">'.__("Post Text (Required): ","tdomf")."\n\t\t\t<br/>\n";      
+    } else {
+      $output .= "\t\t".'<label for="content_content">'.__("Post Text: ","tdomf")."\n\t\t\t<br/>\n";
+    }
+    $output .= "\t\t</label>\n";    
+    if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+      $output .= "\t\t".sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['allowable-tags']))."\n\t\t<br/>\n";
+    }
+    if($options['word-limit'] > 0) {
+      $output .= "\t\t".sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['word-limit'])."\n\t\t<br/>\n";
+    }
+    if($options['char-limit'] > 0) {
+      $output .= "\t\t".sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['char-limit'])."\n\t\t<br/>\n";
+    }
+    if($options['quicktags'] == true) {
+      $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget";
+      if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+        $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
+      }
+      $output .= "\t\t<script src='$qt_path' type='text/javascript'></script>\n";
+      $output .= "\t\t<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
+    }
+    $output .= "\t\t".'<textarea title="true" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >';
+    $output .= '<?php echo $content_content; ?></textarea>'."\n"; 
+    if($options['quicktags'] == true) {
+      $output .= "\t\t<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>";
+    }
+    
+  }
+  $output .= $after_widget;
+  return $output;
+}
+tdomf_register_form_widget_hack('content','Content', 'tdomf_widget_content_hack');
 
 ///////////////////////////////////////
 // Preview the post's content and title
@@ -821,5 +890,105 @@ function tdomf_widget_whoami_post($args) {
   return NULL;
 }
 tdomf_register_form_widget_post('who-am-i','Who Am I', 'tdomf_widget_whoami_post');
+
+/////////
+// version of whoami widget for hacker
+//
+function tdomf_widget_whoami_hack($args) {
+  global $current_user;
+  
+  get_currentuserinfo();
+  extract($args);
+  $options = tdomf_widget_whoami_get_options($tdomf_form_id);
+  
+  $output = $before_widget;  
+  
+  // logged in version
+  
+  $output .= "\t\t<?php if(is_user_logged_in()) { ?>\n";
+  $tdomfurl = get_bloginfo('wpurl')."/wp-admin/admin.php?page=".TDOMF_FOLDER;
+  $output .= <<<EOT
+			<p>You are currently logged in as %%USERNAME%%.
+			<?php if(current_user_can('manage_options')) { ?>
+				<a href='$tdomfurl'>You can configure this form &raquo;</a>
+			<?php } ?></p>
+EOT;
+  
+  // logged out version
+  
+  $output .= "\n\t\t<?php } else { ?>\n";
+  
+  $login_uri = get_bloginfo('wpurl').'/wp-login.php?redirect_to='.TDOMF_MACRO_FORMURL;
+  $reg_uri = get_bloginfo('wpurl').'/wp-register.php?redirect_to='.TDOMF_MACRO_FORMURL;
+  
+  $output .= "\t\t\t<p>".sprintf(__("We do not know who you are. Please supply your name and email address. Alternatively you can <a href=\"%s\">log in</a> if you have a user account or <a href=\"%s\">register</a> for a user account if you do not have one.","tdomf"),$login_uri,$reg_uri)."</p>\n";
+  
+   if($options['name-enable']) {
+     $output .= <<<EOT
+			<?php if(!isset(\$whoami_name) && isset(\$_COOKIE['tdomf_whoami_widget_name'])) {
+				\$whoami_name = \$_COOKIE['tdomf_whoami_widget_name'];
+			} ?>
+EOT;
+     $output .=  "\n\t\t\t<label for='whoami_name'";
+     if($options['name-required']) {
+         $output .= ' class="required" ';
+     }
+     $output .= ">".__("Name:","tdomf")."\n\t\t\t\t<br/>\n\t\t\t\t<input type=\"text\" value=\"";
+     $output .= '<?php echo htmlentities($whoami_name,ENT_QUOTES,get_bloginfo(\'charset\')); ?>';
+     $output .= '" name="whoami_name" id="whoami_name" />';
+     if($options['name-required']) {
+         $output .= __(" (Required)","tdomf");
+     }
+     $output .= "\n\t\t\t</label>";
+     $output .= "\n\t\t\t<br/>\n\t\t\t<br/>\n";
+  }
+  
+   if($options['email-enable']) {
+       $output .= <<<EOT
+			<?php if(!isset(\$whoami_email) && isset(\$_COOKIE['tdomf_whoami_widget_name'])) {
+				\$whoami_email = \$_COOKIE['tdomf_whoami_widget_email'];
+			} ?>
+EOT;
+     $output .=    "\n\t\t\t<label for='whoami_email'";
+     if($options['email-required']) {
+         $output .= ' class="required" ';
+     }
+     $output .= ">".__("Email:","tdomf")."\n\t\t\t\t<br/>\n\t\t\t\t<input type=\"text\" value=\"";
+     $output .= '<?php echo htmlentities($whoami_email,ENT_QUOTES,get_bloginfo(\'charset\')); ?>';
+     $output .= '" name="whoami_email" id="whoami_email" />';
+     if($options['email-required']) {
+         $output .= __(" (Required)","tdomf");
+     }
+     $output .= "\n\t\t\t</label>";
+     $output .= "\n\t\t\t<br/>\n\t\t\t<br/>\n";
+  }
+  
+   if($options['webpage-enable']) {
+		$output .= <<<EOT
+			<?php if(!isset(\$whoami_webpage) && isset(\$_COOKIE['tdomf_whoami_widget_name'])) {
+				\$whoami_webpage = \$_COOKIE['tdomf_whoami_widget_webpage'];
+			}
+			if(!isset(\$whoami_webpage) || empty(\$whoami_webpage)){ \$whoami_webpage = "http://"; } ?>
+EOT;
+     $output .=    "\n\t\t\t<label for='whoami_webpage'";
+     if($options['webpage-required']) {
+        $output .= ' class="required" ';
+     }
+     $output .= ">".__("Email:","tdomf")."\n\t\t\t\t<br/>\n\t\t\t\t<input type=\"text\" value=\"";
+     $output .= '<?php echo htmlentities($whoami_webpage,ENT_QUOTES,get_bloginfo(\'charset\')); ?>';
+     $output .= '" name="whoami_webpage" id="whoami_webpage" />';
+     if($options['webpage-required']) {
+            $output .= __(" (Required)","tdomf");
+     }
+     $output .= "\n\t\t\t</label>";
+     $output .= "\n\t\t\t<br/>\n\t\t\t<br/>\n";
+  }
+  
+  $output .= "\t\t<?php } ?>";
+  $output .= $after_widget;
+
+  return $output;
+}
+tdomf_register_form_widget_hack('who-am-i','Who Am I', 'tdomf_widget_whoami_hack');
 
 ?>

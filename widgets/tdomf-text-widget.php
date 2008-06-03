@@ -73,6 +73,10 @@ function tdomf_widget_text($args,$params) {
     $output .= $options['title'];
     $output .= $after_title;
   }
+  // pretty-up for hack mode
+  if(strpos($mode,'-hack') !== false) {
+    $output .= "\t\t";
+  }
   $output .= $options['text'];
   $output .= $after_widget;
   return $output;
@@ -135,6 +139,7 @@ function tdomf_widget_text_init($form_id){
      
      for($i = 1; $i <= $count; $i++) {
        tdomf_register_form_widget("text-$i","Text $i", 'tdomf_widget_text', array(), $i);
+       tdomf_register_form_widget_hack("text-$i","Text $i", 'tdomf_widget_text', array(), $i);
        tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 400, 300, array(), $i);
      }
   }

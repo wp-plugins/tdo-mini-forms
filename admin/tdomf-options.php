@@ -544,11 +544,18 @@ function tdomf_show_form_options($form_id) {
 
     <?php $on_mod = tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id); ?>
 
-	</p>
+	<p>
 	<b><?php _e("Enable Moderation","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_moderation" id="tdomf_moderation"  	<?php if($on_mod) echo "checked"; ?> >
 	</p>
 
+    <?php $redirect = tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id); ?>
+    
+    <p>
+	<b><?php _e("Redirect to Published Post","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_redirect" id="tdomf_redirect" <?php if($redirect) echo "checked"; ?> >
+	</p>
+    
     <h3><?php _e('Preview',"tdomf"); ?> </h3>
 
 	<p>
@@ -1129,6 +1136,9 @@ function tdomf_handle_options_actions() {
       if(isset($_POST['tdomf_moderation'])) { $mod = true; }
       tdomf_set_option_form(TDOMF_OPTION_MODERATION,$mod,$form_id);
 
+      $tdomf_redirect = isset($_POST['tdomf_redirect']);
+      tdomf_set_option_form(TDOMF_OPTION_REDIRECT,$tdomf_redirect,$form_id);
+      
       //Preview
 
       $preview = false;

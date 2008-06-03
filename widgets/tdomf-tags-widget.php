@@ -50,7 +50,7 @@ if(function_exists('wp_set_post_tags')) {
     
     return "";
   }
-  tdomf_register_form_widget_preview('tags','Tags', 'tdomf_widget_tags_preview', true, array("new-post"));
+  tdomf_register_form_widget_preview('tags','Tags', 'tdomf_widget_tags_preview', array("new-post"));
   
   
   ////////////////////////
@@ -66,7 +66,7 @@ if(function_exists('wp_set_post_tags')) {
    
     return NULL;
   }
-  tdomf_register_form_widget_post('tags','Tags', 'tdomf_widget_tags_post', true, array("new-post"));
+  tdomf_register_form_widget_post('tags','Tags', 'tdomf_widget_tags_post', array("new-post"));
   
   ///////////////////////////////////////////////////////////
   // Show what tags are on the post to admins for moderating

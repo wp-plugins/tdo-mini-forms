@@ -21,7 +21,7 @@ function tdomf_check_permissions_form($form_id = 1) {
        $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
        if($user_status == TDOMF_USER_STATUS_BANNED) {
           tdomf_log_message("Banned user $current_user->user_name tried to submit a post!",TDOMF_LOG_ERROR);
-          return sprintf(__("You (%s) are banned from using this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>.","tdomf"),$current_user->user_name,get_bloginfo('admin_email'));
+          return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_USER,$form_id); 
        }
    }
 
@@ -34,7 +34,7 @@ function tdomf_check_permissions_form($form_id = 1) {
   	foreach($banned_ips as $banned_ip) {
 		if($banned_ip == $ip) {
            tdomf_log_message("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
-			  return sprintf(__("Your IP %s does not currently have permissions to use this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>.","tdomf"),$ip,get_bloginfo('admin_email'));
+           return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id);
 		}
 	 }
   }
@@ -67,7 +67,7 @@ function tdomf_check_permissions_form($form_id = 1) {
           #var_dump($results);
           if(count($results) >= $rule['count']) {
               tdomf_log_message("IP $ip blocked by Throttle Rule $rule_id",TDOMF_LOG_BAD);
-              return __("You have hit your submissions quota. Please wait until your submissions are approved.","tdomf");
+              return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
           }
       }
   }
@@ -78,9 +78,9 @@ function tdomf_check_permissions_form($form_id = 1) {
   	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
       tdomf_log_message("User with the incorrect privilages attempted to submit a post!",TDOMF_LOG_ERROR);
       if(is_user_logged_in()) {
-        return sprintf(__("You (%s) do not currently have permissions to use this form. If this is an error please contact the <a href=\"mailto:%s\">admins</a>.","tdomf"),$current_user->user_name,get_bloginfo('admin_email'));
+        return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_USER,$form_id);
       } else {
-        return __("Unregistered users do not currently have permissions to use this form.","tdomf");
+        return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,$form_id);
       }
   	}
   }
@@ -122,7 +122,8 @@ function tdomf_preview_form($args) {
       tdomf_log_message("Couldn't generate preview!",TDOMF_LOG_ERROR);
 	  return __("Error! Could not generate a preview!","tdomf");
    }
-   return "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_preview\" name=\"tdomf_form".$form_id."_preview\">".sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message)."</div>";
+   #return "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_preview\" name=\"tdomf_form".$form_id."_preview\">".sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message)."</div>";
+   return sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message);
 }
 
 // Validate input using widgets
@@ -451,19 +452,27 @@ function tdomf_generate_form_key($form_id) {
 
 // Create the form!
 //
-function tdomf_generate_form($form_id = 1) {
-  global $tdomf_form_widgets;
+function tdomf_generate_form($form_id = 1,$mode = false) {
+  global $tdomf_form_widgets,$tdomf_form_widgets_hack;
 
   if(!tdomf_form_exists($form_id)) {
     return sprintf(__("Form %d does not exist.",'tdomf'),$form_id); 
   }
 
   // Set mode of form
-  if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-     $mode = "new-page";
+  $hack = false;
+  if($mode === false) {
+      if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+         $mode = "new-page";
+      } else {
+         $mode = "new-post";
+      }
   } else {
-     $mode = "new-post";
+      if(strpos($mode,'-hack') !== false) {
+         $hack = true;
+      }
   }
+  
   
   $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
   if($use_ajax) {
@@ -479,78 +488,179 @@ function tdomf_generate_form($form_id = 1) {
 
   // initilise some variables
   //
-  $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
+  if($hack) {
+      $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_hack);
+  } else {
+      $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
+  }
   $form = "";
   $form_data = tdomf_get_form_data($form_id);
+  
+  // handle hacked forms
+  //
+  if(!$hack) {
+      $hacked_form = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id);
+      if($hacked_form != false) {
+          
+          // grab form message and post args (if exists)
+          //
+          $post_args = array();
+          $message = false;
+          if(isset($form_data['tdomf_form_post_'.$form_id])) {
+              // grab post args
+              $post_args = $form_data['tdomf_form_post_'.$form_id];
+              unset($form_data['tdomf_form_post_'.$form_id]);
+              tdomf_save_form_data($form_id,$form_data);
+              if(isset($post_args['tdomf_post_message_'.$form_id])) {
+                  // grab message (preview/validation)
+                  $message = $post_args['tdomf_post_message_'.$form_id];
+                  unset($form_data['tdomf_post_message_'.$form_id]);
+                  tdomf_save_form_data($form_id,$form_data);
+              }
+              // form has been turned off! just return message
+              if(isset($post_args['tdomf_no_form_'.$form_id])) {
+                  unset($post_args['tdomf_no_form_'.$form_id]);
+                  tdomf_save_form_data($form_id,$form_data);
+                  return $message;
+              }
+          }
+          
+          $form = tdomf_prepare_string($hacked_form, $form_id, $mode, false, "", $post_args);
+          
+          // basics
+          $unused_patterns = array();
+          $patterns     = array ( '/'.TDOMF_MACRO_FORMKEY.'/' );
+          $replacements = array ( tdomf_generate_form_key($form_id) );
+
+          // message
+          if($use_ajax && $message == false) {
+              $patterns[]     = '/'.TDOMF_MACRO_FORMMESSAGE.'/';
+              $replacements[] = "<div id='tdomf_form${form_id}_message' id='tdomf_form${form_id}_message' class='hidden'></div>";
+          } else {
+              $patterns[]     = '/'.TDOMF_MACRO_FORMMESSAGE.'/';
+              $replacements[] = $message;
+          }
+          
+          // widgets
+          $widget_args = array_merge( array( "before_widget"=>"<fieldset>\n",
+                                           "after_widget"=>"\n</fieldset>\n",
+                                           "before_title"=>"<legend>",
+                                           "after_title"=>"</legend>",
+                                           "tdomf_form_id"=>$form_id,
+                                           "mode"=>$mode),
+                                           $post_args);
+          $widget_order = tdomf_get_widget_order($form_id);
+          foreach($widget_order as $w) {
+              if(isset($widgets[$w])) {
+                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
+                  // all widgets need to be excuted even if not displayed
+                  $replacements[] = $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+              } else {
+                   $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
+              }
+          }
+          
+          // create form
+          $form = preg_replace($patterns,$replacements,$form);
+          $form = preg_replace($unused_patterns,"",$form);
+          return $form;
+      }
+  }
+  
   $form_name = 'tdomf_form'.$form_id;
   
+  if($hack) {
+     $form .= "\n<!-- Form $form_id start -->\n";
+  }
+  
   if($use_ajax) {
-      wp_print_scripts( array( 'jquery' ));
-      wp_print_scripts( array( 'sack' ));
       $ajax_script = TDOMF_URLPATH.'tdomf-form-ajax.php';
+      if($hack) {
+          $form .= "<!-- AJAX js start -->\n";
+      }
+      $jquery_url = get_bloginfo('wpurl').'/wp-includes/js/jquery/jquery.js';
+      $form .= "<script type='text/javascript' src='$jquery_url'></script>\n";
+      $sack_url = get_bloginfo('wpurl').'/wp-includes/js/tw-sack.js';
+      $ajax_error = __("TDOMF: ERROR with AJAX request.","tdomf");
+      $form .= "<script type='text/javascript' src='$sack_url'></script>\n";
       $form .= <<<EOT
-  <script type="text/javascript">
-  //<!-- [CDATA[
-     function ajaxProgressStart$form_id() {
-        var w = jQuery('#ajaxProgress$form_id').width();
-        var h = jQuery('#ajaxProgress$form_id').height();
-        var offset = jQuery('#$form_name').offset();
-        var x = offset.left + ((jQuery('#$form_name').width() - w) / 2);
-        var y = offset.top + ((jQuery('#$form_name').height() - h) / 2);
-        jQuery('#ajaxProgress$form_id').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
-        jQuery('#ajaxProgress$form_id').attr('class','progress');
-        ajaxShadow$form_id();
-    }
-    function ajaxShadow$form_id() {
-        var offset = jQuery('#$form_name').offset();
-        var w = jQuery('#$form_name').width();
-        var h = jQuery('#$form_name').height();
-        jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
-        jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
-        jQuery('#shadow$form_id').fadeTo('fast', 0.2);
-    }
-    function ajaxUnshadow$form_id() {
-        jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#shadow').hide()});
-    }
-    function ajaxProgressStop$form_id() {
-        jQuery('#ajaxProgress$form_id').attr('class','hidden');
-        jQuery('#ajaxProgress$form_id').hide();
-        ajaxUnshadow$form_id();
-    }
-  function tdomfSubmit$form_id(action) {
-    ajaxProgressStart$form_id();
-    var mysack = new sack("$ajax_script" );
-    mysack.execute = 1;
-    mysack.method = 'POST';
-    mysack.setVar( "tdomf_action", action );
-    for(i=0; i<document.$form_name.elements.length; i++) {
-        mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
-    }
-    mysack.onError = function() { alert('AJAX Error' )};
-    mysack.runAJAX();
-    return true;
-  }
-  function tdomfDisplayMessage$form_id(message, mode) {
-    if(mode == "full") {
-        document.getElementById('tdomf_ajax_message$form_id').innerHTML = "";
-        document.$form_name.innerHTML = message;
-    } else {
-        document.getElementById('tdomf_ajax_message$form_id').innerHTML = message;
-    }
-    ajaxProgressStop$form_id();
-  }
-  //]] -->
-  </script>
+<script type="text/javascript">
+	//<!-- [CDATA[
+	function ajaxProgressStart$form_id() {
+		var w = jQuery('#ajaxProgress$form_id').width();
+		var h = jQuery('#ajaxProgress$form_id').height();
+		var offset = jQuery('#$form_name').offset();
+		var x = offset.left + ((jQuery('#$form_name').width() - w) / 2);
+		var y = offset.top + ((jQuery('#$form_name').height() - h) / 2);
+		jQuery('#ajaxProgress$form_id').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
+		jQuery('#ajaxProgress$form_id').attr('class','progress');
+		ajaxShadow$form_id();
+	}
+	function ajaxShadow$form_id() {
+		var offset = jQuery('#$form_name').offset();
+		var w = jQuery('#$form_name').width();
+		var h = jQuery('#$form_name').height();
+		jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+		jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
+		jQuery('#shadow$form_id').fadeTo('fast', 0.2);
+	}
+	function ajaxUnshadow$form_id() {
+		jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#shadow').hide()});
+	}
+	function ajaxProgressStop$form_id() {
+		jQuery('#ajaxProgress$form_id').attr('class','hidden');
+		jQuery('#ajaxProgress$form_id').hide();
+		ajaxUnshadow$form_id();
+	}
+	function tdomfSubmit$form_id(action) {
+		ajaxProgressStart$form_id();
+		var mysack = new sack("$ajax_script" );
+		mysack.execute = 1;
+		mysack.method = 'POST';
+		mysack.setVar( "tdomf_action", action );
+		for(i=0; i<document.$form_name.elements.length; i++) {
+			mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
+		}
+		mysack.onError = function() { alert('$ajax_error' )};
+		mysack.runAJAX();
+		return true;
+	}
+	function tdomfDisplayMessage$form_id(message, mode) {
+		if(mode == "full") {
+			jQuery('#tdomf_form${form_id}_message').attr('class','hidden');
+			document.getElementById('tdomf_form${form_id}_message').innerHTML = "";
+			document.$form_name.innerHTML = message;
+		} else if(mode == "preview") {
+			jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_preview');
+			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
+		} else {
+			jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_message');
+			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
+		}
+		ajaxProgressStop$form_id();
+	}
+	function tdomfRedirect$form_id(url) {
+		ajaxProgressStop$form_id();
+		window.location = url;
+	}
+	//]] -->
+</script>
 EOT;
-        // "shadow" is used to darken form when doing some processing
-        $form .= "<div id='shadow$form_id' class='shadow'></div>";
-        // ajaxProgress displays a message during processing
-        $form .= "<div id='ajaxProgress$form_id' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>";
-        // any messages from the backend appear in this div
-        $form .= "<div id='tdomf_ajax_message$form_id' class='tdomf_ajax_message'></div>";
+    if($hack) {
+        $form .= "\n<!-- AJAX js end -->\n<!-- shadow required for disabling form during AJAX submit -->\n";
+    }
+    $form .= "<div id='shadow$form_id' class='shadow'></div>\n";
+    if($hack) {
+        $form .= "<!-- ajaxProgress holds the HTML to show during AJAX busy -->\n";
+    }
+    $form .= "<div id='ajaxProgress$form_id' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>\n";
+    if(!$hack) {
+        $form .= "<div id='tdomf_form${form_id}_message' id='tdomf_form${form_id}_message' class='hidden'></div>";
+    }
   } 
   
-     $post_args = array();
+  $post_args = array();
+  if(!$hack) {
      if(isset($form_data['tdomf_form_post_'.$form_id])) {
         $post_args = $form_data['tdomf_form_post_'.$form_id];
         unset($form_data['tdomf_form_post_'.$form_id]);
@@ -566,46 +676,96 @@ EOT;
            return $form;
         }
      }
+  } else {
+      $form .= TDOMF_MACRO_FORMMESSAGE."\n";
+  }
   
-  $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH."tdomf-form-post.php\" id='$form_name' name='$form_name' class='tdomf_form' >";
+  if($hack) {
+        $form .= "<!-- form start -->\n";
+  }
+     
+  $form .= "<form method=\"post\" action=\"".TDOMF_URLPATH."tdomf-form-post.php\" id='$form_name' name='$form_name' class='tdomf_form' >\n";
    
   // generate key
   //
-  $form .= tdomf_generate_form_key($form_id);
+  if($hack) {
+      $form .= "\t".TDOMF_MACRO_FORMKEY."\n";
+  } else {
+      $form .= tdomf_generate_form_key($form_id);
+  } 
   
   // Form id
   //
-  $form .= "\n<input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' />\n";
+  $form .= "\t<input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' />\n";
 
-  $redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
-  $form .= "<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />";
+  if($hack) {
+      $redirect_url = TDOMF_MACRO_FORMURL;
+  } else {
+      # use message id as re-direct because we *know* where this will appear on a non-hacked form
+      #$redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
+      $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id}_message";
+  }
+  $form .= "\t<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />\n";
   
   // Process widgets
   //
+  
+  if($hack) {
+      $widget_args = array( "before_widget"=>"\t<fieldset>\n",
+                            "after_widget"=>"\n\t</fieldset>\n",
+                             "before_title"=>"\t\t<legend>",
+                             "after_title"=>"</legend>\n",
+                             "tdomf_form_id"=>$form_id,
+                             "mode"=>$mode);
+      $form .= "\t<!-- widgets start -->\n";
+      $widget_order = tdomf_get_widget_order($form_id);
+      foreach($widget_order as $w) {
+          if(!isset($widgets[$w])) {
+              $form .= "\t%%WIDGET:$w%%\n";
+          } else {
+              $form .= "\t<!-- $w start -->\n";
+              $form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+              $form .= "\t<!-- $w end -->\n";
+          }
+      }
+      $form .= "\t<!-- widgets end -->\n";
+  } else {
       $widget_args = array_merge( array( "before_widget"=>"<fieldset>\n",
-                                       "after_widget"=>"\n</fieldset>\n",
-                                       "before_title"=>"<legend>",
-                                       "after_title"=>"</legend>",
-                                       "tdomf_form_id"=>$form_id,
-                                       "mode"=>$mode),
-                                $post_args);
-  $widget_order = tdomf_get_widget_order($form_id);
-  foreach($widget_order as $w) {
-      if(isset($widgets[$w])) {
-          $form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+                                           "after_widget"=>"\n</fieldset>\n",
+                                           "before_title"=>"<legend>",
+                                           "after_title"=>"</legend>",
+                                           "tdomf_form_id"=>$form_id,
+                                           "mode"=>$mode),
+                                    $post_args);
+      $widget_order = tdomf_get_widget_order($form_id);
+      foreach($widget_order as $w) {
+          if(isset($widgets[$w])) {
+              $form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+          }
       }
   }
-
+  
   // Form buttons
   //
-  $form .= '<table border="0" align="left"><tr>';
+  if($hack) {
+        $form .= "\t<!-- form buttons start -->\n";
+  }  
+  $form .= "\t<table border='0' align='left'><tr>\n";
   if(tdomf_widget_is_preview_avaliable($form_id)) {
-      $form .= '<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id.'(\'preview\'); return false;" /></td>';
+      $form .= "\t\t".'<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
   }
-  $form .= '<td width="10px"><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id.'(\'post\'); return false;" /></td>';
-  $form .= '</tr></table>';
-  $form .= "\n</form>\n";
+  $form .= "\t\t".'<td width="10px"><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
+  $form .= "\t</tr></table>\n";
+  if($hack) {
+        $form .= "\t<!-- form buttons end -->\n";
+  }
 
+  $form .= "</form>\n";
+
+  if($hack) {
+      $form .= "<!-- form end -->\n<!-- Form $form_id end -->\n";
+  }
+  
   return $form;
 }
 

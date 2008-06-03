@@ -209,4 +209,25 @@ function tdomf_content_adminbuttons_filter($content=''){
 }
 add_filter('the_content', 'tdomf_content_adminbuttons_filter');
 
+//////////////////////////////////////////////////////////
+// Is the current user the default user? (error checking)
+//
+function tdomf_current_user_default_author() {
+    global $current_user;
+    get_currentuserinfo();
+    if(!is_user_logged_in()) { return false; }
+    return ($current_user->ID == get_option(TDOMF_DEFAULT_AUTHOR));
+}
+
+//////////////////////////////
+// Is the current user trusted
+//
+function tdomf_current_user_trusted() {
+    global $current_user;
+    get_currentuserinfo();
+    if(!is_user_logged_in()) { return false; }
+    return (TDOMF_USER_STATUS_TRUSTED == get_usermeta($current_user->ID,TDOMF_KEY_STATUS));
+}
+
+
 ?>

@@ -356,6 +356,36 @@ function tdomf_widget_notifyme($args) {
 }
 tdomf_register_form_widget('notifyme', 'Notify Me', 'tdomf_widget_notifyme');
 
+// Widget core
+//
+function tdomf_widget_notifyme_hack($args) {
+  global $current_user;
+  get_currentuserinfo();
+
+  extract($args);
+  
+   $output  = "\t<?php if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,\$tdomf_form_id) && !current_user_can('publish_posts') && !tdomf_current_user_default_author() && !tdomf_current_user_trusted()) { ?>\n\t";
+   $output .= $before_widget;
+   
+    $output .= "\t\t\t<label for='notifyme'><input type='checkbox' name='notifyme' id='notifyme'";
+    $output .= "<?php if(isset(\$notifyme)) { ?> checked <?php } ?>"; 
+    $output .= " /> ".__("Do you wish to be notified when your post is approved (or rejected)?","tdomf")."</label>\n";
+
+    $output .= "\t\t<?php if(tdomf_widget_notifyme_show_email_input(%%FORMID%%)) { ?>\n";
+    $output .= "\t\t\t<?php if(isset(\$_COOKIE['tdomf_notify_widget_email'])) { \$notifyme_email = \$_COOKIE['tdomf_notify_widget_email']; } ?>\n";
+    $output .= "\t\t\t\t<br/>\n\t\t\t\t<label for='notifyme_email'>".__("Email for notification:","tdomf").' <input type="text" value="';
+    $output .= '<?php echo htmlentities($notifyme_email,ENT_QUOTES); ?>'.'" name="notifyme_email" id="notifyme_email" size="40" /></label>'."\n";
+    $output .= "\t\t<?php } ?>";
+    
+   $output .= $after_widget;
+   $output .= "\t<?php } ?>";
+ 
+  
+  $output .= $after_widget;
+  return $output;
+}
+tdomf_register_form_widget_hack('notifyme', 'Notify Me', 'tdomf_widget_notifyme_hack');
+
 // Widget validate input
 //
 function tdomf_widget_notifyme_validate($args,$preview) {

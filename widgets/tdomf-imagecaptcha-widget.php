@@ -21,7 +21,7 @@ function tdomf_widget_imagecaptcha_init($form_id){
      else if($count > ($max+1)){ $count = $max + 1; }
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("imagecaptcha-$i","Image Captcha $i", 'tdomf_widget_imagecaptcha',array(), $i);
-       tdomf_register_form_widget_validate("imagecaptcha-$i", "Image Captcha $i",'tdomf_widget_imagecaptcha_validate', true, array(), $i);
+       tdomf_register_form_widget_validate("imagecaptcha-$i", "Image Captcha $i",'tdomf_widget_imagecaptcha_validate', array(), $i);
      }
   }
 }

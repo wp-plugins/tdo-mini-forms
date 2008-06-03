@@ -95,25 +95,28 @@ if($message == NULL) {
       $args['ip'] = $_SERVER['REMOTE_ADDR'];
       $retVal = tdomf_create_post($args);
       // If retVal is an int it's a post id
+      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">";
       if(is_int($retVal)) {
         $post_id = $retVal;
         if(get_post_status($post_id) == 'publish') {
-          $message = sprintf(__("Your submission has been automatically published. You can see it <a href='%s'>here</a>. Thank you for using this service.","tdomf"),get_permalink($post_id));
+          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id);
         } else if(get_post_status($post_id) == 'future') {
-            $message = __("Your post submission has been accepted and should appear shortly.","tdomf");
+          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id);
         } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) { 
-          $message = __("Your submission is being flagged as spam! Sorry.","tdomf");
+          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id);
         } else {
-          $message = sprintf(__("Your post submission has been added to the moderation queue. It should appear in the next few days. If it doesn't please contact the <a href='mailto:%s'>admins</a>. Thank you for using this service.","tdomf"),get_bloginfo('admin_email'));
+          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id);
         }
       // If retVal is a string, something went wrong!
       } else {
-        $message = sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$retVal);
+        $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_ERROR,$form_id,false,false,$retVal);
         $save_post_info = TRUE;
         $hide_form = FALSE;
         tdomf_fixslashesargs();
       }
+      $message .= "</div>";
     } else {
+      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">".$message."</div>";
       $save_post_info = TRUE;
       $hide_form = false;
       tdomf_fixslashesargs();
@@ -127,8 +130,12 @@ if($message == NULL) {
        $hide_form = false;
 	   $message = tdomf_validate_form($_POST,true);
 	   if($message == NULL) {
-		  $message = tdomf_preview_form($_POST);
-	   }
+           $message  = "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">";
+           $message .= tdomf_preview_form($_POST);
+           $message .= "</div>";
+	   } else {
+           $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">".$message."</div>";
+       }
 	} else if(isset($_POST['tdomf_form'.$form_id.'_clear'])) {
     $message = NULL;
     $save_post_info = false;
@@ -140,7 +147,7 @@ if($message == NULL) {
 //
 $form_data = tdomf_get_form_data($form_id);
 
-if(!isset($post_id) || get_post_status($post_id) != 'publish') {
+if(!isset($post_id) || get_post_status($post_id) != 'publish' || !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
   // Go back to form with args
   //
   $redirect_url = $_POST['redirect'];
