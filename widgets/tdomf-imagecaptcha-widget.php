@@ -21,6 +21,7 @@ function tdomf_widget_imagecaptcha_init($form_id){
      else if($count > ($max+1)){ $count = $max + 1; }
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("imagecaptcha-$i","Image Captcha $i", 'tdomf_widget_imagecaptcha',array(), $i);
+       tdomf_register_form_widget_hack("imagecaptcha-$i","Image Captcha $i", 'tdomf_widget_imagecaptcha_hack',array(), $i);
        tdomf_register_form_widget_validate("imagecaptcha-$i", "Image Captcha $i",'tdomf_widget_imagecaptcha_validate', array(), $i);
      }
   }
@@ -54,31 +55,31 @@ function tdomf_widget_imagecaptcha($args,$params) {
   $output  = $before_widget;
 
   $output .= <<< EOT
-<script language="javascript">
-<!--
-function new_freecap_$tdomf_form_id()
-{
-	// loads new freeCap image
-	if(document.getElementById)
-	{
-		// extract image name from image source (i.e. cut off ?randomness)
-		thesrc = document.getElementById("freecap_$tdomf_form_id").src;
-		// add ?(random) to prevent browser/isp caching
-		document.getElementById("freecap_$tdomf_form_id").src = thesrc+"?"+Math.round(Math.random()*100000);
-	} else {
-		alert("Sorry, cannot autoreload freeCap image\\nSubmit the form and a new freeCap will be loaded");
-	}
-}
-//-->
-</script>
+		<script language="javascript">
+		<!--
+		function new_freecap_$tdomf_form_id()
+		{
+			// loads new freeCap image
+			if(document.getElementById)
+			{
+				// extract image name from image source (i.e. cut off ?randomness)
+				thesrc = document.getElementById("freecap_$tdomf_form_id").src;
+				// add ?(random) to prevent browser/isp caching
+				document.getElementById("freecap_$tdomf_form_id").src = thesrc+"?"+Math.round(Math.random()*100000);
+			} else {
+				alert("Sorry, cannot autoreload freeCap image\\nSubmit the form and a new freeCap will be loaded");
+			}
+		}
+		//-->
+		</script>
 EOT;
   
-  $output .= "<img src='".TDOMF_WIDGET_URLPATH."freecap/freecap_tdomf.php?tdomf_form_id=$tdomf_form_id' name='freecap_$tdomf_form_id' id='freecap_$tdomf_form_id' /><br/>";
-  $output .= "<small>".sprintf(__("If you can't read the word in the image, <a href=\"%s\">click here</a>","tdomf"),'#" onClick="this.blur();new_freecap_'.$tdomf_form_id.'();return false;')."</small><br/>";
-  $output .= '<label for="imagecaptcha_'.$tdomf_form_id.'" class="required" >';
-  $output .= __('What is the word in the image? ','tdomf')."<br/>";
-  $output .= '<input type="textfield" id="imagecaptcha_'.$tdomf_form_id.'" name="imagecaptcha_'.$tdomf_form_id.'" size="30" value="'.htmlentities($args["imagecaptcha"],ENT_QUOTES).'" />';
-  $output .= '</label>';
+  $output .= "\n\t\t<img src='".TDOMF_WIDGET_URLPATH."freecap/freecap_tdomf.php?tdomf_form_id=$tdomf_form_id' name='freecap_$tdomf_form_id' id='freecap_$tdomf_form_id' />\n\t\t<br/>\n";
+  $output .= "\t\t<small>".sprintf(__("If you can't read the word in the image, <a href=\"%s\">click here</a>","tdomf"),'#" onClick="this.blur();new_freecap_'.$tdomf_form_id.'();return false;')."</small>\n\t\t<br/>\n";
+  $output .= "\t\t".'<label for="imagecaptcha_'.$tdomf_form_id.'" class="required" >'."\n";
+  $output .= "\t\t".__('What is the word in the image? ','tdomf')."\n\t\t<br/>\n";
+  $output .= "\t\t".'<input type="textfield" id="imagecaptcha_'.$tdomf_form_id.'" name="imagecaptcha_'.$tdomf_form_id.'" size="30" value="'.htmlentities($args["imagecaptcha"],ENT_QUOTES).'" />'."\n";
+  $output .= "\t\t".'</label>';
       
   $output .= $after_widget;
   return $output;
@@ -111,5 +112,6 @@ function tdomf_widget_imagecaptcha_validate($args,$preview,$params) {
 
 tdomf_register_form_widget("imagecaptcha","Image Captcha", 'tdomf_widget_imagecaptcha');
 tdomf_register_form_widget_validate("imagecaptcha", "Image Captcha",'tdomf_widget_imagecaptcha_validate', true);
+tdomf_register_form_widget_hack("imagecaptcha", "Image Captcha",'tdomf_widget_imagecaptcha', true);
 
 ?>

@@ -56,11 +56,13 @@ function tdomf_widget_1qcaptcha_init($form_id){
     tdomf_register_form_widget("1qcaptcha","1 Question Captcha 1", 'tdomf_widget_1qcaptcha', array(), 1);
     tdomf_register_form_widget_control("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_control', 350, 150, array(), 1);
     tdomf_register_form_widget_validate("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_validate', array(), 1);
+    tdomf_register_form_widget_hack("1qcaptcha", "1 Question Captcha 1",'tdomf_widget_1qcaptcha_hack', array(), 1);
     
     for($i = 2; $i <= $count; $i++) {
       tdomf_register_form_widget("1qcaptcha-$i","1 Question Captcha $i", 'tdomf_widget_1qcaptcha', array(), $i);
       tdomf_register_form_widget_control("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_control', 350, 150, array(), $i);
       tdomf_register_form_widget_validate("1qcaptcha-$i", "1 Question Captcha $i",'tdomf_widget_1qcaptcha_validate', array(), $i);
+      tdomf_register_form_widget_hack("1qcaptcha-$i","1 Question Captcha $i", 'tdomf_widget_1qcaptcha_hack', array(), $i);
     }
   }
 }
@@ -110,9 +112,28 @@ function tdomf_widget_1qcaptcha($args,$params) {
   if($number != 1){ $postfix = "-$number"; }
   extract($args);
   $output  = $before_widget;  
-  $output .= '<label for="1qcaptcha" class="required" >';
+  $output .= "\t\t".'<label for="1qcaptcha" class="required" >';
   $output .= $options['question'];
-  $output .= '<br/><input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="'.htmlentities($args["1qcaptcha$postfix"],ENT_QUOTES,get_bloginfo('charset')).'" />';
+  $output .= "\n\t\t<br/>\n\t\t".'<input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="'.htmlentities($args["1qcaptcha$postfix"],ENT_QUOTES,get_bloginfo('charset')).'" />';
+  $output .= '</label>';
+  $output .= $after_widget;
+  return $output;
+}
+
+function tdomf_widget_1qcaptcha_hack($args,$params) {
+  $number = 1;
+  if(is_array($params) && count($params) >= 1){
+     $number = $params[0];
+  }
+  $options = tdomf_widget_1qcaptcha_get_options($number,$args['tdomf_form_id']);
+  $postfix = "";
+  if($number != 1){ $postfix = "-$number"; }
+  extract($args);
+  $output  = $before_widget;  
+  $output .= "\t\t".'<label for="1qcaptcha" class="required" >';
+  $output .= $options['question'];
+  $output .= '<br/><input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="';
+  $output .= "<?php echo htmlentities(\$post_args['1qcaptcha$postfix'],ENT_QUOTES,get_bloginfo('charset')); ?>".'" />';
   $output .= '</label>';
   $output .= $after_widget;
   return $output;

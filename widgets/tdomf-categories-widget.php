@@ -63,6 +63,7 @@ function tdomf_widget_categories_init($form_id,$mode){
      else if($count > ($max+1)){ $count = $max + 1; }
    
      tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
+     tdomf_register_form_widget_hack("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
      tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 350, 510, array(), 1);
      tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', array(), 1);
      tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', array(), 1);
@@ -70,10 +71,11 @@ function tdomf_widget_categories_init($form_id,$mode){
      
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);
+       tdomf_register_form_widget_hack("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);       
        tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 350, 510, array(), $i);
        tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', array(), $i);
        tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', array(), $i);
-       tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', true, array(), $i);
+       tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', array(), $i);
      }
   }
 }
@@ -131,9 +133,20 @@ function tdomf_widget_categories($args,$params) {
   }
 
   extract($args);
+ 
+  $hack = false;
+  if(strpos($mode,'-hack') !== false) {
+     $hack = true;
+  } 
   
   $output  = $before_widget;  
 
+  if($hack) {
+      $output .= "\t\t<?php \$defcat = $defcat; ";
+      $output .= "if(isset(\$post_args['categories$postfix'])) { ";
+      $output .= "\$defcat = \$post_args['categories$postfix']; } ?>\n";
+  }
+  
   if(!empty($options['title'])) {
     $output .= $before_title.$options['title'].$after_title;
   }
@@ -142,10 +155,10 @@ function tdomf_widget_categories($args,$params) {
   if($options['multi']) {
     $name = "categories".$postfix."[]";
   }
+
+    $output .= "\t\t"."<label for='categories$postfix'>".__('Select a category:','tdomf')." \n";
   
   if($options['display'] == "dropdown" ) {
-    
-    $output .= "<label for='categories$postfix'>Select a category: ";
     
     $catargs = array( 'exclude'          => $options['exclude'],
                       'hide_empty'       => false, 
@@ -155,13 +168,13 @@ function tdomf_widget_categories($args,$params) {
                       'class'            => "tdomf_categories$postfix",
                       'multiple'         => $options['multi'],
                       'selected'         => $defcat,
-                      'size'             => 1 );
+                      'size'             => 1,
+                      'mode'             => $mode,
+                      'hack'             => $hack );
     $output .= tdomf_dropdown_categories($catargs);
     
-    $output .= "</label>";
-    
   } else {
-    $output .= "<label for='categories$postfix'>Select a category:<br/>";
+    $output .= "\t\t<br/>\n";
     
     $catargs = array( 'exclude'          => $options['exclude'],
                       'hide_empty'       => false, 
@@ -171,12 +184,14 @@ function tdomf_widget_categories($args,$params) {
                       'class'            => "tdomf_categories$postfix",
                       'size'             => 5,
                       'multiple'         => $options['multi'],
-                      'selected'         => $defcat );
+                      'selected'         => $defcat,
+                      'mode'             => $mode,
+                      'hack'             => $hack );
     $output .= tdomf_dropdown_categories($catargs);
-    
-    $output .= "</label>";
   }
 
+  $output .= "\t\t</label>";
+  
   $output .= $after_widget;
   return $output;
   }
@@ -382,7 +397,9 @@ function tdomf_dropdown_categories($args = '') {
     'size' => 5,
     'name' => 'tdomf_cats[]', 
     'class' => 'tdomf_cats',
-    'width' => ''
+    'width' => '',
+    'mode'  => false,
+    'hack'  => false
   );
   
   $defaults['selected'] = ( is_category() ) ? get_query_var('cat') : 0;
@@ -398,19 +415,19 @@ function tdomf_dropdown_categories($args = '') {
     
     if($size > count($categories)) { $size = count($categories); }
     
-    $output = "<select name='$name' id='$name' class='$class' size='$size' ";
+    $output = "\t\t<select name='$name' id='$name' class='$class' size='$size' ";
     if($width != '') { $output .= "style='width:$width; '"; }
     if($multiple) { $output .= "multiple "; }
     $output .= " >\n";
     
     if ( $show_option_all ) {
       $show_option_all = apply_filters('list_cats', $show_option_all);
-      $output .= "\t<option value='0'>$show_option_all</option>\n";
+      $output .= "\t\t\t<option value='0'>$show_option_all</option>\n";
     }
     
     if ( $show_option_none) {
       $show_option_none = apply_filters('list_cats', $show_option_none);
-      $output .= "\t<option value='-1'>$show_option_none</option>\n";
+      $output .= "\t\t\t<option value='-1'>$show_option_none</option>\n";
     }
     
     if ( $hierarchical )
@@ -419,7 +436,7 @@ function tdomf_dropdown_categories($args = '') {
       $depth = -1; // Flat.
     
     $output .= tdomf_walk_category_dropdown_tree($categories, $depth, $r);
-    $output .= "</select>\n";
+    $output .= "\t\t</select>\n";
   }
   
   $output = apply_filters('wp_dropdown_cats', $output);
@@ -444,10 +461,15 @@ class tdomf_Walker_CategoryDropdown extends Walker {
 		$pad = str_repeat('&nbsp;', $depth * 3);
 
 		$cat_name = apply_filters('list_cats', $category->name, $category);
-		$output .= "\t<option value=\"".$category->term_id."\"";
-    if( (is_array($args['selected']) && in_array($category->term_id, $args['selected'])) 
-      || ( $category->term_id == $args['selected'] ) )
-			$output .= ' selected="selected"';
+		$output .= "\t\t\t<option value=\"".$category->term_id."\"";
+        if(!$args['hack']) {
+            if( (is_array($args['selected']) && in_array($category->term_id, $args['selected'])) 
+                || ( $category->term_id == $args['selected'] ) )
+			    $output .= ' selected="selected"';
+        } else {
+            $output .= "<?php if( (is_array(\$defcat) && in_array($category->term_id, \$defcat)) 
+            || ( $category->term_id == \$defcat ) ) { echo ' selected=\"selected\" '; } ?>\n";
+        }
 		$output .= '>';
 		$output .= $pad.$cat_name;
 		if ( $args['show_count'] )

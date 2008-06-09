@@ -40,6 +40,21 @@ function tdomf_widget_iagree($args) {
 }
 tdomf_register_form_widget('i-agree','I Agree', 'tdomf_widget_iagree');
 
+function tdomf_widget_iagree_hack($args) {
+  extract($args);
+  $options = tdomf_widget_iagree_get_options($tdomf_form_id);
+  
+  $output  = $before_widget;  
+  $output .= "\t\t".'<input type="checkbox" name="iagree" id="iagree" ';
+  $output .= "<?php if(\$iagree) { echo 'checked'; } ?>";
+  $output .= ' />'."\n\t\t".'<label for="iagree" class="required" > ';
+  $output .= $options['text'];
+  $output .= ' </label>';
+  $output .= $after_widget;
+  return $output;
+}
+tdomf_register_form_widget_hack('i-agree','I Agree', 'tdomf_widget_iagree_hack');
+
 //////////////////////////////////////
 // User must Agree! 
 //

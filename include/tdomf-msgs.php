@@ -220,7 +220,7 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
 
     // execute any PHP code in the message    
     ob_start();
-    extract($post_args);
+    extract($post_args,EXTR_PREFIX_INVALID,"tdomf_");
     $message = @eval("?>".$message);
     $message = ob_get_contents();
     ob_end_clean();

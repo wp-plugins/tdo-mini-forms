@@ -5,7 +5,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for Form generation //
 //////////////////////////////
 
-// TODO: Ajax (probably never)
 // TODO: Clear and/or reset button
 
 // Checks if current user/ip has permissions to post!
@@ -101,8 +100,8 @@ function tdomf_preview_form($args) {
    } else {
      $mode = "new-post";
    }
-   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
    do_action('tdomf_preview_form_start',$form_id,$mode);
+   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
    
    $message = "";
    $widget_args = array_merge( array( "before_widget"=>"\n<p>\n",

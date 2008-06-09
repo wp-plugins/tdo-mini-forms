@@ -90,6 +90,19 @@ if(function_exists('wp_set_post_tags')) {
   }
   tdomf_register_form_widget_adminemail('tags','Tags', 'tdomf_widget_tags_adminemail', array("new-post"));
 
+  function tdomf_widget_tags_hack($args) {
+    extract($args);
+    $output  = $before_widget;  
+    $output .= "\t\t".'<label for="tags" >';
+    $output .= "\n\t\t".__("Tags (separate multiple tags with commas: cats, pet food, dogs):","tdomf");
+    $output .= "\n\t\t<br/>\n\t\t".'<input type="textfield" id="tags" name="tags" size="60" value="';
+    $output .= "<?php echo htmlentities(\$tags,ENT_QUOTES,get_bloginfo('charset')); ?>".'" />';
+    $output .= "\n\t\t".'</label>';
+    $output .= $after_widget;
+    return $output;
+    }
+  tdomf_register_form_widget_hack('tags','Tags', 'tdomf_widget_tags_hack', array("new-post"));
+  
 }
 
 ?>

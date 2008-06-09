@@ -300,12 +300,12 @@ function tdomf_form_admin_head() {
 	<?php foreach($widgets_control as $id => $w) { ?>
       controldims['#<?php echo $id; ?>control'] = new Array;
       <?php if($max_w > 0) { ?>
-        controldims['#<?php echo $id; ?>control']['width'] = <?php if($max_w < intval($w['width'])){ echo ($max_w + 40); } else { echo $w['width']; } ?>;
+        controldims['#<?php echo $id; ?>control']['width'] = <?php /*if($max_w < intval($w['width'])){*/ echo ($max_w + 40); /*} else { echo $w['width']; }*/ ?>;
       <?php } else { ?>
         controldims['#<?php echo $id; ?>control']['width'] = <?php echo $w['width']; ?>;
       <?php } ?>   
       <?php if($max_h > 0) { ?>
-        controldims['#<?php echo $id; ?>control']['height'] = <?php if($max_h < intval($w['height'])){ echo ($max_h + 60); } else { echo $w['height']; } ?>;
+        controldims['#<?php echo $id; ?>control']['height'] = <?php /*if($max_h < intval($w['height'])){*/ echo ($max_h + 60); /*} else { echo $w['height']; }*/ ?>;
       <?php } else { ?>
         controldims['#<?php echo $id; ?>control']['height'] = <?php echo $w['height']; ?>;
       <?php } ?>

@@ -113,7 +113,7 @@ function tdomf_filter_widgets($mode,$widgets = false) {
      } else {
        $modes = $w['modes'];
        foreach($modes as $m) {
-         if(strstr($mode,$m) == $m) {
+         if(strpos($mode,$m) !== false) {
            $retWidgets[$id] = $w;
            break;
          }
@@ -174,7 +174,7 @@ function tdomf_register_form_widget_preview($id, $name, $preview_callback, $mode
    #tdomf_log_message_extra("Loading Widget Preview $id...");
    $tdomf_form_widgets_preview[$id]['name'] = $name;
    $tdomf_form_widgets_preview[$id]['cb'] = $preview_callback;
-   $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 5);
+   $tdomf_form_widgets_preview[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets_preview[$id]['modes'] = $modes;
 }
 
@@ -193,7 +193,7 @@ function tdomf_register_form_widget_validate($id, $name, $validate_callback, $mo
    #tdomf_log_message_extra("Loading Widget Validate $id...");
    $tdomf_form_widgets_validate[$id]['name'] = $name;
    $tdomf_form_widgets_validate[$id]['cb'] = $validate_callback;
-   $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 5);
+   $tdomf_form_widgets_validate[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets_validate[$id]['modes'] = $modes;
 }
 
@@ -212,7 +212,7 @@ function tdomf_register_form_widget_post($id, $name, $post_callback, $modes = ar
    #tdomf_log_message_extra("Loading Widget Post $id...");
    $tdomf_form_widgets_post[$id]['name'] = $name;
    $tdomf_form_widgets_post[$id]['cb'] = $post_callback;
-   $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 5);
+   $tdomf_form_widgets_post[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets_post[$id]['modes'] = $modes;
 }
 

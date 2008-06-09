@@ -74,4 +74,22 @@ function tdomf_widget_getcat_post($args,$params) {
 }
 tdomf_register_form_widget_post("getcat", __("Set Category from GET variables","tdomf"),'tdomf_widget_getcat_post',true,array("new-post"));
 
+function tdomf_widget_getcat_hack($args) {
+  global $tdomf_getcat_var_name;
+  extract($args);
+
+  $getcat = tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,$tdomf_form_id);
+  $output  = "\t\t<?php \$getcat = $getcat;\n";
+  $output .= "\t\tif(isset(\$_GET['$tdomf_getcat_var_name'])) {\n";
+  $output .= "\t\t\t\$getcat = intval(\$_GET['$tdomf_getcat_var_name']);\n";
+  $output .= "\t\t} else if(isset(\$post_args['$tdomf_getcat_var_name'])) {\n";
+  $output .= "\t\t\$getcat = intval(\$post_args['$tdomf_getcat_var_name']); }\n";
+  
+  $output .= "\t\t<input type='hidden' name='$tdomf_getcat_var_name' id='$tdomf_getcat_var_name' value='";
+  $output .= "<?php echo \$getcat; ?>' />\n";
+  
+  return $output;
+}
+tdomf_register_form_widget_hack("getcat", __("Set Category from GET variables","tdomf"), 'tdomf_widget_getcat_hack', array("new-post"));
+
 ?>

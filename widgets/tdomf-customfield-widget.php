@@ -158,6 +158,7 @@ function tdomf_widget_customfields($args,$params) {
 // Preview 
 //
 function tdomf_widget_customfields_preview($args,$params) {
+    
   $number = 0;
   if(is_array($params) && count($params) >= 1){
      $number = $params[0];
