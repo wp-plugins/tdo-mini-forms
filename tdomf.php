@@ -281,9 +281,12 @@ Author URI: http://thedeadone.net
 // - AJAX (with fallback support)
 // - Small bug in that validation widgets were not being called properly if they
 //    use the action "tdomf_validate_form_start" (such as any multiple instant
-//    widgets like 1 Question Capatcha and the Image Capatcha
+//    widgets like 1 Question Capatcha and the Image Capatcha. Same also for
+//    preview.
 // - Redirect to published post option
 // - Initial implementation of Form Hacker
+// - Text Widget now uses Form Hacker macros
+// - Log now has size limit!
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -601,7 +604,10 @@ define("TDOMF_MACRO_END", "%%");
 
 define('TDOMF_OPTION_FORM_HACK',"tdomf_form_hack");
 define('TDOMF_OPTION_FORM_HACK_ORIGINAL',"tdomf_form_hack_org");
+define('TDOMF_OPTION_FORM_PREVIEW_HACK',"tdomf_form_preview_hack");
+define('TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL',"tdomf_form_hack_preview_org");
 
+define('TDOMF_OPTION_LOG_MAX_SIZE',"tdomf_option_log_max_size");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation
@@ -751,7 +757,10 @@ function tdomf_new_features() {
       $features .= "<li>".sprintf(__('<a href="%s">AJAX support for forms!</a>','tdomf'),$link)."</li>";
       
       $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_form_hacker";
-      $features .= "<li>".sprintf(__('<a href="%s">Now you can hack your form!</a>','tdomf'),$link)."</li>";
+      $features .= "<li>".sprintf(__('<a href="%s">Hack the appearance of your form!</a>','tdomf'),$link)."</li>";
+      
+      $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
+      $features .= "<li>".sprintf(__('<a href="%s">Text widget updated to support macros and php code</a>','tdomf'),$link)."</li>";
       
   }
   // 33 = 0.12b (ajax)
@@ -806,6 +815,10 @@ function tdomf_init(){
     }
   }
 
+  if(get_option(TDOMF_OPTION_LOG_MAX_SIZE) == false) {
+      add_option(TDOMF_OPTION_LOG_MAX_SIZE,1000);
+  }
+  
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));

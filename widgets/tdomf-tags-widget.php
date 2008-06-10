@@ -3,7 +3,7 @@
 Name: "Tags"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget allows users to add tags to their submissions
-Version: 1
+Version: 2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */

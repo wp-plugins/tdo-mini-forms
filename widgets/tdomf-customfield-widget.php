@@ -154,6 +154,30 @@ function tdomf_widget_customfields($args,$params) {
   return "";
 }
 
+//////////////////////////////
+// Hack this widget 
+//
+function tdomf_widget_customfields_hack($args,$params) {
+  $number = 0;
+  if(is_array($params) && count($params) >= 1){
+     $number = $params[0];
+  }
+  $options = tdomf_widget_customfields_get_options($number,$args['tdomf_form_id']);
+  
+  if($options['type'] == 'textfield') {
+    return tdomf_widget_customfields_textfield_hack($args,$number,$options);
+  } else if($options['type'] == 'hidden') {
+    return tdomf_widget_customfields_hidden($args,$number,$options);
+  } else if($options['type'] == 'textarea') {
+    return tdomf_widget_customfields_textarea_hack($args,$number,$options);
+  } else if($options['type'] == 'checkbox') {
+    return tdomf_widget_customfields_checkbox_hack($args,$number,$options);
+  } else if($options['type'] == 'select') {
+    return tdomf_widget_customfields_select_hack($args,$number,$options);
+  }
+  return "";
+}
+
 ///////////////////////////////////////
 // Preview 
 //
@@ -432,6 +456,7 @@ function tdomf_widget_customfields_init($form_id){
       tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', array(), $i);
       tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array(), $i);
       tdomf_register_form_widget_adminemail("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_adminemail', array(), $i);
+      tdomf_register_form_widget_hack("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_hack', array(), $i);
     }
   }
 }
@@ -468,6 +493,36 @@ function tdomf_widget_customfields_textfield($args,$number,$options) {
   }
   $output .= "<input type=\"textfield\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" />";
   $output .= "</label>\n";
+  
+  $output .= $after_widget;
+  return $output;
+}
+
+function tdomf_widget_customfields_textfield_hack($args,$number,$options) {
+  extract($args);
+  
+  $defval = str_replace("\"","\\\"",$options['defval']);
+  
+  $output  = $before_widget;
+
+  $output .= "\t\t<?php \$value = \"$defval\";\n\t\tif(isset(\$post_args['customfields-textfield-$number'])) { \$value = \$post_args['customfields-textfield-$number']; } ?>\n";
+  
+  if($options['required']) {
+    $output .= "\t\t<label for=\"customfields-textfield-$number\" class=\"required\">".$options['title']." ".__("(Required)","tdomf")."\n\t\t<br/>\n";
+  } else {
+    $output .= "\t\t<label for=\"customfields-textfield-$number\">".$options['title']."\n\t\t\t<br/>\n";
+  }
+  if($options['tf-subtype'] == 'email') {
+    $output .= "\t\t\t".__("Email:","tdomf")." "; 
+  } else if($options['tf-subtype'] == 'url') {
+    $output .= "\t\t\t".__("URL:","tdomf")." ";
+  } else {
+    $output .= "\t\t\t";
+  }
+  $output .= "<input type=\"textfield\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"";
+  $output .= "<?php echo htmlentities(\$value,ENT_QUOTES,get_bloginfo('charset')); ?>";
+  $output .=  "\" />\n";
+  $output .= "\t\t</label>\n";
   
   $output .= $after_widget;
   return $output;
@@ -580,7 +635,7 @@ function tdomf_widget_customfields_textfield_adminemail($args,$number,$options) 
 
 function tdomf_widget_customfields_hidden($args,$number,$options) {
   $value = htmlentities($options['defval'],ENT_NOQUOTES,get_bloginfo('charset'));
-  $output = "<input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" />";
+  $output = "\t\t<input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" />\n";
   return $output;
 }
 
@@ -702,6 +757,46 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
   $output .= "<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >".htmlentities($value,ENT_NOQUOTES,get_bloginfo('charset'))."</textarea>";
   if($options['ta-quicktags']) {
     $output .= "\n<script type='text/javascript'>var edCanvascfta$number = document.getElementById('customfields-textarea-$number');</script>\n";
+  }
+  
+  return $before_widget.$output.$after_widget;
+}
+
+function tdomf_widget_customfields_textarea_hack($args,$number,$options) {
+  extract($args);
+  
+  $defval = str_replace("\"","\\\"",$options['defval']);
+  $output = "\t\t<?php \$value = \"$defval\";\n\t\tif(isset(\$post_args['customfields-textarea-$number'])) { \$value = \$post_args['customfields-textarea-$number']; } ?>\n";
+  
+  if($options['required']) {
+    $output .= "\t\t<label for=\"customfields-textarea-$number\" class=\"required\">".$options['title']." ".__("(Required)","tdomf")."\n\t\t<br/>\n";
+  } else {
+    $output .= "\t\t<label for=\"customfields-textarea-$number\">".$options['title']."\n\t\t<br/>\n";
+  }
+  $output .= "\t\t</label>\n";
+    
+  if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
+    $output .= "\t\t".sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags'],ENT_NOQUOTES,get_bloginfo('charset')))."\n\t\t<br/>\n";
+  }
+  if($options['ta-word-limit'] > 0) {
+      $output .= "\t\t".sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['ta-word-limit'])."\n\t\t<br/>\n";
+  }
+  if($options['ta-char-limit'] > 0) {
+      $output .= "\t\t".sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['ta-char-limit'])."\n\t\t<br/>\n";
+  }
+  if($options['ta-quicktags']) {
+    $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number";
+    if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
+      $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number&allowed_tags=".urlencode($options['ta-allowable-tags']);
+    }
+    $output .= "\t\t<script src='$qt_path' type='text/javascript'></script>\n";
+    $output .= "\t\t<script type='text/javascript'>edToolbarcfta$number();</script>\n";
+  }
+  $output .= "\t\t<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >";
+  $output .= "<?php echo htmlentities(\$value,ENT_NOQUOTES,get_bloginfo('charset')); ?>";
+  $output .= "</textarea>\n";
+  if($options['ta-quicktags']) {
+    $output .= "\t\t<script type='text/javascript'>var edCanvascfta$number = document.getElementById('customfields-textarea-$number');</script>\n";
   }
   
   return $before_widget.$output.$after_widget;
@@ -846,6 +941,7 @@ function tdomf_widget_customfields_checkbox($args,$number,$options) {
   $output  = $before_widget;
   
   $value = $options['defval'];
+  // only grab value if post is previewed!
   if(isset($args["tdomf_key_$tdomf_form_id"])){
     $value = isset($args["customfields-checkbox-$number"]);
   }
@@ -872,17 +968,53 @@ function tdomf_widget_customfields_checkbox($args,$number,$options) {
   return $output;
 }
 
+function tdomf_widget_customfields_checkbox_hack($args,$number,$options) {
+  extract($args);
+  
+  $output  = $before_widget;
+  
+  $defval = false;
+  if(isset($options['defval']) && is_bool($options['defval'])) {
+      $defval = $options['defval'];
+  }
+  $defval = ($defval) ? "true" : "false" ;  
+  
+  // only grab value if post is previewed!
+  $output = "\t\t<?php \$value = $defval;\n\t\tif(isset(\$post_args['tdomf_key_$tdomf_form_id'])) { \$value = isset(\$post_args['customfields-checkbox-$number']); } ?>\n";
+  
+  if($options['required']) {
+    $output .= "\t\t<label for=\"customfields-checkbox-$number\" class=\"required\">\n";
+  } else {
+    $output .= "\t\t<label for=\"customfields-checkbox-$number\">\n";
+  }
+
+  $output .= "\t\t<input type=\"checkbox\" name=\"customfields-checkbox-$number\" id=\"customfields-checkbox-$number\"";
+  $output .= "<?php if(\$value){ ?> checked <?php } ?>";
+  $output .= "/>\n\t\t";
+  
+  if($options['required']) {
+    $output .= $options['title']." ".__("(Required)","tdomf")."\n";
+  } else {
+    $output .= $options['title']."\n";
+  }
+  
+  $output .= "\t\t</label>\n";
+  
+  $output .= $after_widget;
+  return $output;
+}
+
 function tdomf_widget_customfields_checkbox_validate($args,$number,$options) {
   extract($args);
   $output = "";
   if($options['required']) {
-    if(!isset($args["customfields-checkbox-$number"]) && $args['required-value']){
+    if(!isset($args["customfields-checkbox-$number"]) && $options['required-value']){
       if(!empty($options['title'])) {
         $output .= sprintf(__("You must select \"%s\".","tdomf"),$options['title']);
       } else {
         $output .= __("You must select the checkbox!","tdomf");
       }
-    } else if(isset($args["customfields-checkbox-$number"]) && !$args['required-value']){
+    } else if(isset($args["customfields-checkbox-$number"]) && !$options['required-value']){
       if(!empty($options['title'])) {
         $output .= sprintf(__("You must not select \"%s\".","tdomf"),$options['title']);
       } else {
@@ -1173,6 +1305,70 @@ function tdomf_widget_customfields_select($args,$number,$options) {
     return $output;
   }
 
+function tdomf_widget_customfields_select_hack($args,$number,$options) {
+    extract($args);
+  
+    $output  = $before_widget;
+
+    if($options['required']) {
+      $output .= "\t\t<label for=\"customfields-s-list-$number\" class=\"required\">";
+    } else {
+      $output .= "\t\t<label for=\"customfields-s-list-$number\">";
+    }
+    if($options['required']) {
+      $output .= $options['title']." ".__("(Required)","tdomf");
+    } else {
+      $output .= $options['title'];
+    }
+    $output .= "</label>\n\t\t<br/>\n";
+    
+    if($options['s-multiple']) {
+      $output .= "\t\t".'<select name="customfields-s-list-'.$number.'[]" id="customfields-s-list-'.$number.'[]" size="'.$options['rows'].'" multiple >'."\n";
+    } else {
+      $output .= "\t\t<select name=\"customfields-s-list-$number\" id=\"customfields-s-list-$number\" size=\"".$options['rows']."\" >\n";
+    }
+
+    $select_defaults = array();
+    if(!empty($options['s-defaults'])) {
+      $select_defaults = split(";",$options['s-defaults']);
+    }
+    
+    $output .= "\t\t<?php \$value = array();\n"; 
+    $output .= "\t\tif(isset(\$post_args['customfields-s-list-$number'])) {\n";
+    $output .= "\t\t\t\$value = \$post_args['customfields-s-list-$number'];\n";
+    $output .= "\t\t\tif(!is_array(\$value)) { \$value = array( \$value ); }\n";
+    if(!empty($select_defaults)) {
+        $output .= "\t\t} else {\n";
+        $output .= "\t\t\t\$value = array( ";
+        foreach($select_defaults as $def) {
+            if(!empty($def)) {
+                $output .= '"'.str_replace("\"","\\\"",$def).'", ';
+            }
+        }
+        $output .= " );\n";
+    }
+    $output .= "\t\t} ?>\n";
+    
+    if(!empty($options['s-values'])) {
+      $select_options = split(";",$options['s-values']);
+      foreach($select_options as $select_option) {
+        list($text,$value) = split(":",$select_option,2);
+        if(trim($text) != "" && trim($value) != "") {
+          $output .= "\t\t\t<option value=\"".str_replace("\"","\\\"",$value)."\" ";
+          $output .= "<?php if(in_array(\"".str_replace("\"","\\\"",$value)."\",\$value)) { ?> selected <?php } ?>";
+          $output .= " > $text</option>\n"; 
+        }
+     }
+    }
+    
+    $output .= "\t\t</select>\n";
+    $output .= $after_widget;
+    
+    return $output;
+  }
+
+  
+  
 function tdomf_widget_customfields_select_convert($post_input,$options) {
   $opts = split(";",$options['s-values']);
   $message = "";

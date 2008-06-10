@@ -261,8 +261,20 @@ function tdomf_show_general_options() {
 	        <input type="checkbox" name="tdomf_spam_auto_delete" id="tdomf_spam_auto_delete"  <?php if($tdomf_spam_auto_delete) echo "checked"; ?> >
           </p>
           
+    
+    <h3><?php _e('Max Log Size',"tdomf"); ?></h3>
+
+	<p>
+	<?php _e('Limit the number of lines in your tdomf log. A value of 0 disables the stored log.',"tdomf"); ?>
+	</p>
+
+	<p>
+	<b><?php _e("Max Lines in Log","tdomf"); ?></b>
+	<input type="text" name="tdomf_log_max_size" id="tdomf_log_max_size" size="4" value="<?php echo htmlentities(get_option(TDOMF_OPTION_LOG_MAX_SIZE),ENT_QUOTES,get_bloginfo('charset')); ?>" />
+	</p>
+    
     <br/><br/>
-          
+    
     <table border="0"><tr>
 
     <td>
@@ -1079,6 +1091,9 @@ function tdomf_handle_options_actions() {
       
       $tdomf_spam_auto_delete = $_POST['tdomf_spam_auto_delete'];
       update_option(TDOMF_OPTION_SPAM_AUTO_DELETE,$tdomf_spam_auto_delete);
+      
+      $tdomf_log_max_size = intval($_POST['tdomf_log_max_size']);
+      update_option(TDOMF_OPTION_LOG_MAX_SIZE,$tdomf_log_max_size);
       
       $message .= "Options Saved!<br/>";
       tdomf_log_message("Options Saved");

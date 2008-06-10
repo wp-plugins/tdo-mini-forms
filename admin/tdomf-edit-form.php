@@ -437,19 +437,25 @@ function tdomf_show_form_menu() {
   $form_ids = tdomf_get_form_ids();
   $form_id = tdomf_edit_form_form_id();
   
+  tdomf_log_mem_usage(__FILE__,__LINE__);
+  
   $widget_order = tdomf_get_option_form(TDOMF_OPTION_FORM_ORDER,$form_id);
 
+  tdomf_log_mem_usage(__FILE__,__LINE__);
+  
   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
     $mode = "new-page";
   } else {
     $mode = "new-post";
   }
   $widgets = tdomf_filter_widgets($mode,$tdomf_form_widgets);
-  $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);  
-  
+  tdomf_log_mem_usage(__FILE__,__LINE__);
+  $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);
+  tdomf_log_mem_usage(__FILE__,__LINE__);  
   
   do_action( 'tdomf_widget_page_top', $form_id, $mode );
-
+  tdomf_log_mem_usage(__FILE__,__LINE__);
+  
   ?>
 
   <?php if(count($form_ids) > 1 && tdomf_wp23()) { ?>
@@ -581,7 +587,9 @@ function tdomf_show_form_menu() {
 //
 function tdomf_handle_editformmenu_actions() {
 
-  // get form id
+  tdomf_log_mem_usage(__FILE__,__LINE__);
+    
+ // get form id
   $form_id = false;
   if(isset($_REQUEST['tdomf-form-id'])) {
     $form_id = intval($_REQUEST['tdomf-form-id']);
@@ -596,7 +604,9 @@ function tdomf_handle_editformmenu_actions() {
       #$_GET = stripslashes_array($_GET);
       $_POST = stripslashes_array($_POST);
       #$_REQUEST = stripslashes_array($_REQUEST);
-    }
+      
+      tdomf_log_mem_usage(__FILE__,__LINE__);
+  }
 
 	if ( isset( $_POST['action'] ) && $form_id ) {
 		switch( $_POST['action'] ) {
@@ -606,10 +616,12 @@ function tdomf_handle_editformmenu_actions() {
 					parse_str($_POST['tdomf_form-1order'],$widget_order);
 					$widget_order = $widget_order['tdomf_form-1'];
 	                tdomf_set_option_form(TDOMF_OPTION_FORM_ORDER,$widget_order,$form_id);
+                    tdomf_log_mem_usage(__FILE__,__LINE__);
 					tdomf_log_message_extra("Saved widget settings for form-$form_id: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
 				} else {
 					$widget_order = tdomf_get_form_widget_default_order();
 					tdomf_set_option_form(TDOMF_OPTION_FORM_ORDER,false,$form_id);
+                    tdomf_log_mem_usage(__FILE__,__LINE__);
 					tdomf_log_message("Restored default settings for form-$form_id");
 				}
         if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS) && tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id)) {

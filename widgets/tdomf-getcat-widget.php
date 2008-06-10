@@ -3,7 +3,7 @@
 Name: "Set Category from get variables"
 URI: http://thedeadone.net/forum/viewthread/TDOMF-Hacks/4/Bypass-Default-Category/20/
 Description: Change category of post based on URI of forum. Make sure this is the last widget!
-Version: 0.3
+Version: 0.4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */

@@ -3,7 +3,7 @@
 Name: "Text"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Insert some text
-Version: 2
+Version: 3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -73,11 +73,13 @@ function tdomf_widget_text($args,$params) {
     $output .= $options['title'];
     $output .= $after_title;
   }
-  // pretty-up for hack mode
+  
   if(strpos($mode,'-hack') !== false) {
     $output .= "\t\t";
+    $output .= $options['text'];
+  } else {
+    $output .= tdomf_prepare_string($options['text'], $tdomf_form_id, $mode, false, "", $args);
   }
-  $output .= $options['text'];
   $output .= $after_widget;
   return $output;
 }
@@ -109,19 +111,29 @@ function tdomf_widget_text_control($form_id,$params) {
         ?>
 <div>
 
-<i><?php _e("HTML is permissible in messages.","tdomf"); ?></i>
+<i><?php _e("HTML is permissible. You can also now use MACROs (see list) from the Form Hacker in the output which also means you can use PHP code.","tdomf"); ?></i>
 
 <br/><br/>
 
+<ul>
+<li><?php printf(__("<code>%s</code> - User name of the currently logged in user","tdomf"),TDOMF_MACRO_USERNAME); ?>
+<li><?php printf(__("<code>%s</code> - IP of the current visitor","tdomf"),TDOMF_MACRO_IP); ?>
+<li><?php printf(__("<code>%s</code> - The ID of the current form (which is currently %d)","tdomf"),TDOMF_MACRO_FORMID,$form_id); ?>
+<li><?php printf(__("<code>%s</code> - Name of the Form (set in options)","tdomf"),TDOMF_MACRO_FORMNAME); ?>
+<li><?php printf(__("<code>%s</code> - Form Description (set in options)","tdomf"),TDOMF_MACRO_FORMDESCRIPTION); ?>
+</ul>
+             
+             <br/><br/>
+
 <label for="text-title-<?php echo $number; ?>">
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="text-title-<?php echo $number; ?>" name="text-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<input type="textfield" size="60" id="text-title-<?php echo $number; ?>" name="text-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 <br/><br/>
 
 <label for="text-text-<?php echo $number; ?>" ><?php _e("Text:","tdomf"); ?><br/>
-<textarea cols="40" rows="4" id="text-text-<?php echo $number; ?>" name="text-text-<?php echo $number; ?>" ><?php echo htmlentities($options['text'],ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+<textarea cols="50" rows="6" id="text-text-<?php echo $number; ?>" name="text-text-<?php echo $number; ?>" ><?php echo htmlentities($options['text'],ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
 </label>
 
 </div>
@@ -140,7 +152,7 @@ function tdomf_widget_text_init($form_id){
      for($i = 1; $i <= $count; $i++) {
        tdomf_register_form_widget("text-$i","Text $i", 'tdomf_widget_text', array(), $i);
        tdomf_register_form_widget_hack("text-$i","Text $i", 'tdomf_widget_text', array(), $i);
-       tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 400, 300, array(), $i);
+       tdomf_register_form_widget_control("text-$i", "Text $i",'tdomf_widget_text_control', 500, 520, array(), $i);
      }
   }
 }

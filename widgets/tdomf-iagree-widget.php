@@ -3,7 +3,7 @@
 Name: "I Agree"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget provides a checkbox that the user must click before a post will be accept such as the classic "I Agree" buttons.
-Version: 3
+Version: 4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */

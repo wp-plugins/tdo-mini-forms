@@ -3,7 +3,7 @@
 Name: "Image Captcha"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: The user must enter the text in the image otherwise the form will not be processed
-Version: 0.2
+Version: 3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */

@@ -3,26 +3,93 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 function tdomf_form_hacker_diff($form_id) {
   $mode = $_REQUEST['mode'];
-  $form1 = $_REQUEST['form1'];
-  $form2 = $_REQUEST['form2'];
+  $form1_type = $_REQUEST['form1'];
+  $form2_type = $_REQUEST['form2'];
+  $render = 'default';
+  if(isset($_REQUEST['render'])) {
+      $render = $_REQUEST['render'];
+  }
   
-  if($form1 == 'cur') {
+  $form1_name = "";
+  $form2_name = "";
+  
+  if($form1_type == 'cur') {
+    $form1_name = __('Current Unmodified Form','tdomf');
     $form1 = tdomf_generate_form($form_id,$mode);
-  } else if($form1 == 'org') {
+  } else if($form1_type == 'org') {
+    $form1_name = __('Original Unmodified Form','tdomf');
     $form1 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id);
-  } else if($form1 == 'hack') {
+  } else if($form1_type == 'hack') {
+    $form1_name = __('Hacked Form','tdomf');
     $form1 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id);
   }
   
-  if($form2 == 'cur') {
+  if($form2_type == 'cur') {
+    $form2_name = __('Current Unmodified Form','tdomf');
     $form2 = tdomf_generate_form($form_id,$mode);
-  } else if($form2 == 'org') {
+  } else if($form2_type == 'org') {
+    $form2_name = __('Original Unmodified Form','tdomf');
     $form2 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id);
-  } else if($form2 == 'hack') {
+  } else if($form2_type == 'hack') {
+    $form2_name = __('Hacked Form','tdomf');
     $form2 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id);
   }
+  
+  echo "<h3>".sprintf(__('%s verus %s','tdomf'),$form1_name,$form2_name)."</h3>";
 
-  echo "<pre>".htmlentities(PHPDiff($form1,trim($form2)),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+  echo "<form>";
+  
+  echo "<input type='hidden' id='page' name='page' value='tdomf_show_form_hacker' />";
+  echo "<input type='hidden' id='form' name='form' value='$form_id' />";
+  echo "<input type='hidden' id='mode' name='mode' value='$mode' />";
+  echo "<input type='hidden' id='diff' name='diff' />";
+  echo "<input type='hidden' id='form2' name='form2' value='$form2_type' />";
+  echo "<input type='hidden' id='form1' name='form1' value='$form1_type' />";
+  
+  echo '<label for="render">'.__('Render Type','tdomf').' </label>';
+  echo '<select id="render" name="render">';
+  echo '<option value="default" ';
+  if($render == 'default') { echo 'selected'; }
+  echo ' >'.__('Default','tdomf')."\n<br/>";
+  
+  echo '<option value="unified" ';
+  if($render == 'unified') { echo 'selected'; }
+  echo ' >'.__('Unified','tdomf')."\n<br/>";
+  
+  echo '<option value="inline" ';
+  if($render == 'inline') { echo 'selected'; }
+  echo ' >'.__('Inline','tdomf')."\n<br/>";
+  
+  echo '<option value="context" ';
+  if($render == 'context') { echo 'selected'; }
+  echo ' >'.__('Context','tdomf')."\n<br/>";
+  echo '</select>';
+  echo '<input type="submit" value="'.__('Go','tdomf').'" /></form>';
+  
+  set_include_path(get_include_path() . PATH_SEPARATOR . ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'include' );
+  include_once "Text/Diff.php";
+    
+  $form1 = explode("\n",$form1);
+  $form2 = explode("\n",$form2);
+  
+  $diff = &new Text_Diff('auto',array($form1, $form2));
+  if($render == 'unified') {
+     include_once "Text/Diff/Renderer/unified.php";
+     $renderer = &new Text_Diff_Renderer_unified();
+     echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+  } else if($render == 'inline') {
+     include_once "Text/Diff/Renderer/inline.php";
+     $renderer = &new Text_Diff_Renderer_inline();
+     echo "<pre>".$renderer->render($diff)."</pre>";
+  } else if($render == 'context') {
+     include_once "Text/Diff/Renderer/context.php";
+     $renderer = &new Text_Diff_Renderer_context();
+     echo "<pre>".$renderer->render($diff)."</pre>";
+  } else {
+     include_once "Text/Diff/Renderer.php";
+     $renderer = &new Text_Diff_Renderer();
+     echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+  }
 }
 
 function tdomf_form_hacker_actions($form_id) {
@@ -182,7 +249,7 @@ function tdomf_show_form_hacker() {
              <ul>
              <li><?php printf(__("<code>%s</code> - User name of the currently logged in user","tdomf"),TDOMF_MACRO_USERNAME); ?>
              <li><?php printf(__("<code>%s</code> - IP of the current visitor","tdomf"),TDOMF_MACRO_IP); ?>
-             <li><?php printf(__("<code>%s</code> - The ID of the current form (which is current %d)","tdomf"),TDOMF_MACRO_FORMID,$form_id); ?>
+             <li><?php printf(__("<code>%s</code> - The ID of the current form (which is currently %d)","tdomf"),TDOMF_MACRO_FORMID,$form_id); ?>
              <li><?php printf(__("<code>%s</code> - Name of the Form (set in options)","tdomf"),TDOMF_MACRO_FORMNAME); ?>
              <li><?php printf(__("<code>%s</code> - Form Description (set in options)","tdomf"),TDOMF_MACRO_FORMDESCRIPTION); ?>
              <li><?php printf(__("<code>%s</code> - Submission Errors","tdomf"),TDOMF_MACRO_SUBMISSIONERRORS); ?>
@@ -190,6 +257,7 @@ function tdomf_show_form_hacker() {
              <li><?php printf(__("<code>%s</code> - Date of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONDATE); ?>             
              <li><?php printf(__("<code>%s</code> - Time of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONTIME); ?>
              <li><?php printf(__("<code>%s</code> - Title of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONTITLE); ?>
+             </ul>
           </p>
           
           </div>
@@ -277,11 +345,12 @@ function tdomf_show_form_hacker() {
              <li><?php printf(__("<code>%s</code> - IP of the current visitor","tdomf"),TDOMF_MACRO_IP); ?>
              <li><?php printf(__("<code>%s</code> - The form's unique key","tdomf"),TDOMF_MACRO_FORMKEY); ?>
              <li><?php printf(__("<code>%s</code> - The current URL of the form","tdomf"),TDOMF_MACRO_FORMURL); ?>
-             <li><?php printf(__("<code>%s</code> - The ID of the current form (which is current %d)","tdomf"),TDOMF_MACRO_FORMID,$form_id); ?>
+             <li><?php printf(__("<code>%s</code> - The ID of the current form (which is currently %d)","tdomf"),TDOMF_MACRO_FORMID,$form_id); ?>
              <li><?php printf(__("<code>%s</code> - Name of the Form (set in options)","tdomf"),TDOMF_MACRO_FORMNAME); ?>
              <li><?php printf(__("<code>%s</code> - Form Description (set in options)","tdomf"),TDOMF_MACRO_FORMDESCRIPTION); ?>
              <li><?php printf(__("<code>%s</code> - Form Output (such as preview, errors, etc.). This is automatically encapsulated in a div called tdomf_form_message (and tdomf_form_preview for preview)","tdomf"),TDOMF_MACRO_FORMMESSAGE); ?>
              <li><?php printf(__("<code>%swidget-name%s</code> - Original, unmodified output from 'widget-name'","tdomf"),TDOMF_MACRO_WIDGET_START,TDOMF_MACRO_END); ?>
+             </ul>
           </p>
           
           </div>
@@ -303,11 +372,11 @@ function tdomf_show_form_hacker() {
             <?php if($hacked_form != false) { ?>
               <?php _e("You can diff the hacked form to see what you have changed","tdomf"); ?>
               <ul>
-              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form1=hack&form2=cur"><?php _e("Diff Hacked Form with Current Form","tdomf"); ?></a></li>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=hack&form1=cur"><?php _e("Diff Hacked Form with Current Form","tdomf"); ?></a></li>
               <?php $org_form = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id);  
-                    if($cur_form != $org_form) { ?>
-              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form1=hack&form2=org"><?php _e("Diff Hacked Form with Previous Form","tdomf"); ?></a></li>
-              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form1=cur&form2=org"><?php _e("Diff Current Form with Previous Form","tdomf"); ?></a></li>
+                    if(trim($cur_form) != trim($org_form)) { ?>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=hack&form1=org"><?php _e("Diff Hacked Form with Previous Form","tdomf"); ?></a></li>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=cur&form1=org"><?php _e("Diff Current Form with Previous Form","tdomf"); ?></a></li>
                     <?php } ?>
               </ul>
             <?php }?>
@@ -332,116 +401,4 @@ function tdomf_show_form_hacker() {
     <?php
   }
 }
-
-    /** 
-        Diff implemented in pure php, written from scratch. 
-        Copyright (C) 2003  Daniel Unterberger <diff.phpnet@holomind.de> 
-        Copyright (C) 2005  Nils Knappmeier next version  
-         
-        This program is free software; you can redistribute it and/or 
-        modify it under the terms of the GNU General Public License 
-        as published by the Free Software Foundation; either version 2 
-        of the License, or (at your option) any later version. 
-         
-        This program is distributed in the hope that it will be useful, 
-        but WITHOUT ANY WARRANTY; without even the implied warranty of 
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-        GNU General Public License for more details. 
-         
-        You should have received a copy of the GNU General Public License 
-        along with this program; if not, write to the Free Software 
-        Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. 
-         
-        http://www.gnu.org/licenses/gpl.html 
-
-        About: 
-        I searched a function to compare arrays and the array_diff() 
-        was not specific enough. It ignores the order of the array-values. 
-        So I reimplemented the diff-function which is found on unix-systems 
-        but this you can use directly in your code and adopt for your needs. 
-        Simply adopt the formatline-function. with the third-parameter of arr_diff() 
-        you can hide matching lines. Hope someone has use for this. 
-
-        Contact: d.u.diff@holomind.de <daniel unterberger> 
-    **/ 
-
-## PHPDiff returns the differences between $old and $new, formatted 
-## in the standard diff(1) output format. 
-function PHPDiff($old,$new)  
-{ 
-   # split the source text into arrays of lines 
-   $t1 = explode("\n",$old); 
-   $x=array_pop($t1);  
-   if ($x>'') $t1[]="$x\n\\ No newline at end of file"; 
-   $t2 = explode("\n",$new); 
-   $x=array_pop($t2);  
-   if ($x>'') $t2[]="$x\n\\ No newline at end of file"; 
-
-   # build a reverse-index array using the line as key and line number as value 
-   # don't store blank lines, so they won't be targets of the shortest distance 
-   # search 
-   foreach($t1 as $i=>$x) if ($x>'') $r1[$x][]=$i; 
-   foreach($t2 as $i=>$x) if ($x>'') $r2[$x][]=$i; 
-
-   $a1=0; $a2=0;   # start at beginning of each list 
-   $actions=array(); 
-
-   # walk this loop until we reach the end of one of the lists 
-   while ($a1<count($t1) && $a2<count($t2)) { 
-     # if we have a common element, save it and go to the next 
-     if ($t1[$a1]==$t2[$a2]) { $actions[]=4; $a1++; $a2++; continue; }  
-
-     # otherwise, find the shortest move (Manhattan-distance) from the 
-     # current location 
-     $best1=count($t1); $best2=count($t2); 
-     $s1=$a1; $s2=$a2; 
-     while(($s1+$s2-$a1-$a2) < ($best1+$best2-$a1-$a2)) { 
-       $d=-1; 
-       foreach((array)@$r1[$t2[$s2]] as $n)  
-         if ($n>=$s1) { $d=$n; break; } 
-       if ($d>=$s1 && ($d+$s2-$a1-$a2)<($best1+$best2-$a1-$a2)) 
-         { $best1=$d; $best2=$s2; } 
-       $d=-1; 
-       foreach((array)@$r2[$t1[$s1]] as $n)  
-         if ($n>=$s2) { $d=$n; break; } 
-       if ($d>=$s2 && ($s1+$d-$a1-$a2)<($best1+$best2-$a1-$a2)) 
-         { $best1=$s1; $best2=$d; } 
-       $s1++; $s2++; 
-     } 
-     while ($a1<$best1) { $actions[]=1; $a1++; }  # deleted elements 
-     while ($a2<$best2) { $actions[]=2; $a2++; }  # added elements 
-  } 
-
-  # we've reached the end of one list, now walk to the end of the other 
-  while($a1<count($t1)) { $actions[]=1; $a1++; }  # deleted elements 
-  while($a2<count($t2)) { $actions[]=2; $a2++; }  # added elements 
-
-  # and this marks our ending point 
-  $actions[]=8; 
-
-  # now, let's follow the path we just took and report the added/deleted 
-  # elements into $out. 
-  $op = 0; 
-  $x0=$x1=0; $y0=$y1=0; 
-  $out = array(); 
-  foreach($actions as $act) { 
-    if ($act==1) { $op|=$act; $x1++; continue; } 
-    if ($act==2) { $op|=$act; $y1++; continue; } 
-    if ($op>0) { 
-      $xstr = ($x1==($x0+1)) ? $x1 : ($x0+1).",$x1"; 
-      $ystr = ($y1==($y0+1)) ? $y1 : ($y0+1).",$y1"; 
-      if ($op==1) $out[] = "{$xstr}d{$y1}"; 
-      elseif ($op==3) $out[] = "{$xstr}c{$ystr}"; 
-      while ($x0<$x1) { $out[] = '< '.$t1[$x0]; $x0++; }   # deleted elems 
-      if ($op==2) $out[] = "{$x1}a{$ystr}"; 
-      elseif ($op==3) $out[] = '---'; 
-      while ($y0<$y1) { $out[] = '> '.$t2[$y0]; $y0++; }   # added elems 
-    } 
-    $x1++; $x0=$x1; 
-    $y1++; $y0=$y1; 
-    $op=0; 
-  } 
-  $out[] = ''; 
-  return join("\n",$out); 
-} 
 ?>
