@@ -372,7 +372,7 @@ function tdomf_show_form_hacker() {
             <?php if($hacked_form != false) { ?>
               <?php _e("You can diff the hacked form to see what you have changed","tdomf"); ?>
               <ul>
-              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=hack&form1=cur"><?php _e("Diff Hacked Form with Current Form","tdomf"); ?></a></li>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form1=hack&form2=cur"><?php _e("Diff Hacked Form with Current Form","tdomf"); ?></a></li>
               <?php $org_form = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id);  
                     if(trim($cur_form) != trim($org_form)) { ?>
               <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=hack&form1=org"><?php _e("Diff Hacked Form with Previous Form","tdomf"); ?></a></li>

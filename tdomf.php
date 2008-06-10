@@ -287,6 +287,7 @@ Author URI: http://thedeadone.net
 // - Initial implementation of Form Hacker
 // - Text Widget now uses Form Hacker macros
 // - Log now has size limit!
+// - Categories Widget now supports radio buttons and checkboxes
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -303,7 +304,6 @@ TODO for future versions
 
 Known Bugs
 - Invalid markup is used in several form elements
-- Display of Widgets in WP2.5 seems a little funky
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -343,13 +343,11 @@ New Widgets
 - Widget to allow submitter to copy the submission to another email
 - Widget that inputs only title
 - Login/Register/Who Am I Widget
-- Insert Text into Form Widget
 - Username as Title
-- Insert text into post
+- Insert Text into Post Widget
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
-- Any static text used in widgets need to be customisable.
 - Textfield Class (support numeric, date, email, webpage, etc.)
 - Textarea Class
 - Copy Widget to another Form
@@ -762,9 +760,12 @@ function tdomf_new_features() {
       $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
       $features .= "<li>".sprintf(__('<a href="%s">Text widget updated to support macros and php code</a>','tdomf'),$link)."</li>";
       
+      $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
+      $features .= "<li>".sprintf(__('<a href="%s">Categories widget can now be displayed as checkboxes or radio buttons</a>','tdomf'),$link)."</li>";
+      
   }
-  // 33 = 0.12b (ajax)
-  
+  // 33 = 0.12b
+    
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }

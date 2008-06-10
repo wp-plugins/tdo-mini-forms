@@ -3,7 +3,7 @@
 Name: "Categories"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget allows users to select categories for their submissions
-Version: 0.6
+Version: 0.7
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -64,7 +64,7 @@ function tdomf_widget_categories_init($form_id,$mode){
    
      tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
      tdomf_register_form_widget_hack("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
-     tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 350, 510, array(), 1);
+     tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 370, 560, array(), 1);
      tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', array(), 1);
      tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', array(), 1);
      tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', array(), 1);
@@ -72,7 +72,7 @@ function tdomf_widget_categories_init($form_id,$mode){
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);
        tdomf_register_form_widget_hack("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);       
-       tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 350, 510, array(), $i);
+       tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 370, 560, array(), $i);
        tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', array(), $i);
        tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', array(), $i);
        tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', array(), $i);
@@ -156,38 +156,39 @@ function tdomf_widget_categories($args,$params) {
     $name = "categories".$postfix."[]";
   }
 
-    $output .= "\t\t"."<label for='categories$postfix'>".__('Select a category:','tdomf')." \n";
-  
+  $output .= "\t\t"."<label for='categories$postfix'>".__('Select a category:','tdomf')." \n";
+    
+  $catargs = array( 'exclude'          => $options['exclude'],
+                    'hide_empty'       => false, 
+                    'hierarchical'     => $options['hierarchical'], 
+                    'echo'             => false,
+                    'name'             => $name,
+                    'class'            => "tdomf_categories$postfix",
+                    'multiple'         => $options['multi'],
+                    'selected'         => $defcat,
+                    'mode'             => $mode,
+                    'hack'             => $hack );
+    
   if($options['display'] == "dropdown" ) {
-    
-    $catargs = array( 'exclude'          => $options['exclude'],
-                      'hide_empty'       => false, 
-                      'hierarchical'     => $options['hierarchical'], 
-                      'echo'             => false,
-                      'name'             => $name,
-                      'class'            => "tdomf_categories$postfix",
-                      'multiple'         => $options['multi'],
-                      'selected'         => $defcat,
-                      'size'             => 1,
-                      'mode'             => $mode,
-                      'hack'             => $hack );
+      
+    $catargs['size'] = 1;
     $output .= tdomf_dropdown_categories($catargs);
     
-  } else {
+  } else if($options['display'] == "checkbox") {
+    
     $output .= "\t\t<br/>\n";
+    $output .= "\t\t<ul class='tdomf_category_checklist' >\n";
+    $catargs['class'] = 'tdomf_categorychecklist';
+    if($options['multi'] && !is_array($defcat)) { $defcat = array( $defcat ); }
+    $output .= tdomf_category_checklist(0, 0, $defcat, $catargs);
+    $output .= "\t\t</ul>\n";
     
-    $catargs = array( 'exclude'          => $options['exclude'],
-                      'hide_empty'       => false, 
-                      'hierarchical'     => $options['hierarchical'], 
-                      'echo'             => false,
-                      'name'             => $name,
-                      'class'            => "tdomf_categories$postfix",
-                      'size'             => 5,
-                      'multiple'         => $options['multi'],
-                      'selected'         => $defcat,
-                      'mode'             => $mode,
-                      'hack'             => $hack );
+  } else { # list
+    
+    $output .= "\t\t<br/>\n";
+    $catargs['size'] = 5;
     $output .= tdomf_dropdown_categories($catargs);
+    
   }
 
   $output .= "\t\t</label>";
@@ -195,6 +196,97 @@ function tdomf_widget_categories($args,$params) {
   $output .= $after_widget;
   return $output;
   }
+  
+///////////////////////////////////////////////////
+// A stripped-down clone of wp_category_checklist from WP includes/template.php, with return instead of echo and the extra parameter for excluded cats
+//
+function tdomf_category_checklist( $post_id = 0, $descendants_and_self = 0, $selected_cats = false,  $catargs) {
+	$walker = new tdomf_Walker_Category_Checklist;
+	$descendants_and_self = (int) $descendants_and_self;
+
+	$args = array();
+
+	#$args['popular_cats'] = get_terms( 'category', array( 'fields' => 'ids', 'orderby' => 'count', 'order' => 'DESC', 'number' => 10, 'hierarchical' => false ) );
+	$categories = get_categories($catargs);
+
+    $args['selected_cats'] = $selected_cats;
+    if($catargs['multi'] && !is_array($selected_cats)) {
+        $args['selected_cats'] = array($selected_cats);
+    }
+    $args['class'] = $catargs['class'];
+    $args['name'] = $catargs['name'];
+    $args['hack'] = $catargs['hack'];
+    $args['multiple'] = $catargs['multiple'];
+    
+    if ( $catargs['hierarchical'] )
+        $depth = 0;  // Walk the full depth.
+    else
+      $depth = -1; // Flat.
+    
+	$args = array($categories, $depth, $args);
+	$output = call_user_func_array(array(&$walker, 'walk'), $args);
+
+	return $output;
+}
+
+class tdomf_Walker_Category_Checklist extends Walker {
+	var $tree_type = 'category';
+	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id'); //TODO: decouple this
+
+	function start_lvl(&$output, $depth, $args) {
+		$indent = str_repeat("\t", ($depth+4));
+		$output .= "\n$indent<ul class='tdomf_category_children'>\n";
+	}
+
+	function end_lvl(&$output, $depth, $args) {
+		$indent = str_repeat("\t", ($depth+4));
+		$output .= "$indent</ul>\n";
+	}
+
+	function start_el(&$output, $category, $depth, $args) {
+		extract($args);
+
+        $indent = str_repeat("\t", ($depth+4));
+        $output .= "$indent<li>\n";
+        if($multiple) {
+            $_name = str_replace("[]","",$name);
+            $output .= "$indent<input value=\"" . $category->term_id . "\" type=\"checkbox\" name=\"".$name."\" id='".$name."'";
+            if($hack) {
+                // default
+                if(in_array( $category->term_id, $selected_cats)) {
+                    $output .= "<?php if( !isset( \$post_args['$_name'] ) || in_array( $category->term_id, \$post_args['$_name'] ) ) { ?> checked=\"checked\" <?php } ?>";
+                } else {
+                    $output .= "<?php if( isset( \$post_args['$_name'] ) && in_array( $category->term_id, \$post_args['$_name'] ) ) { ?> checked=\"checked\" <?php } ?>";
+                }
+            } else {
+                $output .= (in_array( $category->term_id, $selected_cats ) ? ' checked="checked"' : "" );
+            }
+            $output .= '/> ' . wp_specialchars( apply_filters('the_category', $category->name ));
+        } else {
+            $output .= "$indent<input value=\"" . $category->term_id . "\" type=\"radio\" name=\"".$name."\" id='".$name."'";
+            if($hack) {
+                // default
+                if($category->term_id == $selected_cats) {
+                    $output .= "<?php if( !isset(\$post_args['$name']) || $category->term_id == \$post_args['$name'] ) { ?> checked=\"checked\" <?php } ?>";
+                }
+                else {
+                    $output .= "<?php if( isset(\$post_args['$name']) && $category->term_id == \$post_args['$name'] ) { ?> checked=\"checked\" <?php } ?>";
+                }
+            } else {
+                $output .= ( $category->term_id == $selected_cats ? ' checked="checked"' : "" );
+            }
+            $output .= '/> ' . wp_specialchars( apply_filters('the_category', $category->name ));
+        }
+        $output .= "\n";
+	}
+
+    
+    
+	function end_el(&$output, $category, $depth, $args) {
+        $indent = str_repeat("\t", ($depth+4));
+		$output .= "$indent</li>\n";
+	}
+}
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -244,19 +336,19 @@ function tdomf_widget_categories_control($form_id,$params) {
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-overwrite" id="categories<?php echo $postfix1; ?>-overwrite" <?php if($options['overwrite']) { ?> checked <?php } ?> />
 <?php _e("Overwrite Default Categories","tdomf"); ?>
 </label>
-<br/><Br/>
+<br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-multi">
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-multi" id="categories<?php echo $postfix1; ?>-multi" <?php if($options['multi']) { ?> checked <?php } ?> />
 <?php _e("Allow users to select more than one category","tdomf"); ?>
 </label>
-<br/><Br/>
+<br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-hierarchical">
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-hierarchical" id="categories<?php echo $postfix1; ?>-hierarchical" <?php if($options['hierarchical']) { ?> checked <?php } ?> />
 <?php _e("Display categories in hierarchical mode","tdomf"); ?>
 </label>
-<br/><Br/>
+<br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-include" >
 <?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
@@ -274,6 +366,7 @@ function tdomf_widget_categories_control($form_id,$params) {
 <?php _e("Display categtories as:","tdomf"); ?><br/>
 <input type="radio" name="categories<?php echo $postfix1; ?>-display" id="categories<?php echo $postfix1; ?>-display" value="dropdown" <?php if($options['display'] == 'dropdown'){ ?> checked <?php } ?>><?php _e("Dropdown","tdomf"); ?><br>
 <input type="radio" name="categories<?php echo $postfix1; ?>-display" id="categories<?php echo $postfix1; ?>-display" value="list" <?php if($options['display'] == 'list'){ ?> checked <?php } ?>><?php _e("List","tdomf"); ?><br>
+<input type="radio" name="categories<?php echo $postfix1; ?>-display" id="categories<?php echo $postfix1; ?>-display" value="checkbox" <?php if($options['display'] == 'checkbox'){ ?> checked <?php } ?>><?php _e("Checkboxes","tdomf"); ?><br>
 </label>
 <br/><br/>
 
@@ -304,7 +397,7 @@ function tdomf_widget_categories_preview($args,$params) {
   if($options['multi']) {
     foreach($args["categories$postfix1"] as $cat) {
       $cat_string .= get_cat_name($cat).", ";
-    }
+    }       
   } else {
     $cat_string = get_cat_name($args["categories$postfix1"]);
   }  
