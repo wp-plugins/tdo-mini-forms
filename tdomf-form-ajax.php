@@ -28,8 +28,11 @@ if(!tdomf_form_exists($form_id)){
 
 function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false) {
     global $form_id;
-    $message = str_replace("'","\\'",$message);
+    #$message = str_replace("'","\\'",$message);
+    #$message = str_replace("\n"," ",$message);
+    $message = preg_replace('/\r\n|\n\r|\r/', '\n', str_replace('\'', '\\' . '\'', str_replace('\\', '\\\\', $message)));
     $message = str_replace("\n"," ",$message);
+    #tdomf_log_message("sending '$message' via ajax...");
     #$message = htmlentities($message,ENT_COMPAT);
     if($full) {
         die( "tdomfDisplayMessage$form_id('$message','full');" );

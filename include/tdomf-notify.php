@@ -214,11 +214,8 @@ function tdomf_notify_poster_approved($post_id) {
       $form_id = tdomf_get_first_form_id();
     }
     
-    $subject = sprintf(__("[%s] Your entry \"%s\" has been approved!","tdomf"),get_bloginfo('title'),$title);
-
-    $notify_message = sprintf(__("This is just a quick email to notify you that your post has been approved and published online. You can see it at %s.\r\n\r\n","tdomf"),get_permalink($post_id));
-    $notify_message .= __("Best Regards","tdomf")."\r\n";
-    $notify_message .= get_bloginfo("title");
+    $subject = tdomf_widget_notify_get_message($form_id,'approved_subject',true,$post_id);
+    $notify_message = tdomf_widget_notify_get_message($form_id,'approved',true,$post_id);
 
     // Use custom from field
     //
@@ -263,12 +260,9 @@ function tdomf_notify_poster_rejected($post_id) {
       $form_id = tdomf_get_first_form_id();
     }
 
-    $subject = sprintf(__("[%s] Your entry \"%s\" has been rejected! :(","tdomf"),get_bloginfo('title'),$title);
-
-    $notify_message = sprintf(__("We are sorry to inform you that your post \"%s\" has been rejected.\r\n\r\n","tdomf"),$title);
-    $notify_message .= __("Best Regards","tdomf")."\r\n";
-    $notify_message .= get_bloginfo("title");
-
+    $subject = tdomf_widget_notify_get_message($form_id,'rejected_subject',true,$post_id);
+    $notify_message = tdomf_widget_notify_get_message($form_id,'rejected',true,$post_id);
+    
     // Use custom from field
     //
     if(tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id)) {
@@ -423,5 +417,71 @@ function tdomf_widget_notifyme_post($args) {
   return NULL;
 }
 tdomf_register_form_widget_post('notifyme', 'Notify Me', 'tdomf_widget_notifyme_post');
+
+function tdomf_widget_notify_get_message($form_id,$type,$process=false,$post_id=false) {
+    $options = tdomf_get_option_widget('notifyme',$form_id);
+    $message = "";
+    if($options == false) {
+        switch($type) {
+        case 'approved':
+           $message  = sprintf(__("This is just a quick email to notify you that your post has been approved and published online. You can see it at %s.\n\n","tdomf"),TDOMF_MACRO_SUBMISSIONURL);
+           $message .= __("Best Regards","tdomf")."\n";
+           $message .= "<?php echo get_bloginfo(\"title\"); ?>";
+           break;
+       case 'rejected':
+           $message  = sprintf(__("We are sorry to inform you that your post \"%s\" has been rejected.\n\n","tdomf"),TDOMF_MACRO_SUBMISSIONTITLE);
+           $message .= __("Best Regards","tdomf")."\n";
+           $message .= "<?php echo get_bloginfo(\"title\"); ?>";
+           break;
+       case 'approved_subject':
+           $message  =  sprintf(__("[%s] Your entry \"%s\" has been approved!","tdomf"),"<?php echo get_bloginfo('title'); ?>",TDOMF_MACRO_SUBMISSIONTITLE);
+           break;
+       case 'rejected_subject':
+           $message = sprintf(__("[%s] Your entry \"%s\" has been rejected! :(","tdomf"),"<?php echo get_bloginfo('title'); ?>",TDOMF_MACRO_SUBMISSIONTITLE);
+           break;
+        }
+    } else {
+       $message = $options[$type]; 
+    }
+    if($process) {
+        $message = tdomf_prepare_string($message, $form_id, "", $post_id);
+        $message = str_replace("\n","\r\n",$message);
+    }
+    
+    
+    return $message;
+}
+
+function tdomf_widget_notifyme_hack_messages($form_id, $mode) {
+    $widget_order = tdomf_get_widget_order($form_id);
+    if(in_array('notifyme',$widget_order) && tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)) {
+        if(isset($_REQUEST['tdomf_hack_messages_save'])) {
+            if (get_magic_quotes_gpc()) {
+                $options = array( 'approved' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_approved']),
+                                  'rejected' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_rejected']),
+                                  'approved_subject' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_approved_subject']),
+                                  'rejected_subject' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_rejected_subject']) );
+            } else {
+                $options = array( 'approved' => $_REQUEST['tdomf_widget_notifyme_msg_approved'],
+                                  'rejected' => $_REQUEST['tdomf_widget_notifyme_msg_rejected'],
+                                  'approved_subject' => $_REQUEST['tdomf_widget_notifyme_msg_approved_subject'],
+                                  'rejected_subject' => $_REQUEST['tdomf_widget_notifyme_msg_rejected_subject'] );
+            }
+            tdomf_set_option_widget('notifyme',$options,$form_id);
+        } else if(isset($_REQUEST['tdomf_hack_messages_reset'])) {
+            tdomf_set_option_widget('notifyme',false,$form_id);
+        }
+    ?>
+        <h3><?php _e('Submission Approved Email','tdomf'); ?></h3>
+        <input type="textfield" name="tdomf_widget_notifyme_msg_approved_subject" id="tdomf_widget_notifyme_msg_approved_subject" size="70" value="<?php echo htmlentities(tdomf_widget_notify_get_message($form_id,'approved_subject'),ENT_QUOTES,get_bloginfo('charset')); ?>" />
+        <textarea title="true" rows="5" cols="70" name="tdomf_widget_notifyme_msg_approved" id="tdomf_widget_notifyme_msg_approved" ><?php echo htmlentities(tdomf_widget_notify_get_message($form_id,'approved'),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+        <br/><br/>
+        <h3><?php _e('Submission Rejected Email','tdomf'); ?></h3>
+        <input type="textfield" name="tdomf_widget_notifyme_msg_rejected_subject" id="tdomf_widget_notifyme_msg_rejected_subject" size="70" value="<?php echo htmlentities(tdomf_widget_notify_get_message($form_id,'rejected_subject'),ENT_QUOTES,get_bloginfo('charset')); ?>" />
+        <textarea title="true" rows="5" cols="70" name="tdomf_widget_notifyme_msg_rejected" id="tdomf_widget_notifyme_msg_rejected" ><?php echo htmlentities(tdomf_widget_notify_get_message($form_id,'rejected'),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+        <br/><br/>
+    <?php }
+}
+add_action('tdomf_form_hacker_messages_bottom','tdomf_widget_notifyme_hack_messages',10,2);
 
 ?>

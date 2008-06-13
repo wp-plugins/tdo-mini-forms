@@ -52,6 +52,22 @@ if(function_exists('wp_set_post_tags')) {
   }
   tdomf_register_form_widget_preview('tags','Tags', 'tdomf_widget_tags_preview', array("new-post"));
   
+  ////////////////////////
+  // Hack the Preview tags
+  //
+  function tdomf_widget_tags_preview_hack($args) {
+    extract($args);
+  
+    $output  = $before_widget;
+    $output .= "\t<?php \$tags = strip_tags(trim(\$tags));\n"; 
+    $output .= "\tif(!empty(\$tags)) { ?>\n";
+    $output .= "\t\t<b>".__("Post will be submitted with these tags:","tdomf")."</b>\n\t\t<br/>\n\t\t<?php echo \$tags; ?>\n";
+    $output .= "\t<?php } ?>";
+    $output .= $after_widget;
+    return $output;
+  }
+  tdomf_register_form_widget_preview_hack('tags','Tags', 'tdomf_widget_tags_preview_hack', array("new-post"));
+  
   
   ////////////////////////
   // Add tags to the post

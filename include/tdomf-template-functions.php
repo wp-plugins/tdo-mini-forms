@@ -129,6 +129,33 @@ function tdomf_the_submitter($post_id = 0){
   echo tdomf_get_the_submitter($post_id);
 }
 
+////////////////////////////////////////////////////////////////////////
+// Display the email address of the submitter (must be used in the loop)
+//
+function tdomf_the_submitter_email() {
+  echo tdomf_get_the_submitter_email();
+}
+
+////////////////////////////////////////////////////////////////////////
+// Get the email address of the submitter (must be used in the loop)
+//
+function tdomf_get_the_submitter_email() {
+   global $post, $authordata;
+   $email = strtolower(get_the_author_email());
+   $flag = get_post_meta($post->ID, TDOMF_KEY_FLAG, true);
+   if($flag != false && !empty($flag)) {
+     $submitter_user_id = get_post_meta($post->ID, TDOMF_KEY_USER_ID, true);
+     if($submitter_user_id != false && !empty($submitter_user_id) && $submitter_user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+        $submitter_data = get_userdata($submitter_user_id);
+        $email = strtolower($submitter_data->user_email);  
+     } else {
+        $email = strtolower(get_post_meta($post->ID, TDOMF_KEY_EMAIL, true));
+     }
+   } 
+   return $email;
+}
+
+
 //////////////////////////////////////
 // Modify the_author template tag with user
 //

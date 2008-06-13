@@ -288,6 +288,12 @@ Author URI: http://thedeadone.net
 // - Text Widget now uses Form Hacker macros
 // - Log now has size limit!
 // - Categories Widget now supports radio buttons and checkboxes
+// - Fixed a minor bug in the widgets panel where you had to reload the page 
+//    after you saved a change in the number of any of the multiple widgets
+// - Append widget
+// - Upgrade notice
+// - New Template Tags: tdomf_get_the_submitter_email and 
+//    tdomf_the_submitter_email
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -304,6 +310,7 @@ TODO for future versions
 
 Known Bugs
 - Invalid markup is used in several form elements
+- Import/Export Form disabled currently
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -763,8 +770,13 @@ function tdomf_new_features() {
       $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
       $features .= "<li>".sprintf(__('<a href="%s">Categories widget can now be displayed as checkboxes or radio buttons</a>','tdomf'),$link)."</li>";
       
+      $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
+      $features .= "<li>".sprintf(__('<a href="%s">New Widget: Append. Allows you add text to a submitted post. It can even run PHP code.</a>','tdomf'),$link)."</li>";
+      
+      $features .= "<li>".__('New Template Tags: tdomf_get_the_submitter_email and tdomf_the_submitter_email','tdomf')."</li>";
   }
   // 33 = 0.12b
+  // 34 = 0.12
     
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

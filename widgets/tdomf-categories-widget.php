@@ -18,7 +18,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // How many widgets do you want?
 //
 function tdomf_widget_categories_number_bottom($form_id,$mode){
-  if(strstr($mode,'new-post') == 'new-post') {
+  if(strpos($mode,'new-post') !== false) {
     $form_id = tdomf_edit_form_form_id();
     $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
     if($count <= 0){ $count = 1; } 
@@ -52,20 +52,32 @@ add_action('tdomf_widget_page_bottom','tdomf_widget_categories_number_bottom',10
 
 // TODO: Update multi-widget init
 
+function tdomf_widget_categories_handle_number($form_id,$mode) {
+  if(tdomf_form_exists($form_id) && strpos($mode,'new-post') !== false) {   
+     if (isset($_POST['tdomf-widget-categories-number-submit']) ) {
+       $count = $_POST['tdomf-widget-categories-number'];
+       if($count > 0){ tdomf_set_option_widget('tdomf_categories_widget_count',$count,$form_id); }
+     }
+  }
+}
+#add_action('tdomf_widget_page_top','tdomf_widget_categories_handle_number',10,2);
+add_action('tdomf_control_form_start','tdomf_widget_categories_handle_number',10,2);
+
 ///////////////////////////////////////
 // Initilise multiple category widgets!
 //
 function tdomf_widget_categories_init($form_id,$mode){
-  if(tdomf_form_exists($form_id) && strstr($mode,'new-post') == 'new-post') {   
+  if(tdomf_form_exists($form_id) && strpos($mode,'new-post') !== false) {   
      $count = tdomf_get_option_widget('tdomf_categories_widget_count',$form_id);
      $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
      if($max <= 1){ $count = 1; }
      else if($count > ($max+1)){ $count = $max + 1; }
-   
+     
      tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
      tdomf_register_form_widget_hack("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
      tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 370, 560, array(), 1);
      tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', array(), 1);
+     tdomf_register_form_widget_preview_hack("categories", "Categories 1",'tdomf_widget_categories_preview_hack', array(), 1);
      tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', array(), 1);
      tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', array(), 1);
      
@@ -74,6 +86,7 @@ function tdomf_widget_categories_init($form_id,$mode){
        tdomf_register_form_widget_hack("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);       
        tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 370, 560, array(), $i);
        tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', array(), $i);
+       tdomf_register_form_widget_preview_hack("categories-$i", "Categories $i",'tdomf_widget_categories_preview_hack', array(), $i);
        tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', array(), $i);
        tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', array(), $i);
      }
@@ -84,16 +97,6 @@ add_action('tdomf_generate_form_start','tdomf_widget_categories_init',10,2);
 add_action('tdomf_preview_form_start','tdomf_widget_categories_init',10,2);
 add_action('tdomf_control_form_start','tdomf_widget_categories_init',10,2);
 add_action('tdomf_widget_page_top','tdomf_widget_categories_init',10,2);
-
-function tdomf_widget_categories_handle_number($form_id,$mode) {
-  if(tdomf_form_exists($form_id) && strstr($mode,'new-post') == 'new-post') {   
-     if (isset($_POST['tdomf-widget-categories-number-submit']) ) {
-       $count = $_POST['tdomf-widget-categories-number'];
-       if($count > 0){ tdomf_set_option_widget('tdomf_categories_widget_count',$count,$form_id); }
-     }
-  }
-}
-add_action('tdomf_widget_page_top','tdomf_widget_categories_handle_number',10,2);
 
 // Get Options for this widget
 //
@@ -406,6 +409,39 @@ function tdomf_widget_categories_preview($args,$params) {
   return $output;
 }
 
+////////////////////////
+// Preview categories (Hacked)
+//
+function tdomf_widget_categories_preview_hack($args,$params) {
+  
+  $number = 1;
+  if(is_array($params) && count($params) >= 1){
+     $number = $params[0];
+  }
+  $options = tdomf_widget_categories_get_options($number,$args['tdomf_form_id']);
+  $postfix1 = "";
+  if($number != 1){ 
+    $postfix1 = "-$number"; 
+  }
+  
+  extract($args);
+  $output  = $before_widget;
+  
+  $cat_string = "";
+  if($options['multi']) {
+    $cat_string .= "\t<?php foreach(\$post_args['categories$postfix1'] as \$cat) { ?>\n";
+    $cat_string .= "\t\t<?php echo get_cat_name(\$cat); ?>,\n";
+    $cat_string .= "\t<?php } ?>";
+  } else {
+    $cat_string = "\t<?php echo get_cat_name(\$post_args['categories$postfix1']); ?>";
+  }  
+  
+
+  
+  $output .= sprintf(__("\t<b>This post will be categorized under</b>:\n\t<br/>\n%s","tdomf"), $cat_string);
+  $output .= $after_widget;
+  return $output;
+}
 
 ////////////////////////
 // Add categories to the post

@@ -284,4 +284,14 @@ function tdomf_dashboard_status() {
 }
 add_action('activity_box_end',"tdomf_dashboard_status");
 
+function tdomf_overview_please_upgrade() {
+    $ver_cur = get_option(TDOMF_VERSION_CURRENT);
+    if($ver_cur != false && $ver_cur != TDOMF_BUILD) { ?>
+        <div id="message" class="updated" ><p>
+        <?php printf(__('You\'ve recently upgraded TDO Mini Forms. To finalise the upgrade process, <a href="%s">please visit the overview page</a>. Thank you.','tdomf'),"admin.php?page=tdo-mini-forms"); ?>
+        </p></div>
+    <?php }
+}
+add_action( 'admin_notices', 'tdomf_overview_please_upgrade' );
+
 ?>

@@ -89,39 +89,110 @@ function tdomf_check_permissions_form($form_id = 1) {
 
 // Generate a preview based on form arguments
 //
-function tdomf_preview_form($args) {
-   global $tdomf_form_widgets_preview;
+function tdomf_preview_form($args,$mode=false) {
+   global $tdomf_form_widgets_preview,$tdomf_form_widgets_preview_hack;
 
    $form_id = intval($args['tdomf_form_id']);
    
-   // Set mode of page
-   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-     $mode = "new-page";
+   // Set mode of form
+   $hack = false;
+   if($mode === false) {
+      if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+         $mode = "new-page";
+      } else {
+         $mode = "new-post";
+      }
    } else {
-     $mode = "new-post";
+      if(strpos($mode,'-hack') !== false) {
+         $hack = true;
+      }
    }
+      
    do_action('tdomf_preview_form_start',$form_id,$mode);
-   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
    
-   $message = "";
-   $widget_args = array_merge( array( "before_widget"=>"\n<p>\n",
+   // handle hacked forms
+   //
+   if(!$hack) {
+      // see if there is a "hacked" preview already! 
+      $hacked_message = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id);
+      if($hacked_message != false) {
+          $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
+          $message = tdomf_prepare_string($hacked_message, $form_id, $mode, false, "", $args);
+          
+          // basics
+          $unused_patterns = array();
+          $patterns     = array ();
+          $replacements = array ();
+       
+          // widgets
+          $widget_args = array_merge( array( "before_widget"=>"<p>\n",
                                       "after_widget"=>"\n</p>\n",
                                       "before_title"=>"<b>",
                                       "after_title"=>"</b><br/>",
                                       "mode"=>$mode ),
                                       $args);
-   $widget_order = tdomf_get_widget_order($form_id);
-   foreach($widget_order as $w) {
-	  if(isset($widgets[$w])) {
-		tdomf_log_message_extra("Looking at preview widget $w");
-		$message .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
-	  }
+          $widget_order = tdomf_get_widget_order($form_id);
+          foreach($widget_order as $w) {
+              if(isset($widgets[$w])) {
+                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
+                  // all widgets need to be excuted even if not displayed
+                  $replacements[] = $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+              } else {
+                   $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
+              }
+          }
+          
+          // create message
+          $message = preg_replace($patterns,$replacements,$message);
+          $message = preg_replace($unused_patterns,"",$message);
+          return $message;
+      }
+   } 
+      
+   $message = "";
+   if(!$hack) {
+       $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
+       $widget_args = array_merge( array( "before_widget"=>"<p>\n",
+                                          "after_widget"=>"\n</p>\n",
+                                          "before_title"=>"<b>",
+                                          "after_title"=>"</b><br/>",
+                                          "mode"=>$mode, 
+                                          "tdomf_form_id"=>$form_id),
+                                          $args);
+       $widget_order = tdomf_get_widget_order($form_id);
+       foreach($widget_order as $w) {
+          if(isset($widgets[$w])) {
+            tdomf_log_message_extra("Looking at preview widget $w");
+            $message .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+          }
+       }
+   } else {
+      $widgets_o = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
+      $widgets_h = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview_hack);
+      $widget_args = array( "before_widget"=>"<p>\n",
+                             "after_widget"=>"\n</p>\n",
+                             "before_title"=>"<b>",
+                             "after_title"=>"</b>\n\t<br/>\n",
+                             "mode"=>$mode,
+                             "tdomf_form_id"=>$form_id);
+      $widget_order = tdomf_get_widget_order($form_id);
+      $message .= "\n<!-- widgets start -->\n";
+      foreach($widget_order as $w) {
+          if(!isset($widgets_h[$w]) && isset($widgets_o[$w])) {
+              $message .= "%%WIDGET:$w%%\n";
+          } else if(isset($widgets_h[$w])) {
+              $message .= "<!-- $w start -->\n";
+              $message .= $widgets_h[$w]['cb']($widget_args,$widgets_h[$w]['params']);
+              $message .= "<!-- $w end -->\n";
+          }
+      }
+      $message .= "<!-- widgets end -->\n";
    }
+   
    if($message == "") {
       tdomf_log_message("Couldn't generate preview!",TDOMF_LOG_ERROR);
 	  return __("Error! Could not generate a preview!","tdomf");
    }
-   #return "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_preview\" name=\"tdomf_form".$form_id."_preview\">".sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message)."</div>";
    return sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message);
 }
 

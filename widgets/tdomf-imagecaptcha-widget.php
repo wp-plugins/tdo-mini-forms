@@ -10,6 +10,17 @@ Author URI: http://thedeadone.net
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+function tdomf_widget_imagecaptcha_handle_number($form_id) {
+  if(tdomf_form_exists($form_id)) {   
+   if ( isset($_POST['tdomf-widget-imagecaptcha-number-submit']) ) {
+      $count = $_POST['tdomf-widget-imagecaptcha-number'];
+      if($count > 0){ tdomf_set_option_widget('tdomf_imagecaptcha_widget_count',$count,$form_id); }
+   }
+  }
+}
+#add_action('tdomf_widget_page_top','tdomf_widget_imagecaptcha_handle_number');
+add_action('tdomf_control_form_start','tdomf_widget_imagecaptcha_handle_number');
+
 /////////////////////////////////
 // Initilise multiple captchas!
 //
@@ -26,19 +37,11 @@ function tdomf_widget_imagecaptcha_init($form_id){
      }
   }
 }
-add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_create_post_start','tdomf_widget_imagecaptcha_init');
+add_action('tdomf_generate_form_start','tdomf_widget_imagecaptcha_init');
 add_action('tdomf_validate_form_start','tdomf_widget_imagecaptcha_init');
-add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
-
-function tdomf_widget_imagecaptcha_handle_number($form_id) {
-  if(tdomf_form_exists($form_id)) {   
-   if ( isset($_POST['tdomf-widget-imagecaptcha-number-submit']) ) {
-      $count = $_POST['tdomf-widget-imagecaptcha-number'];
-      if($count > 0){ tdomf_set_option_widget('tdomf_imagecaptcha_widget_count',$count,$form_id); }
-   }
-  }
-}
-add_action('tdomf_widget_page_top','tdomf_widget_imagecaptcha_handle_number');
+#add_action('tdomf_widget_page_top','tdomf_widget_imagecaptcha_init');
+add_action('tdomf_control_form_start','tdomf_widget_imagecaptcha_init');
 
 //////////////////////////////
 // Display the widget! 

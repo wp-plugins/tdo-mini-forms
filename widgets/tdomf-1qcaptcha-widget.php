@@ -82,7 +82,8 @@ function tdomf_widget_1qcaptcha_handle_number($form_id){
     }
   }
 }
-add_action('tdomf_widget_page_top','tdomf_widget_1qcaptcha_handle_number');
+#add_action('tdomf_widget_page_top','tdomf_widget_1qcaptcha_handle_number');
+add_action('tdomf_control_form_start','tdomf_widget_1qcaptcha_handle_number');
 
 /////////////////////////////////
 // Get options for this widget

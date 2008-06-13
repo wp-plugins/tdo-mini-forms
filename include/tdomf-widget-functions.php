@@ -95,9 +95,13 @@ $tdomf_form_widgets_post = array();
 //
 $tdomf_form_widgets_adminemail = array();
 //
-// Admin email notifications for Widgets
+// Hacked Widgets
 //
 $tdomf_form_widgets_hack = array();
+//
+// Hacked Preview Widgets
+//
+$tdomf_form_widgets_preview_hack = array();
 
 // Filter list of widgets by mode (if a mode set for that widget)
 //
@@ -234,7 +238,7 @@ function tdomf_register_form_widget_adminemail($id, $name, $post_callback, $mode
    $tdomf_form_widgets_adminemail[$id]['modes'] = $modes;
 }
 
-// Widgets that create info for the admin notification
+// Widgets that support the Form Hacker
 //
 function tdomf_register_form_widget_hack($id, $name, $hack_callback, $modes = array()) {
    global $tdomf_form_widgets_hack,$tdomf_form_widgets;
@@ -250,6 +254,24 @@ function tdomf_register_form_widget_hack($id, $name, $hack_callback, $modes = ar
    $tdomf_form_widgets_hack[$id]['cb'] = $hack_callback;
    $tdomf_form_widgets_hack[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets_hack[$id]['modes'] = $modes;
+}
+
+// Widgets that support the Form Hacker Preview
+//
+function tdomf_register_form_widget_preview_hack($id, $name, $preview_callback, $modes = array()) {
+   global $tdomf_form_widgets_preview_hack,$tdomf_form_widgets;
+   $id = sanitize_title($id);
+	if(!isset($tdomf_form_widgets[$id])) {
+   		 tdomf_log_message_extra("Preview Hack: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 return;
+   }
+   if(isset($tdomf_form_widgets_preview_hack[$id])) {
+      tdomf_log_message_extra("Preview Hack widget $id already exists. Overwriting...");
+   }
+   $tdomf_form_widgets_preview_hack[$id]['name'] = $name;
+   $tdomf_form_widgets_preview_hack[$id]['cb'] = $preview_callback;
+   $tdomf_form_widgets_preview_hack[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_preview_hack[$id]['modes'] = $modes;
 }
 
 // Return the default widget order!
@@ -452,6 +474,44 @@ function tdomf_widget_content_preview($args) {
   return $output;
 }
 tdomf_register_form_widget_preview('content','Content', 'tdomf_widget_content_preview');
+
+///////////////////////////////////////
+// Hack the preview the post's content and title
+//
+function tdomf_widget_content_preview_hack($args) {
+  extract($args);
+  $options = tdomf_widget_content_get_options($tdomf_form_id);
+  if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
+  $output = $before_widget;
+  if($options['title'] != "") {
+    $output .= $before_title.$options['title'].$after_title;
+  }
+  if($options['title-enable']) {
+    $output .= "\t<b>".__("Title: ","tdomf")."</b>";
+    $output .= "<?php echo \$content_title; ?>\n";
+    $output .= "\t<br/>\n";
+  }
+  if($options['text-enable']) {
+    // prep output
+    $output .= "\t<?php ";
+    $output .= '$content_content = preg_replace(\'|\<!--tdomf_form.*-->|\', \'\', $content_content);'."\n";
+    $output .= "\t".'$content_content = preg_replace(\'|\[tdomf_form.*\]|\', \'\', $content_content);'."\n";
+    if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
+      $output .= "\t".'$content_content = wp_filter_post_kses($content_content);'."\n";
+    }
+     if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+      $output .= "\t".'$content_content = apply_filters(\'the_content\', strip_tags($content_content,\''.$options['allowable-tags'].'\'));';
+    } else {
+      $output .= "\t".'$content_content = apply_filters(\'the_content\', $content_content);';
+    }
+    $output .= " ?>\n";
+    $output .= "\t<b>".__("Text: ","tdomf")."</b>\n\t<br/>\n";
+    $output .= "\t<?php echo \$content_content; ?>";
+  }
+  $output .= $after_widget;
+  return $output;
+}
+tdomf_register_form_widget_preview_hack('content','Content', 'tdomf_widget_content_preview_hack');
 
 ///////////////////////////////////////
 // Add the title and content to the post 
@@ -806,6 +866,40 @@ extract($args);
   }
 }
 tdomf_register_form_widget_preview('who-am-i','Who Am I', 'tdomf_widget_whoami_preview');
+
+///////////////////////////////////////
+// Generate a simple hacked preview for widget
+//
+function tdomf_widget_whoami_preview_hack($args) {
+  extract($args);
+
+    $output  = $before_widget;
+    $output .= "\t<?php if(is_user_logged_in()) { ?>\n";
+    $output .= "\t\t".sprintf(__("Submitted by %s.","tdomf"),TDOMF_MACRO_USERNAME)."\n";  
+    $output .= "\t<?php } else { ?>\n";
+    
+    $nonreg_user  = "<?php if(isset(\$post_args['whoami_webpage'])){ ?>";
+    $nonreg_user .= "<a href=\"<?php echo \$whoami_webpage; ?>\">";
+    $nonreg_user .= "<?php } ?>";
+    
+    $nonreg_user .= "<?php if(isset(\$post_args['whoami_name'])){ ";
+    $nonreg_user .= "echo \$whoami_name; ";
+    $nonreg_user .= "} else { ?>";
+    $nonreg_user .= __("unknown","tdomf");
+    $nonreg_user .= "<?php } ?>";
+    
+    $nonreg_user .= "<?php if(isset(\$post_args['whoami_webpage'])){ ?>";
+    $nonreg_user .= "</a>";
+    $nonreg_user .= "<?php } ?>";
+    
+    $output .= "\t\t".sprintf(__("Submitted by %s.","tdomf"),$nonreg_user)."\n";
+    
+    $output .= "\t<?php } ?>\n";
+    $output .= $after_widget;
+
+    return $output;
+}
+tdomf_register_form_widget_preview_hack('who-am-i','Who Am I', 'tdomf_widget_whoami_preview_hack');
 
 //////////////////////////////////
 // Validate input for this widget

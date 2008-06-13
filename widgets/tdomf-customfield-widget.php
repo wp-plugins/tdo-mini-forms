@@ -25,7 +25,7 @@ function tdomf_widget_customfields_gen_fmt($index,$value,$options){
   return $output;
 }
 
-function tdomf_widget_customfields_append($post_ID,$options,$index){
+function tdomf_widget_customfields_append($post_ID,$options,$index,$form_id){
   // Grab value
   $value = get_post_meta($post_ID,$options['key'],true);
   // select of course has to be a special case!
@@ -35,7 +35,8 @@ function tdomf_widget_customfields_append($post_ID,$options,$index){
   if(!empty($value) && (!is_string($value) || trim($value) != "") )
   {
     // Gen Format
-    $fmt = trim(tdomf_widget_customfields_gen_fmt($index,$value,$options));
+    $fmt = tdomf_widget_customfields_gen_fmt($index,$value,$options);
+    $fmt = trim(tdomf_prepare_string($fmt,$form_id,"",$post_ID));
     if($fmt != "") {
       // Grab existing data
       $post = wp_get_single_post($post_ID, ARRAY_A);
@@ -344,6 +345,8 @@ function tdomf_widget_customfields_control($form_id,$params) {
 <label for="customfields-format-<?php echo $number; ?>">
 <?php _e("Format to use:","tdomf"); ?><br/>
 <small>
+<?php _e("If you enable the append option, this format will be used for preview as well. It supports the Form Hacker macros and you can use PHP code. Additional macros are listed below:","tdomf"); ?>
+<br/>
 %%VALUE%% <?php _e("= Value of Custom Field","tdomf"); ?></br>
 %%KEY%% <?php _e("= Custom Field Key","tdomf"); ?><br/> 
 %%TITLE%% <?php _e("= Title","tdomf"); ?>
@@ -439,7 +442,8 @@ function tdomf_widget_customfields_handle_number($form_id) {
      }
   }
 }
-add_action('tdomf_widget_page_top','tdomf_widget_customfields_handle_number');
+#add_action('tdomf_widget_page_top','tdomf_widget_customfields_handle_number');
+add_action('tdomf_control_form_start','tdomf_widget_customfields_handle_number');
 
 function tdomf_widget_customfields_init($form_id){
   if(tdomf_form_exists($form_id)) {
@@ -451,7 +455,7 @@ function tdomf_widget_customfields_init($form_id){
     
     for($i = 1; $i <= $count; $i++) {
       tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields', array(), $i);
-      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 800, array(), $i);
+      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 820, array(), $i);
       tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', array(), $i);
       tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', array(), $i);
       tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array(), $i);
@@ -465,7 +469,7 @@ add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
 add_action('tdomf_preview_form_start','tdomf_widget_customfields_init');
 add_action('tdomf_validate_form_start','tdomf_widget_customfields_init');
 add_action('tdomf_control_form_start','tdomf_widget_customfields_init');
-add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
+#add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                Custom Field as a Textfield //
@@ -576,7 +580,8 @@ function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -890,7 +895,8 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   }
   
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$text,$options);
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$text,$options);
+    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -1041,7 +1047,8 @@ function tdomf_widget_customfields_checkbox_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;  
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;
@@ -1398,7 +1405,8 @@ function tdomf_widget_customfields_select_preview($args,$number,$options) {
   extract($args);  
   $output = $before_widget;
   if($options['append'] && trim($options['format']) != "") {
-    $output .= tdomf_widget_customfields_gen_fmt($number,$message,$options);
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$message,$options);
+    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));    
   } else {
     if($options['title'] != "") {
       $output .= $before_title.$options['title'].$after_title;

@@ -687,9 +687,37 @@ function tdomf_show_form_options($form_id) {
 	<?php _e('The textbox below contains the export of data for this form including widgets. If you wish to import a form, paste its settings here and click Import.',"tdomf"); ?>
 	</p>
      
-     <?php $form_data['options'] = tdomf_get_options_form($form_id);
-           $form_data['options'][TDOMF_OPTION_FORM_NAME] = tdomf_get_option_form(TDOMF_OPTION_FORM_NAME,$form_id);
-           $form_data['widgets'] = tdomf_get_widgets_form($form_id); 
+     <?php /*
+    
+     <?php if(!function_exists('tdomf_prep_str_seralize')) {
+                // @todo Should probably implement this properly somewhere
+                function tdomf_prep_str_seralize($input) {
+                    if(is_array($input)) {
+                        $output = array();
+                        foreach($input as $elem) {
+                            $output[] = tdomf_prep_str_seralize($elem);
+                        }
+                        return $output;
+                    } else if(is_string($input)) {
+                        $output = str_replace(chr(13).chr(10),"\\n",$input);
+                        $output = str_replace("\t","\\t",$output);
+                        $output = str_replace("\"","\\\"",$output);
+                        $output = str_replace("\n","\\n",$output);
+                        return $output;
+                    }
+                    return $input;
+                }
+           }
+     
+           $form_data['options'] = tdomf_get_options_form($form_id);
+           $form_data['options'][TDOMF_OPTION_NAME] = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
+           #$form_data['options'][TDOMF_OPTION_FORM_HACK] = false;
+           #$form_data['options'][TDOMF_OPTION_FORM_HACK_ORIGINAL] = false;
+           #$form_data['options'][TDOMF_OPTION_FORM_PREVIEW_HACK] = false;
+           #$form_data['options'][TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL] = false;
+           ##$form_data['options'] = tdomf_prep_str_seralize($form_data['options']);
+           $form_data['widgets'] = tdomf_get_widgets_form($form_id);
+           #$form_data['widgets'] = tdomf_prep_str_seralize($form_data['widgets']);
            $form_data['caps'] = array();
            if(!isset($wp_roles)) {
               $wp_roles = new WP_Roles();
@@ -700,12 +728,17 @@ function tdomf_show_form_options($form_id) {
                   $form_data['caps'][] = $role->name;
               }
            }
-           $form_export = maybe_serialize($form_data); ?>
+           
+           $form_export = serialize($form_data);
+           $form_export = htmlentities($form_export,ENT_NOQUOTES,get_bloginfo('charset')); 
+           ?>
      <p>
      <textarea cols="100" rows="10" name="tdomf_import" id="tdomf_import"><?php echo $form_export; ?></textarea>
      <br/>
      <input type="submit" name="tdomf_import_button" id="tdomf_import_button" value="<?php _e("Import","tdomf"); ?> &raquo;">
      </p>
+     
+     */ ?>
      
      <h3 id="ajax"><?php _e('AJAX',"tdomf"); ?> </h3>
 
@@ -968,18 +1001,24 @@ function tdomf_handle_options_actions() {
      $form_id = intval($_REQUEST['tdomf_form_id']);
      
      $form_import = $_REQUEST['tdomf_import'];
+     #var_dump(is_serialized($form_import));
      if(get_magic_quotes_gpc()) {
          $form_import = stripslashes($form_import);
      }
      
-     $form_data = maybe_unserialize($form_import);
+     #var_dump(is_serialized($form_import));
+     error_reporting(E_ALL);
+     #$form_data = maybe_unserialize($form_import);
+     $form_data = unserialize($form_import);
+     
+     #echo htmlentities(var_export($form_data,true));
      
      if(is_array($form_data)) {
          tdomf_import_form($form_id,$form_data['options'],$form_data['widgets'],$form_data['caps']);
          tdomf_log_message("Form import succeeded",TDOMF_LOG_GOOD);
          $message = __("Form import successful<br/>","tdomf");
      } else {
-         tdomf_log_message("Form import failed " . var_export($form_data,true),TDOMF_LOG_ERROR);
+         tdomf_log_message("Form import failed " . htmlentities(var_export($form_data,true)),TDOMF_LOG_ERROR);
          $message = __("Form import failed<br/>","tdomf");
      }
 

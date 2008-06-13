@@ -9,34 +9,80 @@ function tdomf_form_hacker_diff($form_id) {
   if(isset($_REQUEST['render'])) {
       $render = $_REQUEST['render'];
   }
+  $type = $_REQUEST['type'];
+  
+  // @TODO add preview
   
   $form1_name = "";
   $form2_name = "";
-  
-  if($form1_type == 'cur') {
-    $form1_name = __('Current Unmodified Form','tdomf');
-    $form1 = tdomf_generate_form($form_id,$mode);
-  } else if($form1_type == 'org') {
-    $form1_name = __('Original Unmodified Form','tdomf');
-    $form1 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id);
-  } else if($form1_type == 'hack') {
-    $form1_name = __('Hacked Form','tdomf');
-    $form1 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id);
-  }
-  
-  if($form2_type == 'cur') {
-    $form2_name = __('Current Unmodified Form','tdomf');
-    $form2 = tdomf_generate_form($form_id,$mode);
-  } else if($form2_type == 'org') {
-    $form2_name = __('Original Unmodified Form','tdomf');
-    $form2 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id);
-  } else if($form2_type == 'hack') {
-    $form2_name = __('Hacked Form','tdomf');
-    $form2 = tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id);
+
+  if($type == 'preview') {
+      if($form1_type == 'cur') {
+        $form1_name = __('Current Unmodified Preview','tdomf');
+        $form1 = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
+      } else if($form1_type == 'org') {
+        $form1_name = __('Original Unmodified Preview','tdomf');
+        $form1 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$form_id));
+      } else if($form1_type == 'hack') {
+        $form1_name = __('Hacked Preview','tdomf');
+        $form1 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id));
+      }
+      
+      if($form2_type == 'cur') {
+        $form2_name = __('Current Unmodified Preview','tdomf');
+        $form2 = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
+      } else if($form2_type == 'org') {
+        $form2_name = __('Original Unmodified Preview','tdomf');
+        $form2 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$form_id));
+      } else if($form2_type == 'hack') {
+        $form2_name = __('Hacked Preview','tdomf');
+        $form2 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id));
+      }
+  } else {
+      if($form1_type == 'cur') {
+        $form1_name = __('Current Unmodified Form','tdomf');
+        $form1 = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
+      } else if($form1_type == 'org') {
+        $form1_name = __('Original Unmodified Form','tdomf');
+        $form1 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id));
+      } else if($form1_type == 'hack') {
+        $form1_name = __('Hacked Form','tdomf');
+        $form1 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id));
+      }
+      
+      if($form2_type == 'cur') {
+        $form2_name = __('Current Unmodified Form','tdomf');
+        $form2 = trim(tdomf_generate_form($form_id,$mode));
+      } else if($form2_type == 'org') {
+        $form2_name = __('Original Unmodified Form','tdomf');
+        $form2 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id));
+      } else if($form2_type == 'hack') {
+        $form2_name = __('Hacked Form','tdomf');
+        $form2 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id));
+      }
   }
   
   echo "<h3>".sprintf(__('%s verus %s','tdomf'),$form1_name,$form2_name)."</h3>";
 
+  if($form1 == $form2) {
+      echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
+      return;
+  }
+  
+  
+  set_include_path(get_include_path() . PATH_SEPARATOR . ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'include' );
+  include_once "Text/Diff.php";
+    
+  $form1 = explode("\n",$form1);
+  $form2 = explode("\n",$form2);
+  
+  $diff = &new Text_Diff('auto',array($form1, $form2));
+  
+  if($diff->isEmpty()) {
+      echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
+      return;
+  }
+  
   echo "<form>";
   
   echo "<input type='hidden' id='page' name='page' value='tdomf_show_form_hacker' />";
@@ -45,6 +91,7 @@ function tdomf_form_hacker_diff($form_id) {
   echo "<input type='hidden' id='diff' name='diff' />";
   echo "<input type='hidden' id='form2' name='form2' value='$form2_type' />";
   echo "<input type='hidden' id='form1' name='form1' value='$form1_type' />";
+  echo "<input type='hidden' id='type' name='type' value='$type' />";  
   
   echo '<label for="render">'.__('Render Type','tdomf').' </label>';
   echo '<select id="render" name="render">';
@@ -66,13 +113,6 @@ function tdomf_form_hacker_diff($form_id) {
   echo '</select>';
   echo '<input type="submit" value="'.__('Go','tdomf').'" /></form>';
   
-  set_include_path(get_include_path() . PATH_SEPARATOR . ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'include' );
-  include_once "Text/Diff.php";
-    
-  $form1 = explode("\n",$form1);
-  $form2 = explode("\n",$form2);
-  
-  $diff = &new Text_Diff('auto',array($form1, $form2));
   if($render == 'unified') {
      include_once "Text/Diff/Renderer/unified.php";
      $renderer = &new Text_Diff_Renderer_unified();
@@ -84,7 +124,7 @@ function tdomf_form_hacker_diff($form_id) {
   } else if($render == 'context') {
      include_once "Text/Diff/Renderer/context.php";
      $renderer = &new Text_Diff_Renderer_context();
-     echo "<pre>".$renderer->render($diff)."</pre>";
+     echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
   } else {
      include_once "Text/Diff/Renderer.php";
      $renderer = &new Text_Diff_Renderer();
@@ -106,15 +146,19 @@ function tdomf_form_hacker_actions($form_id) {
        check_admin_referer('tdomf-form-hacker');
        if(isset($_REQUEST['tdomf_form_hack'])) {
           $form_new = $_REQUEST['tdomf_form_hack'];
-          #$form_new = str_replace("\t","   ",$form_new);
+          $preview_new = $_REQUEST['tdomf_form_preview_hack'];
+          
           if (get_magic_quotes_gpc()) {
              $form_new = stripslashes($form_new);
+             $preview_new = stripslashes($preview_new);
           }
           if(strpos($form_new,TDOMF_MACRO_FORMKEY) !== false) {
             $form_cur = trim(tdomf_generate_form($form_id,$mode));
-            #$form_cur = str_replace("\t","   ",$form_cur);
+            $preview_cur = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
             tdomf_set_option_form(TDOMF_OPTION_FORM_HACK,trim($form_new),$form_id);
+            tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,trim($preview_new),$form_id);
             tdomf_set_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_cur,$form_id);
+            tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$preview_cur,$form_id);
           } else {
             $message = sprintf(__("No <code>%s</code> is included in one of your forms! Hacked form not saved.","tdomf"),TDOMF_MACRO_FORMKEY);
           }
@@ -125,9 +169,9 @@ function tdomf_form_hacker_actions($form_id) {
      } else if(isset($_REQUEST['tdomf_form_hack_reset'])){
        check_admin_referer('tdomf-form-hacker');
        tdomf_set_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,false,$form_id);
-       tdomf_set_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,false,$form_id);
+       tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,false,$form_id);
        tdomf_set_option_form(TDOMF_OPTION_FORM_HACK,false,$form_id);
-       tdomf_set_option_form(TDOMF_OPTION_FORM_HACK,false,$form_id);
+       tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,false,$form_id);
        $message = __("Reset Hacked Forms.","tdomf");
      } else if(isset($_REQUEST['tdomf_hack_messages_save'])) {
          check_admin_referer('tdomf-form-hacker');
@@ -200,6 +244,12 @@ function tdomf_show_form_hacker() {
           <?php tdomf_form_hacker_diff($form_id); ?>
     </div>
   <?php } else {
+
+    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+      $mode = "new-page-hack";
+    } else {
+       $mode = "new-post-hack";
+    }
     tdomf_form_hacker_actions($form_id);
     $form_ids = tdomf_get_form_ids(); ?>
         
@@ -265,6 +315,11 @@ function tdomf_show_form_hacker() {
           <form method="post">
           <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-form-hacker'); } ?>
           
+          <p class="submit">
+          <input type="submit" value="<?php _e('Save &raquo;','tdomf'); ?>" id="tdomf_hack_messages_save" name="tdomf_hack_messages_save" />
+          <input type="submit" value="<?php _e('Reset &raquo;','tdomf'); ?>" id="tdomf_hack_messages_reset" name="tdomf_hack_messages_reset" />
+          </p>
+          
           <?php if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)){ ?>
               <h3><?php _e('Submission Published','tdomf'); ?></h3>
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_publish" id="tdomf_msg_sub_publish" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
@@ -320,11 +375,11 @@ function tdomf_show_form_hacker() {
               <br/><br/>
           <?php } ?>
           
-          <!-- @TODO: notification messages -->
+          <?php do_action('tdomf_form_hacker_messages_bottom',$form_id,$mode); ?>
                     
           <span class="submit">
-          <input type="submit" value="<?php _e('Save','tdomf'); ?>" id="tdomf_hack_messages_save" name="tdomf_hack_messages_save" />
-          <input type="submit" value="<?php _e('Reset','tdomf'); ?>" id="tdomf_hack_messages_reset" name="tdomf_hack_messages_reset" />
+          <input type="submit" value="<?php _e('Save &raquo;','tdomf'); ?>" id="tdomf_hack_messages_save" name="tdomf_hack_messages_save" />
+          <input type="submit" value="<?php _e('Reset &raquo;','tdomf'); ?>" id="tdomf_hack_messages_reset" name="tdomf_hack_messages_reset" />
           </span>
           
           </form>
@@ -355,14 +410,19 @@ function tdomf_show_form_hacker() {
           
           </div>
  
-          <?php if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-                   $mode = "new-page-hack";
-                } else {
-                   $mode = "new-post-hack";
-                } ?>
-          
           <form method="post">
           <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-form-hacker'); } ?>
+      
+          <p class="submit">
+          <input type="submit" value="<?php _e('Save &raquo;','tdomf'); ?>" id="tdomf_form_hack_save" name="tdomf_form_hack_save" />
+          <input type="submit" value="<?php _e('Reset &raquo;','tdomf'); ?>" id="tdomf_form_hack_reset" name="tdomf_form_hack_reset" />
+          </p>
+          
+          <?php if(tdomf_widget_is_preview_avaliable($form_id)) { ?>
+          
+              <h3><?php _e('Core Form', 'tdomf') ?></h3>
+              
+          <?php } ?>
           
             <?php $cur_form = tdomf_generate_form($form_id,$mode);
                   $form = $cur_form;
@@ -385,15 +445,45 @@ function tdomf_show_form_hacker() {
             
           <br/><br/>
           
+          <?php if(tdomf_widget_is_preview_avaliable($form_id)) { ?>
+          
+              <h3><?php _e('Form Preview', 'tdomf') ?></h3>
+              
+              <?php $cur_preview = tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode);
+                    $preview = $cur_preview;
+                    $hacked_preview = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id);
+                    if($hacked_preview != false) { $preview = $hacked_preview; } ?>
+              
+              <?php if($hacked_preview != false) { ?>
+              <?php _e("You can diff the hacked preview to see what you have changed","tdomf"); ?>
+              <ul>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form1=hack&form2=cur&type=preview"><?php _e("Diff Hacked Preview with Current Preview","tdomf"); ?></a></li>
+              <?php $org_preview = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$form_id);  
+                    if(trim($cur_preview) != trim($org_preview)) { ?>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=hack&form1=org&type=preview"><?php _e("Diff Hacked Preview with Previous Preview","tdomf"); ?></a></li>
+              <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>&mode=<?php echo $mode; ?>&diff&form2=cur&form1=org&type=preview"><?php _e("Diff Current Preview with Previous Preview","tdomf"); ?></a></li>
+                    <?php } ?>
+              </ul>
+            <?php }?>                    
+                    
+              <textarea title="true" rows="15" cols="100" name="tdomf_form_preview_hack" id="tdomf_form_preview_hack" ><?php echo htmlentities($preview,ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+                
+              <br/><br/>
+                
+          <?php } ?>
+
+          <!-- @TODO Validation Message Hacker -->
+          <!-- @TODO Upload Form Hacker -->     
+          <?php do_action('tdomf_form_hacker_bottom',$form_id,$mode); ?>
+          
           <span class="submit">
-          <input type="submit" value="<?php _e('Save','tdomf'); ?>" id="tdomf_form_hack_save" name="tdomf_form_hack_save" />
-          <input type="submit" value="<?php _e('Reset','tdomf'); ?>" id="tdomf_form_hack_reset" name="tdomf_form_hack_reset" />
+          <input type="submit" value="<?php _e('Save &raquo;','tdomf'); ?>" id="tdomf_form_hack_save" name="tdomf_form_hack_save" />
+          <input type="submit" value="<?php _e('Reset &raquo;','tdomf'); ?>" id="tdomf_form_hack_reset" name="tdomf_form_hack_reset" />
           </span>
           
           </form>
           
           <!-- @TODO: warning about updated form (with dismiss link) -->
-          <!-- @TODO: upload form -->
           
           <?php } ?>
           

@@ -140,6 +140,18 @@ function tdomf_widget_text_control($form_id,$params) {
         <?php 
 }
     
+
+function tdomf_widget_text_handle_number($form_id) {
+  if(tdomf_form_exists($form_id)) {   
+      if ( isset($_POST['tdomf-widget-text-number-submit']) ) {
+        $count = $_POST['tdomf-widget-text-number'];
+        if($count > 0){ tdomf_set_option_widget('tdomf_text_widget_count',$count,$form_id); }
+      }
+  }
+}
+#add_action('tdomf_widget_page_top','tdomf_widget_text_handle_number');
+add_action('tdomf_control_form_start','tdomf_widget_text_handle_number',10,1);
+
 function tdomf_widget_text_init($form_id){
   if(tdomf_form_exists($form_id)) {     
      $count = tdomf_get_option_widget('tdomf_text_widget_count',$form_id);
@@ -158,16 +170,8 @@ function tdomf_widget_text_init($form_id){
 }
 add_action('tdomf_generate_form_start','tdomf_widget_text_init');
 add_action('tdomf_control_form_start','tdomf_widget_text_init');
-add_action('tdomf_widget_page_top','tdomf_widget_text_init');
+#add_action('tdomf_widget_page_top','tdomf_widget_text_init');
+add_action('tdomf_control_form_start','tdomf_widget_text_init',10,1);
 
-function tdomf_widget_text_handle_number($form_id) {
-  if(tdomf_form_exists($form_id)) {   
-      if ( isset($_POST['tdomf-widget-text-number-submit']) ) {
-        $count = $_POST['tdomf-widget-text-number'];
-        if($count > 0){ tdomf_set_option_widget('tdomf_text_widget_count',$count,$form_id); }
-      }
-  }
-}
-add_action('tdomf_widget_page_top','tdomf_widget_text_handle_number');
 
 ?>
