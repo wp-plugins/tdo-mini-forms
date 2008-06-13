@@ -3,12 +3,12 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.11.1
+Version: 0.12
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
 
-/*  Copyright 2006  Mark Cunningham  (email : Mark.Cunningham@gmail.com)
+/*  Copyright 2006-2007  Mark Cunningham  (email : Mark.Cunningham@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -277,7 +277,7 @@ Author URI: http://thedeadone.net
 // - Using a dollar sign plus a value in a input field would cause the first two
 //    digits to disappear - now fixed.
 //
-// v0.1x: TBD
+// v0.12: 13th June 2008
 // - AJAX (with fallback support)
 // - Small bug in that validation widgets were not being called properly if they
 //    use the action "tdomf_validate_form_start" (such as any multiple instant
@@ -288,11 +288,11 @@ Author URI: http://thedeadone.net
 // - Text Widget now uses Form Hacker macros
 // - Log now has size limit!
 // - Categories Widget now supports radio buttons and checkboxes
-// - Fixed a minor bug in the widgets panel where you had to reload the page 
+// - Fixed a minor bug in the widgets panel where you had to reload the page
 //    after you saved a change in the number of any of the multiple widgets
 // - Append widget
 // - Upgrade notice
-// - New Template Tags: tdomf_get_the_submitter_email and 
+// - New Template Tags: tdomf_get_the_submitter_email and
 //    tdomf_the_submitter_email
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -430,7 +430,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "33");
+define("TDOMF_BUILD", "34");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.12");
 
@@ -757,27 +757,27 @@ function tdomf_new_features() {
   // 31 = 0.11
   // 32 = 0.11.1 (bug fixes)
   if($last_version <= 32) {
-      
+
       $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&form=".tdomf_get_first_form_id()."#ajax";
       $features .= "<li>".sprintf(__('<a href="%s">AJAX support for forms!</a>','tdomf'),$link)."</li>";
-      
+
       $link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_form_hacker";
       $features .= "<li>".sprintf(__('<a href="%s">Hack the appearance of your form!</a>','tdomf'),$link)."</li>";
-      
+
       $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
       $features .= "<li>".sprintf(__('<a href="%s">Text widget updated to support macros and php code</a>','tdomf'),$link)."</li>";
-      
+
       $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
       $features .= "<li>".sprintf(__('<a href="%s">Categories widget can now be displayed as checkboxes or radio buttons</a>','tdomf'),$link)."</li>";
-      
+
       $link = get_bloginfo('wpurl')."/wp-admin/admin.phppage=tdomf_show_form_menu&form=".tdomf_get_first_form_id();
       $features .= "<li>".sprintf(__('<a href="%s">New Widget: Append. Allows you add text to a submitted post. It can even run PHP code.</a>','tdomf'),$link)."</li>";
-      
+
       $features .= "<li>".__('New Template Tags: tdomf_get_the_submitter_email and tdomf_the_submitter_email','tdomf')."</li>";
   }
   // 33 = 0.12b
   // 34 = 0.12
-    
+
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }
@@ -831,7 +831,7 @@ function tdomf_init(){
   if(get_option(TDOMF_OPTION_LOG_MAX_SIZE) == false) {
       add_option(TDOMF_OPTION_LOG_MAX_SIZE,1000);
   }
-  
+
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));
