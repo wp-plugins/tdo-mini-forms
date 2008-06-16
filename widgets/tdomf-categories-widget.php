@@ -366,11 +366,10 @@ function tdomf_widget_categories_control($form_id,$params) {
 <br/><br/>
 
 <label for"categories<?php echo $postfix1; ?>-display">
-<?php _e("Display categtories as:","tdomf"); ?><br/>
+<?php _e("Display categtories as:","tdomf"); ?><br/></label>
 <input type="radio" name="categories<?php echo $postfix1; ?>-display" id="categories<?php echo $postfix1; ?>-display" value="dropdown" <?php if($options['display'] == 'dropdown'){ ?> checked <?php } ?>><?php _e("Dropdown","tdomf"); ?><br>
 <input type="radio" name="categories<?php echo $postfix1; ?>-display" id="categories<?php echo $postfix1; ?>-display" value="list" <?php if($options['display'] == 'list'){ ?> checked <?php } ?>><?php _e("List","tdomf"); ?><br>
 <input type="radio" name="categories<?php echo $postfix1; ?>-display" id="categories<?php echo $postfix1; ?>-display" value="checkbox" <?php if($options['display'] == 'checkbox'){ ?> checked <?php } ?>><?php _e("Checkboxes","tdomf"); ?><br>
-</label>
 <br/><br/>
 
 </div>

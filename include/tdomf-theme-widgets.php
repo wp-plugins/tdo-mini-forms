@@ -244,25 +244,35 @@ function tdomf_theme_widgets_init() {
       $newoptions['use_subs'] = isset($_POST['tdomf_theme_widget_submitters-use_subs']);
       $newoptions['use_reg'] = isset($_POST['tdomf_theme_widget_submitters-use_reg']);
       $newoptions['use_link'] = isset($_POST['tdomf_theme_widget_submitters-use_link']);
+      $newoptions['avatar'] = isset($_POST['tdomf_theme_widget_submitters-avatar']);
+      $newoptions['avatar_size'] = intval($_POST['tdomf_theme_widget_submitters-avatar_size']);
+      $newoptions['avatar_default'] = $_POST['tdomf_theme_widget_submitters-avatar_default'];
         if ( $options != $newoptions ) {
           $options = $newoptions;
           update_option('tdomf_theme_widget_submitters', $options);
         }
     }
     
-    if($options == false) {
-      $title = 'Top Submitters';
-      $count = 5;
-      $use_subs = true;
-      $use_reg = true;
-      $use_link = false;
-    } else {
+    $title = 'Top Submitters';
+    $count = 5;
+    $use_subs = true;
+    $use_reg = true;
+    $use_link = false;
+    $avatar = false;
+    $avatar_size = 25;
+    $avatar_default = "";        
+    if($options != false) {
       $title = $options['title'];
       $count = $options['count'];
       $use_subs = $options['use_subs'];
       $use_reg = $options['use_reg'];
       $use_link = $options['use_link'];
-    }  
+      if(isset($options['avatar'])) {
+          $avatar = $options['avatar'];
+          $avatar_size = $options['avatar_size'];
+          $avatar_default = $options['avatar_default'];
+      }
+    }
   ?>
   <div>
   
@@ -285,7 +295,23 @@ function tdomf_theme_widgets_init() {
   <br/><br/>
   <?php _e("Use link to author posts before profile URL","tdomf"); ?>
   <input type="checkbox" id="tdomf_theme_widget_submitters-use_link" name="tdomf_theme_widget_submitters-use_link" <?php if($use_link) { ?>checked<?php } ?> />
-  </label>  
+  </label>
+
+  <?php if(function_exists('get_avatar')) { ?>
+  <br/><br/>
+  <?php _e("Enable Avatars","tdomf"); ?>
+  <input type="checkbox" id="tdomf_theme_widget_submitters-avatar" name="tdomf_theme_widget_submitters-avatar" <?php if($avatar) { ?>checked<?php } ?> />
+  </label>
+  <br/><br/>
+  <?php _e("Default Size:","tdomf"); ?>
+  <input type="text" id="tdomf_theme_widget_submitters-avatar_size" name="tdomf_theme_widget_submitters-avatar_size" value="<?php echo htmlentities($avatar_size,ENT_QUOTES); ?>" size="3" />
+  </label>
+  <br/><br/>
+  <?php _e("Default URL (can leave blank):","tdomf"); ?>
+  <input type="text" id="tdomf_theme_widget_submitters-avatar_default" name="tdomf_theme_widget_submitters-avatar_default" value="<?php echo htmlentities($avatar_default,ENT_QUOTES); ?>" size="20" />
+  </label>
+  <?php } ?>
+  
   </div>
   <?php
   }
@@ -293,18 +319,26 @@ function tdomf_theme_widgets_init() {
   function tdomf_theme_widget_submitters($args) {
     extract($args);
     $options = get_option('tdomf_theme_widget_submitters');
-    if($options == false) {
-      $title = 'Top Submitters';
-      $count = 5;
-      $use_subs = true;
-      $use_reg = true;
-      $use_link = false;
-    } else {
+
+   $title = 'Top Submitters';
+   $count = 5;
+   $use_subs = true;
+   $use_reg = true;
+   $use_link = false;
+   $avatar = false;
+   $avatar_size = 25;
+   $avatar_default = "";        
+   if($options != false) {
       $title = $options['title'];
       $count = $options['count'];
       $use_subs = $options['use_subs'];
       $use_reg = $options['use_reg'];
       $use_link = $options['use_link'];
+       if(isset($options['avatar'])) {
+          $avatar = $options['avatar'];
+          $avatar_size = $options['avatar_size'];
+          $avatar_default = $options['avatar_default'];
+      }     
     }
     
     $posts = tdomf_get_published_posts();
@@ -322,6 +356,9 @@ function tdomf_theme_widgets_init() {
                             $u['web'] = trim($user->user_url);
                             if(strlen($u['web']) < 8 || strpos($u['web'], "http://", 0) !== 0 ) {
                                 $u['web'] = false;
+                            }
+                            if(function_exists('get_avatar')) { 
+                                $u['avatar'] = get_avatar($id, $avatar_size, $avatar_default);
                             }
                             $u['name'] = $user->display_name;
                             $u['link'] = get_author_posts_url($user_id);
@@ -344,9 +381,13 @@ function tdomf_theme_widgets_init() {
                 $sub['count'] = 1;
                 
                 $sub['email'] = false;
+                $sub['avatar'] = "";
                 if(get_post_meta($p->ID,TDOMF_KEY_EMAIL)) {
                     // use lowercase to avoid case-sensitive misses
                     $sub['email'] = strtolower(trim(get_post_meta($p->ID,TDOMF_KEY_EMAIL,true)));
+                    if(function_exists('get_avatar')) { 
+                        $sub['avatar'] = get_avatar($sub['email'], $avatar_size, $avatar_default);
+                    }
                 }
                 
                 $sub['name'] = false;
@@ -445,6 +486,7 @@ function tdomf_theme_widgets_init() {
                   echo "<a href=\"".$l['link']."\">";
               }
           }
+          if($avatar && isset($l['avatar'])) { echo " ".$l['avatar']." "; }
           echo $l['name']." (".$l['count'].")";
           if(isset($l['link']) || ($l['web'] != false)) {
               echo "</a>";

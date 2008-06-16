@@ -6,7 +6,7 @@ function tdomf_get_message($key,$form_id = false) {
     if($form_id === false) {
         $message = get_option($key);
     } else {
-        $message = tdomf_get_option_form($key);
+        $message = tdomf_get_option_form($key,$form_id);
     }
     if($message === false) {
         $message = tdomf_get_message_default($key);

@@ -295,16 +295,23 @@ Author URI: http://thedeadone.net
 // - New Template Tags: tdomf_get_the_submitter_email and
 //    tdomf_the_submitter_email
 //
+// v0.12.1: TBD
+// - Hacked messages could only be saved for Form ID 1.
+// - Gravatars in Top Submitters
+// - Fixed Category Widget radio button for Checkboxes doesn't work in Firefox
+// - get_memory_usage not supported on many user-installed versions of PHP
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
-   - Random Questions
-   - Image Template Tags
-   - Modifying Email Message
-   - Username widget
+   - Import/Export Form & tdomfinfo
+   - Queuing Bug
+   - Error/Validation Hacking
+   - Default Title options: username, time, blank, extract from post content, etc.
+   - Validation Form
  */
 
-/*
+ /*
 ////////////////////////////////////////////////////////////////////////////////
 TODO for future versions
 
@@ -412,6 +419,7 @@ Template Tags
 - Approved Posts
 - File Info
 - Country codes on submitter's IP
+- Image Tags
 
 Misc
 - Documentation on creating your own widgets

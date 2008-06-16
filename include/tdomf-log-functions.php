@@ -93,7 +93,9 @@ function tdomf_log_message_extra($message,$color=TDOMF_LOG_GENERAL){
 // For memory debugging
 //
 function tdomf_log_mem_usage($file,$line){
-    tdomf_log_message(basename($file).":".$line.": current memory footprint: ".memory_get_usage(),TDOMF_LOG_MEMORY);
+    if(function_exists('memory_get_usage')) {
+        tdomf_log_message(basename($file).":".$line.": current memory footprint: ".memory_get_usage(),TDOMF_LOG_MEMORY);
+    }
 }
 
 // Clear/Empty the log
