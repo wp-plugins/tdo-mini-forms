@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.1
+Version: 0.12.2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -302,6 +302,10 @@ Author URI: http://thedeadone.net
 // - get_memory_usage not supported on many user-installed versions of PHP
 // - Security risk with Custom Fields fixed. 
 //
+// v0.12.2: 19th June 2008
+// - Broken code got into v0.12.1 in the rush to get the patch for the security
+//   risk out.
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -437,9 +441,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "35");
+define("TDOMF_BUILD", "36");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.1");
+define("TDOMF_VERSION", "0.12.2");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)

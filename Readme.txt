@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
 Requires at least: 2.3
 Tested up to: 2.5.1
-Stable Tag: 0.12.1
+Stable Tag: 0.12.2
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -293,6 +293,9 @@ Checkbox support in the Categories Widget initially added by [Sillybean](http://
 * The queuing functionality may get the time wrong if period set to greater than an hour
 
 == Version History ==
+
+= v0.12.2: 19th June 2008 =
+* Broken code got into v0.12.1 in the rush to get the patch for the security risk out.
 
 = v0.12.1: 19th June 2008 =
 * Hacked messages could only be saved for Form ID 1.

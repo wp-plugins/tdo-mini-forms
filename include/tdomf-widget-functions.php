@@ -540,7 +540,7 @@ function tdomf_widget_content_post($args) {
   $post = array (
       "ID"                      => $post_ID,
       "post_content"            => $post_content,
-  };
+  );
   if($options['title-enable']) {
       $post["post_title"] = $content_title;
       $post["post_name"] = sanitize_title($content_title);
