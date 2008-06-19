@@ -527,7 +527,7 @@ function tdomf_widget_content_post($args) {
   }
   $post_content = $post['post_content'];
   if($options['title-enable'] && !isset($content_title)) {
-    $content_title = $post['post_title'];
+    $content_title = tdomf_protect_input($post['post_title']);
   }
   
   if($options['allowable-tags'] != "" && $options['restrict-tags']) {
@@ -540,9 +540,12 @@ function tdomf_widget_content_post($args) {
   $post = array (
       "ID"                      => $post_ID,
       "post_content"            => $post_content,
-      "post_title"              => $content_title,
-      "post_name"               => sanitize_title($content_title),
-  );
+  };
+  if($options['title-enable']) {
+      $post["post_title"] = $content_title;
+      $post["post_name"] = sanitize_title($content_title);
+  }
+
   $post_ID = wp_update_post($post);
   return NULL;
 }
@@ -855,7 +858,7 @@ extract($args);
           $link .= "<a href=\"".$args['whoami_webpage']."\">";
     }
     if(isset($args['whoami_name'])){
-          $link .= $args['whoami_name'];
+          $link .= tdomf_protect_input($args['whoami_name']);
     } else {
           $link .= __("unknown","tdomf");
     }
@@ -883,7 +886,7 @@ function tdomf_widget_whoami_preview_hack($args) {
     $nonreg_user .= "<?php } ?>";
     
     $nonreg_user .= "<?php if(isset(\$post_args['whoami_name'])){ ";
-    $nonreg_user .= "echo \$whoami_name; ";
+    $nonreg_user .= "echo tdomf_protect_input(\$whoami_name); ";
     $nonreg_user .= "} else { ?>";
     $nonreg_user .= __("unknown","tdomf");
     $nonreg_user .= "<?php } ?>";
@@ -962,7 +965,7 @@ function tdomf_widget_whoami_post($args) {
   get_currentuserinfo();
   extract($args);
   if(isset($whoami_name)) {
-    add_post_meta($post_ID, TDOMF_KEY_NAME, $whoami_name, true);
+    add_post_meta($post_ID, TDOMF_KEY_NAME, tdomf_protect_input($whoami_name), true);
   }
   if(isset($whoami_webpage)) {
     add_post_meta($post_ID, TDOMF_KEY_WEB, $whoami_webpage, true);
@@ -980,7 +983,7 @@ function tdomf_widget_whoami_post($args) {
        update_usermeta($current_user->ID, TDOMF_KEY_FLAG, true);
     }
   }
-  tdomf_widget_whoami_store_cookies($whoami_name,$whoami_email,$whoami_webpage);
+  tdomf_widget_whoami_store_cookies(tdomf_protect_input($whoami_name),$whoami_email,$whoami_webpage);
   return NULL;
 }
 tdomf_register_form_widget_post('who-am-i','Who Am I', 'tdomf_widget_whoami_post');

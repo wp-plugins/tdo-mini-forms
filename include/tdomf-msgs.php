@@ -14,168 +14,24 @@ function tdomf_get_message($key,$form_id = false) {
     return $message;
 }
 
-/*function tdomf_process_var($string, $post_args = array()) {
-        
-    if(preg_match_all('|'.TDOMF_MACRO_VAR_START.'.*?'.TDOMF_MACRO_END.'|', $string, $matches) > 0) {
-        $patterns = array();
-        $replacements = array();
-        $unused_patterns = array();
-        foreach($matches[0] as $match) {
-            $var = false;
-            $var_found = false;
-            
-            $var_args = str_replace(TDOMF_MACRO_VAR_START,'',trim($match));
-            $var_args = str_replace(TDOMF_MACRO_END,'',$var_args);
-
-            if(strpos($var_args,',') !== false) {
-                // contains multiple args
-                $var_args = split(',',$var_args);
-            } else {
-                $var_args = array( $var_args );
-            }
-            
-            foreach($var_args as $var_arg) {
-                
-                if(strpos($var_arg,':') !== false) {
-                    $args = split(':',$var_arg,2);
-                    switch($args[0]) {
-                       case TDOMF_MACRO_VAR_COOKIE:
-                           if(isset($_COOKIE[$args[1]])) {
-                               $var = $_COOKIE[$args[1]];
-                               $var_found = true;
-                           }
-                       break;
-                       case TDOMF_MACRO_VAR_POST:
-                           if(isset($post_args[$args[1]])) {
-                               $var = $post_args[$args[1]];
-                               $var_found = true;
-                           } else if(isset($_POST[$args[1]])) {
-                               $var = $_POST[$args[1]];
-                               $var_found = true;
-                           }
-                           break;
-                       case TDOMF_MACRO_VAR_DEFAULT:
-                           $var = $args[1];
-                           $var_found = true;
-                           break;
-                       default:
-                           // error
-                       break;
-                    }
-                } else {
-                    // error
-                }
-                if($var_found) { break; }
-            }
-            
-            if($var_found) {
-                 $patterns[] = '/'.trim($match).'/';
-                 $replacements[] = $var;
-            } else {
-                 $unused_patterns[] = '/'.trim($match).'/';
-            }
-            
-            
-        }
-        if(!empty($patterns)) {
-            $string = preg_replace($patterns,$replacements,$string);
-        }
-        if(!empty($unused_patterns)) {
-            $string = preg_replace($unused_patterns,"",$string);
-        }
-    }
-    return $string;
+function tdomf_protect_input($message) {
+    # This function passes the string through Wordpress kses filters,
+    # this should pull out javascript hacks and php code. It should be used
+    # on any input
+    #
+    global $allowedposttags;
+    #if(!current_user_can('unfiltered_html')) {
+        $message = wp_kses($message,$allowedposttags);
+    #}   
+    return $message;
 }
-
-function tdomf_process_if($string) {
-    if(preg_match_all('|'.TDOMF_MACRO_IF_START.'.*?'.TDOMF_MACRO_FI.'|s', $string, $matches) > 0) {
-        $patterns = array();
-        $replacements = array();
-        foreach($matches[0] as $match) {
-            if(preg_match_all('|'.TDOMF_MACRO_START.'(.*?)(?=('.TDOMF_MACRO_END.'))|s', $match, $submatches) > 0) {
-                $output = "";
-                for($i = 0; $i < count($submatches[1]); $i++) {
-                    if(strpos($submatches[0][$i],TDOMF_MACRO_IF_START) === 0 && $i == 0) {
-                        $if_eval = str_replace(TDOMF_MACRO_IF_START,'',$submatches[0][$i]);
-                        if(eval($if_eval)) {
-                            $output = $submatches[1][$i+1];
-                            break;
-                        } else {
-                            $i++;
-                        }
-                    } else if(strpos($submatches[0][$i],TDOMF_MACRO_ELSEIF_START) === 0) {
-                        $elseif_eval = str_replace(TDOMF_MACRO_ELSEIF_START,'',$submatches[0][$i]);
-                        if(eval($elseif_eval)) {
-                            $output = $submatches[1][$i+1];
-                            break;
-                        } else {
-                            $i++;
-                        }
-                    } else if(strpos($submatches[0][$i],TDOMF_MACRO_ELSE_START) === 0){
-                        $output = $submatches[1][$i+1];
-                        break;
-                    } else if(strpos($submatches[0][$i],TDOMF_MACRO_FI_START) === 0){
-                        $output = "";
-                        break;
-                    } else {
-                        // error
-                        $output = "";
-                        break;
-                    }
-                }
-                $patterns[] = '/'.trim($match).'/s';
-                $replacements[] = $output;
-            } else {
-                $unused_patterns[] = '/'.trim($match).'/s';
-            }
-        }
-        if(!empty($patterns)) {
-            $string = preg_replace($patterns,$replacements,$string);
-        }
-        if(!empty($unused_patterns)) {
-            $string = preg_replace($unused_patterns,"",$string);
-        }
-    }
-    return $string;
-}
-
-function tdomf_process_eval($string) {
-
-    if(preg_match_all('|'.TDOMF_MACRO_EVAL_START.'.*?'.TDOMF_MACRO_END.'|s', $string, $matches) > 0) {
-        $patterns = array();
-        $replacements = array();
-        $unused_patterns = array();
-        foreach($matches[0] as $match) {
-
-            $eval_args = str_replace(TDOMF_MACRO_EVAL_START,'',trim($match));
-            $eval_args = str_replace(TDOMF_MACRO_END,'',$eval_args);
-
-            $eval_ret = eval($eval_args);
-
-            if($eval_ret != false) {
-                 $patterns[] = '/'.trim($match).'/s';
-                 $replacements[] = $eval_ret;
-            } else {
-                 $unused_patterns[] = '/'.trim($match).'/s';
-            }
-            
-            
-        }
-        if(!empty($patterns)) {
-            $string = preg_replace($patterns,$replacements,$string);
-        }
-        if(!empty($unused_patterns)) {
-            $string = preg_replace($unused_patterns,"",$string);
-        }
-    }
-    return $string;
-} */
 
 function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id = false, $errors = "", $post_args = array()) {
     global $current_user;
     if($post_id !== false) {
         $post = &get_post($post_id);
         
+        // url, date and time are safe but title is not: scrub
         $patterns = array ( '/'.TDOMF_MACRO_SUBMISSIONURL.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONDATE.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONTIME.'/',
@@ -183,7 +39,7 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
         $replacements = array( get_permalink($post_id),
                                gmdate(get_option('date_format'), strtotime($post->post_date)),
                                gmdate(get_option('time_format'), strtotime($post->post_date)),
-                               $post->post_title);
+                               tdomf_protect_input($post->post_title));
                 
         $message = preg_replace($patterns,$replacements,$message);
     }
@@ -194,9 +50,11 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
     
     if(is_user_logged_in()) {
         get_currentuserinfo();
-        $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',$current_user->display_name,$message);
+        // might not be safe
+        $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',tdomf_protect_input($current_user->display_name),$message);
     } else if( $post_id !== false) {
-        $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',get_post_meta($post_id,TDOMF_KEY_NAME,true),$message);
+        // may not be safe at all
+        $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',tdomf_protect_input(get_post_meta($post_id,TDOMF_KEY_NAME,true),$message));
     } else {
         $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',__("Unregistered","tdomf"),$message);
     }
@@ -204,9 +62,8 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
     $message = preg_replace('/'.TDOMF_MACRO_IP.'/',$_SERVER['REMOTE_ADDR'],$message);
     
     if($form_id !== false) {
-        
-        # @TODO: Form Key and Widgets need to be done on demand only
-
+         
+        // these macros are inputed by form admin so are considered safe
         $patterns = array ( '/'.TDOMF_MACRO_FORMURL.'/',
                             '/'.TDOMF_MACRO_FORMID.'/',
                             '/'.TDOMF_MACRO_FORMNAME.'/',

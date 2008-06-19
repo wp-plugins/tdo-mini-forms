@@ -19,8 +19,11 @@ function tdomf_widget_customfields_gen_fmt($index,$value,$options){
   $key = $options['key'];
   
   $output = $options['format'];
+  // title safe : set by admin
   $output = ereg_replace("%%TITLE%%",$title,$output);
-  $output = ereg_replace("%%VALUE%%",$value,$output);
+  // value not safe, so scrub it for PHP and js
+  $output = ereg_replace("%%VALUE%%",tdomf_protect_input($value),$output);
+  // key safe : set by admin
   $output = ereg_replace("%%KEY%%",$key,$output);
   return $output;
 }

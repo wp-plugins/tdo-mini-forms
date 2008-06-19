@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
 Requires at least: 2.3
 Tested up to: 2.5.1
-Stable Tag: 0.12
+Stable Tag: 0.12.1
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -78,6 +78,8 @@ Before installing the new version of TDO Mini Forms, delete the TDOMiniForms fro
 Please check the Frequently Asked Questions for answers to many of the common issues that arise.
 
 If you are using the wp-cache or wp-super-cache plugins, please make sure that any page that uses a TDO Mini Forms form is **not** cached. If you cache the form it'll may contain an old "key" and will cause "Bad Data" error messages and also you will not be able to preview or see admin messages.
+
+If you are using any plugins that will execute PHP code within post content/title or custom field, it is recommended to disable them or at the very least make sure that moderation is enabled and all submissions are scanned for malicious code. PHP code and Javascript tags can be submitted as part of input to any part of the form, in some cases Wordpress will strip them out. But custom fields, especially, will not be filtered automatically (this can be desirable, for example if you want people to post snippets of javascript code). 
 
 = Creating a Form =
 
@@ -288,10 +290,16 @@ Checkbox support in the Categories Widget initially added by [Sillybean](http://
 * If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper. In v0.10.3, the default is to use direct links but you can switch back to the handler if this does not work correctly for you.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
 * Form does not validate as XHTML. I'll fix this soon I swear! :)
-* An clash with using the WP-United plugin and TDO-Mini Forms (v0.10.4) has been reported. Not yet investigated. (http://thedeadone.net/forum/?p=266)
 * The queuing functionality may get the time wrong if period set to greater than an hour
 
 == Version History ==
+
+= v0.12.1: 19th June 2008 =
+* Hacked messages could only be saved for Form ID 1.
+* Gravatars in Top Submitters
+* Fixed Category Widget radio button for Checkboxes doesn't work in Firefox
+* get_memory_usage not supported on many user-installed versions of PHP
+* Security risk with Custom Fields fixed.
 
 = v0.12: 13th June 2008 =
 * AJAX (with fallback support)
