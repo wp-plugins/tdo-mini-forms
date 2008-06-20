@@ -306,6 +306,9 @@ Author URI: http://thedeadone.net
 // - Broken code got into v0.12.1 in the rush to get the patch for the security
 //   risk out.
 //
+// v0.12.3: TBD
+// - Bug in tdomf-msgs.php that would occur for unregistered users only
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -441,7 +444,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "36");
+define("TDOMF_BUILD", "37");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.12.2");
 

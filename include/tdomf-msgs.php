@@ -54,7 +54,7 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
         $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',tdomf_protect_input($current_user->display_name),$message);
     } else if( $post_id !== false) {
         // may not be safe at all
-        $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',tdomf_protect_input(get_post_meta($post_id,TDOMF_KEY_NAME,true),$message));
+        $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',tdomf_protect_input(get_post_meta($post_id,TDOMF_KEY_NAME,true)),$message);
     } else {
         $message = preg_replace('/'.TDOMF_MACRO_USERNAME.'/',__("Unregistered","tdomf"),$message);
     }
