@@ -308,6 +308,7 @@ Author URI: http://thedeadone.net
 //
 // v0.12.3: TBD
 // - Bug in tdomf-msgs.php that would occur for unregistered users only
+// - Auto Respond Email widget
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -444,7 +445,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "37");
+define("TDOMF_BUILD", "38");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.12.2");
 
