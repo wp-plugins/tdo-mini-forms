@@ -105,6 +105,8 @@ This will display your blog's title in the form.
 
 The Form Hacker has a number of "macros". These are special strings that are automatically expanded when the Form is displayed. Some of these macros are used to automatically generate the Form Key (which is used for security). The %%WIDGET:widget-name%% macro can be used to let individual widgets do their thing while you hack everything else. A list of macros can be found by clicking on "Show Help" link at the top of the page. 
 
+**Please be aware that if you use the Form Hacker and you later change the setings of your form (modify widgets or options), these changes are not reflected automatically in the Form Hacker. You must re-edit the hacked form to pick up the new changes.**
+
 == Frequently Asked Questions ==
 
 = Where do I get the latest updates and news on TDO Mini Forms? =
@@ -214,6 +216,34 @@ get_post_meta($post_ID, "_tdomf_download_cmd_output_0");
 get_post_meta($post_ID, "_tdomf_download_name_1");
 
 // And so on...`
+
+= Styling TDO Mini Form Posts =
+
+Styling and formatting of posts is really outside the scope of this plugin. Some nominal features in TDO Mini Forms allow you to append content to the Post's content area but this has limited application. Wordpress core gives more than enough options to do this. 
+
+Custom Fields, Title, Categories, Tags, etc. can be displayed in myriad ways using [Template Tags](http://codex.wordpress.org/Template_Tags ), without having to modify your post content using TDO Mini Forms. 
+
+You can style TDO Mini Forms differently to normally posts in your Theme (within the [loop](http://codex.wordpress.org/The_Loop )):
+
+`<?php if(defined('TDOMF_KEY_FLAG') && get_post_meta($id,TDOMF_KEY_FLAG,true) != false) { ?>
+
+   <p>This post was submitted by TDO Mini Forms, so use a TDO Mini Forms format, etc.</p>
+
+<?php } else { ?>
+
+   <p>Default Post Formatting</p>
+
+<?php } ?>`
+
+= Modifying tdomf-style-form.css has no effect on form! =
+
+TDO Mini Forms uses the wp_head action in your theme to add a link to the stylesheet. Check for the existance of a line like this in your header.php:
+
+`do_action('wp_head');`
+
+You can also manually add like this:
+
+`<link rel="stylesheet" href="<?php echo get_bloginfo('url'); ?>/wp-content/plugins/tdo-mini-forms/tdomf-style-form.css" type="text/css" media="screen" />`
 
 = Uploading a bmp file causes errors! =
 

@@ -116,7 +116,7 @@ function tdomf_widget_customfields_get_options($index,$form_id) {
        $options['tf-subtype'] = 'text';
        // textarea specific
        $options['ta-restrict-tags'] = false;
-       $options['ta-allowable-tags'] = "<p><b><i><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
+       $options['ta-allowable-tags'] = "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
        $options['ta-quicktags'] = true;
        $options['ta-content-filter'] = true;     
     }

@@ -307,7 +307,7 @@ function tdomf_widget_content_get_options($form_id) {
        $options['text-rows'] = 10; 
        $options['quicktags'] = false;
        $options['restrict-tags'] = true;
-       $options['allowable-tags'] = "<p><b><i><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
+       $options['allowable-tags'] = "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
     }
     if(!isset($options['char-limit'])) {
        $options['char-limit'] = 0;
@@ -1071,7 +1071,7 @@ EOT;
      if($options['webpage-required']) {
         $output .= ' class="required" ';
      }
-     $output .= ">".__("Email:","tdomf")."\n\t\t\t\t<br/>\n\t\t\t\t<input type=\"text\" value=\"";
+     $output .= ">".__("Webpage:","tdomf")."\n\t\t\t\t<br/>\n\t\t\t\t<input type=\"text\" value=\"";
      $output .= '<?php echo htmlentities($whoami_webpage,ENT_QUOTES,get_bloginfo(\'charset\')); ?>';
      $output .= '" name="whoami_webpage" id="whoami_webpage" />';
      if($options['webpage-required']) {

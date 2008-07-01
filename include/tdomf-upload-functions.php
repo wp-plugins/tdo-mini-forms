@@ -914,15 +914,12 @@ function tdomf_widget_upload_control($form_id) {
 <?php printf(__("Max File Size in bytes. Example: 1024 = %s, 1048576 = %s","tdomf"),tdomf_filesize_format(1024),tdomf_filesize_format(1048576)); ?> 
 </label><br/><br/>
 
-<label for="upload-files-min">
 <input type="textfield" name="upload-files-min" id="upload-files-min" value="<?php echo htmlentities($options['min'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
-<?php _e("Minimum File Uploads <i>(0 indicates file uploads optional)</i>","tdomf"); ?> 
-</label><br/>
+<label for="upload-files-min"><?php _e("Minimum File Uploads <i>(0 indicates file uploads optional)</i>","tdomf"); ?></label><br/>
 
-<label for="upload-files-size">
 <input type="textfield" name="upload-files-max" id="upload-files-max" value="<?php echo htmlentities($options['max'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
-<?php _e("Maximum File Uploads","tdomf"); ?> 
-</label><br/>
+<label for="upload-files-sax"><?php _e("Maximum File Uploads","tdomf"); ?></label><br/>
+
 
 <br/>
 

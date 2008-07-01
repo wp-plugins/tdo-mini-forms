@@ -83,7 +83,7 @@ function tdomf_widget_getcat_hack($args) {
   $output .= "\t\tif(isset(\$_GET['$tdomf_getcat_var_name'])) {\n";
   $output .= "\t\t\t\$getcat = intval(\$_GET['$tdomf_getcat_var_name']);\n";
   $output .= "\t\t} else if(isset(\$post_args['$tdomf_getcat_var_name'])) {\n";
-  $output .= "\t\t\$getcat = intval(\$post_args['$tdomf_getcat_var_name']); }\n";
+  $output .= "\t\t\$getcat = intval(\$post_args['$tdomf_getcat_var_name']); } ?>\n";
   
   $output .= "\t\t<input type='hidden' name='$tdomf_getcat_var_name' id='$tdomf_getcat_var_name' value='";
   $output .= "<?php echo \$getcat; ?>' />\n";

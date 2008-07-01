@@ -37,8 +37,8 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
                             '/'.TDOMF_MACRO_SUBMISSIONTIME.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONTITLE.'/');
         $replacements = array( get_permalink($post_id),
-                               gmdate(get_option('date_format'), strtotime($post->post_date)),
-                               gmdate(get_option('time_format'), strtotime($post->post_date)),
+                               mysql2date(get_option('date_format'),$post->post_date),
+                               mysql2date(get_option('time_format'),$post->post_date),
                                tdomf_protect_input($post->post_title));
                 
         $message = preg_replace($patterns,$replacements,$message);

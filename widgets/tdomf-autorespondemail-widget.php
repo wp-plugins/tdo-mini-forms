@@ -126,11 +126,31 @@ function tdomf_widget_autorespondemail_post($args) {
       }
   }
   setcookie("tdomf_autorespond_widget_email",$autorespondemail_email, time() + 30000000, COOKIEPATH, COOKIE_DOMAIN);
-  //add_post_meta($post_ID, "_tdomf_autorespond_widget_email", $autorespondemail_email, true);    
+  add_post_meta($post_ID, "_tdomf_autorespond_widget_email", $autorespondemail_email, true);    
 
-  $options = tdomf_widget_autorespondemail_get_options($form_id);
+  // mail will be sent after post is created and post is not flagged as spam
   
-  // Problem: We do not know if this is SPAM at this stage! Need to add an action to tdomf-form so we can send email, after!
+  return NULL;
+}
+tdomf_register_form_widget_post('autorespondemail', __('Auto Respond Email','tdomf'), 'tdomf_widget_autorespondemail_post');
+
+function tdomf_widget_autorespondemail_send_mail($post_id,$form_id) {
+ 
+   // do nothing if no email set
+   //   
+   $autorespondemail_email = get_post_meta($post_id, '_tdomf_autorespond_widget_email', true);
+   if($autorespondemail_email == false) {
+       return false;
+   }
+   delete_post_meta($post_id, '_tdomf_autorespond_widget_email');
+      
+   // if spam, do nothing
+   //
+   if(get_post_meta($post_id,TDOMF_KEY_SPAM,true)) {
+      return false;
+   }
+   
+  $options = tdomf_widget_autorespondemail_get_options($form_id);
    
   $subject = tdomf_prepare_string($options['subject'], $form_id, "", $post_id);
   $body = tdomf_prepare_string($options['body'], $form_id, "", $post_id);
@@ -154,10 +174,10 @@ function tdomf_widget_autorespondemail_post($args) {
   // should we do some sort of error handling here?
   //
   tdomf_log_message("wp_mail returned $status for auto responde email on post $post_id");
- 
-  return NULL;
+  
+  return true;
 }
-tdomf_register_form_widget_post('autorespondemail', __('Auto Respond Email','tdomf'), 'tdomf_widget_autorespondemail_post');
+add_action('tdomf_create_post_end','tdomf_widget_autorespondemail_send_mail',10,2);
 
 ///////////////////////////////////////////////////
 // Display and handle widget control panel 

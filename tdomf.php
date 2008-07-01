@@ -309,15 +309,40 @@ Author URI: http://thedeadone.net
 // v0.12.3: TBD
 // - Bug in tdomf-msgs.php that would occur for unregistered users only
 // - Auto Respond Email widget
+// - Small mistake in whoami widget hack, "email" title used for webpage field
+// - Checkbox settings were not being correctly passed in AJAX
+// - Full paths are used, not just relative
+// - Ban User/IP links from moderation email
+// - Enabling extra debug messages and turning on error messages to user also
+//    turns on all error reporting in PHP
+// - Added extra debug messages and handling around post_id 0 submissions (still
+//    dont' have a clue about them)
+// - Moderation emails to admins can now be turned off if moderation is turned
+//    off
+// - Custom Field summary was not appearing in admin emails
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
+////////////////////////////////////////////////////////////////////////////////
+Work Queue:
    - Import/Export Form & tdomfinfo
-   - Queuing Bug
-   - Error/Validation Hacking
- */
+   - Error, Validation and Style Hacking
+*/
 
+/*
+////////////////////////////////////////////////////////////////////////////////
+Notes:
+ - Potential nice hack: query.php @ line 1479
+   $this->posts = apply_filters('the_posts', $this->posts);
+     1. is single/page [should include category and index?]
+     2. what post? 
+     3. is it tdomf, draft/unmoderation, not spam, viewer is submitter
+     4. add to array
+     This will allow users see their submitted posts, however comments should
+     be disabled as they cannot be used in preview mode
+*/
+ 
  /*
 ////////////////////////////////////////////////////////////////////////////////
 TODO for future versions
@@ -325,6 +350,9 @@ TODO for future versions
 Known Bugs
 - Invalid markup is used in several form elements
 - Import/Export Form disabled currently
+- There seems to be some issues with the queuing functionality and GMT 
+   calculation of time. I haven't nailed down exactly what is going on but queue
+   periods of greater than an hour are not correctly respected.
 
 New Features
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
@@ -445,7 +473,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "38");
+define("TDOMF_BUILD", "39");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.12.2");
 
@@ -497,7 +525,7 @@ define("TDOMF_KEY_STATUS","_tdomf_status");
 // 0.7 Settings
 //
 define('TDOMF_FOLDER', dirname(plugin_basename(__FILE__)));
-define('TDOMF_FULLPATH', ABSPATH.PLUGINDIR.'/'.TDOMF_FOLDER.'/');
+define('TDOMF_FULLPATH', ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR);
 define('TDOMF_URLPATH', get_option('siteurl').'/wp-content/plugins/'.TDOMF_FOLDER.'/');
 define('TDOMF_WIDGET_PATH',TDOMF_FULLPATH.'widgets/');
 define('TDOMF_VERSION_CURRENT', "tdomf_version_current");
@@ -629,6 +657,11 @@ define('TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL',"tdomf_form_hack_preview_org");
 
 define('TDOMF_OPTION_LOG_MAX_SIZE',"tdomf_option_log_max_size");
 
+//////////
+// 0.12.2
+
+define('TDOMF_OPTION_MOD_EMAIL_ON_PUB',"tdomf_option_mod_email_on_pub");
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -712,27 +745,27 @@ function tdomf_add_menus()
 // Load the rest of the plugin! //
 //////////////////////////////////
 
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-log-functions.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-hacks.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-widget-functions.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-spam.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-form.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
-require_once('include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
-require_once('admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-log-functions.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-hacks.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-functions.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-spam.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-form.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
 
 /////////////////////////
 // What's new since... //

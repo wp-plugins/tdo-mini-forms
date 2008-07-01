@@ -241,10 +241,10 @@ function tdomf_timestamp_wp_sql( $timestamp, $gmt = false ) {
 }
 
 function tdomf_queue_date($form_id,$current_ts)  {
-    tdomf_log_message("Current ts is $current_ts");
+    tdomf_log_message("Current ts is $current_ts (" . tdomf_timestamp_wp_sql($current_ts) . ")" );
     $queue_period = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
     if($queue_period > 0) {
-        tdomf_log_message("Queue period is $queue_period");
+        tdomf_log_message("Queue period is $queue_period seconds");
         global $wpdb;
         $query = "SELECT DISTINCT(ID), post_date
           FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
@@ -255,11 +255,12 @@ function tdomf_queue_date($form_id,$current_ts)  {
           LIMIT 1 ";
           $results = $wpdb->get_results($query);
           if(count($results) > 0) {
-              $last_ts = strtotime($results[0]->post_date);
-              tdomf_log_message("Got latest ts of $last_ts");
+              #$last_ts = strtotime($results[0]->post_date);
+              $last_ts = mysql2date('U',$results[0]->post_date);
+              tdomf_log_message("Got latest ts of $last_ts (" . tdomf_timestamp_wp_sql($last_ts) . ")");
               $next_ts = $last_ts + $queue_period;
               if($next_ts > $current_ts) {
-                  tdomf_log_message("Sticking post in queue!");
+                  tdomf_log_message("Sticking post in queue with ts of $next_ts (" . tdomf_timestamp_wp_sql($next_ts) . ")");
                   return $next_ts;
               }
           }
@@ -322,6 +323,11 @@ function tdomf_create_post($args) {
    }
    //
    $post_ID = wp_insert_post($post);
+   if($post_ID == 0)
+   {
+       tdomf_log_message("Failed to create post!<pre>".var_export($post,true)."</pre>",TDOMF_LOG_ERROR);
+       return false;
+   }
 
    tdomf_log_message("Post with id $post_ID (and default title $def_title) created as draft.");
 
@@ -426,6 +432,7 @@ function tdomf_create_post($args) {
         } else {
             $post_date = tdomf_timestamp_wp_sql($ts);
             $post_date_gmt = get_gmt_from_date($post_date);
+            #$post_date_gmt = tdomf_timestamp_wp_sql($ts,1);
             tdomf_log_message("Future Post Date = $post_date!");
             $post = array (
               "ID"             => $post_ID,
@@ -437,7 +444,7 @@ function tdomf_create_post($args) {
         }
         
         wp_update_post($post);
-        $send_moderator_email = false;
+        $send_moderator_email = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id);
      } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
           $testuser = new WP_User($user_id,$user->user_login);
           $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
@@ -461,6 +468,7 @@ function tdomf_create_post($args) {
             } else {
                 $post_date = tdomf_timestamp_wp_sql($ts);
                 $post_date_gmt = get_gmt_from_date($post_date);
+                #$post_date_gmt = tdomf_timestamp_wp_sql($ts,1);
                 tdomf_log_message("Future Post Date = $post_date!");
                 $post = array (
                   "ID"             => $post_ID,
@@ -472,7 +480,7 @@ function tdomf_create_post($args) {
             }
              wp_update_post($post);
              #wp_publish_post($post_ID);
-             $send_moderator_email = false;
+             $send_moderator_email = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id);
           }
      }
    } else {
@@ -494,6 +502,8 @@ function tdomf_create_post($args) {
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
      kses_init_filters();
    }
+   
+   do_action('tdomf_create_post_end',$post_ID,$form_id,$mode);
    
    return intval($post_ID);
 }
@@ -689,7 +699,13 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 		mysack.method = 'POST';
 		mysack.setVar( "tdomf_action", action );
 		for(i=0; i<document.$form_name.elements.length; i++) {
-			mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
+			if(document.$form_name.elements[i].type == "checkbox") {
+				if(document.$form_name.elements[i].checked == 1) {
+					mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
+				}
+			} else {
+				mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
+			}
 		}
 		mysack.onError = function() { alert('$ajax_error' )};
 		mysack.runAJAX();

@@ -26,6 +26,12 @@ if (!file_exists($wp_config)) {
 }
 require_once($wp_config);
 
+// enable all PHP errors
+//
+if(get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES) && !get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
+  error_reporting(E_ALL);
+}
+
 // loading text domain for language translation
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
@@ -55,7 +61,7 @@ $all_good = true;
 //
 $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
 if($tdomf_verify == false || $tdomf_verify == 'default') {
-  if(isset($form_data['tdomf_upload_key_'.$form_id]) && $form_data['tdomf_upload_key_'.$form_id] != $_POST['tdomf_upload_key_'.$form_id]){
+  if(isset($form_data['tdomf_upload_key_'.$form_id]) && isset($_POST['tdomf_upload_key_'.$form_id]) && $form_data['tdomf_upload_key_'.$form_id] != $_POST['tdomf_upload_key_'.$form_id]){
      #tdomf_log_message_extra("Upload form submitted with bad key from ".$_SERVER['REMOTE_ADDR']." !",TDOMF_LOG_BAD);
      unset($form_data['tdomf_upload_key_'.$form_id]); // prevents any "operations" on uploads
      $all_good = false;

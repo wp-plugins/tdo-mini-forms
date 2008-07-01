@@ -14,6 +14,12 @@ require_once($wp_config);
 
 global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 
+// enable all PHP errors
+//
+if(get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES) && !get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
+  error_reporting(E_ALL);
+}
+
 // loading text domain for language translation
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);

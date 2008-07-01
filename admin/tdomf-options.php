@@ -129,10 +129,10 @@ function tdomf_show_general_options() {
 	<input type="checkbox" name="tdomf_disable_errors" id="tdomf_disable_errors"  <?php if($disable_errors) echo "checked"; ?> >
 	</p>
   
-  <h3><?php _e('Extra Log Messages','tdomf'); ?></h3>
+  <h3><?php _e('Extra Debug Messages','tdomf'); ?></h3>
   
   <p>
-  <?php _e('You can enable extra log messages to aid in debugging problems','tdomf'); ?>
+  <?php _e('You can enable extra debugs messages to aid in debugging problems. If you enable "Error Messages" this will also turn on extra PHP error checking.','tdomf'); ?>
   </p>
   
   <?php $extra_log = get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES); ?>
@@ -557,19 +557,24 @@ function tdomf_show_form_options($form_id) {
     <?php $on_mod = tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id); ?>
 
 	<p>
-	<b><?php _e("Enable Moderation","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_moderation" id="tdomf_moderation"  	<?php if($on_mod) echo "checked"; ?> >
-	</p>
+    <b><?php _e("Enable Moderation","tdomf"); ?></b><br/>
 
     <?php $redirect = tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id); ?>
     
-    <p>
-	<b><?php _e("Redirect to Published Post","tdomf"); ?></b>
+
 	<input type="checkbox" name="tdomf_redirect" id="tdomf_redirect" <?php if($redirect) echo "checked"; ?> >
+    <?php _e("Redirect to Published Post","tdomf"); ?><br/>
+    
+    <?php $mod_email_on_pub = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id); ?>
+    
+	<input type="checkbox" name="tdomf_mod_email_on_pub" id="tdomf_mod_email_on_pub" <?php if($mod_email_on_pub) echo "checked"; ?> >
+    <?php _e("Send Moderation Email even for automatically Published Post","tdomf"); ?>
+
 	</p>
     
     <h3><?php _e('Preview',"tdomf"); ?> </h3>
-
+    
 	<p>
 	<?php _e('If your chosen widgets support preview, you can allow users to preview their post before submission',"tdomf"); ?>
     </p>
@@ -1257,6 +1262,11 @@ function tdomf_handle_options_actions() {
       //
       $tdomf_ajax = isset($_POST['tdomf_ajax']);
       tdomf_set_option_form(TDOMF_OPTION_AJAX,$tdomf_ajax,$form_id);
+      
+      // Send moderation email even for published posts
+      //
+      $tdomf_mod_email_on_pub = isset($_POST['tdomf_mod_email_on_pub']);
+      tdomf_set_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$tdomf_mod_email_on_pub,$form_id);
       
       tdomf_log_message("Options Saved for Form ID $form_id");
        
