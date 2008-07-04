@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
 Requires at least: 2.3
 Tested up to: 2.5.1
-Stable Tag: 0.12.2
+Stable Tag: 0.12.3
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -323,6 +323,18 @@ Checkbox support in the Categories Widget initially added by [Sillybean](http://
 * The queuing functionality may get the time wrong if period set to greater than an hour
 
 == Version History ==
+
+=  v0.12.3: 4th July 2008 = 
+* Bug in tdomf-msgs.php that would occur for unregistered users only
+* Auto Respond Email widget
+* Small mistake in whoami widget hack, "email" title used for webpage field
+* Checkbox settings were not being correctly passed in AJAX
+* Full paths are used, not just relative
+* Ban User/IP links from moderation email
+* Enabling extra debug messages and turning on error messages to user also turns on all error reporting in PHP
+* Added extra debug messages and handling around post_id 0 submissions (still dont' have a clue about them)
+* Moderation emails to admins can now be turned on if moderation is turned off
+* Custom Field summary was not appearing in admin emails
 
 = v0.12.2: 19th June 2008 =
 * Broken code got into v0.12.1 in the rush to get the patch for the security risk out.

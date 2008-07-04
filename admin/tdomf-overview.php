@@ -99,7 +99,7 @@ function tdomf_overview_menu()  {
 
         <?php $features = tdomf_new_features(); 
               if($features) { ?>
-                <h2><?php printf(__("Newest Features in %s","tdomf"),TDOMF_VERSION); ?></h2>
+                <h2><?php printf(__("New Features in %s for you","tdomf"),TDOMF_VERSION); ?></h2>
                 <?php echo $features; ?>
         <?php } ?>
     

@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.2
+Version: 0.12.3
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -306,7 +306,7 @@ Author URI: http://thedeadone.net
 // - Broken code got into v0.12.1 in the rush to get the patch for the security
 //   risk out.
 //
-// v0.12.3: TBD
+// v0.12.3: 4th July 2008
 // - Bug in tdomf-msgs.php that would occur for unregistered users only
 // - Auto Respond Email widget
 // - Small mistake in whoami widget hack, "email" title used for webpage field
@@ -317,7 +317,7 @@ Author URI: http://thedeadone.net
 //    turns on all error reporting in PHP
 // - Added extra debug messages and handling around post_id 0 submissions (still
 //    dont' have a clue about them)
-// - Moderation emails to admins can now be turned off if moderation is turned
+// - Moderation emails to admins can now be turned on if moderation is turned
 //    off
 // - Custom Field summary was not appearing in admin emails
 //
@@ -328,6 +328,7 @@ Author URI: http://thedeadone.net
 Work Queue:
    - Import/Export Form & tdomfinfo
    - Error, Validation and Style Hacking
+   - Extract Widget
 */
 
 /*
@@ -473,9 +474,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "39");
+define("TDOMF_BUILD", "40");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.2");
+define("TDOMF_VERSION", "0.12.3");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -825,6 +826,12 @@ function tdomf_new_features() {
   }
   // 33 = 0.12b
   // 34 = 0.12
+  // 40 = 0.12.3
+  if($last_version < 40) {
+      $features .= "<li>".__("Auto Respond Email widget for your form","tdomf")."</li>";
+      $features .= "<li>".__("Ban User and IP links directly from the moderation email","tdomf")."</li>";
+      $features .= "<li>".__("The moderation emails that are sent for admins can now be left turned on even if moderation is turned off","tdomf")."</li>";
+  }
 
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
