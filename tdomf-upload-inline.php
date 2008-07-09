@@ -68,7 +68,7 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
      #exit("TDOMF: Bad data submitted");
   }
 } else if($tdomf_verify == 'wordpress_nonce') {
-  if(!wp_verify_nonce($_POST['tdomf_upload_key_'.$form_id],'tdomf-form-upload-'.$form_id)) {
+  if(!isset($_POST['tdomf_upload_key_'.$form_id]) && !wp_verify_nonce($_POST['tdomf_upload_key_'.$form_id],'tdomf-form-upload-'.$form_id)) {
     unset($form_data['tdomf_upload_key_'.$form_id]);
     $all_good = false;
   }

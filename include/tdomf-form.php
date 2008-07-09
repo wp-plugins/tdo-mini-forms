@@ -303,7 +303,7 @@ function tdomf_create_post($args) {
    // Build post and post it as draft
    //
    $post = array (
-#	   "post_content"   => "",
+	   "post_content"   => "",
 #	   "post_excerpt"   => "",
 	   "post_title"     => $def_title,
 	   "post_category"  => $post_cats,
@@ -325,8 +325,8 @@ function tdomf_create_post($args) {
    $post_ID = wp_insert_post($post);
    if($post_ID == 0)
    {
-       tdomf_log_message("Failed to create post!<pre>".var_export($post,true)."</pre>",TDOMF_LOG_ERROR);
-       return false;
+       tdomf_log_message("Failed to create post! \$post_ID == 0",TDOMF_LOG_ERROR);
+       return __("TDOMF ERROR: Failed to create post! \$post_ID == 0","tdomf");
    }
 
    tdomf_log_message("Post with id $post_ID (and default title $def_title) created as draft.");

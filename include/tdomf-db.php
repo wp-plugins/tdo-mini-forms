@@ -316,7 +316,7 @@ function tdomf_session_get($key=0) {
   // grab session key
   //
   if($key == 0 && !isset($_COOKIE['tdomf_'.COOKIEHASH])) {
-     #var_dump($_COOKIE);
+     tdomf_log_message_extra("No cookie present");
      return false; 
   } else if($key == 0) {
      $key = $_COOKIE['tdomf_'.COOKIEHASH];
@@ -327,6 +327,12 @@ function tdomf_session_get($key=0) {
             FROM $table_name 
             WHERE session_key = '" .$wpdb->escape($key)."'";
   $retValue = $wpdb->get_row( $query );
+  if($retValue == null) {
+      tdomf_log_message_extra("Cookie found but no session data! Deleting cookie key.",TDOMF_LOG_ERROR);
+      // delete cookie (it's invalid)
+      setcookie ('tdomf_'.COOKIEHASH, "", time()-60000);
+      return false;
+  }
   return maybe_unserialize($retValue->session_data);
 }
 
