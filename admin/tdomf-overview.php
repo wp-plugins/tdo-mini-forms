@@ -211,7 +211,7 @@ function tdomf_overview_menu()  {
       <?php } ?>
     </ul>
 
-<p><?php _e('Need help with TDO Mini Forms? Please see the <a href="admin.php?page=tdomf_show_help_page">help page</a> or visit the <a href="http://thedeadone.net/forum">support forums on thedeadone.net</a> or the <a href="http://wordpress.org/tags/tdo-mini-forms">support forums on wordpress.org</a>.',"tdomf"); ?></p>
+<p><?php _e('Need help with TDO Mini Forms? Please see the <a href="http://thedeadone.net/forum">support forums on thedeadone.net</a> or the <a href="http://wordpress.org/tags/tdo-mini-forms">support forums on wordpress.org</a>.',"tdomf"); ?></p>
 
     <h3><?php _e('Welcome', 'tdomf') ?></h3>
 

@@ -1,5 +1,9 @@
 <?php
 
+// Disable revisions *before* everything else
+//
+define('WP_POST_REVISIONS', false);
+
 //////////////////////////
 // Inline upload!       //
 //////////////////////////

@@ -299,7 +299,7 @@ function tdomf_create_post($args) {
    // Default title (should this be an option?)
    //
    $def_title = tdomf_get_log_timestamp();
-
+   
    // Build post and post it as draft
    //
    $post = array (
@@ -330,7 +330,7 @@ function tdomf_create_post($args) {
    }
 
    tdomf_log_message("Post with id $post_ID (and default title $def_title) created as draft.");
-
+   
    // Flag this post as TDOMF!
    add_post_meta($post_ID, TDOMF_KEY_FLAG, true, true);
 
@@ -504,7 +504,7 @@ function tdomf_create_post($args) {
    }
    
    do_action('tdomf_create_post_end',$post_ID,$form_id,$mode);
-   
+
    return intval($post_ID);
 }
 

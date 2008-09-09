@@ -102,6 +102,10 @@ $tdomf_form_widgets_hack = array();
 // Hacked Preview Widgets
 //
 $tdomf_form_widgets_preview_hack = array();
+//
+// Admin warnings and errors
+//
+$tdomf_form_widgets_admin_errors = array();
 
 // Filter list of widgets by mode (if a mode set for that widget)
 //
@@ -272,6 +276,24 @@ function tdomf_register_form_widget_preview_hack($id, $name, $preview_callback, 
    $tdomf_form_widgets_preview_hack[$id]['cb'] = $preview_callback;
    $tdomf_form_widgets_preview_hack[$id]['params'] = array_slice(func_get_args(), 4);
    $tdomf_form_widgets_preview_hack[$id]['modes'] = $modes;
+}
+
+// Widgets that support the admin warnings and errors
+//
+function tdomf_register_form_widget_admin_error($id, $name, $callback, $modes = array()) {
+   global $tdomf_form_widgets_admin_errors,$tdomf_form_widgets;
+   $id = sanitize_title($id);
+	if(!isset($tdomf_form_widgets[$id])) {
+   		 tdomf_log_message_extra("Admin Error: Widget $id has not be registered!...",TDOMF_LOG_ERROR);
+   		 return;
+   }
+   if(isset($tdomf_form_widgets_admin_errors[$id])) {
+      tdomf_log_message_extra("Admin Error widget $id already exists. Overwriting...");
+   }
+   $tdomf_form_widgets_admin_errors[$id]['name'] = $name;
+   $tdomf_form_widgets_admin_errors[$id]['cb'] = $callback;
+   $tdomf_form_widgets_admin_errors[$id]['params'] = array_slice(func_get_args(), 4);
+   $tdomf_form_widgets_admin_errors[$id]['modes'] = $modes;
 }
 
 // Return the default widget order!

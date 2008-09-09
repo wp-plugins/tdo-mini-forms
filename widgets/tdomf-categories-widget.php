@@ -80,6 +80,7 @@ function tdomf_widget_categories_init($form_id,$mode){
      tdomf_register_form_widget_preview_hack("categories", "Categories 1",'tdomf_widget_categories_preview_hack', array(), 1);
      tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', array(), 1);
      tdomf_register_form_widget_adminemail("categories", "Categories 1",'tdomf_widget_categories_adminemail', array(), 1);
+     tdomf_register_form_widget_admin_error("categories", "Categories 1",'tdomf_widget_categories_admin_error', array(), 1);
      
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);
@@ -89,6 +90,7 @@ function tdomf_widget_categories_init($form_id,$mode){
        tdomf_register_form_widget_preview_hack("categories-$i", "Categories $i",'tdomf_widget_categories_preview_hack', array(), $i);
        tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', array(), $i);
        tdomf_register_form_widget_adminemail("categories-$i", "Categories $i",'tdomf_widget_categories_adminemail', array(), $i);
+       tdomf_register_form_widget_admin_error("categories-$i", "Categories $i",'tdomf_widget_categories_admin_error', array(), $i);
      }
   }
 }
@@ -133,6 +135,22 @@ function tdomf_widget_categories($args,$params) {
   $defcat = tdomf_get_option_form(TDOMF_DEFAULT_CATEGORY,$args['tdomf_form_id']);
   if(isset($args["categories$postfix"])) {
     $defcat = $args["categories$postfix"];
+  } else if(isset($options['include']) && !empty($options['include'])) {
+    $includes = split(',',$options['include']);
+    if(!empty($includes)){
+        $defcat = $includes[0];
+    }
+  } else {
+    // check if defcat is in the exclude list:
+    $excludes = split(',',$options['exclude']);
+    if(in_array($defcat,$excludes)) {
+        // need to pick a "new" default
+        $cats = get_categories(array( 'exclude' => $options['exclude'],
+                                      'hide_empty' => false ));
+        if(!empty($cats)) {
+            $defcat = $cats[0]->term_id;
+        } # else ERROR: no categories to select from! 
+    }
   }
 
   extract($args);
@@ -160,8 +178,20 @@ function tdomf_widget_categories($args,$params) {
   }
 
   $output .= "\t\t"."<label for='categories$postfix'>".__('Select a category:','tdomf')." \n";
-    
-  $catargs = array( 'exclude'          => $options['exclude'],
+   
+  $excludes = $options['exclude'];
+  if(!empty($options['include'])) {
+      $includes = split(',',trim($options['include']));
+      $excludes = "";
+      $cats = get_categories(array('hide_empty' => false ));
+      foreach($cats as $cat) {
+          if(!in_array($cat->term_id,$includes)) {
+              $excludes .= $cat->term_id . ",";
+          }
+      }
+  }
+  
+  $catargs = array( 'exclude'          => $excludes,
                     'hide_empty'       => false, 
                     'hierarchical'     => $options['hierarchical'], 
                     'echo'             => false,
@@ -330,39 +360,35 @@ function tdomf_widget_categories_control($form_id,$params) {
 <p>A number of fields are disabled as they have not yet been implemented. They will be implemented in later releases of TDO Mini Forms</p>
 
 <label for="categories<?php echo $postfix1; ?>-title" >
-<?php _e("Title:","tdomf"); ?><br/>
+<?php _e("Title:","tdomf"); ?><br/></label>
 <input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
-</label>
 <br/><br/>
 
-<label for="categories<?php echo $postfix1; ?>-overwrite">
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-overwrite" id="categories<?php echo $postfix1; ?>-overwrite" <?php if($options['overwrite']) { ?> checked <?php } ?> />
-<?php _e("Overwrite Default Categories","tdomf"); ?>
-</label>
+<label for="categories<?php echo $postfix1; ?>-overwrite">
+<?php _e("Overwrite Default Categories","tdomf"); ?></label>
 <br/><br/>
 
-<label for="categories<?php echo $postfix1; ?>-multi">
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-multi" id="categories<?php echo $postfix1; ?>-multi" <?php if($options['multi']) { ?> checked <?php } ?> />
+<label for="categories<?php echo $postfix1; ?>-multi">
 <?php _e("Allow users to select more than one category","tdomf"); ?>
 </label>
 <br/><br/>
 
-<label for="categories<?php echo $postfix1; ?>-hierarchical">
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-hierarchical" id="categories<?php echo $postfix1; ?>-hierarchical" <?php if($options['hierarchical']) { ?> checked <?php } ?> />
+<label for="categories<?php echo $postfix1; ?>-hierarchical">
 <?php _e("Display categories in hierarchical mode","tdomf"); ?>
 </label>
 <br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-include" >
-<?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" disabled />
-</label>
+<?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3) (overwrites exclude setting)","tdomf"); ?><br/></label>
+<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-exclude" >
-<?php _e("List of categories to exclude (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/>
+<?php _e("List of categories to exclude (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/></label>
 <input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
-</label>
 <br/><br/>
 
 <label for"categories<?php echo $postfix1; ?>-display">
@@ -393,16 +419,21 @@ function tdomf_widget_categories_preview($args,$params) {
   if($number != 1){ 
     $postfix1 = "-$number"; 
   }
+  
   extract($args);
   $output  = $before_widget;
   $cat_string = "";
-  if($options['multi']) {
-    foreach($args["categories$postfix1"] as $cat) {
-      $cat_string .= get_cat_name($cat).", ";
-    }       
+  if(isset($args["categories$postfix1"])) {
+      if($options['multi'] && is_array($args["categories$postfix1"])) {
+        foreach($args["categories$postfix1"] as $cat) {
+          $cat_string .= get_cat_name($cat).", ";
+        }       
+      } else {
+        $cat_string .= get_cat_name($args["categories$postfix1"]);
+      }
   } else {
-    $cat_string = get_cat_name($args["categories$postfix1"]);
-  }  
+      $cat_string .= __("No categories selected.", "tdomf");
+  }
   $output .= sprintf(__("<b>This post will be categorized under</b>:<br/>%s","tdomf"), $cat_string);
   $output .= $after_widget;
   return $output;
@@ -428,14 +459,18 @@ function tdomf_widget_categories_preview_hack($args,$params) {
   
   $cat_string = "";
   if($options['multi']) {
-    $cat_string .= "\t<?php foreach(\$post_args['categories$postfix1'] as \$cat) { ?>\n";
-    $cat_string .= "\t\t<?php echo get_cat_name(\$cat); ?>,\n";
-    $cat_string .= "\t<?php } ?>";
+    $cat_string .= "<?php if(isset(\$post_args['categories$postfix1']) && is_array(\$post_args['categories$postfix1'])) { ?>\n";
+    $cat_string .= "\t\t<?php foreach(\$post_args['categories$postfix1'] as \$cat) { ?>\n";
+    $cat_string .= "\t\t\t<?php echo get_cat_name(\$cat); ?>,\n";
+    $cat_string .= "\t\t<?php } ?>";
   } else {
-    $cat_string = "\t<?php echo get_cat_name(\$post_args['categories$postfix1']); ?>";
+    $cat_string .= "<?php if(isset(\$post_args['categories$postfix1'])) { ?>\n";
+    $cat_string .= "\t\t<?php echo get_cat_name(\$post_args['categories$postfix1']); ?>\n";
   }  
+  $cat_string .= "<?php } else { ?>\n\t";
+  $cat_string .= __("No categories selected.", "tdomf");
+  $cat_string .= "\n<?php } ?>";
   
-
   
   $output .= sprintf(__("\t<b>This post will be categorized under</b>:\n\t<br/>\n%s","tdomf"), $cat_string);
   $output .= $after_widget;
@@ -463,7 +498,7 @@ function tdomf_widget_categories_post($args,$params) {
   
   // multiple selection
   $incoming_cats = array();
-  if($options['multi']) {
+  if($options['multi'] && is_array($args["categories$postfix1"])) {
     $incoming_cats = $args["categories$postfix1"];
   } else {
     $incoming_cats = array( $args["categories$postfix1"] );
@@ -610,6 +645,47 @@ class tdomf_Walker_CategoryDropdown extends Walker {
 
 		return $output;
 	}
+}
+
+function tdomf_widget_categories_admin_error($form_id,$params) {
+    
+  $number = 0;
+  if(is_array($params) && count($params) >= 1){
+     $number = $params[0];
+  }
+  $options = tdomf_widget_categories_get_options($number,$form_id);
+
+  $output = "";  
+  if(!empty($options['include'])) {
+      $includes = split(',',trim($options['include']));
+      $cats = get_categories(array('hide_empty' => false ));
+      $real_cats = array();
+      foreach($cats as $cat) {
+          if(in_array($cat->term_id,$includes)) {
+              $real_cats[] = $cat->term_id;
+          }
+      }
+      if(empty($real_cats)) {
+          $output .= sprintf(__('<b>Error</b>: Widget "Categories #%d" categories listed in include field are not valid. No categories are selected!','tdomf'),$number);
+      } else if(count($includes) != count($real_cats)){
+          $not_real_cats = "";
+          foreach($includes as $inc) {
+              if(!in_array($inc,$real_cats)) {
+                  $not_real_cats .= $inc . ", ";
+              }
+          }
+          $output .= sprintf(__('<b>Warning</b>: Categories %s set as include categories in Widget "Categories #%d" are not valid categories!','tdomf'),$not_real_cats,$number);
+      }
+  } else {
+      $excludes = split(',',$options['exclude']);
+      $cats = get_categories(array( 'exclude' => $options['exclude'],
+                                    'hide_empty' => false ));
+      if(empty($cats)) {
+          $output .= sprintf(__('<b>Error</b>: Widget "Categories #%d" exclude field values means that there are not categories to select!','tdomf'),$number);
+      }  
+  }
+  
+  return $output;
 }
 
 ?>

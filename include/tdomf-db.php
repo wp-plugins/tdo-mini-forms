@@ -330,7 +330,7 @@ function tdomf_session_get($key=0) {
   if($retValue == null) {
       tdomf_log_message_extra("Cookie found but no session data! Deleting cookie key.",TDOMF_LOG_ERROR);
       // delete cookie (it's invalid)
-      setcookie ('tdomf_'.COOKIEHASH, "", time()-60000);
+      @setcookie ('tdomf_'.COOKIEHASH, "", time()-60000);
       return false;
   }
   return maybe_unserialize($retValue->session_data);

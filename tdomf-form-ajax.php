@@ -1,5 +1,13 @@
 <?php
 
+// Disable revisions *before* everything else
+//
+define('WP_POST_REVISIONS', false);
+
+//////////////////////////
+// Process Form Request //
+//////////////////////////
+
 // Load up Wordpress
 //
 $wp_config = realpath("../../../wp-config.php");

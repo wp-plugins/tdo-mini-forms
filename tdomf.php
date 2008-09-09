@@ -49,6 +49,18 @@ Author URI: http://thedeadone.net
 // - Solved "$post_ID == 0" problem. See 
 //    http://thedeadone.net/forum/?p=325#comment-1446
 // - Added some error checking around cookie session info
+// - Stopped multiple revisions from being created on post submit
+// - Better Error/Warning reporting to Admins
+// - Form toolbar added to both Widgets and Form Hacker (easier to move between
+//    the screens for specific forms)
+// - Error checking on the categories widget when the default category is 
+//    excluded (it selects a new "default") and also if all categories are 
+//    excluded
+// - Error checking if post and ajax submit urls can be reached
+// - Include option enabled and tested for Categories widget
+// - Removed link to non-existant help page and set the y offset of widget 
+//    controls to zero so it doesn't get lost. - Thanks Oleg Butuov for those 
+//    fixes!
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,10 +68,32 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
    - Import/Export Form & tdomfinfo
-   - Error, Validation and Style Hacking
+   - disabling comment emails to non-admin submitter users
+   - Error message for categories widget when no categories selected
    - Extract Widget
-   - Custom Field Error checking (empty key/title, same key/title)
-   - Add warning if ERRORs turned on 
+   - Error, Validation and Style Hacking
+   - AJAX + Capatcha
+   - Time calculation
+   - Disabling Comments/Pings
+   
+   - Recaptcha plugin
+
+   - http://wordpress.org/extend/plugins/tdo-mini-forms/#rate-response
+   - IE gives "Use FireFox" on submission page   
+   - Clickable links: http://thedeadone.net/forum/?p=500#comment-1598
+   - Using the Append Widget
+     * Custom Fields as Title: http://thedeadone.net/forum/?p=418#comment-1542
+     * Username as Title: http://thedeadone.net/forum/?p=269#comment-1459
+     no sb in widget configuration in IE.7
+     conflicts with other plugins
+     tinymce problem (conflict with AJAX)
+     widgets on new install of wp2.6.1
+     tag widget: required
+     tdomf_ru_Ru: http://thedeadone.net/forum/?p=806#comment-1735
+     upload-link error: http://wordpress.org/support/topic/186919#post-838957
+     replace diff with wordpress diff
+     custom field widgets: unique key error
+     In IE, can't select copy/paste text in text widget
 */
 
 /*

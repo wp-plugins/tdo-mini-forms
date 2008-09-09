@@ -361,7 +361,8 @@ function tdomf_show_form_options($form_id) {
       <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
       <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
     <?php } ?>
-     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a></li>  
+     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a> |</li>
+     <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>"><?php printf(__("Hack Form &raquo;","tdomf"),$form_id); ?></a></li>
     </ul>
           <?php } ?>
 
@@ -1332,7 +1333,7 @@ function tdomf_handle_options_actions() {
 
 // Check for error messages with options and return a message
 //
-function tdomf_get_error_messages($show_links=true) {
+function tdomf_get_error_messages($show_links=true, $form_id=0) {
   global $wpdb, $wp_roles;
   if(!isset($wp_roles)) {
   	$wp_roles = new WP_Roles();
@@ -1348,28 +1349,94 @@ function tdomf_get_error_messages($show_links=true) {
     $message .= __("Warning: Form input verification is disabled. This is a potential security risk.");
   }
   
-  if(isset($_REQUEST['form'])) {
-  
-    $form_id = intval($_REQUEST['form']);
-    
-  if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
-          $test_see_form = false;
-          foreach($roles as $role) {
-          if(!isset($role->capabilities['publish_posts']) && isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
-            $test_see_form = true;
-          }
-          }
-          if($test_see_form == false) {
-            if($show_links) {
-              $message .= "<font color=\"red\">".sprintf(__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"%s\">Configure on Options Page &raquo;</a>"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu")."</font><br/>";
-            } else {
-              $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can seet this form!")."</font><br/>";
-            }
-            tdomf_log_message("Option Allow Everyone not set and no roles set to see the form",TDOMF_LOG_BAD);
-          }
+    if(isset($_REQUEST['form']) || $form_id != 0) {
+        if($form_id == 0)
+        {
+            $form_id = intval($_REQUEST['form']);
         }
-  }
         
+        // permissions error
+        
+        if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
+            $test_see_form = false;
+            foreach($roles as $role) {
+                if(!isset($role->capabilities['publish_posts']) && isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
+                    $test_see_form = true;
+                }
+            }
+            if($test_see_form == false) {
+                if($show_links) {
+                    $message .= "<font color=\"red\">".sprintf(__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"%s\">Configure on Options Page &raquo;</a>","tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu")."</font><br/>";
+                } else {
+                    $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see this form!", "tdomf")."</font><br/>";
+                }
+                tdomf_log_message("Option Allow Everyone not set and no roles set to see the form",TDOMF_LOG_BAD);
+            }
+        }
+   
+        // form hacker modified
+        
+        $mode = "new-post-hack";
+        if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+            $mode = "new-page-hack";
+        }
+        $curr_unmod_prev = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
+        $org_unmod_prev = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$form_id));
+        $hacked_prev = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id));
+        if($hacked_prev != false && $curr_unmod_prev != $org_unmod_prev) {
+            $message .= "<font color=\"red\">";
+            $diffs = "admin.php?page=tdomf_show_form_hacker&form=$form_id&mode=$mode&diff&form2=cur&form1=org&type=preview";
+            $form_hacker = "admin.php?page=tdomf_show_form_hacker&form=$form_id";
+            $dismiss = wp_nonce_url("admin.php?page=tdomf_show_form_hacker&form=$form_id&dismiss&type=preview",'tdomf-form-hacker');
+            $message .= sprintf(__("<b>Warning</b>: Form configuration has been changed that affect the preview output but Form Hacker has not been updated! <a href='%s'>Diff &raquo;</a> | <a href='%s'>Hack Form &raquo;</a> | <a href='%s'>Dismiss</a>","tdomf"),$diffs,$form_hacker,$dismiss);
+            $message .= "</font><br/>";
+        }
+        
+        $curr_unmod_form = trim(tdomf_generate_form($form_id,$mode));
+        $org_unmod_form = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id));
+        $hacked_form = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id));
+        if($hacked_form != false && $curr_unmod_form != $org_unmod_form) {
+            $message .= "<font color=\"red\">";
+            $diffs = "admin.php?page=tdomf_show_form_hacker&form=$form_id&mode=$mode&diff&form2=cur&form1=org";
+            $form_hacker = "admin.php?page=tdomf_show_form_hacker&form=$form_id";
+            $dismiss = wp_nonce_url("admin.php?page=tdomf_show_form_hacker&form=$form_id&dismiss",'tdomf-form-hacker');
+            $message .= sprintf(__("<b>Warning</b>: Form configuration has been changed that affect the generated form but Form Hacker has not been updated! <a href='%s'>Diff &raquo;</a> | <a href='%s'>Hack Form &raquo;</a> | <a href='%s'>Dismiss</a>","tdomf"),$diffs,$form_hacker,$dismiss);
+            $message .= "</font><br/>";
+        }
+        
+        // widget errors
+        
+        global $tdomf_form_widgets_admin_errors;
+        $mode = "new-post";        
+        if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+            $mode = "new-page";
+        }
+        $uri = "admin.php?page=tdomf_show_form_menu&form=5";
+        do_action('tdomf_control_form_start',$form_id,$mode);
+        $widget_order = tdomf_get_widget_order($form_id);
+        $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_admin_errors);
+        foreach($widget_order as $w) {
+              if(isset($widgets[$w])) {
+                  $widget_message = $widgets[$w]['cb']($form_id,$widgets[$w]['params']);
+                  if(!empty($widget_message)) {
+                      $message .= "<font color=\"red\">" . $widget_message . sprintf(__(" <a href='%s'>Fix &raquo;</a>","tdomf"),$uri)."</font><br/>";
+                  }
+              }
+          }
+          
+         // @todo check that key is unique in custom fields
+    }
+        
+    if(get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES) && !get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES)) {
+         $message .= "<font color=\"red\">";
+         if($show_links) {
+             $message .= sprintf(__("<b>Warning:</b> You have enabled 'Extra Debug Messages' and disabled 'Disable Error Messages'. This invokes a special mode where all PHP errors are turned on. This can lead to unexpected problems and could be considered a security leak! <a href=\"%s\">Change on the Options Page &raquo;</a>", "tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu");
+         } else {
+             $message .= __("<b>Warning:</b> You have enabled 'Extra Debug Messages' and disabled 'Disable Error Messages'. This invokes a special mode where all PHP errors are turned on. This can lead to unexpected problems and could be considered a security leak!","tdomf");
+         }
+         $message .= "</font><br/>";
+    }
+    
        $create_user_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu&action=create_dummy_user";
 	    if(function_exists('wp_nonce_url')){
 	          $create_user_link = wp_nonce_url($create_user_link, 'tdomf-create-dummy-user');
@@ -1390,6 +1457,30 @@ function tdomf_get_error_messages($show_links=true) {
 	 	  tdomf_log_message("Option Default Author is set to an author who can publish posts.",TDOMF_LOG_BAD);
  	  	}
     }
+    
+    if(function_exists('wp_get_http'))
+    {
+        $post_uri = TDOMF_URLPATH.'tdomf-form-post.php';
+        $headers = wp_get_http($post_uri,false,1);
+        if($headers != false && $headers["response"] != '200')
+        {
+             $message .= "<font color=\"red\">";
+             $message .= sprintf(__("<b>Error</b>: Got a %d error when checking <a href=\"%s\">%s</a>! This will prevent posts from being submitted. The permissions may be wrong on the tdo-mini-forms folder.","tdomf"),$headers["response"], $post_uri, $post_uri);
+             $message .= "</font><br/>";
+             tdomf_log_message("Did not receive a 200 response when checking $post_uri:<pre>".var_export($headers,true)."</pre>",TDOMF_LOG_ERROR);
+        }
+
+        $ajax_uri = TDOMF_URLPATH.'tdomf-form-ajax.php';
+        $headers = wp_get_http($ajax_uri,false,1);
+        if($headers != false && $headers["response"] != '200')
+        {
+             $message .= "<font color=\"red\">";
+             $message .= sprintf(__("<b>Error</b>: Got a %d error when checking <a href=\"%s\">%s</a>! This will prevent forms that use AJAX from submitting posts. The permissions may be wrong on the tdo-mini-forms folder.","tdomf"),$headers["response"], $ajax_uri, $ajax_uri);
+             $message .= "</font><br/>";
+             tdomf_log_message("Did not receive a 200 response when checking $ajax_uri:<pre>".var_export($headers,true)."</pre>",TDOMF_LOG_ERROR);
+        }
+    }
+    
     return $message;
 }
 

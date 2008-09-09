@@ -100,7 +100,7 @@ function tdomf_widget_customfields_get_options($index,$form_id) {
   $options = tdomf_get_option_widget('tdomf_customfields_widget_'.$index,$form_id);
     if($options == false) {
        $options = array();
-       $options['key'] = "";
+       $options['key'] = "TDOMF Form #$form_id Custom Field #$index";
        $options['title'] = "";
        $options['required'] = false;
        $options['defval'] = "";
@@ -274,6 +274,26 @@ function tdomf_widget_customfields_adminemail($args,$params) {
   return "";
 }
 
+function tdomf_widget_customfields_admin_error($form_id,$params) {
+    
+  $number = 0;
+  if(is_array($params) && count($params) >= 1){
+     $number = $params[0];
+  }
+  $options = tdomf_widget_customfields_get_options($number,$form_id);
+  
+  $output = "";
+  
+  if(empty($options['key']))
+  {
+      $output .= sprintf(__('<b>Error</b>: Widget "Custom Fields #%d" contains an empty key. The key must be set to something and must be unique.','tdomf'),$number);
+  }
+  
+  /* @todo: grabbing all the other custom field widgets */
+  
+  return $output;
+}
+
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
 //
@@ -326,6 +346,9 @@ function tdomf_widget_customfields_control($form_id,$params) {
 
 <label for="customfields-name-<?php echo $number; ?>">
 <?php _e("Custom Field Key:","tdomf"); ?><br/>
+<small>
+<?php _e("You must specify a unique value for the Custom Field key.","tdomf"); ?>
+</small><br/>
 <input type="textfield" size="40" id="customfields-key-<?php echo $number; ?>" name="customfields-key-<?php echo $number; ?>" value="<?php echo htmlentities($options['key'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
@@ -464,6 +487,7 @@ function tdomf_widget_customfields_init($form_id){
       tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array(), $i);
       tdomf_register_form_widget_adminemail("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_adminemail', array(), $i);
       tdomf_register_form_widget_hack("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_hack', array(), $i);
+      tdomf_register_form_widget_admin_error("customfields-$i", "Custom Fields $i", 'tdomf_widget_customfields_admin_error', array(), $i);
     }
   }
 }

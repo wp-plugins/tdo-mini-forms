@@ -374,7 +374,8 @@ function tdomf_form_admin_head() {
 	}
 	function popControl(elm) {
 		var x = ( document.body.clientWidth - controldims[elm]['width'] ) / 2;
-		var y = ( document.body.parentNode.clientHeight - controldims[elm]['height'] ) / 2;
+		/*var y = ( document.body.parentNode.clientHeight - controldims[elm]['height'] ) / 2;*/
+        var y = ( (topOffset = ( document.body.parentNode.clientHeight - controldims[elm]['height'] ) / 2) && (topOffset > 0)) ? topOffset : 0 ;
 		jQuery(elm).css({display: 'block', width: controldims[elm]['width'] + 'px', height: controldims[elm]['height'] + 'px', position: 'absolute', right: x + 'px', top: y + 'px', zIndex: '1000' });
 		jQuery(elm).attr('class','control');
 		jQuery('#shadow').click(function() {unpopControl(elm);});
@@ -458,6 +459,11 @@ function tdomf_show_form_menu() {
   
   ?>
 
+   <?php $message = tdomf_get_error_messages(true,$form_id);
+         if(!empty($message)) { ?>
+         <div id="message" class="updated fade"><p><?php echo $message; ?></p></div>
+        <?php } ?>
+
   <?php if(count($form_ids) > 1 && tdomf_wp23()) { ?>
     <div class="wrap">
     <?php foreach($form_ids as $single_form_id) { ?>
@@ -487,6 +493,30 @@ function tdomf_show_form_menu() {
       </ul>
   <?php } ?>
     
+  <ul class="subsubsub">
+   <?php $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
+         $updated_pages = false;
+         if($pages != false) {
+            $updated_pages = array();
+            foreach($pages as $page_id) {
+              if(get_permalink($page_id) != false) {
+                $updated_pages[] = $page_id; 
+              }
+            }
+            if(count($updated_pages) == 0) { $updated_pages = false; }
+            tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$updated_pages,$form_id);
+    } ?>
+    <?php if($updated_pages != false) { ?>
+      <li><a href="<?php echo get_permalink($updated_pages[0]); ?>" title="<?php _e("Live on your blog!","tdomf"); ?>" ><?php _e("View Page &raquo;","tdomf"); ?></a> |</li>
+    <?php } ?>
+    <?php if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id) && get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
+      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
+      <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
+    <?php } ?>
+     <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>"><?php printf(__("Options &raquo;","tdomf"),$form_id); ?></a> |</li>
+     <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>"><?php printf(__("Hack Form &raquo;","tdomf"),$form_id); ?></a></li>
+    </ul>
+  
 		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Widgets will be executed and displayed in order from top to bottom.',"tdomf"); ?></p>
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">

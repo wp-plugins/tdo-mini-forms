@@ -41,7 +41,7 @@ function tdomf_form_hacker_diff($form_id) {
   } else {
       if($form1_type == 'cur') {
         $form1_name = __('Current Unmodified Form','tdomf');
-        $form1 = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
+        $form1 = trim(tdomf_generate_form(array('tdomf_form_id' => $form_id),$mode));
       } else if($form1_type == 'org') {
         $form1_name = __('Original Unmodified Form','tdomf');
         $form1 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_id));
@@ -62,7 +62,7 @@ function tdomf_form_hacker_diff($form_id) {
       }
   }
   
-  echo "<h3>".sprintf(__('%s verus %s','tdomf'),$form1_name,$form2_name)."</h3>";
+  echo "<h3>".sprintf(__('%s versus %s','tdomf'),$form1_name,$form2_name)."</h3>";
 
   if($form1 == $form2) {
       echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
@@ -212,6 +212,23 @@ function tdomf_form_hacker_actions($form_id) {
          tdomf_set_option_form(TDOMF_OPTION_MSG_PERM_INVALID_USER,false,$form_id);
          tdomf_set_option_form(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,false,$form_id);
          $message = __("Messages Reset.","tdomf");         
+    } else if(isset($_REQUEST['dismiss'])) {
+         check_admin_referer('tdomf-form-hacker');
+         $mode = "new-post-hack";
+         if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+            $mode = "new-page-hack";
+         }
+         if(isset($_REQUEST['type']) && $_REQUEST['type'] == 'preview')
+         {
+             $curr = tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode);
+             tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$curr,$form_id);
+         } 
+         else
+         {
+             $curr = tdomf_generate_form($form_id,$mode);
+             tdomf_set_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$curr,$form_id);
+         }
+         $message = __("Error Dismissed.","tdomf");        
     }
     if(!empty($message)) {
     ?> <div id="message" class="updated fade"><p><?php echo $message ?></p></div> <?php
@@ -251,6 +268,12 @@ function tdomf_show_form_hacker() {
        $mode = "new-post-hack";
     }
     tdomf_form_hacker_actions($form_id);
+    
+    $message = tdomf_get_error_messages(true,$form_id);
+    if(!empty($message)) { ?>
+        <div id="message" class="updated fade"><p><?php echo $message; ?></p></div>
+    <?php }
+    
     $form_ids = tdomf_get_form_ids(); ?>
         
         <div class="wrap">
@@ -289,6 +312,30 @@ function tdomf_show_form_hacker() {
                <li><a id='tdomf_hide_help' href="javascript:tdomfHideHelp()" class='hidden'><?php _e("Hide Help","tdomf"); ?></a></li>
            </ul>
           
+           <ul class="subsubsub">
+   <?php $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
+         $updated_pages = false;
+         if($pages != false) {
+            $updated_pages = array();
+            foreach($pages as $page_id) {
+              if(get_permalink($page_id) != false) {
+                $updated_pages[] = $page_id; 
+              }
+            }
+            if(count($updated_pages) == 0) { $updated_pages = false; }
+            tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$updated_pages,$form_id);
+    } ?>
+    <?php if($updated_pages != false) { ?>
+      <li><a href="<?php echo get_permalink($updated_pages[0]); ?>" title="<?php _e("Live on your blog!","tdomf"); ?>" ><?php _e("View Page &raquo;","tdomf"); ?></a> |</li>
+    <?php } ?>
+    <?php if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id) && get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
+      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
+      <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
+    <?php } ?>
+     <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>"><?php printf(__("Options &raquo;","tdomf"),$form_id); ?></a> |</li>
+     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a></li>
+    </ul>
+           
           <?php if(isset($_REQUEST['text'])) { ?>
            
            <div id="tdomf_help" class='hidden'>
