@@ -174,10 +174,11 @@ function tdomf_widget_categories($args,$params) {
   
   $name = "categories$postfix";
   if($options['multi']) {
-    $name = "categories".$postfix."[]";
+    $name = 'categories'.$postfix.'[]';
   }
 
-  $output .= "\t\t"."<label for='categories$postfix'>".__('Select a category:','tdomf')." \n";
+  # no point putting a label as we can't use "id" on ul or li or combobox
+  $output .= "\t\t".__('Select a category:','tdomf')." \n";
    
   $excludes = $options['exclude'];
   if(!empty($options['include'])) {
@@ -223,12 +224,10 @@ function tdomf_widget_categories($args,$params) {
     $output .= tdomf_dropdown_categories($catargs);
     
   }
-
-  $output .= "\t\t</label>";
   
   $output .= $after_widget;
   return $output;
-  }
+}
   
 ///////////////////////////////////////////////////
 // A stripped-down clone of wp_category_checklist from WP includes/template.php, with return instead of echo and the extra parameter for excluded cats
@@ -283,7 +282,7 @@ class tdomf_Walker_Category_Checklist extends Walker {
         $output .= "$indent<li>\n";
         if($multiple) {
             $_name = str_replace("[]","",$name);
-            $output .= "$indent<input value=\"" . $category->term_id . "\" type=\"checkbox\" name=\"".$name."\" id='".$name."'";
+            $output .= "$indent<input value=\"" . $category->term_id . "\" type=\"checkbox\" name=\"".$name."\""; /*id='".$name."'";*/
             if($hack) {
                 // default
                 if(in_array( $category->term_id, $selected_cats)) {
@@ -296,7 +295,7 @@ class tdomf_Walker_Category_Checklist extends Walker {
             }
             $output .= '/> ' . wp_specialchars( apply_filters('the_category', $category->name ));
         } else {
-            $output .= "$indent<input value=\"" . $category->term_id . "\" type=\"radio\" name=\"".$name."\" id='".$name."'";
+            $output .= "$indent<input value=\"" . $category->term_id . "\" type=\"radio\" name=\"".$name."\""; /*id='".$name."'";*/
             if($hack) {
                 // default
                 if($category->term_id == $selected_cats) {
@@ -361,7 +360,7 @@ function tdomf_widget_categories_control($form_id,$params) {
 
 <label for="categories<?php echo $postfix1; ?>-title" >
 <?php _e("Title:","tdomf"); ?><br/></label>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<input type="text" size="40" id="categories<?php echo $postfix1; ?>-title" name="categories<?php echo $postfix1; ?>-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/><br/>
 
 <input type="checkbox" name="categories<?php echo $postfix1; ?>-overwrite" id="categories<?php echo $postfix1; ?>-overwrite" <?php if($options['overwrite']) { ?> checked <?php } ?> />
@@ -383,12 +382,12 @@ function tdomf_widget_categories_control($form_id,$params) {
 
 <label for="categories<?php echo $postfix1; ?>-include" >
 <?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3) (overwrites exclude setting)","tdomf"); ?><br/></label>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<input type="text" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" disabled />
 <br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-exclude" >
 <?php _e("List of categories to exclude (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/></label>
-<input type="textfield" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<input type="text" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/><br/>
 
 <label for"categories<?php echo $postfix1; ?>-display">
@@ -423,6 +422,7 @@ function tdomf_widget_categories_preview($args,$params) {
   extract($args);
   $output  = $before_widget;
   $cat_string = "";
+  
   if(isset($args["categories$postfix1"])) {
       if($options['multi'] && is_array($args["categories$postfix1"])) {
         foreach($args["categories$postfix1"] as $cat) {
@@ -434,6 +434,7 @@ function tdomf_widget_categories_preview($args,$params) {
   } else {
       $cat_string .= __("No categories selected.", "tdomf");
   }
+  
   $output .= sprintf(__("<b>This post will be categorized under</b>:<br/>%s","tdomf"), $cat_string);
   $output .= $after_widget;
   return $output;
@@ -470,7 +471,6 @@ function tdomf_widget_categories_preview_hack($args,$params) {
   $cat_string .= "<?php } else { ?>\n\t";
   $cat_string .= __("No categories selected.", "tdomf");
   $cat_string .= "\n<?php } ?>";
-  
   
   $output .= sprintf(__("\t<b>This post will be categorized under</b>:\n\t<br/>\n%s","tdomf"), $cat_string);
   $output .= $after_widget;
@@ -578,9 +578,9 @@ function tdomf_dropdown_categories($args = '') {
     
     if($size > count($categories)) { $size = count($categories); }
     
-    $output = "\t\t<select name='$name' id='$name' class='$class' size='$size' ";
+    $output = "\t\t<select name='$name' class='$class' size='$size' ";
     if($width != '') { $output .= "style='width:$width; '"; }
-    if($multiple) { $output .= "multiple "; }
+    if($multiple) { $output .= "multiple='multiple' "; }
     $output .= " >\n";
     
     if ( $show_option_all ) {

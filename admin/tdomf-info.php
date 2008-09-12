@@ -79,7 +79,7 @@ function tdomfinfo_html_display() { ?>
         foreach($options as $option => $value) { ?>
           <tr>
           <td><?php echo $option; ?></td>
-          <td><?php var_dump($value); ?></td>
+          <td><?php echo htmlentities(var_export($value,true)); ?></td>
           </tr>
         <?php } 
         $widgets = tdomf_get_widgets_form($form_id->form_id);
@@ -144,7 +144,7 @@ function tdomfinfo_html_text() { ?>
         foreach($options as $option => $value) { ?>
           <tr>
           <td><?php echo $option; ?></td>
-          <td><?php var_dump($value); ?></td>
+          <td><?php echo htmlentities(htmlentities(var_export($value,true))); ?></td>
           </tr>
         <?php } 
         $widgets = tdomf_get_widgets_form($form_id->form_id);
@@ -180,7 +180,7 @@ function tdomfinfo_text_display() { ?>
 <?php $options = tdomf_get_options_form($form_id->form_id);
         foreach($options as $option => $value) { ?>
 = <?php echo $option; ?> =
-<?php var_dump($value); ?>
+<?php echo htmlentities(var_export($value,true)); ?>
 
 <?php } 
         $widgets = tdomf_get_widgets_form($form_id->form_id);

@@ -5,6 +5,95 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for the options menu //
 ///////////////////////////////
 
+function tdomf_prep_str_seralize($input) {
+    $ko = 4096; /*$ko = 100;*/
+    
+    $match = array( chr(13).chr(10), "\t", /*"\"",*/ "\n", "\r" );
+    /*$replace = array( "\\n", "\\t", "\\\"", "\\n", "\\r" );*/
+    $replace = array( '\n', '\t', /*'\"',*/ '\n', '\r' );
+    
+    if(is_array($input)) {
+        $output = array();
+        foreach($input as $key => $elem) {
+            $output[$key] = tdomf_prep_str_seralize($elem);
+        }
+        return $output;
+    } else if(is_string($input) && strlen($input) > $ko) {
+        #echo "strlen = " . strlen($input) . "<br/>";
+        $split_data['split'] = true;
+        $split_data['ko'] = $ko;
+        $split_data['data'] = array();
+        #$split_data = array();
+        for($i=0;$i<ceil(strlen($input) / $ko);$i++) {
+            #echo "<br/><b>$i</b> (".($i * $ko).") and (".(($i+1) * $ko).")<br/>";
+            $data = substr($input,($i * $ko),(($i+1) * $ko));
+            /*$data = str_replace("\t","\\t",$data);
+            $data = str_replace("\"","\\\"",$data);
+            $data = str_replace("\n","\\n",$data);
+            $data = str_replace("\r","\\r",$data);*/
+            $data = str_replace($match,$replace,$data);
+            $split_data['data'][] = $data;
+            #echo htmlentities($split_data['data'][$i]);
+            #$split_data = substr($input,($i * $ko),(($i+1) * $ko));
+            #echo "\$output[$i] = " . strlen($output[$i]) . "<br/>";
+        }
+        return $split_data;
+    } else if(is_string($input)){
+        /*$output = str_replace(chr(13).chr(10),"\\n",$input);
+        $output = str_replace("\t","\\t",$output);
+        $output = str_replace("\"","\\\"",$output);
+        $output = str_replace("\n","\\n",$output);
+        $output = str_replace("\r","\\r",$output);*/
+        $output = str_replace($match,$replace,$input);
+        #$output = "$output";
+        #echo htmlentities($output)."<br/><br/>";
+        return $output;
+    } else if(is_object($input)) {
+        # string is already seralized so this just "corrects" mistakes  
+        @$input->widget_value = tdomf_prep_str_seralize($input->widget_value);
+    }
+    return $input;
+}
+
+function tdomf_fix_str_unseralize($input) {
+    /*$str_literal = '\n';
+    $str_literal = sprintf("%s",$str_literal);
+    $str_test = "<pre>test${str_literal}test</pre>";
+    echo $str_test;*/
+
+    if(is_array($input)) {
+        if(isset($input['split']) && isset($input['ko']) && isset($input['data'])) {
+            $data = $input['data'];
+            $ko = intval($input['ko']);
+            $output = "";
+            for($i=0;$i<count($data);$i++) {
+                $output .= $data[$i];
+            }
+            return $output;
+        } else {
+            $output = array();
+            foreach($input as $key => $elem) {
+                $output[$key] = tdomf_fix_str_unseralize($elem);
+            }
+            return $output;
+        } 
+    /*} else if(is_object($input)) {
+        $vars = get_object_vars($input);
+        #echo "<pre>".var_export($vars,true)."</pre>";
+        if(array_key_exists('widget_value',$vars)) {
+            echo "<br/>before: <pre>".var_export($input->widget_value,true)."</pre>";
+            $widget_value = tdomf_fix_str_unseralize(maybe_unserialize($input->widget_value));
+            echo "<br/>after: <pre>".var_export($widget_value,true)."</pre><br/>";
+        }*/
+    } else if(is_string($input)) {
+         $replace = array( "\n", "\t", "\r" );
+         $match = array( '\n', '\t', '\r' );
+         $output = str_replace($match,$replace,$input);
+         return $output;
+    }
+    return $input;
+}
+
 function tdomf_show_general_options() {
   ?> 
   <div class="wrap">
@@ -686,67 +775,6 @@ function tdomf_show_form_options($form_id) {
           <?php } else { ?>
               <p><b><?php _e("No Throttling Rules currently set.","tdomf"); ?></b></p>
           <?php } ?>
-    
-     <h3 id="import"><?php _e('Export/Import Form Settings',"tdomf"); ?></h3>
-     
-     <p>
-	<?php _e('The textbox below contains the export of data for this form including widgets. If you wish to import a form, paste its settings here and click Import.',"tdomf"); ?>
-	</p>
-     
-     <?php /*
-    
-     <?php if(!function_exists('tdomf_prep_str_seralize')) {
-                // @todo Should probably implement this properly somewhere
-                function tdomf_prep_str_seralize($input) {
-                    if(is_array($input)) {
-                        $output = array();
-                        foreach($input as $elem) {
-                            $output[] = tdomf_prep_str_seralize($elem);
-                        }
-                        return $output;
-                    } else if(is_string($input)) {
-                        $output = str_replace(chr(13).chr(10),"\\n",$input);
-                        $output = str_replace("\t","\\t",$output);
-                        $output = str_replace("\"","\\\"",$output);
-                        $output = str_replace("\n","\\n",$output);
-                        return $output;
-                    }
-                    return $input;
-                }
-           }
-     
-           $form_data['options'] = tdomf_get_options_form($form_id);
-           $form_data['options'][TDOMF_OPTION_NAME] = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
-           #$form_data['options'][TDOMF_OPTION_FORM_HACK] = false;
-           #$form_data['options'][TDOMF_OPTION_FORM_HACK_ORIGINAL] = false;
-           #$form_data['options'][TDOMF_OPTION_FORM_PREVIEW_HACK] = false;
-           #$form_data['options'][TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL] = false;
-           ##$form_data['options'] = tdomf_prep_str_seralize($form_data['options']);
-           $form_data['widgets'] = tdomf_get_widgets_form($form_id);
-           #$form_data['widgets'] = tdomf_prep_str_seralize($form_data['widgets']);
-           $form_data['caps'] = array();
-           if(!isset($wp_roles)) {
-              $wp_roles = new WP_Roles();
-           }
-           $roles = $wp_roles->role_objects;
-           foreach($roles as $role) {
-              if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
-                  $form_data['caps'][] = $role->name;
-              }
-           }
-           
-           $form_export = serialize($form_data);
-           $form_export = htmlentities($form_export,ENT_NOQUOTES,get_bloginfo('charset')); 
-           ?>
-     <p>
-     <textarea cols="100" rows="10" name="tdomf_import" id="tdomf_import"><?php echo $form_export; ?></textarea>
-     <br/>
-     <input type="submit" name="tdomf_import_button" id="tdomf_import_button" value="<?php _e("Import","tdomf"); ?> &raquo;">
-     </p>
-     
-     */ ?>
-     
-     <h3 id="ajax"><?php _e('AJAX',"tdomf"); ?> </h3>
 
 	<p>
 	<?php _e('You can now enable your form to use AJAX to submit posts. The form handles graceful fallback to the non-ajax version for no-javascript browsers and accessibilty.',"tdomf"); ?>
@@ -754,6 +782,8 @@ function tdomf_show_form_options($form_id) {
 
     <?php $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX,$form_id); ?>
 
+    <h3 id="ajax"><?php _e('AJAX',"tdomf"); ?> </h3>
+    
 	<p>
 	<b><?php _e("Use AJAX","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_ajax" id="tdomf_ajax"  <?php if($ajax) echo "checked"; ?> >
@@ -774,7 +804,28 @@ function tdomf_show_form_options($form_id) {
     </td>
 
     </tr></table>
-  
+
+    </div>
+    
+    <div class="wrap">
+    
+    <h3 id="import"><?php _e('Export and Import Form Configuration',"tdomf"); ?></h3>
+
+     <?php $export_url = get_bloginfo('wpurl')."?tdomf_export=$form_id";
+           $export_url = wp_nonce_url($export_url,'tdomf-export-'.$form_id);?>
+    
+     <p>
+        <?php printf(__('To export the configuration of this file, just <a href="%s">save this link</a>. To import, just use the form below to select a previousily exported file and click "Import"',"tdomf"),$export_url); ?>     </p>
+     </p>
+    
+     <form enctype="multipart/form-data" method="post" action="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>">
+        <label for="import_file"><b><?php _e("Form saved configuration to import: "); ?></b></label>
+        <input type="hidden" name='form_id' id='form_id' value='<?php echo $form_id; ?>'>
+        <input type='file' name='import_file' id='import_file' size='30' />
+        <input type="submit" name="tdomf_import" id="tdomf_import" value="<?php _e("Import","tdomf"); ?>" />
+        <?php wp_nonce_field('tdomf-import-'.$form_id); ?>
+     </form>
+     
   </div>
   
   <?php }
@@ -1000,33 +1051,10 @@ function tdomf_handle_options_actions() {
      $message .= "Throttle rule added!<br/>";
      tdomf_log_message("Added a new throttle rule: " . var_export($rule,true));
   
-  } else if(isset($_REQUEST['tdomf_import_button'])) {
+  } else if(isset($_REQUEST['tdomf_import'])) {
      
-     check_admin_referer('tdomf-options-save');
-
-     $form_id = intval($_REQUEST['tdomf_form_id']);
-     
-     $form_import = $_REQUEST['tdomf_import'];
-     #var_dump(is_serialized($form_import));
-     if(get_magic_quotes_gpc()) {
-         $form_import = stripslashes($form_import);
-     }
-     
-     #var_dump(is_serialized($form_import));
-     error_reporting(E_ALL);
-     #$form_data = maybe_unserialize($form_import);
-     $form_data = unserialize($form_import);
-     
-     #echo htmlentities(var_export($form_data,true));
-     
-     if(is_array($form_data)) {
-         tdomf_import_form($form_id,$form_data['options'],$form_data['widgets'],$form_data['caps']);
-         tdomf_log_message("Form import succeeded",TDOMF_LOG_GOOD);
-         $message = __("Form import successful<br/>","tdomf");
-     } else {
-         tdomf_log_message("Form import failed " . htmlentities(var_export($form_data,true)),TDOMF_LOG_ERROR);
-         $message = __("Form import failed<br/>","tdomf");
-     }
+     $import_message = tdomf_import_form_from_file();
+     if($import_message != false) { $message .= $import_message . '<br/>'; }
 
   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create_dummy_user') {
      check_admin_referer('tdomf-create-dummy-user');

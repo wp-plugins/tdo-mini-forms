@@ -52,11 +52,15 @@
  color: red;
 }
 
-#tdomf_category_checklist ul, .tdomf_category_children ul {
+ul.tdomf_category_checklist, ul.tdomf_category_children {
  list-style-type: none; 
 }
 
-.tdomf_category_children ul {
+.tdomf_buttons {
+  text-align: left;
+}
+.tdomf_buttons td {
+ width: 10px;
 }
 
 /* Formatting the QuickTag toolbar */

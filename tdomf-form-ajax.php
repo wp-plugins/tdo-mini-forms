@@ -10,11 +10,17 @@ define('WP_POST_REVISIONS', false);
 
 // Load up Wordpress
 //
-$wp_config = realpath("../../../wp-config.php");
-if (!file_exists($wp_config)) {
-   exit("Can't find wp-config.php");
+$wp_load = realpath("../../../wp-load.php");
+if(!file_exists($wp_load)) {
+  $wp_config = realpath("../../../wp-config.php");
+  if (!file_exists($wp_config)) {
+      exit("Can't find wp-config.php or wp-load.php");
+  } else {
+      require_once($wp_config);
+  }
+} else {
+  require_once($wp_load);
 }
-require_once($wp_config);
 
 global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 
@@ -22,15 +28,26 @@ global $wpdb, $tdomf_form_widgets_validate, $tdomf_form_widgets_preview;
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 
+// Now using jquery to pre-seralise form output but must still support the old
+// way of non-seralized (so people don't have to modify their hacked forms)
+// - Note: "action" is still used in _POST
+//
+if(isset($_POST['tdomf_args'])) {
+    parse_str($_POST['tdomf_args'],$tdomf_args);
+} else {
+    tdomf_log_message("AJAX: Using old argument method");
+    $tdomf_args = $_POST;
+}
+
 // Form id
 //
-if(!isset($_POST['tdomf_form_id'])) {
-  tdomf_log_message("tdomf-form-post: No Form ID set!",TDOMF_LOG_BAD);
+if(!isset($tdomf_args['tdomf_form_id'])) {
+  tdomf_log_message("tdomf-form-ajax: No Form ID set!",TDOMF_LOG_BAD);
   die( "alert('".__("TDOMF: No Form id!","tdomf")."');" );
 }
-$form_id = intval($_POST['tdomf_form_id']);
+$form_id = intval($tdomf_args['tdomf_form_id']);
 if(!tdomf_form_exists($form_id)){
-  tdomf_log_message("tdomf-form-post: Bad form id %d!",TDOMF_LOG_BAD);
+  tdomf_log_message("tdomf-form-ajax: Bad form id %d!",TDOMF_LOG_BAD);
   die( "tdomfDisplayMessage$form_id('TDOMF: Bad Form Id','full');" );
 }
 
@@ -59,12 +76,12 @@ $form_data = tdomf_get_form_data($form_id);
 //
 $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
 if($tdomf_verify == false || $tdomf_verify == 'default') {
-  if(!isset($form_data['tdomf_key_'.$form_id]) || $form_data['tdomf_key_'.$form_id] != $_POST['tdomf_key_'.$form_id]) {
+  if(!isset($form_data['tdomf_key_'.$form_id]) || $form_data['tdomf_key_'.$form_id] != $tdomf_args['tdomf_key_'.$form_id]) {
      if(!isset($form_data) || !isset($form_data['tdomf_key_'.$form_id]) || trim($form_data['tdomf_key_'.$form_id]) == "") {
        tdomf_log_message('Key is missing from $form_data: contents of $form_data:<pre>'.var_export($form_data,true)."</pre>",TDOMF_LOG_BAD);
      }
      $session_key = $form_data['tdomf_key_'.$form_id];
-     $post_key = $_POST['tdomf_key_'.$form_id];
+     $post_key = $tdomf_args['tdomf_key_'.$form_id];
      $ip = $_SERVER['REMOTE_ADDR'];
      tdomf_log_message("Form ($form_id) submitted with bad key (session = $session_key, post = $post_key) from $ip !",TDOMF_LOG_BAD);
      unset($form_data['tdomf_key_'.$form_id]);
@@ -73,8 +90,8 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
   }
   unset($form_data['tdomf_key_'.$form_id]);
 } else if($tdomf_verify == 'wordpress_nonce') {
-  if(!wp_verify_nonce($_POST['tdomf_key_'.$form_id],'tdomf-form-'.$form_id)) {
-    $post_key = $_POST['tdomf_key_'.$form_id];
+  if(!wp_verify_nonce($tdomf_args['tdomf_key_'.$form_id],'tdomf-form-'.$form_id)) {
+    $post_key = $tdomf_args['tdomf_key_'.$form_id];
     $ip = $_SERVER['REMOTE_ADDR'];    
     tdomf_log_message("Form ($form_id) submitted with bad nonce key (post = $post_key) from $ip !",TDOMF_LOG_BAD);
     tdomf_ajax_exit($form_id,__("<font color='red'>TDOMF: Bad data submitted. Please reload the page and try submitting your post again.</font>","tdomf"));
@@ -92,7 +109,7 @@ function tdomf_fixslashesargs() {
       $_COOKIE = stripslashes_array($_COOKIE);
       #$_FILES = stripslashes_array($_FILES);
       #$_GET = stripslashes_array($_GET);
-      $_POST = stripslashes_array($_POST);
+      $tdomf_args = stripslashes_array($tdomf_args);
       $_REQUEST = stripslashes_array($_REQUEST);
     }
 }
@@ -112,9 +129,9 @@ if(!isset($_POST['tdomf_action'])) {
 //
 if($_POST['tdomf_action'] == "post") {
     tdomf_log_message("Someone is attempting to submit something");
-    $message = tdomf_validate_form($_POST,false);
+    $message = tdomf_validate_form($tdomf_args,false);
     if($message == NULL) {
-      $args = $_POST;
+      $args = $tdomf_args;
       $args['ip'] = $_SERVER['REMOTE_ADDR'];
       $retVal = tdomf_create_post($args);
       // If retVal is an int it's a post id
@@ -143,9 +160,9 @@ if($_POST['tdomf_action'] == "post") {
 } else if($_POST['tdomf_action'] == "preview") {
    // For preview, remove magic quote slashes!
    tdomf_fixslashesargs();
-   $message = tdomf_validate_form($_POST,true);
+   $message = tdomf_validate_form($tdomf_args,true);
    if($message == NULL) {
-      $message = tdomf_preview_form($_POST);
+      $message = tdomf_preview_form($tdomf_args);
       tdomf_ajax_exit($form_id,$message,false,true);
    } else {
        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$message));

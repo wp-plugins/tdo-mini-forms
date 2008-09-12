@@ -127,7 +127,7 @@ function tdomf_widget_text_control($form_id,$params) {
 
 <label for="text-title-<?php echo $number; ?>">
 <?php _e("Title:","tdomf"); ?><br/>
-<input type="textfield" size="60" id="text-title-<?php echo $number; ?>" name="text-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<input type="text" size="60" id="text-title-<?php echo $number; ?>" name="text-title-<?php echo $number; ?>" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 <br/><br/>

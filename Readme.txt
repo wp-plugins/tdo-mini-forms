@@ -2,17 +2,17 @@
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
-Requires at least: 2.3
-Tested up to: 2.5.1
+Requires at least: 2.5
+Tested up to: 2.6.2
 Stable Tag: 0.12.3
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
 == Description ==
 
-This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam.
+This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, etc.
 
-**Version 0.12 introduces the Form Hacker which allows admins the power to modify the form code from within the plugin as opposed to hacking the plugin source code. Nearly all messages to the user are configurable now.**
+**Version 0.12.4 includes a number of fixes for AJAX, additional error checking, French language files and re-introduction of the Import/Export form configuration functionality**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -29,6 +29,7 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Integration with Akismet to prevent Spam
 * Highly customisable: Create your forms using a Widget interface and then hack it to make it work how you like!
 * Create as many forms as you like.
+* Import and Export form configurations
 * Put a form in your sidebar using a widget for your Theme.
 * Submit pages instead of posts.
 * Simple Question and/or Image Captcha.
@@ -47,21 +48,17 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Numerous widgets for your theme, including a list of the top submitters
 * And many more...
 
-The Import/Export feature has been temporarily disabled in this release due to incompatibility with the Form Hacker. 
+**Version 0.12 introduces the Form Hacker which allows admins the power to modify the form code from within the plugin as opposed to hacking the plugin source code. Nearly all messages to the user are configurable now.**
 
 **Verision 0.11 provides intregration with Akismet, Submission Throttling, Import and Export of Form settings, Queuing Approved Post, Top Submitter theme widget and numerous bug fixes!**
-
-**With version 0.10.3, "Bad Data" errors and register_global issues should be a thing of the past!**
-
-**Version 0.10.2 provides compatibility with Wordpress 2.5!**
-
-**Version 0.10 is a big upgrade. You will not be able to roll back to previous versions after this install**
-
-**Version 0.7 is a major reworking of the code. Make sure to follow the upgrade instructions if you are using a version prior to this!**
 
 == Installation ==
 
 Download the zip and extract the files to a subdirectory, called tdo-mini-forms, of your plugin directory. i.e. `/path_to_wordpress/wp-content/plugins/tdo-mini-forms`. 
+
+It is currently assumed that the "wp-load.php" of your Wordpress install can be accessed from the tdo-mini-forms folder using the relative path: `../../../wp-load.php`
+
+Also make sure that the files in the root of tdo-mini-forms can be accessed from the web as they are used to enable post submission. 
 
 Once you've got it installed, active the plugin via the usual Wordpress plugin menu. Make sure you then configure it via the main TDOMF menu in the Wordpress Administration backend.
 
@@ -89,7 +86,7 @@ By default, TDO Mini Forms must have at least one form. You can have multiple fo
 
 Now move on to the Form Widgets. From here you can configure what is on the Form and how it is processed by dragging and dropping "widgets" from the "Available Widgets" pool to "Your Form" and then configuring the widgets by clicking on the left icon for the widget. It is important to remember that widgets are processed from top down, so they will appear on your form in that order and they will be executed in that order when the form input is previewed, validated and submitted. This can mean that one widget can overwrite a submitted posts settings from another widget (for example multiple Categories widgets can overwrite the default category and themselves). At this stage, try using the form and making sure it works the way you want. 
 
-If you're happy with the generated Form and the submitted posts it creates, then you are finished. However if you want to tweak stuff, change some of the messages, re-arrange fields you can move onto the Form Hacker. You must be careful with the Form Hacker as it is quite powerful and there is very little debugging or error reporting going on. You can totally change how your Form appears and even acts using the Form Hacker. See the following section "Using the Form Hacker" for more on using the Form Hacker.
+If you're happy with the generated Form and the submitted posts it creates, then you are finished. However if you want to tweak stuff, change some of the messages, re-arrange fields you can move onto the Form Hacker. You must be careful with the Form Hacker as it is quite powerful and there is very little debugging or error reporting going on. You can totally change how your Form appears and even behaves using the Form Hacker. See the following section "Using the Form Hacker" for more on using the Form Hacker.
 
 = Using the Form Hacker =
 
@@ -106,6 +103,12 @@ This will display your blog's title in the form.
 The Form Hacker has a number of "macros". These are special strings that are automatically expanded when the Form is displayed. Some of these macros are used to automatically generate the Form Key (which is used for security). The %%WIDGET:widget-name%% macro can be used to let individual widgets do their thing while you hack everything else. A list of macros can be found by clicking on "Show Help" link at the top of the page. 
 
 **Please be aware that if you use the Form Hacker and you later change the setings of your form (modify widgets or options), these changes are not reflected automatically in the Form Hacker. You must re-edit the hacked form to pick up the new changes.**
+
+= Getting even more out of your Form =
+
+You can now attach additionally PHP code to your form using the "Append to Content" widget. If you drag and drop this widget to your Form, you can use it to add anything you like to the post content, however you can also insert PHP code that will get called when the submission is being processed (and any outputed info gets added to the post content).
+
+For some examples, on the support forums, the Append to Content widget has been used to use the value set in [Custom Field as the Title]( http://thedeadone.net/forum/?p=418#comment-1542 ) and to use the [Submitter's username as Title] ( http://thedeadone.net/forum/?p=269#comment-1459  )
 
 == Frequently Asked Questions ==
 
@@ -187,7 +190,11 @@ Alternativily you can use a custom field. Add the Custom Field widget to your fo
 
 = Can we use TinyMCE, FckEditor, Niced for writing posts? =
 
-I have spent some time exploring the use of TinyMCE (and to a lesser degree FckEditor) for TDO Mini Forms. Both libraries provide a WYSIWYG or "Rich Text" editors in place of your bog-standard text area. Wordpress' write screen using a heavily modified version of TinyMCE. I haven't settled on the right method to do this yet. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. Grab the latest copy and installed it somewhere on your website and then follow the directions on how to replace a text area with TinyMCE. This can be used to even change your comment input field.
+I have spent some time exploring the use of TinyMCE (and to a lesser degree FckEditor) for TDO Mini Forms. Both libraries provide a WYSIWYG or "Rich Text" editors in place of your bog-standard text area. Wordpress' write screen using a heavily modified version of TinyMCE. 
+
+There is no direct integration support for these toolkits. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. 
+
+[I've written up a short tutorial on how you might integrate TinyMCE with the a TDO Mini Form's Form] ( http://thedeadone.net/how-to/tinymce-tdomf/ )
 
 = I want to add add tags to QuickTags such as embed video, etc.? =
 
@@ -305,6 +312,10 @@ PHP Function to display a human readable time interval based on a function I fou
 
 Checkbox support in the Categories Widget initially added by [Sillybean](http://www.sillybean.com)
 
+Several updates to make the generated forms W3C compliance done by [Laurent Grabielle]( www.3w3t.com ) 
+
+Also thanks to everyone who donated and offered feedback and testing!
+
 == Screenshots ==
 
 1. The Form as displayed to non-registered users
@@ -319,8 +330,14 @@ Checkbox support in the Categories Widget initially added by [Sillybean](http://
 * An issue with having the latest MoreFields plugin (v0.6.7) and TDO-Mini Forms (v0.10.2) has been reported. Not yet investigated. (http://thedeadone.net/forum/?p=212)
 * If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper. In v0.10.3, the default is to use direct links but you can switch back to the handler if this does not work correctly for you.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
-* Form does not validate as XHTML. I'll fix this soon I swear! :)
 * The queuing functionality may get the time wrong if period set to greater than an hour
+* The current Image Capatcha widget acts funny when AJAX turned on
+* When a submitted post has the author as the submitter account, they will recieve all the comment moderation emails. This should be disabled.
+* IE sometimes gives a "Use FireFox" message on submissions page in WP2.6.x
+* Missing Sidebars in Widget Control in IE7
+* A number of conflicts with other plugins reported when using WP2.6.x
+* Issue with Widgets on new install of wp2.6.1
+* In IE, can't select, copy or paste test into the Text widget
 
 == Version History ==
 

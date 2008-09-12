@@ -515,7 +515,7 @@ function tdomf_generate_form_key($form_id) {
   $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
   if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
     $nonce_string = wp_create_nonce( 'tdomf-form-'.$form_id );
-    return "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$nonce_string' />";
+    return "<div><input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$nonce_string' /></div>";
   } else if($tdomf_verify == 'none') {
     // do nothing! Bad :(
     return "";
@@ -527,7 +527,7 @@ function tdomf_generate_form_key($form_id) {
   $form_data["tdomf_key_$form_id"] = $random_string;
   tdomf_log_message_extra('Placing key '.$random_string.' in form_data: <pre>'.var_export($form_data,true)."</pre>");
   tdomf_save_form_data($form_id,$form_data);
-  return "<input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$random_string' />";
+  return "<div><input type='hidden' id='tdomf_key_$form_id' name='tdomf_key_$form_id' value='$random_string' /></div>";
 }
 
 // Create the form!
@@ -698,15 +698,7 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 		mysack.execute = 1;
 		mysack.method = 'POST';
 		mysack.setVar( "tdomf_action", action );
-		for(i=0; i<document.$form_name.elements.length; i++) {
-			if(document.$form_name.elements[i].type == "checkbox") {
-				if(document.$form_name.elements[i].checked == 1) {
-					mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
-				}
-			} else {
-				mysack.setVar(document.$form_name.elements[i].name,document.$form_name.elements[i].value);
-			}
-		}
+		mysack.setVar( "tdomf_args", jQuery('#$form_name').serialize());
 		mysack.onError = function() { alert('$ajax_error' )};
 		mysack.runAJAX();
 		return true;
@@ -741,7 +733,7 @@ EOT;
     }
     $form .= "<div id='ajaxProgress$form_id' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>\n";
     if(!$hack) {
-        $form .= "<div id='tdomf_form${form_id}_message' id='tdomf_form${form_id}_message' class='hidden'></div>";
+        $form .= "<div id='tdomf_form${form_id}_message' class='hidden'></div>";
     }
   } 
   
@@ -782,7 +774,7 @@ EOT;
   
   // Form id
   //
-  $form .= "\t<input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' />\n";
+  $form .= "\t<div><input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' /></div>\n";
 
   if($hack) {
       $redirect_url = TDOMF_MACRO_FORMURL;
@@ -791,7 +783,7 @@ EOT;
       #$redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
       $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id}_message";
   }
-  $form .= "\t<input type='hidden' id='redirect' name='redirect' value='$redirect_url' />\n";
+  $form .= "\t<div><input type='hidden' id='redirect' name='redirect' value='$redirect_url' /></div>\n";
   
   // Process widgets
   //
@@ -836,11 +828,11 @@ EOT;
   if($hack) {
         $form .= "\t<!-- form buttons start -->\n";
   }  
-  $form .= "\t<table border='0' align='left'><tr>\n";
+  $form .= "\t<table class='tdomf_buttons'><tr>\n";
   if(tdomf_widget_is_preview_avaliable($form_id)) {
-      $form .= "\t\t".'<td width="10px"><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
+      $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
   }
-  $form .= "\t\t".'<td width="10px"><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
+  $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
   $form .= "\t</tr></table>\n";
   if($hack) {
         $form .= "\t<!-- form buttons end -->\n";

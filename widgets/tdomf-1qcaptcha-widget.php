@@ -113,9 +113,9 @@ function tdomf_widget_1qcaptcha($args,$params) {
   if($number != 1){ $postfix = "-$number"; }
   extract($args);
   $output  = $before_widget;  
-  $output .= "\t\t".'<label for="1qcaptcha" class="required" >';
+  $output .= "\t\t".'<label for="q1captcha" class="required" >';
   $output .= $options['question'];
-  $output .= "\n\t\t<br/>\n\t\t".'<input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="'.htmlentities($args["1qcaptcha$postfix"],ENT_QUOTES,get_bloginfo('charset')).'" />';
+  $output .= "\n\t\t<br/>\n\t\t".'<input type="text" id="q1captcha'.$postfix.'" name="q1captcha'.$postfix.'" size="30" value="'.htmlentities($args["q1captcha$postfix"],ENT_QUOTES,get_bloginfo('charset')).'" />';
   $output .= '</label>';
   $output .= $after_widget;
   return $output;
@@ -131,10 +131,10 @@ function tdomf_widget_1qcaptcha_hack($args,$params) {
   if($number != 1){ $postfix = "-$number"; }
   extract($args);
   $output  = $before_widget;  
-  $output .= "\t\t".'<label for="1qcaptcha" class="required" >';
+  $output .= "\t\t".'<label for="q1captcha" class="required" >';
   $output .= $options['question'];
-  $output .= '<br/><input type="textfield" id="1qcaptcha'.$postfix.'" name="1qcaptcha'.$postfix.'" size="30" value="';
-  $output .= "<?php echo htmlentities(\$post_args['1qcaptcha$postfix'],ENT_QUOTES,get_bloginfo('charset')); ?>".'" />';
+  $output .= '<br/><input type="text" id="q1captcha'.$postfix.'" name="q1captcha'.$postfix.'" size="30" value="';
+  $output .= "<?php echo htmlentities(\$post_args['q1captcha$postfix'],ENT_QUOTES,get_bloginfo('charset')); ?>".'" />';
   $output .= '</label>';
   $output .= $after_widget;
   return $output;
@@ -158,7 +158,7 @@ function tdomf_widget_1qcaptcha_validate($args,$preview,$params) {
   if($number != 1){ $postfix = "-$number"; }
   
   extract($args);
-  $simplecaptcha = trim(strtolower($args["1qcaptcha$postfix"]));
+  $simplecaptcha = trim(strtolower($args["q1captcha$postfix"]));
   $answer = trim(strtolower($options['answer']));
   if($simplecaptcha != $answer) {
     return $before_widget.sprintf(__("You must answer the captcha question. Hint: the answer is \"%s\".","tdomf"),$answer).$after_widget;
@@ -184,8 +184,8 @@ function tdomf_widget_1qcaptcha_control($form_id,$params) {
   }
   // Store settings for this widget
     if ( $_POST["1qcaptcha$postfix1-submit"] ) {
-     $newoptions['question'] = $_POST["1qcaptcha$postfix1-question"];
-     $newoptions['answer'] = $_POST["1qcaptcha$postfix1-answer"];
+     $newoptions['question'] = $_POST["q1captcha$postfix1-question"];
+     $newoptions['answer'] = $_POST["q1captcha$postfix1-answer"];
      if ( $options != $newoptions ) {
         $options = $newoptions;
         tdomf_set_option_widget('tdomf_1qcaptcha_widget'.$postfix2, $options,$form_id);
@@ -195,12 +195,12 @@ function tdomf_widget_1qcaptcha_control($form_id,$params) {
         ?>
 <div>
 
-<label for="1qcaptcha<?php echo $postfix1; ?>-question" ><?php _e("The simple question:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="1qcaptcha<?php echo $postfix1; ?>-question" name="1qcaptcha<?php echo $postfix1; ?>-question" value="<?php echo htmlentities($options['question'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<label for="q1captcha<?php echo $postfix1; ?>-question" ><?php _e("The simple question:","tdomf"); ?><br/>
+<input type="text" size="40" id="q1captcha<?php echo $postfix1; ?>-question" name="q1captcha<?php echo $postfix1; ?>-question" value="<?php echo htmlentities($options['question'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 <br/><br/>
-<label for="1qcaptcha<?php echo $postfix1; ?>-answer" ><?php _e("The simple answer:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="1qcaptcha<?php echo $postfix1; ?>-answer" name="1qcaptcha<?php echo $postfix1; ?>-answer" value="<?php echo htmlentities($options['answer'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<label for="q1captcha<?php echo $postfix1; ?>-answer" ><?php _e("The simple answer:","tdomf"); ?><br/>
+<input type="text" size="40" id="q1captcha<?php echo $postfix1; ?>-answer" name="q1captcha<?php echo $postfix1; ?>-answer" value="<?php echo htmlentities($options['answer'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 </div>

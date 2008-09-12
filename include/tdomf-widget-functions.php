@@ -357,7 +357,7 @@ function tdomf_widget_content($args) {
     } else {
       $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/>\n";
     }
-    $output .= '<input type="textfield" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES,get_bloginfo('charset')).'" />';
+    $output .= '<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES,get_bloginfo('charset')).'" />';
     $output .= "</label>\n";
     if($options['text-enable']) {
       $output .= "<br/><br/>";
@@ -417,7 +417,7 @@ function tdomf_widget_content_hack($args) {
     } else {
       $output .= "\t\t".'<label for="content_title">'.__("Post Title: ","tdomf")."\n\t\t\t<br/>\n";
     }
-    $output .= "\t\t\t".'<input type="textfield" name="content_title" id="content_title" size="'.$options['title-size'].'" value="';
+    $output .= "\t\t\t".'<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="';
     $output .= '<?php echo htmlentities($content_title,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />'."\n";
     $output .= "\t\t</label>\n";
     if($options['text-enable']) {

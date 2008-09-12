@@ -204,7 +204,7 @@ function tdomf_widget_autorespondemail_control($form_id) {
 <p><?php _e("This widget sends a plain ascii email to the submitter once the form is submitted. Form Hacker macros and PHP code are fine here. Also, if Who Am I widget or Notify Me widget is used, the email address will be taken from there. If not avaliable (or not mandatory) a new field will be added to the form. Please make sure this is one of the bottom widgets on your form","tdomf"); ?></p>
 
 <br/><br/>
-<input type="textfield" name="autorespondemail-subject" id="autorespondemail-subject" size="70" value="<?php echo htmlentities($subject,ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<input type="text" name="autorespondemail-subject" id="autorespondemail-subject" size="70" value="<?php echo htmlentities($subject,ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <textarea title="true" rows="5" cols="70" name="autorespondemail-body" id="autorespondemail-body" ><?php echo htmlentities($body,ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
 </div>
 

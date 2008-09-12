@@ -58,7 +58,7 @@ function tdomf_widget_imagecaptcha($args,$params) {
   $output  = $before_widget;
 
   $output .= <<< EOT
-		<script language="javascript">
+		<script type="text/javascript">
 		<!--
 		function new_freecap_$tdomf_form_id()
 		{
@@ -77,11 +77,11 @@ function tdomf_widget_imagecaptcha($args,$params) {
 		</script>
 EOT;
   
-  $output .= "\n\t\t<img src='".TDOMF_WIDGET_URLPATH."freecap/freecap_tdomf.php?tdomf_form_id=$tdomf_form_id' name='freecap_$tdomf_form_id' id='freecap_$tdomf_form_id' />\n\t\t<br/>\n";
-  $output .= "\t\t<small>".sprintf(__("If you can't read the word in the image, <a href=\"%s\">click here</a>","tdomf"),'#" onClick="this.blur();new_freecap_'.$tdomf_form_id.'();return false;')."</small>\n\t\t<br/>\n";
+  $output .= "\n\t\t<img src='".TDOMF_WIDGET_URLPATH."freecap/freecap_tdomf.php?tdomf_form_id=$tdomf_form_id'  id='freecap_$tdomf_form_id' alt='' />\n\t\t<br/>\n";
+  $output .= "\t\t<small>".sprintf(__("If you can't read the word in the image, <a href=\"%s\">click here</a>","tdomf"),'#" onclick="this.blur();new_freecap_'.$tdomf_form_id.'();return false;')."</small>\n\t\t<br/>\n";
   $output .= "\t\t".'<label for="imagecaptcha_'.$tdomf_form_id.'" class="required" >'."\n";
   $output .= "\t\t".__('What is the word in the image? ','tdomf')."\n\t\t<br/>\n";
-  $output .= "\t\t".'<input type="textfield" id="imagecaptcha_'.$tdomf_form_id.'" name="imagecaptcha_'.$tdomf_form_id.'" size="30" value="'.htmlentities($args["imagecaptcha"],ENT_QUOTES).'" />'."\n";
+  $output .= "\t\t".'<input type="text" id="imagecaptcha_'.$tdomf_form_id.'" name="imagecaptcha_'.$tdomf_form_id.'" size="30" value="'.htmlentities($args["imagecaptcha"],ENT_QUOTES).'" />'."\n";
   $output .= "\t\t".'</label>';
       
   $output .= $after_widget;

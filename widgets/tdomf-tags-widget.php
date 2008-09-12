@@ -28,7 +28,7 @@ if(function_exists('wp_set_post_tags')) {
     $output  = $before_widget;  
     $output .= '<label for="tags" >';
     $output .= __("Tags (separate multiple tags with commas: cats, pet food, dogs):","tdomf");
-    $output .= '<br/><input type="textfield" id="tags" name="tags" size="60" value="'.htmlentities($tags,ENT_QUOTES,get_bloginfo('charset')).'" />';
+    $output .= '<br/><input type="text" id="tags" name="tags" size="60" value="'.htmlentities($tags,ENT_QUOTES,get_bloginfo('charset')).'" />';
     $output .= '</label>';
     $output .= $after_widget;
     return $output;
@@ -111,7 +111,7 @@ if(function_exists('wp_set_post_tags')) {
     $output  = $before_widget;  
     $output .= "\t\t".'<label for="tags" >';
     $output .= "\n\t\t".__("Tags (separate multiple tags with commas: cats, pet food, dogs):","tdomf");
-    $output .= "\n\t\t<br/>\n\t\t".'<input type="textfield" id="tags" name="tags" size="60" value="';
+    $output .= "\n\t\t<br/>\n\t\t".'<input type="text" id="tags" name="tags" size="60" value="';
     $output .= "<?php echo htmlentities(\$tags,ENT_QUOTES,get_bloginfo('charset')); ?>".'" />';
     $output .= "\n\t\t".'</label>';
     $output .= $after_widget;

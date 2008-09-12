@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: TDO Mini Forms
-Plugin URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
+Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 Version: 0.12.3
 Author: Mark Cunningham
@@ -30,21 +30,6 @@ Author URI: http://thedeadone.net
 // 
 // See readme.txt
 //
-// v0.12.3: 4th July 2008
-// - Bug in tdomf-msgs.php that would occur for unregistered users only
-// - Auto Respond Email widget
-// - Small mistake in whoami widget hack, "email" title used for webpage field
-// - Checkbox settings were not being correctly passed in AJAX
-// - Full paths are used, not just relative
-// - Ban User/IP links from moderation email
-// - Enabling extra debug messages and turning on error messages to user also
-//    turns on all error reporting in PHP
-// - Added extra debug messages and handling around post_id 0 submissions (still
-//    dont' have a clue about them)
-// - Moderation emails to admins can now be turned on if moderation is turned
-//    off
-// - Custom Field summary was not appearing in admin emails
-//
 // v0.12.4: XXX
 // - Solved "$post_ID == 0" problem. See 
 //    http://thedeadone.net/forum/?p=325#comment-1446
@@ -61,35 +46,40 @@ Author URI: http://thedeadone.net
 // - Removed link to non-existant help page and set the y offset of widget 
 //    controls to zero so it doesn't get lost. - Thanks Oleg Butuov for those 
 //    fixes!
+// - Fixed multiple categories selection not showing in preview.
+// - Now tries to use wp-load.php before using wp-config.php as per the new 
+//    Wordpress 2.6 way
+// - Import/Export re-implemented and much cleaner
+// - tdomfinfo() now produces useful output again
+// - Updated the AJAX code so that it now properly passes *all* variables
+//    (previousily multi-choice selections got reduced to single-choice)
+// - Forms now better validate as W3C compliance - Thanks Luarent Grabielle
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
-   - Import/Export Form & tdomfinfo
-   - disabling comment emails to non-admin submitter users
-   - Error message for categories widget when no categories selected
+   - tdomf_ru_Ru: http://thedeadone.net/forum/?p=806#comment-1735
+   - localisation forum
+   - http://wordpress.org/extend/plugins/tdo-mini-forms/#rate-response
+     
+   - disabling comment emails to non-admin submitter users: line 916 pluggable.php
    - Extract Widget
    - Error, Validation and Style Hacking
    - AJAX + Capatcha
    - Time calculation
    - Disabling Comments/Pings
-   
    - Recaptcha plugin
-
    - http://wordpress.org/extend/plugins/tdo-mini-forms/#rate-response
    - IE gives "Use FireFox" on submission page   
    - Clickable links: http://thedeadone.net/forum/?p=500#comment-1598
-   - Using the Append Widget
-     * Custom Fields as Title: http://thedeadone.net/forum/?p=418#comment-1542
-     * Username as Title: http://thedeadone.net/forum/?p=269#comment-1459
-     no sb in widget configuration in IE.7
+
+   no sb in widget configuration in IE.7
      conflicts with other plugins
      tinymce problem (conflict with AJAX)
      widgets on new install of wp2.6.1
      tag widget: required
-     tdomf_ru_Ru: http://thedeadone.net/forum/?p=806#comment-1735
      upload-link error: http://wordpress.org/support/topic/186919#post-838957
      replace diff with wordpress diff
      custom field widgets: unique key error
@@ -114,8 +104,6 @@ Notes:
 TODO for future versions
 
 Known Bugs
-- Invalid markup is used in several form elements
-- Import/Export Form disabled currently
 - There seems to be some issues with the queuing functionality and GMT 
    calculation of time. I haven't nailed down exactly what is going on but queue
    periods of greater than an hour are not correctly respected.
@@ -148,7 +136,7 @@ New Features
 New Form Options
 - Force Preview before submission
 - Hide Form on Preview
-- Forms can be used to submit links
+- Forms can be used to submit links, emails, etc.
 - Select Form Style/include Custom CSS
 - Control who can access form not just by role but also by user, ip and capability.
 
@@ -159,7 +147,6 @@ New Widgets
 - Widget that inputs only title
 - Login/Register/Who Am I Widget
 - Username as Title
-- Insert Text into Post Widget
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
@@ -195,11 +182,12 @@ Existing Widget Improvements
   * Required support
 - Tags
   * Select from existing tag list or tag cloud
+  * Select from only a specified set of tags
+  * Make required
+  * Default Tags
 - 1 Question Captcha
   * Random questions for Captcha
 - Category
-  * Include specific categories
-  * Multiple default categories
   * Co-operate with "Set Category from GET variables" Widget
 - Notify Me
   * Option to always notify submitter
@@ -532,6 +520,7 @@ require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-export.php');
 
 /////////////////////////
 // What's new since... //
