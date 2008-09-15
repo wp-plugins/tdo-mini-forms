@@ -118,7 +118,7 @@ For some examples, on the support forums, the Append to Content widget has been 
 
 = Where is the best place to get support for this plugin? =
 
-You can use the [TDOMF Support Forum]( http://thedeadone.net/forum ) or you can post on [Wordpress.org's Support Form]( http://wordpress.org/tags/tdo-mini-forms#postform ).
+You can use the [TDOMF Support Forum]( http://thedeadone.net/forum ) or you can post on [Wordpress.org's Support Form]( http://wordpress.org/tags/tdo-mini-forms#postform ). Please avoid emailing me directly. I got a lot of email, so I have a tendency to attach low priorities to  these emails, unless it is directly related to some query on the forum that I have shown an interest in.
 
 = How do I add a form to a page or post? =
 
