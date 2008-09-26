@@ -13,8 +13,8 @@ function tdomf_load_edit_form_scripts() {
   // Need these scripts for drag and drop but only on this page, not every page!
   wp_enqueue_script( 'interface' );
 }
-// @BUG: this could break with a different lank "tdo-mini-forms" links to name of menu, not file name
-add_action("load-tdo-mini-forms_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
+add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
+
 
 // Stuff to do in the header of the page
 //

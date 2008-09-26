@@ -188,7 +188,10 @@ function tdomf_overview_menu()  {
 ">
           </form>
         </td><td>
-          <?php printf(__("<a href='%s'>My Amazon Wishlist</a>","tdomf"),"http://www.amazon.co.uk/gp/registry/23S7OL9W6Q4JT"); ?></li>
+          <?php printf(__("[<a href='%s'>My Amazon Wishlist</a>]","tdomf"),"http://www.amazon.co.uk/gp/registry/23S7OL9W6Q4JT"); ?>
+        </td>
+        <td>
+          <?php printf(__("[<a href='%s'>Rate TDO-Mini-Forms on Wordpress.org!</a>]","tdomf"),"http://wordpress.org/extend/plugins/tdo-mini-forms/#rate-response"); ?>
         </td>
       </tr>
     </table>

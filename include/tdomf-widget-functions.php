@@ -396,7 +396,7 @@ function tdomf_widget_content($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('content','Content', 'tdomf_widget_content');
+tdomf_register_form_widget('content',__('Content','tdomf'), 'tdomf_widget_content');
 
 // Hacked version
 //
@@ -459,7 +459,7 @@ function tdomf_widget_content_hack($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_hack('content','Content', 'tdomf_widget_content_hack');
+tdomf_register_form_widget_hack('content',__('Content','tdomf'), 'tdomf_widget_content_hack');
 
 ///////////////////////////////////////
 // Preview the post's content and title
@@ -495,7 +495,7 @@ function tdomf_widget_content_preview($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview('content','Content', 'tdomf_widget_content_preview');
+tdomf_register_form_widget_preview('content',__('Content','tdomf'), 'tdomf_widget_content_preview');
 
 ///////////////////////////////////////
 // Hack the preview the post's content and title
@@ -533,7 +533,7 @@ function tdomf_widget_content_preview_hack($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview_hack('content','Content', 'tdomf_widget_content_preview_hack');
+tdomf_register_form_widget_preview_hack('content',__('Content','tdomf'), 'tdomf_widget_content_preview_hack');
 
 ///////////////////////////////////////
 // Add the title and content to the post 
@@ -571,7 +571,7 @@ function tdomf_widget_content_post($args) {
   $post_ID = wp_update_post($post);
   return NULL;
 }
-tdomf_register_form_widget_post('content','Content', 'tdomf_widget_content_post');
+tdomf_register_form_widget_post('content',__('Content','tdomf'), 'tdomf_widget_content_post');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -632,7 +632,7 @@ function tdomf_widget_content_control($form_id) {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('content','Content', 'tdomf_widget_content_control', 340, 520);
+tdomf_register_form_widget_control('content',__('Content','tdomf'), 'tdomf_widget_content_control', 340, 520);
 
 ///////////////////////////////////////
 // Validate title and content from form 
@@ -691,7 +691,7 @@ function tdomf_widget_content_validate($args,$preview) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('content','Content', 'tdomf_widget_content_validate');
+tdomf_register_form_widget_validate('content',__('Content','tdomf'), 'tdomf_widget_content_validate');
 
 ///////////////////////
 // "Who Am I" Widget //
@@ -818,7 +818,7 @@ function tdomf_widget_whoami($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('who-am-i','Who Am I', 'tdomf_widget_whoami');
+tdomf_register_form_widget('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami');
 
 //////////////////////////////////////////
 // Display and handle widget control panel 
@@ -863,7 +863,7 @@ function tdomf_widget_whoami_control($form_id) {
 </div>
         <?php
 }
-tdomf_register_form_widget_control('who-am-i','Who Am I', 'tdomf_widget_whoami_control', 200, 380);
+tdomf_register_form_widget_control('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami_control', 200, 380);
 
 ///////////////////////////////////////
 // Generate a simple preview for widget
@@ -890,7 +890,7 @@ extract($args);
     return $before_widget.sprintf(__("Submitted by %s.","tdomf"),$link).$after_widget;
   }
 }
-tdomf_register_form_widget_preview('who-am-i','Who Am I', 'tdomf_widget_whoami_preview');
+tdomf_register_form_widget_preview('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami_preview');
 
 ///////////////////////////////////////
 // Generate a simple hacked preview for widget
@@ -924,7 +924,7 @@ function tdomf_widget_whoami_preview_hack($args) {
 
     return $output;
 }
-tdomf_register_form_widget_preview_hack('who-am-i','Who Am I', 'tdomf_widget_whoami_preview_hack');
+tdomf_register_form_widget_preview_hack('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami_preview_hack');
 
 //////////////////////////////////
 // Validate input for this widget
@@ -977,7 +977,7 @@ function tdomf_widget_whoami_validate($args,$preview) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('who-am-i','Who Am I', 'tdomf_widget_whoami_validate');
+tdomf_register_form_widget_validate('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami_validate');
 
 ///////////////////////////////////
 // Update post after form submitted 
@@ -1008,7 +1008,7 @@ function tdomf_widget_whoami_post($args) {
   tdomf_widget_whoami_store_cookies(tdomf_protect_input($whoami_name),$whoami_email,$whoami_webpage);
   return NULL;
 }
-tdomf_register_form_widget_post('who-am-i','Who Am I', 'tdomf_widget_whoami_post');
+tdomf_register_form_widget_post('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami_post');
 
 /////////
 // version of whoami widget for hacker
@@ -1108,6 +1108,6 @@ EOT;
 
   return $output;
 }
-tdomf_register_form_widget_hack('who-am-i','Who Am I', 'tdomf_widget_whoami_hack');
+tdomf_register_form_widget_hack('who-am-i',__('Who Am I','tdomf'), 'tdomf_widget_whoami_hack');
 
 ?>

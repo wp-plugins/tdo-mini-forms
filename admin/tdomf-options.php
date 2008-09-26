@@ -1373,8 +1373,15 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
   #  $message .= "<font color=\"red\"><strong>".__("ERROR: <em>register_globals</em> is enabled. This is a security risk and also prevents TDO Mini Forms from working.")."</strong></font>";
   #}
   
+  if(version_compare("5.0.0",phpversion(),">"))
+  {
+    $message .= sprintf(__("Warning: You are currently using PHP version %s. It is strongly recommended to use PHP5 with TDO Mini Forms.","tdomf"),phpversion());
+    $message .= "<br/>";
+  }
+  
   if(get_option(TDOMF_OPTION_VERIFICATION_METHOD) == 'none') {
-    $message .= __("Warning: Form input verification is disabled. This is a potential security risk.");
+    $message .= __("Warning: Form input verification is disabled. This is a potential security risk.","tdomf");
+    $message .= "<br/>";
   }
   
     if(isset($_REQUEST['form']) || $form_id != 0) {
@@ -1460,7 +1467,7 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
          if($show_links) {
              $message .= sprintf(__("<b>Warning:</b> You have enabled 'Extra Debug Messages' and disabled 'Disable Error Messages'. This invokes a special mode where all PHP errors are turned on. This can lead to unexpected problems and could be considered a security leak! <a href=\"%s\">Change on the Options Page &raquo;</a>", "tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu");
          } else {
-             $message .= __("<b>Warning:</b> You have enabled 'Extra Debug Messages' and disabled 'Disable Error Messages'. This invokes a special mode where all PHP errors are turned on. This can lead to unexpected problems and could be considered a security leak!","tdomf");
+             $message .= __("<b>Warning:</b> You have enabled 'Extra Debug Messages' and disabled 'Disable Error Messages'. This invokes a special mode where all PHP errors are turned on. This can lead to unexpected problems and could be considered a security leak! This should only be used for debugging purposes.","tdomf");
          }
          $message .= "</font><br/>";
     }
@@ -1506,6 +1513,16 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
              $message .= sprintf(__("<b>Error</b>: Got a %d error when checking <a href=\"%s\">%s</a>! This will prevent forms that use AJAX from submitting posts. The permissions may be wrong on the tdo-mini-forms folder.","tdomf"),$headers["response"], $ajax_uri, $ajax_uri);
              $message .= "</font><br/>";
              tdomf_log_message("Did not receive a 200 response when checking $ajax_uri:<pre>".var_export($headers,true)."</pre>",TDOMF_LOG_ERROR);
+        }
+        
+        $css_uri = TDOMF_URLPATH.'tdomf-style-form.css';
+        $headers = wp_get_http($css_uri,false,1);
+        if($headers != false && $headers["response"] != '200')
+        {
+             $message .= "<font color=\"red\">";
+             $message .= sprintf(__("<b>Error</b>: Got a %d error when checking <a href=\"%s\">%s</a>! This will make your forms, by default, look very ugly. The permissions may be wrong on the tdo-mini-forms folder.","tdomf"),$headers["response"], $css_uri, $css_uri);
+             $message .= "</font><br/>";
+             tdomf_log_message("Did not receive a 200 response when checking $css_uri:<pre>".var_export($headers,true)."</pre>",TDOMF_LOG_ERROR);
         }
     }
     

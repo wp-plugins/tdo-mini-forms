@@ -86,7 +86,7 @@ function tdomf_check_submissions_spam($post_id,$live=true) {
   if(!$live) {
       // we're updating a post
       $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
-      update_option(TDOMF_STAT_SUBMITTED,$$submitted_count--);
+      update_option(TDOMF_STAT_SUBMITTED,$submitted_count--);
   }
 
   // Flag post as spam!
@@ -268,7 +268,7 @@ function tdomf_ham_post($post_id) {
 
   $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
   if($submitted_count == false) { add_option(TDOMF_STAT_SUBMITTED,1); }
-  else { update_option(TDOMF_STAT_SUBMITTED,$$submitted_count++); }
+  else { update_option(TDOMF_STAT_SUBMITTED,$submitted_count++); }
 
   tdomf_log_message("$post_id has been submitted as ham to Akismet<br/><pre>" . var_export($response,true) . "</pre>");
 }

@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
 Requires at least: 2.5
 Tested up to: 2.6.2
-Stable Tag: 0.12.3
+Stable Tag: 0.12.4
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -111,6 +111,14 @@ You can now attach additionally PHP code to your form using the "Append to Conte
 For some examples, on the support forums, the Append to Content widget has been used to use the value set in [Custom Field as the Title]( http://thedeadone.net/forum/?p=418#comment-1542 ) and to use the [Submitter's username as Title] ( http://thedeadone.net/forum/?p=269#comment-1459  )
 
 == Frequently Asked Questions ==
+
+= Plugin clashes and "Server 500 Errors" using Wordpress 2.6.2 =
+
+A number of users experinced random 500 errors using TDO Mini Forms and conflicts with other plugins under Wordpress 2.6.2. If you experince a 500 error, please check your host's error logs. If you don't know how to do that, contant your host.
+
+There are two things check. Are you using PHP4? If you can, try using PHP5 instead. (You can check via phpinfo() or by the error message that appears at the top of any of the TDO-Mini-Form admin menus). [Someone found this solution for their blog hosted on 1and1]( http://wordpress.org/support/topic/204256?replies=16#post-860103 ) and it requires modifying your .htaccess to use PHP5 instead of PHP4. This may not be applicable to other hosts.
+
+The second thing to check is your .htaccess. If you are completely locked out of your blog by the 500 error, try deleting your .htaccess file (normally in the root of your wordpress install). Then you should be able to access the admin UI of your blog (normally at "yourbloguri/wp-admin"). You must then recreate your .htaccess by resetting your permalink structure in the admin UI and re-apply any other changes to your .htaccess (wp-super-cache for example requires changes in your .htaccess).
 
 = Where do I get the latest updates and news on TDO Mini Forms? =
 
@@ -314,6 +322,8 @@ Checkbox support in the Categories Widget initially added by [Sillybean](http://
 
 Several updates to make the generated forms W3C compliance done by [Laurent Grabielle]( www.3w3t.com ) 
 
+SQL Time calcuation function used in calculating next post time in queue, donated [Adam Selvidge]( http://www.myconfinedspace.com/ )
+
 Also thanks to everyone who donated and offered feedback and testing!
 
 == Screenshots ==
@@ -327,7 +337,6 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 == Known Bugs == 
 
-* An issue with having the latest MoreFields plugin (v0.6.7) and TDO-Mini Forms (v0.10.2) has been reported. Not yet investigated. (http://thedeadone.net/forum/?p=212)
 * If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper. In v0.10.3, the default is to use direct links but you can switch back to the handler if this does not work correctly for you.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
 * The queuing functionality may get the time wrong if period set to greater than an hour
@@ -335,11 +344,33 @@ Also thanks to everyone who donated and offered feedback and testing!
 * When a submitted post has the author as the submitter account, they will recieve all the comment moderation emails. This should be disabled.
 * IE sometimes gives a "Use FireFox" message on submissions page in WP2.6.x
 * Missing Sidebars in Widget Control in IE7
-* A number of conflicts with other plugins reported when using WP2.6.x
 * Issue with Widgets on new install of wp2.6.1
-* In IE, can't select, copy or paste test into the Text widget
+* In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)
 
 == Version History ==
+
+= v0.12.4: 26th September 2008 =
+
+* Solved "$post_ID == 0" problem. See ( http://thedeadone.net/forum/?p=325#comment-1446 )
+* Added some error checking around cookie session info
+* Stopped multiple revisions from being created on post submit
+* Better Error/Warning reporting to Admins
+* Form toolbar added to both Widgets and Form Hacker (easier to move between the screens for specific forms)
+* Error checking on the categories widget when the default category is excluded (it selects a new "default") and also if all categories are excluded
+* Error checking if post and ajax submit urls can be reached
+* Include option enabled and tested for Categories widget
+* Removed link to non-existant help page and set the y offset of widget controls to zero so it doesn't get lost. - Thanks Oleg Butuov for those fixes!
+* Fixed multiple categories selection not showing in preview.
+* Now tries to use wp-load.php before using wp-config.php as per the new Wordpress 2.6 way
+* Import/Export re-implemented and much cleaner
+* tdomfinfo() now produces useful output again
+* Updated the AJAX code so that it now properly passes *all* variables (previousily multi-choice selections got reduced to single-choice)
+* Forms now better validate as W3C compliance - Thanks Luarent Grabielle
+* Potential source of 500 Server Error message is because TDO-Mini-Forms seems to require PHP5. See readme.txt for more information.
+* Wordpress comment notification on tdomf submitted posts would go to the author set to the post who may not have admin rights to delete/spam the post. Now TDOMF will check if a post is owned by TDOMF and if so will redirect the notification email to the admin if it is post author cannot delete or spam comments.
+* Readme.txt heavily expanded with help sections on the new complex features like form hacker (as if anyone reads the readme any more)
+* Queue time calculation correction code imported. Code donated by Adam Selvidge
+* Fixed a small bug in the widgets page, where if the page was localised fully, drag and drop would not work.
 
 =  v0.12.3: 4th July 2008 = 
 * Bug in tdomf-msgs.php that would occur for unregistered users only

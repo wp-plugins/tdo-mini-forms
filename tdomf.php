@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.3
+Version: 0.12.4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -30,7 +30,7 @@ Author URI: http://thedeadone.net
 // 
 // See readme.txt
 //
-// v0.12.4: XXX
+// v0.12.4: 26/09/2008
 // - Solved "$post_ID == 0" problem. See 
 //    http://thedeadone.net/forum/?p=325#comment-1446
 // - Added some error checking around cookie session info
@@ -54,31 +54,35 @@ Author URI: http://thedeadone.net
 // - Updated the AJAX code so that it now properly passes *all* variables
 //    (previousily multi-choice selections got reduced to single-choice)
 // - Forms now better validate as W3C compliance - Thanks Luarent Grabielle
+// - Potential source of 500 Server Error message is because TDO-Mini-Forms 
+//    seems to require PHP5. See readme.txt for more information.
+// - Wordpress comment notification on tdomf submitted posts would go to the 
+//    author set to the post who may not have admin rights to delete/spam
+//    the post. Now TDOMF will check if a post is owned by TDOMF and if so
+//    will redirect the notification email to the admin if it is post author
+//    cannot delete or spam comments.
+// - Readme.txt heavily expanded with help sections on the new complex features
+//    like form hacker (as if anyone reads the readme any more)
+// - Queue time calculation correction code imported. Code donated by Adam 
+//    Selvidge
+// - Fixed a small bug in the widgets page, where if the page was localised 
+//    fully, drag and drop would not work.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
-   - tdomf_ru_Ru: http://thedeadone.net/forum/?p=806#comment-1735
-   - localisation forum
-   - http://wordpress.org/extend/plugins/tdo-mini-forms/#rate-response
-     
-   - disabling comment emails to non-admin submitter users: line 916 pluggable.php
+   - AJAX + Capatcha
+   - Store link to Thumbnail in Custom Field
    - Extract Widget
    - Error, Validation and Style Hacking
-   - AJAX + Capatcha
-   - Time calculation
    - Disabling Comments/Pings
    - Recaptcha plugin
-   - http://wordpress.org/extend/plugins/tdo-mini-forms/#rate-response
    - IE gives "Use FireFox" on submission page   
    - Clickable links: http://thedeadone.net/forum/?p=500#comment-1598
-
-   no sb in widget configuration in IE.7
-     conflicts with other plugins
+     no sb in widget configuration in IE.7
      tinymce problem (conflict with AJAX)
-     widgets on new install of wp2.6.1
      tag widget: required
      upload-link error: http://wordpress.org/support/topic/186919#post-838957
      replace diff with wordpress diff
@@ -104,11 +108,13 @@ Notes:
 TODO for future versions
 
 Known Bugs
-- There seems to be some issues with the queuing functionality and GMT 
-   calculation of time. I haven't nailed down exactly what is going on but queue
-   periods of greater than an hour are not correctly respected.
+- Problem with AJAX and Capathca Widget
+- Upload Link error
+- TinyMCE integration problem with AJAX
+- IE gives "Use FireFox" on submission page
 
 New Features
+- Option to redirect all comment notifications on submitted posts to the admin (globally or per form)
 - Allow moderators append a message to the approved/rejected notification (allows communication between submitter and moderator)
 - Widget Manager Menu
   * Info about loaded widgets
@@ -150,6 +156,7 @@ New Widgets
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
+- All widgets should have a title field
 - Textfield Class (support numeric, date, email, webpage, etc.)
 - Textarea Class
 - Copy Widget to another Form
@@ -201,6 +208,7 @@ Existing Widget Improvements
   * Co-operate with "Categories" Widget
 - Who Am I
   * Integration with WP-OpenID?
+  * Allow login as part of form submit
 
 Template Tags
 - Log
@@ -227,9 +235,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "40");
+define("TDOMF_BUILD", "41");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.3");
+define("TDOMF_VERSION", "0.12.4");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -421,6 +429,11 @@ define('TDOMF_OPTION_MOD_EMAIL_ON_PUB',"tdomf_option_mod_email_on_pub");
 //
 load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 
+/////////////////////////////////////////
+// Loading "hacks" here before pluggable
+//
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-hacks.php');
+
 //////////////////////////////////////////////////////////////////////////
 // A potential fix for WordpressMU (WordpressMU is officially unsupported)
 //
@@ -500,7 +513,6 @@ function tdomf_add_menus()
 //////////////////////////////////
 
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-log-functions.php');
-require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-hacks.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-spam.php');
@@ -585,6 +597,15 @@ function tdomf_new_features() {
       $features .= "<li>".__("Auto Respond Email widget for your form","tdomf")."</li>";
       $features .= "<li>".__("Ban User and IP links directly from the moderation email","tdomf")."</li>";
       $features .= "<li>".__("The moderation emails that are sent for admins can now be left turned on even if moderation is turned off","tdomf")."</li>";
+  }
+  // 41 = 0.12.4
+  if($last_version < 41) {
+      $features .= "<li>".__("Improved Error Reporting","tdomf")."</li>";
+      $features .= "<li>".__("Form toolbar on all form pages (Widgets and Form Hacker)","tdomf")."</li>";
+      $features .= "<li>".__("Include option implemented for Categories widget","tdomf")."</li>";
+      $features .= "<li>".__("Import/Export restored and improved","tdomf")."</li>";
+      $features .= "<li>".__("Default Generated Forms are now W3C compliant","tdomf")."</li>";
+      $features .= "<li>".__("Comment Notification from Submitted Posts no longer go to the Submitter unless they can modify the comments","tdomf")."</li>";
   }
 
   if(!empty($features)) {

@@ -57,6 +57,7 @@ function tdomf_check_permissions_form($form_id = 1) {
               $query .= "AND post_status = 'draft' ";
           }
           if($rule['opt1']) {
+              // this may be inaccurate!
               $timestamp = tdomf_timestamp_wp_sql(time() - $rule['time']);
               $query .= "AND post_date > '$timestamp' ";
           }
@@ -241,28 +242,21 @@ function tdomf_timestamp_wp_sql( $timestamp, $gmt = false ) {
 }
 
 function tdomf_queue_date($form_id,$current_ts)  {
-    tdomf_log_message("Current ts is $current_ts (" . tdomf_timestamp_wp_sql($current_ts) . ")" );
+    tdomf_log_message("Current ts is $current_ts" );
     $queue_period = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
     if($queue_period > 0) {
         tdomf_log_message("Queue period is $queue_period seconds");
-        global $wpdb;
-        $query = "SELECT DISTINCT(ID), post_date
-          FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-          WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
-                AND $wpdb->postmeta.meta_value='".$form_id."'
+         global $wpdb;
+          $query = "SELECT ADDTIME(post_date, SEC_TO_TIME({$queue_period})) 
+            FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+            WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
+                AND $wpdb->postmeta.meta_value='$form_id'
                 AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
-          ORDER BY post_date DESC 
-          LIMIT 1 ";
-          $results = $wpdb->get_results($query);
-          if(count($results) > 0) {
-              #$last_ts = strtotime($results[0]->post_date);
-              $last_ts = mysql2date('U',$results[0]->post_date);
-              tdomf_log_message("Got latest ts of $last_ts (" . tdomf_timestamp_wp_sql($last_ts) . ")");
-              $next_ts = $last_ts + $queue_period;
-              if($next_ts > $current_ts) {
-                  tdomf_log_message("Sticking post in queue with ts of $next_ts (" . tdomf_timestamp_wp_sql($next_ts) . ")");
-                  return $next_ts;
-              }
+            ORDER BY post_date DESC LIMIT 1 ";
+          $next_ts = $wpdb->get_var( $query );
+          if( null != $next_ts ) {
+              tdomf_log_message("Sticking post in queue with ts of $next_ts");
+              return $next_ts;
           }
     }
     return $current_ts;
@@ -421,7 +415,7 @@ function tdomf_create_post($args) {
         
         // Schedule date
         //
-        $current_ts = time();
+        $current_ts = current_time( 'mysql' );
         $ts = tdomf_queue_date($form_id,$current_ts);
         if($current_ts == $ts) {
             $post = array (
@@ -430,16 +424,12 @@ function tdomf_create_post($args) {
               "comment_status" => get_option('default_comment_status'),
               );
         } else {
-            $post_date = tdomf_timestamp_wp_sql($ts);
-            $post_date_gmt = get_gmt_from_date($post_date);
-            #$post_date_gmt = tdomf_timestamp_wp_sql($ts,1);
-            tdomf_log_message("Future Post Date = $post_date!");
+            tdomf_log_message("Future Post Date = $ts!");
             $post = array (
               "ID"             => $post_ID,
               "post_status"    => 'future',
               "comment_status" => get_option('default_comment_status'),
-              "post_date"      => $post_date,
-              "post_date_gmt"  => $post_date_gmt,
+              "post_date"      => $ts,
               );
         }
         
@@ -457,7 +447,7 @@ function tdomf_create_post($args) {
              
             // Schedule date
             //
-            $current_ts = time();
+            $current_ts = current_time( 'mysql' );
             $ts = tdomf_queue_date($form_id,$current_ts);
             if($current_ts == $ts) {
                 $post = array (
@@ -466,16 +456,12 @@ function tdomf_create_post($args) {
                   "comment_status" => get_option('default_comment_status'),
                   );
             } else {
-                $post_date = tdomf_timestamp_wp_sql($ts);
-                $post_date_gmt = get_gmt_from_date($post_date);
-                #$post_date_gmt = tdomf_timestamp_wp_sql($ts,1);
-                tdomf_log_message("Future Post Date = $post_date!");
+                tdomf_log_message("Future Post Date = $ts!");
                 $post = array (
                   "ID"             => $post_ID,
                   "post_status"    => 'future',
                   "comment_status" => get_option('default_comment_status'),
-                  "post_date"      => $post_date,
-                  "post_date_gmt"  => $post_date_gmt,
+                  "post_date"      => $ts,
                   );
             }
              wp_update_post($post);

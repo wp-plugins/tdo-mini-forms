@@ -72,7 +72,7 @@ function tdomf_unpublish_post($post_id) {
 //
 function tdomf_publish_post($post_ID) {
    $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
-   $current_ts = time();
+   $current_ts = current_time( 'mysql' );
    $ts = tdomf_queue_date($form_id,$current_ts);
    if($current_ts == $ts) {
         $post = array (
@@ -81,15 +81,12 @@ function tdomf_publish_post($post_ID) {
           "comment_status" => get_option('default_comment_status'),
           );
     } else {
-        $post_date = tdomf_timestamp_wp_sql($ts);
-        $post_date_gmt = get_gmt_from_date($post_date);
-        tdomf_log_message("Future Post Date = $post_date!");
+        tdomf_log_message("Future Post Date = $ts!");
         $post = array (
           "ID"             => $post_ID,
           "post_status"    => 'future',
           "comment_status" => get_option('default_comment_status'),
-          "post_date"      => $post_date,
-          "post_date_gmt"  => $post_date_gmt,
+          "post_date"      => $ts,
           );
     }
      // Use update post instead of publish post because in WP2.3, 
