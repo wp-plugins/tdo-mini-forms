@@ -92,7 +92,7 @@ function tdomf_import_form_from_file()
                }
                @unlink($thefile['tmp_name']);
            } else {
-               tdomf_log_message("Error uploading file!",TDOMF_LOG_ERROR );
+               tdomf_log_message("Error uploading file! <pre>" . var_export($_FILES["import_file"],true) . "</pre>",TDOMF_LOG_ERROR );
                $message = __("Error importing form","tdomf");
                $ok = false;
            }
@@ -104,15 +104,21 @@ function tdomf_import_form_from_file()
    }
 
    if($ok) {
+       /*error_reporting(E_ALL);*/
        $form_data = unserialize($form_import);
        if(is_array($form_data)) {
              tdomf_import_form($form_id,$form_data['options'],$form_data['widgets'],$form_data['caps']);
              tdomf_log_message("Form import succeeded <pre>" . htmlentities(var_export($form_data,true)) . "</pre>",TDOMF_LOG_GOOD);
              $message = __("Form import successful","tdomf");
          } else {
-             tdomf_log_message("Form import failed <pre>" . htmlentities(var_export($form_data,true)) . "</pre>",TDOMF_LOG_ERROR);
+             if($form_data == false) {
+                 tdomf_log_message("Form import failed <pre>" . htmlentities($form_import) . "</pre>",TDOMF_LOG_ERROR);
+                 $message = __("Failed to unserialize form data: Form import failed","tdomf");                 
+             } else {
+                 tdomf_log_message("Form import failed <pre>" . htmlentities(var_export($form_data,true)) . "</pre>",TDOMF_LOG_ERROR);
+                 $message = __("Form import failed","tdomf");
+             }
              $ok = false;
-             $message = __("Form import failed","tdomf");
          }
    }
    return $message;

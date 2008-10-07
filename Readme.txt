@@ -227,6 +227,9 @@ get_post_meta($post_ID, "_tdomf_download_path_0");
 // Gets the command output for the first uploaded file for post $post_ID (if avaliable)
 get_post_meta($post_ID, "_tdomf_download_cmd_output_0"); 
 
+// Gets the URI for the thumbnail (if it exists)
+get_post_meta($post_ID, "_tdomf_download_thumburi_0"); 
+
 // Gets the name of the second uploaded file for post $post_ID
 get_post_meta($post_ID, "_tdomf_download_name_1");
 

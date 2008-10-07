@@ -820,6 +820,7 @@ function tdomf_show_form_options($form_id) {
     
      <form enctype="multipart/form-data" method="post" action="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>">
         <label for="import_file"><b><?php _e("Form saved configuration to import: "); ?></b></label>
+        <!-- <input type="hidden" name="MAX_FILE_SIZE" value="3000000" /> -->
         <input type="hidden" name='form_id' id='form_id' value='<?php echo $form_id; ?>'>
         <input type='file' name='import_file' id='import_file' size='30' />
         <input type="submit" name="tdomf_import" id="tdomf_import" value="<?php _e("Import","tdomf"); ?>" />

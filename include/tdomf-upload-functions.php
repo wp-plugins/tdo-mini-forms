@@ -642,6 +642,9 @@ function tdomf_widget_upload_post($args) {
                     $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
                   }
                   
+                  // store a copy of the thumb uri
+                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
+                  
                   //$attachment_metadata['thumb'] = $thumb_uri;
                   //$attachment_metadata['thumb'] = $thumbpath;
                   
@@ -678,6 +681,9 @@ function tdomf_widget_upload_post($args) {
                     $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
                   }
                   
+                  // store a copy of the thumb uri
+                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
+                  
                   // add thumbnail link to attachment page
                   if($options['attach-thumb-a']) {
                     $modifypost = true;
@@ -709,6 +715,9 @@ function tdomf_widget_upload_post($args) {
                   $sizeit = " height=\"${w}px\" ";
                 }
               }
+              
+              // store a the uri as a the thumburi
+              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$uri,true);
               
               // add thumbnail link to attachment page
               if($options['attach-thumb-a']) {

@@ -78,14 +78,12 @@ function tdomf_publish_post($post_ID) {
         $post = array (
           "ID"             => $post_ID,
           "post_status"    => 'publish',
-          "comment_status" => get_option('default_comment_status'),
           );
     } else {
         tdomf_log_message("Future Post Date = $ts!");
         $post = array (
           "ID"             => $post_ID,
           "post_status"    => 'future',
-          "comment_status" => get_option('default_comment_status'),
           "post_date"      => $ts,
           );
     }

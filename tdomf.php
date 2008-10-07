@@ -30,64 +30,39 @@ Author URI: http://thedeadone.net
 // 
 // See readme.txt
 //
-// v0.12.4: 26/09/2008
-// - Solved "$post_ID == 0" problem. See 
-//    http://thedeadone.net/forum/?p=325#comment-1446
-// - Added some error checking around cookie session info
-// - Stopped multiple revisions from being created on post submit
-// - Better Error/Warning reporting to Admins
-// - Form toolbar added to both Widgets and Form Hacker (easier to move between
-//    the screens for specific forms)
-// - Error checking on the categories widget when the default category is 
-//    excluded (it selects a new "default") and also if all categories are 
-//    excluded
-// - Error checking if post and ajax submit urls can be reached
-// - Include option enabled and tested for Categories widget
-// - Removed link to non-existant help page and set the y offset of widget 
-//    controls to zero so it doesn't get lost. - Thanks Oleg Butuov for those 
-//    fixes!
-// - Fixed multiple categories selection not showing in preview.
-// - Now tries to use wp-load.php before using wp-config.php as per the new 
-//    Wordpress 2.6 way
-// - Import/Export re-implemented and much cleaner
-// - tdomfinfo() now produces useful output again
-// - Updated the AJAX code so that it now properly passes *all* variables
-//    (previousily multi-choice selections got reduced to single-choice)
-// - Forms now better validate as W3C compliance - Thanks Luarent Grabielle
-// - Potential source of 500 Server Error message is because TDO-Mini-Forms 
-//    seems to require PHP5. See readme.txt for more information.
-// - Wordpress comment notification on tdomf submitted posts would go to the 
-//    author set to the post who may not have admin rights to delete/spam
-//    the post. Now TDOMF will check if a post is owned by TDOMF and if so
-//    will redirect the notification email to the admin if it is post author
-//    cannot delete or spam comments.
-// - Readme.txt heavily expanded with help sections on the new complex features
-//    like form hacker (as if anyone reads the readme any more)
-// - Queue time calculation correction code imported. Code donated by Adam 
-//    Selvidge
-// - Fixed a small bug in the widgets page, where if the page was localised 
-//    fully, drag and drop would not work.
+// v0.12.5: 
+// - A "link" to the thumbnail is stored on the post using 
+//     TDOMF_KEY_DOWNLOAD_THUMBURI key.
+// - Excerpt Widget
+// - Comments Management Widget
+// - Categories Include Field enabled (was accidently left disabled in previous
+//     release)
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
-   - AJAX + Capatcha
-   - Store link to Thumbnail in Custom Field
-   - Extract Widget
-   - Error, Validation and Style Hacking
-   - Disabling Comments/Pings
+
+   - IE gives "Use FireFox" on submission page  
    - Recaptcha plugin
-   - IE gives "Use FireFox" on submission page   
+     publish-now button
+     category sort  
+   - Error, Validation and Style Hacking
    - Clickable links: http://thedeadone.net/forum/?p=500#comment-1598
      no sb in widget configuration in IE.7
      tinymce problem (conflict with AJAX)
      tag widget: required
      upload-link error: http://wordpress.org/support/topic/186919#post-838957
      replace diff with wordpress diff
-     custom field widgets: unique key error
+     * error: custom field widgets: unique key error
+     * error: no policy set in I agree
      In IE, can't select copy/paste text in text widget
+     
+     * Get notifications of Comments widget
+     - For categories widget: No need for default if
+      * doesn't overwrite
+      * checkbox or radio
 */
 
 /*
@@ -235,9 +210,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "41");
+define("TDOMF_BUILD", "42");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.4");
+define("TDOMF_VERSION", "0.12.5");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -423,6 +398,11 @@ define('TDOMF_OPTION_LOG_MAX_SIZE',"tdomf_option_log_max_size");
 // 0.12.2
 
 define('TDOMF_OPTION_MOD_EMAIL_ON_PUB',"tdomf_option_mod_email_on_pub");
+
+//////////
+// 0.12.5
+
+define('TDOMF_KEY_DOWNLOAD_THUMBURI',"_tdomf_download_thumburi_");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

@@ -382,7 +382,7 @@ function tdomf_widget_categories_control($form_id,$params) {
 
 <label for="categories<?php echo $postfix1; ?>-include" >
 <?php _e("List of categories to include (leave blank for all) (separate multiple categories with commas: 0,2,3) (overwrites exclude setting)","tdomf"); ?><br/></label>
-<input type="text" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" disabled />
+<input type="text" size="40" id="categories<?php echo $postfix1; ?>-include" name="categories<?php echo $postfix1; ?>-include" value="<?php echo htmlentities($options['include'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/><br/>
 
 <label for="categories<?php echo $postfix1; ?>-exclude" >
