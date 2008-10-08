@@ -37,6 +37,7 @@ Author URI: http://thedeadone.net
 // - Comments Management Widget
 // - Categories Include Field enabled (was accidently left disabled in previous
 //     release)
+// - Recaptcha Widget
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -44,8 +45,6 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
-   - IE gives "Use FireFox" on submission page  
-   - Recaptcha plugin
      publish-now button
      category sort  
    - Error, Validation and Style Hacking
@@ -58,7 +57,7 @@ Work Queue:
      * error: custom field widgets: unique key error
      * error: no policy set in I agree
      In IE, can't select copy/paste text in text widget
-     
+     * Your submission link on dashboard...
      * Get notifications of Comments widget
      - For categories widget: No need for default if
       * doesn't overwrite

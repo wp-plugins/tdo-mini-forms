@@ -76,15 +76,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
   tdomf_register_form_widget('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments');
  
   function tdomf_widget_comments_hack($args) {
-    /*extract($args);
-    $output  = $before_widget;  
-    $output .= "\t\t".'<label for="comments" >';
-    $output .= "\n\t\t".__("Comments (separate multiple comments with commas: cats, pet food, dogs):","tdomf");
-    $output .= "\n\t\t<br/>\n\t\t".'<input type="text" id="comments" name="comments" size="60" value="';
-    $output .= "<?php echo htmlentities(\$comments,ENT_QUOTES,get_bloginfo('charset')); ?>".'" />';
-    $output .= "\n\t\t".'</label>';
-    $output .= $after_widget;
-    return $output;*/
     $options = tdomf_widget_comments_get_options($args['tdomf_form_id']);
     $output = "";
     if($options['user-comments'] || $options['user-pings'])
