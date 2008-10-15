@@ -8,7 +8,7 @@ Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
 
-/*  Copyright 2006-2007  Mark Cunningham  (email : Mark.Cunningham@gmail.com)
+/*  Copyright 2006-2007  Mark Cunningham  (email : tdomf@thedeadone.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,14 @@ Author URI: http://thedeadone.net
 // - Comments Management Widget
 // - Categories Include Field enabled (was accidently left disabled in previous
 //     release)
+// - Category Widget now has a Order by and Order options
 // - Recaptcha Widget
+// - Warning displayed if "I Agree" text is not modified
+// - Integration with Subscibe to Comments plugin via "Subscribe to Comments" 
+//     widget
+// - Publish Now button
+// - Instead of notifying specific roles that a submission is requiring 
+//     moderation, you can now specify an email list
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -45,23 +52,20 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
-     publish-now button
-     category sort  
-   - Error, Validation and Style Hacking
-   - Clickable links: http://thedeadone.net/forum/?p=500#comment-1598
-     no sb in widget configuration in IE.7
-     tinymce problem (conflict with AJAX)
-     tag widget: required
-     upload-link error: http://wordpress.org/support/topic/186919#post-838957
-     replace diff with wordpress diff
-     * error: custom field widgets: unique key error
-     * error: no policy set in I agree
-     In IE, can't select copy/paste text in text widget
-     * Your submission link on dashboard...
-     * Get notifications of Comments widget
-     - For categories widget: No need for default if
-      * doesn't overwrite
-      * checkbox or radio
+   - Allow Error, StyleSheet and Validation Form Hacking
+   - Allow only the Form or the Preview to be "hacked" in the Form Hacker
+   - "Your Submissions" page link in WP2.6.x is now in a sub-menu. Add option
+       to have it appear somewhere more visible for users
+   - Tag widget
+     * Required Option
+     * Default tags
+   - Add Error Warning for custom field widgets when non-unique keys used
+   - Investigate: no sidebars in widget configuration in IE.7
+   - Investigate: tinymce conflict with AJAX form
+   - Investigate: upload-link error: 
+       http://wordpress.org/support/topic/186919#post-838957
+   - Study: Replace diff with wordpress diff or add wordpress diff to options?
+   - Investigate: In IE, can't select copy/paste text in text widget
 */
 
 /*
@@ -75,6 +79,7 @@ Notes:
      4. add to array
      This will allow users see their submitted posts, however comments should
      be disabled as they cannot be used in preview mode
+ - What Clickable links in your posts? http://thedeadone.net/forum/?p=500#comment-1598
 */
  
  /*
@@ -82,10 +87,8 @@ Notes:
 TODO for future versions
 
 Known Bugs
-- Problem with AJAX and Capathca Widget
 - Upload Link error
 - TinyMCE integration problem with AJAX
-- IE gives "Use FireFox" on submission page
 
 New Features
 - Option to redirect all comment notifications on submitted posts to the admin (globally or per form)
@@ -402,6 +405,7 @@ define('TDOMF_OPTION_MOD_EMAIL_ON_PUB',"tdomf_option_mod_email_on_pub");
 // 0.12.5
 
 define('TDOMF_KEY_DOWNLOAD_THUMBURI',"_tdomf_download_thumburi_");
+define('TDOMF_OPTION_ADMIN_EMAILS', "tdomf_admin_emails");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

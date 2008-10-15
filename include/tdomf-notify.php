@@ -63,6 +63,10 @@ function tdomf_get_admin_emails($form_id) {
         }
      }
   }
+  $more_emails = tdomf_get_option_form(TDOMF_OPTION_ADMIN_EMAILS,$form_id);
+  if($more_emails) {
+      $email_list .= $more_emails;
+  }
   return $email_list;
 }
 

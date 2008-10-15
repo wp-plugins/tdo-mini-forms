@@ -221,5 +221,18 @@ tdomf_register_form_widget_validate('recaptcha',__('reCaptcha',"tdomf"), 'tdomf_
 <?php
 }
 tdomf_register_form_widget_control('recaptcha',__('reCaptcha',"tdomf"), 'tdomf_widget_recaptcha_control', 700, 500);
+
+function tdomf_widget_recaptcha_admin_error($form_id) {
+    
+  $options = tdomf_widget_recaptcha_get_options($form_id,true);
+
+  $output = "";  
+  if(empty($options['publickey']) || empty($options['privatekey'])) {
+      $output .= __('<b>Error</b>: Widget "reCaptcha" is missing the private and/or public keys and cannot function if theses are not set.','tdomf');
+  }
   
+  return $output;
+}
+tdomf_register_form_widget_admin_error('recaptcha',__('reCaptcha','tdomf'), 'tdomf_widget_recaptcha_admin_error');
+
 ?>

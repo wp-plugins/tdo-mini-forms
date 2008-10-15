@@ -210,11 +210,27 @@ function tdomf_content_adminbuttons_filter($content=''){
    && get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
    && $post->post_status == 'draft') {
      
+       $output = "<p>";
+   
+       $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
+       if($queue > 0) { $queue = true; } else { $queue = false; }
+   
+       if($queue) {
+           $publishnow_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$post_ID&nofuture=1";
+           $publishnow_link = wp_nonce_url($publishnow_link,'tdomf-publish_'.$post_ID);
+       }
+       
        $publish_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$post_ID";
        $publish_link = wp_nonce_url($publish_link,'tdomf-publish_'.$post_ID);
-            
+
        $delete_link = get_bloginfo('wpurl')."/wp-admin/post.php?action=delete&post=$post_ID";
        $delete_link = wp_nonce_url($delete_link,'delete-post_'.$post_ID);
+       
+       if($queue) {
+           $output .= sprintf(__('[<a href="%s">Publish Now</a>] [<a href="%s">Add to Queue</a>] [<a href="%s">Delete</a>]',"tdomf"),$publishnow_link, $publish_link,$delete_link);
+       } else {
+           $output .= sprintf(__('[<a href="%s">Publish</a>] [<a href="%s">Delete</a>]',"tdomf"),$publish_link,$delete_link);
+       }
        
        if(get_option(TDOMF_OPTION_SPAM)) {
            $spam_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$post_ID";
@@ -224,13 +240,15 @@ function tdomf_content_adminbuttons_filter($content=''){
            $ham_link = wp_nonce_url($ham_link,'tdomf-hamit_'.$post_ID);
            
             if(get_post_meta($post_ID, TDOMF_KEY_SPAM)) {
-                 return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>] [<a href="%s">Not Spam</a>]</p>',"tdomf"),$publish_link,$delete_link,$ham_link);
+                 $output .= sprintf(__(' [<a href="%s">Not Spam</a>]',"tdomf"),$ham_link);
             } else {
-                 return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>] [<a href="%s">Spam</a>]</p>',"tdomf"),$publish_link,$delete_link,$spam_link);
+                 return $content.sprintf(__(' [<a href="%s">Spam</a>]',"tdomf"),$spam_link);
             }
-       } else {
-           return $content.sprintf(__('<p>[<a href="%s">Approve</a>] [<a href="%s">Reject</a>]</p>',"tdomf"),$publish_link,$delete_link);
-       }
+       } 
+       
+       $output .= '</p>';
+       
+       return $content.$output;
    }
    return $content;
 }

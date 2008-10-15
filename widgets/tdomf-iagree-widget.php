@@ -38,7 +38,7 @@ function tdomf_widget_iagree($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('i-agree','I Agree', 'tdomf_widget_iagree');
+tdomf_register_form_widget('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree');
 
 function tdomf_widget_iagree_hack($args) {
   extract($args);
@@ -53,7 +53,7 @@ function tdomf_widget_iagree_hack($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_hack('i-agree','I Agree', 'tdomf_widget_iagree_hack');
+tdomf_register_form_widget_hack('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_hack');
 
 //////////////////////////////////////
 // User must Agree! 
@@ -70,7 +70,7 @@ function tdomf_widget_iagree_validate($args,$preview) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('i-agree','I Agree', 'tdomf_widget_iagree_validate');
+tdomf_register_form_widget_validate('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_validate');
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -110,7 +110,18 @@ function tdomf_widget_iagree_control($form_id) {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('i-agree','I Agree', 'tdomf_widget_iagree_control', 400, 300);
+tdomf_register_form_widget_control('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_control', 400, 300);
 
+function tdomf_widget_iagree_admin_error($form_id) {
+    
+  $options = tdomf_widget_iagree_get_options($form_id,true);
 
+  $output = "";  
+  if($options['text'] == __("I agree with the <a href='#'>posting policy</a>.","tdomf")) {
+      $output .= __('<b>Warning</b>: You have not modified the text in "I Agree" widget. This contains just a place holder text and should be at least updated to point to <i>your</i> submission policy.','tdomf');
+  }
+  
+  return $output;
+}
+tdomf_register_form_widget_admin_error('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_admin_error');
 ?>

@@ -12,7 +12,7 @@ This plugin allows you to add custom posting forms to your website that allows y
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, etc.
 
-**Version 0.12.4 includes a number of fixes for AJAX, additional error checking, French language files and re-introduction of the Import/Export form configuration functionality**
+**Version 0.12.5 includes integration with the reCapatcha captcha service, integration with the Subscribe-to-Plugins 2.1 plugin (allow submitters to subscribe to followup comments automatically), Comments management widget (allows you to set comments and ping status for forms and/or allow users chose if they want to allow comments), Excerpt Widget and even more bug fixes**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -26,7 +26,8 @@ Registered users have access to a "Your Submissions" page which lists their curr
 
 = Features =
 
-* Integration with Akismet to prevent Spam
+* Integration with Subcribe-to-Comments 2.1 plugin
+* Integration with Akismet and reCaptcha to prevent Spam
 * Highly customisable: Create your forms using a Widget interface and then hack it to make it work how you like!
 * Create as many forms as you like.
 * Import and Export form configurations
@@ -108,7 +109,7 @@ The Form Hacker has a number of "macros". These are special strings that are aut
 
 You can now attach additionally PHP code to your form using the "Append to Content" widget. If you drag and drop this widget to your Form, you can use it to add anything you like to the post content, however you can also insert PHP code that will get called when the submission is being processed (and any outputed info gets added to the post content).
 
-For some examples, on the support forums, the Append to Content widget has been used to use the value set in [Custom Field as the Title]( http://thedeadone.net/forum/?p=418#comment-1542 ) and to use the [Submitter's username as Title] ( http://thedeadone.net/forum/?p=269#comment-1459  )
+For some examples, on the support forums, the Append to Content widget has been used to use the value set in [Custom Field as the Title]( http://thedeadone.net/forum/?p=418#comment-1542 ) and to use the [Submitter's username as Title]( http://thedeadone.net/forum/?p=269#comment-1459  )
 
 == Frequently Asked Questions ==
 
@@ -327,6 +328,8 @@ Several updates to make the generated forms W3C compliance done by [Laurent Grab
 
 SQL Time calcuation function used in calculating next post time in queue, donated [Adam Selvidge]( http://www.myconfinedspace.com/ )
 
+reCaptcha PHP library taken from ( http://recaptcha.net/ )
+
 Also thanks to everyone who donated and offered feedback and testing!
 
 == Screenshots ==
@@ -343,9 +346,6 @@ Also thanks to everyone who donated and offered feedback and testing!
 * If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper. In v0.10.3, the default is to use direct links but you can switch back to the handler if this does not work correctly for you.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
 * The queuing functionality may get the time wrong if period set to greater than an hour
-* The current Image Capatcha widget acts funny when AJAX turned on
-* When a submitted post has the author as the submitter account, they will recieve all the comment moderation emails. This should be disabled.
-* IE sometimes gives a "Use FireFox" message on submissions page in WP2.6.x
 * Missing Sidebars in Widget Control in IE7
 * Issue with Widgets on new install of wp2.6.1
 * In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)

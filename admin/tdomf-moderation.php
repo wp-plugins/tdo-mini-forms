@@ -70,11 +70,11 @@ function tdomf_unpublish_post($post_id) {
 
 // publish a post
 //
-function tdomf_publish_post($post_ID) {
+function tdomf_publish_post($post_ID,$use_queue=true) {
    $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
    $current_ts = current_time( 'mysql' );
    $ts = tdomf_queue_date($form_id,$current_ts);
-   if($current_ts == $ts) {
+   if($current_ts == $ts || !$use_queue) {
         $post = array (
           "ID"             => $post_ID,
           "post_status"    => 'publish',
@@ -392,6 +392,9 @@ function getNumChecked(form)
                  </td>
            <?php } ?>
            
+           <?php $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
+                 if($queue > 0) { $queue = true; } else { $queue = false; } ?>
+           
 		       <td>
                
                <?php if($is_spam && $p->post_status == 'draft') { ?>
@@ -435,7 +438,13 @@ function getNumChecked(form)
                <?php if($is_spam) { ?>
                    <!-- N/A -->
 		       <?php } else if($p->post_status == "draft") { ?>
-		          <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-publish_'.$p->ID); ?>" class="publish"><?php _e("Publish","tdomf"); ?></a>
+                   <?php if($queue) { 
+                       $publishnow_link =  wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit&nofuture=1",'tdomf-publish_'.$p->ID);
+                       $publishlater_link = wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-publish_'.$p->ID);
+                       printf(__('<a href="%s">Publish Now</a> or <a href="%s">Add to Queue</a>','tdomf'),$publishnow_link,$publishlater_link);
+                       } else { ?>
+                       <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-publish_'.$p->ID); ?>" class="publish"><?php _e("Publish","tdomf"); ?></a>
+                   <?php } ?>
 		       <?php } else { ?>
 		          <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=unpublish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-unpublish_'.$p->ID); ?>" class="draft"><?php _e("Un-Publish","tdomf"); ?></a>
 		       <?php } ?>
@@ -536,11 +545,12 @@ function tdomf_moderation_handler() {
    } else if(isset($_REQUEST['publish_button'])) {
       check_admin_referer('tdomf-moderate-bulk');
       $posts = $_REQUEST['moderateposts'];
+      $queue = !isset($_REQUEST['nofuture']);
       $list = "";
       foreach($posts as $p) {
          // if we're going to publish the post, then it's not spam!
          tdomf_ham_post($p);
-         tdomf_publish_post($p);
+         tdomf_publish_post($p,$queue);
          $list .= "<a href=\"".get_permalink($p)."\">".$p."</a>,";
       }
       tdomf_log_message("Published $list posts");
@@ -586,9 +596,10 @@ function tdomf_moderation_handler() {
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'publish') {
       $post_id = $_REQUEST['post'];
       check_admin_referer('tdomf-publish_'.$post_id);
+      $queue = !isset($_REQUEST['nofuture']);
       // if we're going to publish the post, then it's not spam!
       tdomf_ham_post($post_id);
-      tdomf_publish_post($post_id);
+      tdomf_publish_post($post_id,$queue);
       tdomf_log_message("Published post $post_id");
       $message = sprintf(__("Published post <a href=\"%s\">%d</a>.","tdomf"),get_permalink($post_id),$post_id);
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'unpublish') {

@@ -75,7 +75,7 @@ function tdomf_widget_categories_init($form_id,$mode){
      
      tdomf_register_form_widget("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
      tdomf_register_form_widget_hack("categories","Categories 1", 'tdomf_widget_categories', array(), 1);
-     tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 370, 560, array(), 1);
+     tdomf_register_form_widget_control("categories", "Categories 1",'tdomf_widget_categories_control', 370, 610, array(), 1);
      tdomf_register_form_widget_preview("categories", "Categories 1",'tdomf_widget_categories_preview', array(), 1);
      tdomf_register_form_widget_preview_hack("categories", "Categories 1",'tdomf_widget_categories_preview_hack', array(), 1);
      tdomf_register_form_widget_post("categories", "Categories 1",'tdomf_widget_categories_post', array(), 1);
@@ -85,7 +85,7 @@ function tdomf_widget_categories_init($form_id,$mode){
      for($i = 2; $i <= $count; $i++) {
        tdomf_register_form_widget("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);
        tdomf_register_form_widget_hack("categories-$i","Categories $i", 'tdomf_widget_categories', array(), $i);       
-       tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 370, 560, array(), $i);
+       tdomf_register_form_widget_control("categories-$i", "Categories $i",'tdomf_widget_categories_control', 370, 610, array(), $i);
        tdomf_register_form_widget_preview("categories-$i", "Categories $i",'tdomf_widget_categories_preview', array(), $i);
        tdomf_register_form_widget_preview_hack("categories-$i", "Categories $i",'tdomf_widget_categories_preview_hack', array(), $i);
        tdomf_register_form_widget_post("categories-$i", "Categories $i",'tdomf_widget_categories_post', array(), $i);
@@ -115,7 +115,11 @@ function tdomf_widget_categories_get_options($number = 1,$form_id = 1) {
        $options['hierarchical'] = true;
        $options['include'] = "";
        $options['exclude'] = "";
+       $options['order'] = 'asc';
+       $options['orderby'] = 'ID';
     }
+    if(!isset($options['order'])) { $options['order'] = 'asc'; }
+    if(!isset($options['orderby'])) { $options['order'] = 'ID'; }
   return $options;
 }
 
@@ -184,7 +188,9 @@ function tdomf_widget_categories($args,$params) {
   if(!empty($options['include'])) {
       $includes = split(',',trim($options['include']));
       $excludes = "";
-      $cats = get_categories(array('hide_empty' => false ));
+      $cats = get_categories(array('hide_empty' => false, 
+                                   'order'      => $options['order'],
+                                   'orderby'    => $options['orderby'] ));
       foreach($cats as $cat) {
           if(!in_array($cat->term_id,$includes)) {
               $excludes .= $cat->term_id . ",";
@@ -201,7 +207,9 @@ function tdomf_widget_categories($args,$params) {
                     'multiple'         => $options['multi'],
                     'selected'         => $defcat,
                     'mode'             => $mode,
-                    'hack'             => $hack );
+                    'hack'             => $hack,
+                    'order'            => $options['order'],
+                    'orderby'          => $options['orderby'] );
     
   if($options['display'] == "dropdown" ) {
       
@@ -344,6 +352,8 @@ function tdomf_widget_categories_control($form_id,$params) {
        $newoptions['include'] = str_replace(' ', '', strip_tags($_POST["categories$postfix1-include"]));
        $newoptions['exclude'] = str_replace(' ', '',strip_tags($_POST["categories$postfix1-exclude"]));
        $newoptions['display'] = $_POST["categories$postfix1-display"];
+       $newoptions['order'] = $_POST["categories$postfix1-order"];
+       $newoptions['orderby'] = $_POST["categories$postfix1-orderby"];
      if ( $options != $newoptions ) {
         $options = $newoptions;
         tdomf_set_option_widget('tdomf_categories_widget'.$postfix2, $options,$form_id);
@@ -389,6 +399,18 @@ function tdomf_widget_categories_control($form_id,$params) {
 <?php _e("List of categories to exclude (separate multiple categories with commas: 0,2,3)","tdomf"); ?><br/></label>
 <input type="text" size="40" id="categories<?php echo $postfix1; ?>-exclude" name="categories<?php echo $postfix1; ?>-exclude" value="<?php echo htmlentities($options['exclude'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/><br/>
+
+<label for="categories<?php echo $postfix1; ?>-orderby" >
+<?php _e("How the list of categories should be ordered",'tdomf'); ?><br/></label>
+<input type="radio" name="categories<?php echo $postfix1; ?>-orderby" id="categories<?php echo $postfix1; ?>-orderby" value="ID" <?php if($options['orderby'] == 'ID'){ ?> checked <?php } ?>><?php _e("ID","tdomf"); ?><br>
+<input type="radio" name="categories<?php echo $postfix1; ?>-orderby" id="categories<?php echo $postfix1; ?>-orderby" value="name" <?php if($options['orderby'] == 'name'){ ?> checked <?php } ?>><?php _e("Name","tdomf"); ?><br>
+<br/>
+
+<label for="categories<?php echo $postfix1; ?>-order" >
+<?php _e("How the list of categories should be sorted",'tdomf'); ?><br/></label>
+<input type="radio" name="categories<?php echo $postfix1; ?>-order" id="categories<?php echo $postfix1; ?>-order" value="asc" <?php if($options['order'] == 'asc'){ ?> checked <?php } ?>><?php _e("Ascending order","tdomf"); ?><br>
+<input type="radio" name="categories<?php echo $postfix1; ?>-order" id="categories<?php echo $postfix1; ?>-order" value="desc" <?php if($options['order'] == 'desc'){ ?> checked <?php } ?>><?php _e("Descending order","tdomf"); ?><br>
+<br/>
 
 <label for"categories<?php echo $postfix1; ?>-display">
 <?php _e("Display categtories as:","tdomf"); ?><br/></label>

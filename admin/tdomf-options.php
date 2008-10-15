@@ -592,11 +592,12 @@ function tdomf_show_form_options($form_id) {
 
         <h3><?php _e("Who gets notified?","tdomf"); ?></h3>
 
-	<p><?php _e("When a form is submitted by someone who can't automatically publish their entry, someone who can approve or publish the posts will be notified by email. You can chose which roles will be notified. If you select no role, no-one will be notified.","tdomf"); ?>
+	<p><?php _e("When a form is submitted by someone who can't automatically publish their entry, someone who can approve or publish the posts will be notified by email. You can chose which roles will be notified or set a list of specific email addresses (seperate multiple email addresses with a comma). If you select no role or leave the email field empty, no-one will be notified.","tdomf"); ?>
      <br/><br/>
 
 	 <?php $notify_roles = tdomf_get_option_form(TDOMF_NOTIFY_ROLES,$form_id);
-	       if($notify_roles != false) { $notify_roles = explode(';', $notify_roles); }  ?>
+	       if($notify_roles != false) { $notify_roles = explode(';', $notify_roles); }  
+           $admin_emails = tdomf_get_option_form(TDOMF_OPTION_ADMIN_EMAILS,$form_id); ?>
 
 	 <?php foreach($roles as $role) {
            if(isset($role->capabilities['edit_others_posts'])
@@ -613,6 +614,10 @@ function tdomf_show_form_options($form_id) {
 	       } ?>
          <br/>
 
+     <b><?php _e("Specific Emails","tdomf"); ?></b><br/>
+	<input type="text" name="tdomf_admin_emails" id="tdomf_admin_emails" size="80" value="<?php if($admin_emails) { echo htmlentities(stripslashes($admin_emails),ENT_QUOTES,get_bloginfo('charset')); } ?>" />
+	</p>
+         
 	 </p>
 
 	<h3><?php _e("Default Category","tdomf"); ?></h3>
@@ -1213,7 +1218,19 @@ function tdomf_handle_options_actions() {
       } else {
         tdomf_set_option_form(TDOMF_NOTIFY_ROLES,false,$form_id);
       }
-
+      
+      $save = true;
+      $tdomf_admin_emails = $_POST['tdomf_admin_emails'];
+      $emails = split(',',$tdomf_admin_emails);
+      foreach($emails as $email) {
+          if(!tdomf_check_email_address($email)) {
+              $message .= "<font color='red'>".sprintf(__("The email %s is not valid! Please update 'Who Gets Notified' with valid email addresses.","tdomf"),$email)."</font><br/>";
+              $save = false;
+              break;
+          }
+      }
+      if($save) { tdomf_set_option_form(TDOMF_OPTION_ADMIN_EMAILS,$tdomf_admin_emails,$form_id); }
+      
       // Default Category
 
       $def_cat = $_POST['tdomf_def_cat'];
@@ -1447,7 +1464,7 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
         if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
             $mode = "new-page";
         }
-        $uri = "admin.php?page=tdomf_show_form_menu&form=5";
+        $uri = "admin.php?page=tdomf_show_form_menu&form=".$form_id;
         do_action('tdomf_control_form_start',$form_id,$mode);
         $widget_order = tdomf_get_widget_order($form_id);
         $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_admin_errors);
