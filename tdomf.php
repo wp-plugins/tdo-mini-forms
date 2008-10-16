@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.4
+Version: 0.12.5
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -45,6 +45,8 @@ Author URI: http://thedeadone.net
 // - Publish Now button
 // - Instead of notifying specific roles that a submission is requiring 
 //     moderation, you can now specify an email list
+// - Tags Widget now has options for default tags, required and to disable 
+//     user adding tags
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -590,7 +592,18 @@ function tdomf_new_features() {
       $features .= "<li>".__("Default Generated Forms are now W3C compliant","tdomf")."</li>";
       $features .= "<li>".__("Comment Notification from Submitted Posts no longer go to the Submitter unless they can modify the comments","tdomf")."</li>";
   }
-
+  // 43 = 0.12.5
+  if($last_version < 43) {
+      $features .= "<li>".__("Excerpt Widget","tdomf")."</li>";
+      $features .= "<li>".__("Comments Management Widget","tdomf")."</li>";
+      $features .= "<li>".__("Include option implemented for Categories widget (fixed)","tdomf")."</li>";
+      $features .= "<li>".__("Order by and Sort options for Categories widget","tdomf")."</li>";
+      $features .= "<li>".__("Integration with Subscribe to Comments plugin via widget","tdomf")."</li>";
+      $features .= "<li>".__("Publish now button","tdomf")."</li>";
+      $features .= "<li>".__("Specify Email Addresses instead of Roles to recieve Moderation notifications","tdomf")."</li>";
+      $features .= "<li>".__('Default tags, required and enable/disable user adding tags options for Tags widget','tdomf').'</li>';
+  }
+  
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }

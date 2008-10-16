@@ -218,7 +218,7 @@ tdomf_register_form_widget_post('subscribe_to_comments',__('Subscribe to Comment
       $options = tdomf_widget_subscribe_to_comments_get_options($form_id);
   
   // Store settings for this widget
-    if ( $_POST['excerpt-submit'] ) {
+    if ( $_POST['subscribe_to_comments-submit'] ) {
      $newoptions['title'] = strip_tags(stripslashes($_POST['subscribe_to_comments-title']));
      $newoptions['show_email_field'] = isset($_POST['subscribe_to_comments-show_email_field']);
      $newoptions['always_subscribe'] = isset($_POST['subscribe_to_comments-always_subscribe']);
