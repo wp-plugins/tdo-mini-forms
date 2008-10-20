@@ -58,9 +58,6 @@ Work Queue:
    - Allow only the Form or the Preview to be "hacked" in the Form Hacker
    - "Your Submissions" page link in WP2.6.x is now in a sub-menu. Add option
        to have it appear somewhere more visible for users
-   - Tag widget
-     * Required Option
-     * Default tags
    - Add Error Warning for custom field widgets when non-unique keys used
    - Investigate: no sidebars in widget configuration in IE.7
    - Investigate: tinymce conflict with AJAX form
@@ -214,7 +211,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "42");
+define("TDOMF_BUILD", "43");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.12.5");
 

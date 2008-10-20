@@ -305,7 +305,7 @@ function tdomf_widget_customfields_control($form_id,$params) {
   
   $options = tdomf_widget_customfields_get_options($number,$form_id);
   // Store settings for this widget
-  if ( $_POST["customfields-$number-submit"] ) {
+  if (isset($_POST["customfields-$number-submit"]) ) {
      $newoptions['title'] = $_POST["customfields-title-$number"];
      $newoptions['key'] = $_POST["customfields-key-$number"];;
      $newoptions['required'] = isset($_POST["customfields-required-$number"]);

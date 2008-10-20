@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments
 Requires at least: 2.5
 Tested up to: 2.6.2
-Stable Tag: 0.12.4
+Stable Tag: 0.12.5
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -121,13 +121,13 @@ There are two things check. Are you using PHP4? If you can, try using PHP5 inste
 
 The second thing to check is your .htaccess. If you are completely locked out of your blog by the 500 error, try deleting your .htaccess file (normally in the root of your wordpress install). Then you should be able to access the admin UI of your blog (normally at "yourbloguri/wp-admin"). You must then recreate your .htaccess by resetting your permalink structure in the admin UI and re-apply any other changes to your .htaccess (wp-super-cache for example requires changes in your .htaccess).
 
-= Where do I get the latest updates and news on TDO Mini Forms? =
-
-[TDO Mini Forms News]( http://thedeadone.net/index.php?tag=tdomf ) and here is the [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 ).
-
 = Where is the best place to get support for this plugin? =
 
 You can use the [TDOMF Support Forum]( http://thedeadone.net/forum ) or you can post on [Wordpress.org's Support Form]( http://wordpress.org/tags/tdo-mini-forms#postform ). Please avoid emailing me directly. I got a lot of email, so I have a tendency to attach low priorities to  these emails, unless it is directly related to some query on the forum that I have shown an interest in.
+
+= Where do I get the latest updates and news on TDO Mini Forms? =
+
+[TDO Mini Forms News]( http://thedeadone.net/index.php?tag=tdomf ) and here is the [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 ).
 
 = How do I add a form to a page or post? =
 
@@ -351,6 +351,20 @@ Also thanks to everyone who donated and offered feedback and testing!
 * In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)
 
 == Version History ==
+
+= v0.12.5: 20th October 2008 =
+
+* A "link" to the thumbnail is stored on the post using TDOMF_KEY_DOWNLOAD_THUMBURI key.
+* Excerpt Widget
+* Comments Management Widget
+* Categories Include Field enabled (was accidently left disabled in previous release)
+* Category Widget now has a Order by and Order options
+* Recaptcha Widget
+* Warning displayed if "I Agree" text is not modified
+* Integration with Subscibe to Comments plugin via "Subscribe to Comments" widget
+* Publish Now button
+* Instead of notifying specific roles that a submission is requiring moderation, you can now specify an email list
+* Tags Widget now has options for default tags, required and to disable user adding tags
 
 = v0.12.4: 26th September 2008 =
 
