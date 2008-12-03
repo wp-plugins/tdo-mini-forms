@@ -48,12 +48,60 @@ Author URI: http://thedeadone.net
 // - Tags Widget now has options for default tags, required and to disable 
 //     user adding tags
 //
+// v0.13:
+// - Hopefully, finally fixed additionally slashes being added to the content.
+// - Bug with 2.5 and breaking wp-comments.php file
+// - Bug with file uploads and accidentially displaying an error when no error
+//   exists and therefore causing the form to break.
+//
 ////////////////////////////////////////////////////////////////////////////////
+
+/*
+////////////////////////////////////////////////////////////////////////////////
+
+- Control who can access form not just by role but also by user, ip and capability.
+
+Edit Post:
+  * Using same/similar form as what the post was submitted with?
+  * Create Edit-Post only forms
+  * Allow various controls and access for forms: per category and by access roles
+  * Editing Post implies adding/removing comments too (can replace comment submission form)
+  * Unregistered user editing (requires some sort of magic code)
+
+   
+  * Custom Rules for Form access (using regex patterns against $_SERVER or PHP code)
+  
+////////////////////////////////////////////////////////////////////////////////
+ */
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+    http://thedeadone.net/forum/?p=334#comment-2637 (additional default categories)
+    http://thedeadone.net/forum/?p=1230#comment-2618 (potential solution for not saving hacked forms)
+    http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
+    http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
+    
+    http://thedeadone.net/forum/?p=1211#comment-2790 "magic quotes" in post (potential fix)
+    
+    Bug cf with underscore - http://thedeadone.net/forum/?p=1324
+    Bug fix for "0" value in custom field - http://thedeadone.net/forum/?p=1281
+    GD Rating Plugin - http://thedeadone.net/forum/?p=1264
+    Bug with post times - http://thedeadone.net/forum/?p=1269
+    Bug "true" - http://thedeadone.net/forum/?p=1232#comment-2681
+    
+    Geopress integration?
+    
+    Some simple javascript to track number of chars/words typed so far in 
+    textarea: http://thedeadone.net/forum/?p=1321
+    
+    Option: Schedule after latest post in queue, not just tDOMF
+    
+    Add info/image of how to bring up the widget conf panel
+    
+    list of attached files under title in moderation screen
+    
    - Allow Error, StyleSheet and Validation Form Hacking
    - Allow only the Form or the Preview to be "hacked" in the Form Hacker
    - "Your Submissions" page link in WP2.6.x is now in a sub-menu. Add option
@@ -123,12 +171,16 @@ New Form Options
 - Control who can access form not just by role but also by user, ip and capability.
 
 New Widgets
-- Widget to allow users to enable/disable comments and trackbacks on their submission
 - Widget to allow user to enter a date to post the submission (as in future post)
 - Widget to allow submitter to copy the submission to another email
 - Widget that inputs only title
+  * or that allows formatting of title by
+  * user-input
+  * custom field
+  * username/submitter
+  * date submitted (requires date/time format)
+  * PHP code
 - Login/Register/Who Am I Widget
-- Username as Title
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
@@ -166,8 +218,6 @@ Existing Widget Improvements
 - Tags
   * Select from existing tag list or tag cloud
   * Select from only a specified set of tags
-  * Make required
-  * Default Tags
 - 1 Question Captcha
   * Random questions for Captcha
 - Category
@@ -211,7 +261,7 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "43");
+define("TDOMF_BUILD", "44");
 // Version Number (can be text)
 define("TDOMF_VERSION", "0.12.5");
 
@@ -406,6 +456,14 @@ define('TDOMF_OPTION_MOD_EMAIL_ON_PUB',"tdomf_option_mod_email_on_pub");
 define('TDOMF_KEY_DOWNLOAD_THUMBURI',"_tdomf_download_thumburi_");
 define('TDOMF_OPTION_ADMIN_EMAILS', "tdomf_admin_emails");
 
+/////////
+// 0.13.0
+
+define('TDOMF_OPTION_ALLOW_CAPS',"tdomf_allow_caps");
+define('TDOMF_OPTION_ALLOW_USERS',"tdomf_allow_users");
+define('TDOMF_OPTION_ALLOW_PUBLISH',"tdomf_allow_publish");
+define('TDOMF_OPTION_PUBLISH_NO_MOD',"tdomf_option_publish_no_mod");
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -440,6 +498,12 @@ function tdomf_wp25() {
   return false;
 }
 
+// Is this a Wordpress >= 2.7
+//
+function tdomf_wp27() {
+  global $wp_version;
+  return version_compare($wp_version,"2.7-beta3",">=");
+}
 
 ///////////////////////////////////
 // Configure Backend Admin Menus //
@@ -600,6 +664,10 @@ function tdomf_new_features() {
       $features .= "<li>".__("Specify Email Addresses instead of Roles to recieve Moderation notifications","tdomf")."</li>";
       $features .= "<li>".__('Default tags, required and enable/disable user adding tags options for Tags widget','tdomf').'</li>';
   }
+  // 44 = pre-0.13 release
+  if($last_version < 44) {
+      $features .= "<li>".__("More powerful form access configuration. Now you can select by capability and user as well as role!","tdomf")."</li>";
+  }
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
@@ -655,6 +723,14 @@ function tdomf_init(){
       add_option(TDOMF_OPTION_LOG_MAX_SIZE,1000);
   }
 
+  if(intval(get_option(TDOMF_VERSION_CURRENT)) < 44) {
+      $form_ids = tdomf_get_form_ids();
+      foreach($form_ids as $form_id) {
+          tdomf_set_option_form(TDOMF_OPTION_ALLOW_PUBLISH,true,$form_id->form_id);
+          tdomf_set_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,true,$form_id->form_id);
+      }
+  }
+  
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));

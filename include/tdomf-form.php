@@ -10,7 +10,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Checks if current user/ip has permissions to post!
 //
 function tdomf_check_permissions_form($form_id = 1) {
-   global $current_user, $wpdb;
+   global $current_user, $wpdb, $wp_roles;
 
    get_currentuserinfo();
 
@@ -71,20 +71,68 @@ function tdomf_check_permissions_form($form_id = 1) {
           }
       }
   }
-  
-  // Users who can access form
-  //
-  if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
-  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
-      tdomf_log_message("User with the incorrect privilages attempted to submit a post!",TDOMF_LOG_ERROR);
-      if(is_user_logged_in()) {
-        return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_USER,$form_id);
-      } else {
-        return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,$form_id);
-      }
-  	}
-  }
 
+  
+    // What users can access the form
+    //
+    if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
+
+        // does the current user have the capability
+        //
+        if(current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) { 
+            return NULL;
+        }
+        
+        // check if users with publish rights can use form
+        //
+        if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_PUBLISH,$form_id) == true && current_user_can("publish_posts")) {
+            return NULL;
+        }
+        
+        // check if default role is set and if anyone can register => logged
+        // in users are valid
+        //
+        if(!isset($wp_roles)) {
+            $wp_roles = new WP_Roles();
+        }
+        $roles = $wp_roles->role_objects;
+        foreach($roles as $role) {
+            if($role->name == get_option('default_role')) {
+                $def_role = $role->name;
+                break;
+            }
+        }
+        if(is_user_logged_in() && get_option('users_can_register') && isset($def_role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) {
+            return NULL;
+        }
+        
+        // check against selected caps
+        //
+        $access_caps = tdomf_get_option_form(TDOMF_OPTION_ALLOW_CAPS,$form_id);
+        if(is_array($access_caps)) {
+            foreach($access_caps as $cap) {
+                if(current_user_can($cap)) {
+                    return NULL;
+                }
+            }
+        }
+
+        // check against selected users
+        //
+        $allow_users = tdomf_get_option_form(TDOMF_OPTION_ALLOW_USERS,$form_id);           
+        if(is_array($allow_users) && is_user_logged_in() && in_array($current_user->ID,$allow_users)) {
+            return NULL;
+        }
+        
+        // If you get this point, all other checkes failed
+        //
+        if(is_user_logged_in()) {
+            return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_USER,$form_id);
+        } else {
+            return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,$form_id);
+        }
+    }
+  
   return NULL;
 }
 

@@ -37,12 +37,52 @@ function tdomf_can_current_user_see_form($form_id = 1) {
 	 }
   }
   
-  if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
-  	if(!current_user_can("publish_posts")  && !current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
-      // User doesn't have capability to see form
-      return false;
-  	}
-  }
+    if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
+
+        if(current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
+            // has cap
+            return true;
+        }
+        
+        if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_PUBLISH,$form_id) == true && current_user_can("publish_posts")) {
+            // can already publish
+            return true;
+        }
+        
+        if(!isset($wp_roles)) {
+            $wp_roles = new WP_Roles();
+        }
+        $roles = $wp_roles->role_objects;
+        foreach($roles as $role) {
+            if($role->name == get_option('default_role')) {
+                $def_role = $role->name;
+                break;
+            }
+        }
+        if(is_user_logged_in() && get_option('users_can_register') && isset($def_role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) {
+            // logged in (and default role + free reg enabled)
+            return true;
+        }
+
+        $access_caps = tdomf_get_option_form(TDOMF_OPTION_ALLOW_CAPS,$form_id);
+        if(is_array($access_caps)) {
+            foreach($access_caps as $cap) {
+                if(current_user_can($cap)) {
+                    // has specific cap
+                    return true;
+                }
+            }
+        }
+
+        $allow_users = tdomf_get_option_form(TDOMF_OPTION_ALLOW_USERS,$form_id);           
+        if(is_array($allow_users) && is_user_logged_in() && in_array($current_user->ID,$allow_users)) {
+            // is one of the specific users
+            return true;
+        }             
+        
+        // if get to here => fail
+        return false;
+    }
   
   // all other conditions passed!
   return true;

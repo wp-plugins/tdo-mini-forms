@@ -432,7 +432,7 @@ function tdomf_edit_form_form_id() {
 //
 function tdomf_show_form_menu() {
   global $wpdb, $wp_roles, $tdomf_form_widgets, $tdomf_form_widgets_control;
-
+  
   tdomf_handle_editformmenu_actions();
 
   $form_ids = tdomf_get_form_ids();
@@ -491,6 +491,7 @@ function tdomf_show_form_menu() {
           |</li>
       <?php } ?>
       </ul>
+      <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
   <?php } ?>
     
   <ul class="subsubsub">
@@ -517,7 +518,9 @@ function tdomf_show_form_menu() {
      <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>"><?php printf(__("Hack Form &raquo;","tdomf"),$form_id); ?></a></li>
     </ul>
   
-		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Widgets will be executed and displayed in order from top to bottom.',"tdomf"); ?></p>
+    <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
+    
+		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Most Widgets can be individually configured once you have dropped them on the form. Just click on the right-most icon on the Widget title. Widgets will be executed and displayed in order from top to bottom. If you wish to change the order they are displayed in but not executed in, please use the Form Hacker to do so.',"tdomf"); ?></p>
 
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
       
@@ -625,18 +628,18 @@ function tdomf_handle_editformmenu_actions() {
     $form_id = intval($_REQUEST['tdomf-form-id']);
   }
   
-  if (get_magic_quotes_gpc()) {
+  #if (get_magic_quotes_gpc()) {
       function stripslashes_array($array) {
           return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
       }
       #$_COOKIE = stripslashes_array($_COOKIE);
       #$_FILES = stripslashes_array($_FILES);
-      #$_GET = stripslashes_array($_GET);
+      $_GET = stripslashes_array($_GET);
       $_POST = stripslashes_array($_POST);
-      #$_REQUEST = stripslashes_array($_REQUEST);
+      $_REQUEST = stripslashes_array($_REQUEST);
       
       tdomf_log_mem_usage(__FILE__,__LINE__);
-  }
+  #}
 
 	if ( isset( $_POST['action'] ) && $form_id ) {
 		switch( $_POST['action'] ) {

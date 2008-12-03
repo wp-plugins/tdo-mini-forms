@@ -483,17 +483,17 @@ function tdomf_widget_notifyme_hack_messages($form_id, $mode) {
     $widget_order = tdomf_get_widget_order($form_id);
     if(in_array('notifyme',$widget_order) && tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)) {
         if(isset($_REQUEST['tdomf_hack_messages_save'])) {
-            if (get_magic_quotes_gpc()) {
+            #if (get_magic_quotes_gpc()) {
                 $options = array( 'approved' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_approved']),
                                   'rejected' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_rejected']),
                                   'approved_subject' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_approved_subject']),
                                   'rejected_subject' => stripslashes($_REQUEST['tdomf_widget_notifyme_msg_rejected_subject']) );
-            } else {
-                $options = array( 'approved' => $_REQUEST['tdomf_widget_notifyme_msg_approved'],
-                                  'rejected' => $_REQUEST['tdomf_widget_notifyme_msg_rejected'],
-                                  'approved_subject' => $_REQUEST['tdomf_widget_notifyme_msg_approved_subject'],
-                                  'rejected_subject' => $_REQUEST['tdomf_widget_notifyme_msg_rejected_subject'] );
-            }
+            #} else {
+            #    $options = array( 'approved' => $_REQUEST['tdomf_widget_notifyme_msg_approved'],
+            #                      'rejected' => $_REQUEST['tdomf_widget_notifyme_msg_rejected'],
+            #                      'approved_subject' => $_REQUEST['tdomf_widget_notifyme_msg_approved_subject'],
+            #                      'rejected_subject' => $_REQUEST['tdomf_widget_notifyme_msg_rejected_subject'] );
+            #}
             tdomf_set_option_widget('notifyme',$options,$form_id);
         } else if(isset($_REQUEST['tdomf_hack_messages_reset'])) {
             tdomf_set_option_widget('notifyme',false,$form_id);

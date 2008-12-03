@@ -5,6 +5,124 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for the options menu //
 ///////////////////////////////
 
+function tdomf_load_options_admin_scripts() {
+    /* for tabs */
+    wp_enqueue_script( 'jquery-ui-tabs' );
+}
+add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_options_menu","tdomf_load_options_admin_scripts");
+
+function tdomf_options_admin_head() {
+    /* add style options and start tabs for options page */
+    if(preg_match('/tdomf_show_options_menu\&form/',$_SERVER[REQUEST_URI])) { ?>
+  
+           <style>
+            .ui-tabs-nav {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                float: left;
+                position: relative;
+                z-index: 1;
+                border-right: 1px solid #d3d3d3;
+                bottom: -1px;
+            }
+            .ui-tabs-nav li {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                float: left;
+                border: 1px solid #d3d3d3;
+                border-right: none;
+            }
+            .ui-tabs-nav li a {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                float: left;
+                font-weight: bold;
+                text-decoration: none;
+                padding: .5em 1.7em;
+                color: #555555;
+                background: #e6e6e6;
+            }
+            .ui-tabs-nav li a:hover {
+                background: #dadada;
+                color: #212121;
+            }
+            .ui-tabs-nav li.ui-tabs-selected {
+                border-bottom-color: #ffffff;
+            }
+            .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs-nav li.ui-tabs-selected a:hover {
+                background: #ffffff;
+                color: #222222;
+            }
+            .ui-tabs-panel {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                clear:left;
+                border: 1px solid #d3d3d3;
+                background: #ffffff;
+                color: #222222;
+                padding: 1.5em 1.7em;	
+            }
+            .ui-tabs-hide {
+                display: none;
+            }
+            #access_caps_list {
+             overflow: scroll;
+             height: 200px;
+            }
+            
+            </style>
+           
+           <script>
+           jQuery(document).ready(function(){
+                   jQuery("#options_access_tabs > ul").tabs();
+           });
+           </script>
+           
+    <?php }
+}
+add_action( 'admin_head', 'tdomf_options_admin_head' );
+
+  /**
+   * get an array with all capabilities
+   * copied from role-manager 2 plugin
+   */
+function tdomf_get_all_caps() {
+    global $wp_roles;
+    
+    // Get Role List
+    foreach($wp_roles->role_objects as $key => $role) {
+      foreach($role->capabilities as $cap => $grant) {
+        $capnames[$cap] = $cap;
+        //$this->debug('grant', ($role->capabilities));
+      }
+    }
+    
+    $capnames = apply_filters('capabilities_list', $capnames);
+    if(!is_array($capnames)) $capnames = array();
+    $capnames = array_unique($capnames);
+    sort($capnames);
+
+    //Filter out the level_x caps, they're obsolete
+    $capnames = array_diff($capnames, array('level_0', 'level_1', 'level_2', 'level_3', 'level_4', 'level_5',
+        'level_6', 'level_7', 'level_8', 'level_9', 'level_10'));
+    
+    //Filter out roles
+      foreach ($wp_roles->get_names() as $role) {
+        $key = array_search($role, $capnames);
+        if ($key !== false && $key !== null) { //array_search() returns null if not found in 4.1
+          unset($capnames[$key]);
+        }
+      }
+      
+      // this cap is used seperately 
+      unset($capnames['publish_post']);
+      
+      // filter out tdomf caps that were added
+      foreach($capnames as $key => $cap) {
+          if(substr($cap,TDOMF_CAPABILITY_CAN_SEE_FORM,strlen(TDOMF_CAPABILITY_CAN_SEE_FORM)) == TDOMF_CAPABILITY_CAN_SEE_FORM) {
+              unset($capnames[$key]);
+          }
+      }
+      
+    return $capnames;
+  }
+
 function tdomf_prep_str_seralize($input) {
     $ko = 4096; /*$ko = 100;*/
     
@@ -453,7 +571,8 @@ function tdomf_show_form_options($form_id) {
      <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a> |</li>
      <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>"><?php printf(__("Hack Form &raquo;","tdomf"),$form_id); ?></a></li>
     </ul>
-          <?php } ?>
+    <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
+    <?php } ?>
 
           <?php if($updated_pages == false) { ?>
           
@@ -511,13 +630,17 @@ function tdomf_show_form_options($form_id) {
           
 <h3><?php _e("Who can access the form?","tdomf"); ?></h3>
 
-	<p><?php _e("You can control access to the form based on user users roles. You can chose \"Unregistered Users\" if you want anyone to be able to access the form. If a user can publish their own posts, when they use the form, the post will be automatically published. (Only roles that cannot publish are listed here).","tdomf"); ?>
+    <?php /*
+       @todo: update warnings
+       @todo: auto-publish option
+    */ ?>
 
-   <br/><br/>
-
+	<p><?php _e("You can control access to the form based on user roles, capabilities or by specific users. You can chose \"Unregistered Users\" if you want anyone to be able to access the form, including visitors to your site that do not have user accounts. The old behaviour of TDO Mini Forms allowed any user with the ability to publish posts automatic access to the form. This behaviour can now be turned off or on as required.","tdomf"); ?></p>
+   
 	<?php if (!isset($wp_roles)) { $wp_roles = new WP_Roles(); }
 	       $roles = $wp_roles->role_objects;
           $access_roles = array();
+          $publish_roles = array();
           foreach($roles as $role) {
              if(!isset($role->capabilities['publish_posts'])) {
                 if($role->name != get_option('default_role')) {
@@ -525,71 +648,229 @@ function tdomf_show_form_options($form_id) {
                 } else {
                    $def_role = $role->name;
                 }
+             } else {
+                 array_push($publish_roles,$role->name);
              }
-          } ?>
+          }
+          rsort($access_roles);
+          rsort($publish_roles);
+          
+          $caps = tdomf_get_all_caps();
 
+          $can_reg = get_option('users_can_register');
+          
+          ?>
+
+
+          
           <script type="text/javascript">
          //<![CDATA[
           function tdomf_unreg_user() {
             var flag = document.getElementById("tdomf_special_access_anyone").checked;
-            if(flag) {
-            <?php if(isset($def_role)) {?>
-               document.getElementById("tdomf_access_<?php echo $def_role; ?>").checked = !flag;
-            <?php } ?>
-            <?php foreach($access_roles as $role) { ?>
-               document.getElementById("tdomf_access_<?php echo $role; ?>").checked = !flag;
-            <?php } ?>
-            }
+            var flag2 = document.getElementById("tdomf_user_publish_override").checked;
             <?php if(isset($def_role)) {?>
             document.getElementById("tdomf_access_<?php echo $def_role; ?>").disabled = flag;
+            document.getElementById("tdomf_access_<?php echo $def_role; ?>").checked = flag;
             <?php } ?>
             <?php foreach($access_roles as $role) { ?>
             document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
+            document.getElementById("tdomf_access_<?php echo $role; ?>").checked = flag;
             <?php } ?>
+            <?php foreach($caps as $cap) { ?>
+            document.getElementById("tdomf_access_caps_<?php echo $cap; ?>").disabled = flag;
+            document.getElementById("tdomf_access_caps_<?php echo $cap; ?>").checked = flag;
+            <?php } ?>
+            document.getElementById("tdomf_access_users_list").disabled = flag;
+            if(flag) {
+               document.getElementById("tdomf_access_users_list").value = "";
+            }
+            if(!flag2) {
+            <?php foreach($publish_roles as $role) { ?>
+            document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
+            document.getElementById("tdomf_access_<?php echo $role; ?>").checked = flag;
+            <?php } ?>
+            }
            }
-           <?php if(isset($def_role)) { ?>
+           <?php if(isset($def_role) && $can_reg) { ?>
            function tdomf_def_role() {
               var flag = document.getElementById("tdomf_access_<?php echo $def_role; ?>").checked;
-              if(flag) {
+              var flag2 = document.getElementById("tdomf_user_publish_override").checked;
               <?php foreach($access_roles as $role) { ?>
-               //document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
                document.getElementById("tdomf_access_<?php echo $role; ?>").checked = flag;
               <?php } ?>
-              } else {
+                 if(!flag2) {
+                 <?php foreach($publish_roles as $role) { ?>
+                    document.getElementById("tdomf_access_<?php echo $role; ?>").checked = flag;
+                 <?php } ?>
+                 }
+              <?php foreach($caps as $cap) { ?>
+             document.getElementById("tdomf_access_caps_<?php echo $cap; ?>").disabled = flag;
+             document.getElementById("tdomf_access_caps_<?php echo $cap; ?>").checked = flag;
+             <?php } ?>
               <?php foreach($access_roles as $role) { ?>
-               //document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
+              document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
+              <?php } ?>
+              if(!flag2) {
+              <?php foreach($publish_roles as $role) { ?>
+                 document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
               <?php } ?>
               }
+             document.getElementById("tdomf_access_users_list").disabled = flag;
+            if(flag) {
+               document.getElementById("tdomf_access_users_list").value = "";
+            }
            }
            <?php } ?>
+           
+           function tdomf_publish_user() {
+            var flag = document.getElementById("tdomf_user_publish_override").checked;
+            <?php if(isset($def_role) && $can_reg) { ?>
+            var flag2 = document.getElementById("tdomf_access_<?php echo $def_role; ?>").checked;
+            if(!flag2) {
+            <?php } ?>
+                <?php foreach($publish_roles as $role) { ?>
+                document.getElementById("tdomf_access_<?php echo $role; ?>").checked = flag;
+                document.getElementById("tdomf_access_<?php echo $role; ?>").disabled = flag;
+                <?php } ?>
+
+            <?php if(isset($def_role) && $can_reg) { ?>
+            }
+            <?php } ?>
+           }
            //-->
            </script>
 
+           <p>
+           
           <label for="tdomf_special_access_anyone">
    <input value="tdomf_special_access_anyone" type="checkbox" name="tdomf_special_access_anyone" id="tdomf_special_access_anyone" <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?>checked<?php } ?> onClick="tdomf_unreg_user();" />
-   <?php _e("Unregistered Users"); ?>
-           </label><br/>
+   <?php _e("Unregistered Users (i.e. everyone)","tdomf"); ?>
+           </label>
+           
+           <br/>
 
-   <?php if(isset($def_role)) { ?>
+           <input type="checkbox" name="tdomf_author_edit" id="tdomf_author_edit" disabled />
+          <label for="tdomf_author_edit">
+          <?php _e("Author of post (registered users only)","tdomf"); ?>
+          </label>   
+           
+          <br/>
+          
+          <?php $can_publish = tdomf_get_option_form(TDOMF_OPTION_ALLOW_PUBLISH,$form_id); ?>
+          
+          <input type="checkbox" 
+                 name="tdomf_user_publish_override" id="tdomf_user_publish_override"
+                 <?php if($can_publish) { ?> checked <?php } ?>
+                 onClick="tdomf_publish_user();" />
+          <label for="tdomf_user_publish_override">
+          <?php _e("Users with rights to publish posts.","tdomf"); ?>
+          </label>   
+
+           </p>
+          
+           <div id="options_access_tabs" class="tabs">
+              <ul>
+                <li><a href="#access_roles"><span><?php _e('Roles','tdomf'); ?></span></a></li>
+                <li><a href="#access_caps"><span><?php _e('Capabilities','tdomf'); ?></span></a></li>
+                <li><a href="#access_users"><span><?php _e('Specific Users','tdomf'); ?></span></a></li>
+              </ul>
+           
+           <div id="access_roles">
+           <p><?php _e('Select roles that can access the form. If you allow free user registration and pick the default role, this means that a user must just be logged in to access the form.','tdomf'); ?></p>
+           
+           <p>
+          <?php if(isset($def_role)) { ?>
              <label for="tdomf_access_<?php echo ($def_role); ?>">
-             <input value="tdomf_access_<?php echo ($def_role); ?>" type="checkbox" name="tdomf_access_<?php echo ($def_role); ?>" id="tdomf_access_<?php echo ($def_role); ?>"  <?php if(isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?> onClick="tdomf_def_role()" <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> disabled <?php } ?> />
+             <input value="tdomf_access_<?php echo ($def_role); ?>" type="checkbox"
+                    name="tdomf_access_<?php echo ($def_role); ?>" id="tdomf_access_<?php echo ($def_role); ?>"  
+                    <?php if(isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?> 
+                    onClick="tdomf_def_role()" 
+                    <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> checked disabled <?php } ?> />
              <?php if(function_exists('translate_with_context')) {
                    $role_name = translate_with_context($wp_roles->role_names[$def_role]);
                    } else { $role_name = $wp_roles->role_names[$def_role]; } ?>
-             <?php echo $role_name." ".__("(default role for new users)"); ?>
+             <?php echo $role_name." ".__("(newly registered users)"); ?>
              </label><br/>
           <?php } ?>
 
           <?php foreach($access_roles as $role) { ?>
              <label for="tdomf_access_<?php echo ($role); ?>">
-             <input value="tdomf_access_<?php echo ($role); ?>" type="checkbox" name="tdomf_access_<?php echo ($role); ?>" id="tdomf_access_<?php echo ($role); ?>" <?php if(isset($wp_roles->role_objects[$role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?> <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> disabled <?php } ?> />
+             <input value="tdomf_access_<?php echo ($role); ?>" type="checkbox" 
+                    name="tdomf_access_<?php echo ($role); ?>" id="tdomf_access_<?php echo ($role); ?>" 
+                    <?php if(isset($wp_roles->role_objects[$role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?>
+                    <?php if(isset($def_role) && isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id]) && $can_reg) { ?> checked disabled <?php } ?>
+                    <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> checked disabled <?php } ?> />
              <?php if(function_exists('translate_with_context')) {
                    echo translate_with_context($wp_roles->role_names[$role]);
                    } else { echo $wp_roles->role_names[$role]; } ?>
              </label><br/>
           <?php } ?>
-	 </p>
-
+          
+          <?php foreach($publish_roles as $role) { ?>
+             <label for="tdomf_access_<?php echo ($role); ?>">
+             <input value="tdomf_access_<?php echo ($role); ?>" type="checkbox" 
+                    name="tdomf_access_<?php echo ($role); ?>" id="tdomf_access_<?php echo ($role); ?>"
+                    <?php if($can_publish) { ?> checked disabled <?php } ?>
+                    <?php if(isset($wp_roles->role_objects[$role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) { ?> checked <?php } ?>
+                    <?php if(isset($def_role) && isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id]) && $can_reg) { ?> checked disabled <?php } ?>
+                    <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> checked disabled <?php } ?> />
+             <?php if(function_exists('translate_with_context')) {
+                   printf(__('%s (can publish posts)','tdomf'), translate_with_context($wp_roles->role_names[$role]));
+                   } else { printf(__('%s (can publish posts)','tdomf'),$wp_roles->role_names[$role]); } ?>
+             </label><br/>
+          <?php } ?>
+          </p>
+          </div> <!-- access_roles -->
+           
+          <div id="access_caps">
+          <p><?php _e('Capabilities are specific access rights. Roles are groupings of capabilities. Individual users can be given individual capabilities outside their assigned Role using external plugins. You can optionally select additional capabilities that give access to the form.','tdomf'); ?></p>
+          
+          <?php $access_caps = tdomf_get_option_form(TDOMF_OPTION_ALLOW_CAPS,$form_id);
+                if($access_caps == false) { $access_caps = array(); } ?>
+          
+          <div id="access_caps_list"><p>
+          <?php foreach($caps as $cap) { ?>
+             <input value="tdomf_access_caps_<?php echo ($cap); ?>" type="checkbox" 
+                    name="tdomf_access_caps_<?php echo ($cap); ?>" id="tdomf_access_caps_<?php echo ($cap); ?>"
+                    <?php if(isset($def_role) && isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id]) && $can_reg) { ?> checked disabled <?php } ?>
+                    <?php if(in_array($cap,$access_caps)) { ?> checked <?php } ?>
+                    <?php if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> checked disabled <?php } ?> />
+             <label for="tdomf_access_caps_<?php echo ($cap); ?>">
+             <?php if(function_exists('translate_with_context')) {
+                   echo translate_with_context($cap);
+                   } else { echo $cap; } ?>
+             </label><br/>
+          <?php } ?>
+          </p></div> <!-- access_caps_list -->
+          
+          </div> <!-- access_caps -->
+          
+          <div id="access_users">
+          
+          <?php $allow_users = tdomf_get_option_form(TDOMF_OPTION_ALLOW_USERS,$form_id); 
+                $tdomf_access_users_list = "";
+                if(is_array($allow_users)) {
+                    $tdomf_access_users_list = array();
+                    foreach( $allow_users as $allow_user ) {
+                        $allow_user = get_userdata($allow_user);
+                        $tdomf_access_users_list[] = $allow_user->user_login;
+                    }
+                    sort($tdomf_access_users_list);
+                    $tdomf_access_users_list = join(' ', $tdomf_access_users_list);
+                } ?>
+          
+          <p><?php _e('You can specify additional specific users who can access the form. Just list their login names seperated by spaces in the box provide','tdomf'); ?></p>
+          
+          <textarea cols="80" rows="3" 
+                    name="tdomf_access_users_list" id="tdomf_access_users_list"
+                    <?php if(isset($def_role) && isset($wp_roles->role_objects[$def_role]->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id]) && $can_reg) { ?> checked disabled /></textarea>
+                    <?php } else if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) != false) { ?> checked disabled /></textarea> 
+                    <?php } else { ?> /><?php echo $tdomf_access_users_list; ?></textarea><?php } ?>
+          
+          </div> <!-- access_users -->
+          
+       </div> <!-- options_access_tabs -->
+           
         <h3><?php _e("Who gets notified?","tdomf"); ?></h3>
 
 	<p><?php _e("When a form is submitted by someone who can't automatically publish their entry, someone who can approve or publish the posts will be notified by email. You can chose which roles will be notified or set a list of specific email addresses (seperate multiple email addresses with a comma). If you select no role or leave the email field empty, no-one will be notified.","tdomf"); ?>
@@ -602,8 +883,8 @@ function tdomf_show_form_options($form_id) {
 	 <?php foreach($roles as $role) {
            if(isset($role->capabilities['edit_others_posts'])
 	           && isset($role->capabilities['publish_posts'])) { ?>
-		     <label for="tdomf_notify_<?php echo ($role->name); ?>">
 		     <input value="tdomf_notify_<?php echo ($role->name); ?>" type="checkbox" name="tdomf_notify_<?php echo ($role->name); ?>" id="tdomf_notify_<?php echo ($role->name); ?>" <?php if($notify_roles != false && in_array($role->name,$notify_roles)) { ?>checked<?php } ?> />
+             <label for="tdomf_notify_<?php echo ($role->name); ?>">
           <?php if(function_exists('translate_with_context')) {
                    echo translate_with_context($wp_roles->role_names[$role->name]);
                    } else { echo $wp_roles->role_names[$role->name]; } ?>
@@ -666,6 +947,12 @@ function tdomf_show_form_options($form_id) {
 	<input type="checkbox" name="tdomf_mod_email_on_pub" id="tdomf_mod_email_on_pub" <?php if($mod_email_on_pub) echo "checked"; ?> >
     <?php _e("Send Moderation Email even for automatically Published Post","tdomf"); ?>
 
+       
+    <input type="checkbox" name="tdomf_user_publish_auto" id="tdomf_user_publish_auto" checked />
+    <label for="tdomf_user_publish_auto">
+    <?php _e("Automatically publish their entries","tdomf"); ?>
+    </label>
+    
 	</p>
     
     <h3><?php _e('Preview',"tdomf"); ?> </h3>
@@ -886,6 +1173,7 @@ function tdomf_options_form_list($form_id_in=false) {
       <li><a href="admin.php?page=tdomf_show_options_menu&new"><?php _e("New Form &raquo;","tdomf"); ?></a></li>
     <?php } ?>
    </ul>
+   <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
   <?php } 
 }
 
@@ -1010,6 +1298,7 @@ function tdomf_handle_options_actions() {
   	$wp_roles = new WP_Roles();
   }
   $roles = $wp_roles->role_objects;
+  $caps = tdomf_get_all_caps();
   
   $remove_throttle_rule = false;
   $rule_id = 0;
@@ -1187,14 +1476,20 @@ function tdomf_handle_options_actions() {
 
       if(isset($_REQUEST['tdomf_special_access_anyone']) && tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
          tdomf_set_option_form(TDOMF_OPTION_ALLOW_EVERYONE,true,$form_id);
-     	foreach($roles as $role) {
+
+         foreach($roles as $role) {
      	    // remove cap as it's not needed
 		    if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
    				$role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id);
 		    }
  	  	}
+        
+        tdomf_set_option_form(TDOMF_OPTION_ALLOW_CAPS,array(),$form_id);
+        
       } else if(!isset($_REQUEST['tdomf_special_access_anyone'])){
+          
          tdomf_set_option_form(TDOMF_OPTION_ALLOW_EVERYONE,false,$form_id);
+         
          // add cap to right roles
          foreach($roles as $role) {
 		    if(isset($_REQUEST["tdomf_access_".$role->name])){
@@ -1203,8 +1498,39 @@ function tdomf_handle_options_actions() {
    				$role->remove_cap(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id);
 		    }
  	  	}
+        
+        // list caps that can access form
+        $allow_caps = array();
+        foreach($caps as $cap) {
+            if(isset($_REQUEST['tdomf_access_caps_'.$cap])){
+                $allow_caps[] = $cap; 
+            }
+        }
+        tdomf_set_option_form(TDOMF_OPTION_ALLOW_CAPS,$allow_caps,$form_id);
+        
+        // convert user names to ids
+        $allow_users = array();
+        if(isset($_REQUEST['tdomf_access_users_list'])) {
+           $user_names = trim($_REQUEST['tdomf_access_users_list']);
+           if(!empty($user_names)) {
+               $user_names = split(' ',$user_names);
+               foreach($user_names as $user_name) {
+                   if(!empty($user_name)) {
+                       if(($userdata = get_userdatabylogin($user_name)) != false) {
+                           $allow_users[] = $userdata->ID;
+                       } else {
+                           $message .= "<font color='red'>".sprintf(__("$user_name is not a valid user name. Ignoring.<br/>","tdomf"),$form_id)."</font>";
+                           tdomf_log_message("User login $user_name is not recognised by wordpress. Ignoring.",TDOMF_LOG_BAD);
+                       }
+                   }
+               }
+           }
+        }
+        tdomf_set_option_form(TDOMF_OPTION_ALLOW_USERS,$allow_users,$form_id);
       }
-
+ 
+      tdomf_set_option_form(TDOMF_OPTION_ALLOW_PUBLISH,isset($_REQUEST['tdomf_user_publish_override']),$form_id);
+      
       // Who gets notified?
 
       $notify_roles = "";
@@ -1411,19 +1737,45 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
         // permissions error
         
         if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
-            $test_see_form = false;
+            
+            $caps = tdomf_get_option_form(TDOMF_OPTION_ALLOW_CAPS,$form_id);
+            if(is_array($caps) && empty($caps)) { $caps = false; } 
+            $users = tdomf_get_option_form(TDOMF_OPTION_ALLOW_USERS,$form_id);
+            if(is_array($users) && empty($users)) { $users = false; }
+            $publish = tdomf_get_option_form(TDOMF_OPTION_ALLOW_PUBLISH,$form_id);
+            
+            $role_count = 0;
+            $role_publish_count = 0;
             foreach($roles as $role) {
-                if(!isset($role->capabilities['publish_posts']) && isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
-                    $test_see_form = true;
+                if(isset($role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])){
+                    $role_count++;
+                    if(isset($role->capabilities['publish_posts'])) {
+                        $role_publish_count++;
+                    }
                 }
             }
-            if($test_see_form == false) {
+            
+            // if nothing set
+            
+            if($role_count == 0 && $caps == false && $users == false && $publish == false) {
+                if($show_links) {
+                    $message .= "<font color=\"red\">".sprintf(__("<b>Warning</b>: No-one has been configured to be able to access the form! <a href=\"%s\">Configure on Options Page &raquo;</a>","tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu")."</font><br/>";
+                } else {
+                    $message .= "<font color=\"red\">".__("<b>Warning</b>: No-one has been configured to be able to access the form!", "tdomf")."</font><br/>";
+                }
+                tdomf_log_message("No-one has been configured to access this form ($form_id)",TDOMF_LOG_BAD);
+            } 
+            
+            // if only publish set
+
+            else if($caps == false && $users == false && $role_count == $role_publish_count) {
+    
                 if($show_links) {
                     $message .= "<font color=\"red\">".sprintf(__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"%s\">Configure on Options Page &raquo;</a>","tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu")."</font><br/>";
                 } else {
                     $message .= "<font color=\"red\">".__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see this form!", "tdomf")."</font><br/>";
                 }
-                tdomf_log_message("Option Allow Everyone not set and no roles set to see the form",TDOMF_LOG_BAD);
+                tdomf_log_message("Only users who can already publish can access the form ($form_id)",TDOMF_LOG_BAD);
             }
         }
    

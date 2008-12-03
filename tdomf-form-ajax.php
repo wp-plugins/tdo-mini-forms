@@ -99,7 +99,7 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
 }
 
 function tdomf_fixslashesargs() {
-    if (get_magic_quotes_gpc()) {
+    #if (get_magic_quotes_gpc()) {
       tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes!");
       if(!function_exists('stripslashes_array')) {
         function stripslashes_array($array) {
@@ -111,7 +111,7 @@ function tdomf_fixslashesargs() {
       #$_GET = stripslashes_array($_GET);
       $tdomf_args = stripslashes_array($tdomf_args);
       $_REQUEST = stripslashes_array($_REQUEST);
-    }
+    #}
 }
 
 // Double check user permissions

@@ -148,10 +148,10 @@ function tdomf_form_hacker_actions($form_id) {
           $form_new = $_REQUEST['tdomf_form_hack'];
           $preview_new = $_REQUEST['tdomf_form_preview_hack'];
           
-          if (get_magic_quotes_gpc()) {
+          #if (get_magic_quotes_gpc()) {
              $form_new = stripslashes($form_new);
              $preview_new = stripslashes($preview_new);
-          }
+          #}
           if(strpos($form_new,TDOMF_MACRO_FORMKEY) !== false) {
             $form_cur = trim(tdomf_generate_form($form_id,$mode));
             $preview_cur = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
@@ -180,9 +180,9 @@ function tdomf_form_hacker_actions($form_id) {
              function tdomf_set_form_message($form_id,$name,$opt) {
                  if(isset($_REQUEST[$name])) {
                      $msg = $_REQUEST[$name];
-                     if (get_magic_quotes_gpc()) {
+                     #if (get_magic_quotes_gpc()) {
                          $msg = stripslashes($_REQUEST[$name]);
-                     }
+                     #}
                  }
                  tdomf_set_option_form($opt,$msg,$form_id);
              }
@@ -303,6 +303,7 @@ function tdomf_show_form_hacker() {
                     <?php printf(__("Form %d","tdomf"),$single_form_id->form_id); ?></a> | </li>
                 <?php } ?>
                 </ul>
+                <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
           <?php } ?>
 
            <ul class="subsubsub">
@@ -312,6 +313,8 @@ function tdomf_show_form_hacker() {
                <li><a id='tdomf_hide_help' href="javascript:tdomfHideHelp()" class='hidden'><?php _e("Hide Help","tdomf"); ?></a></li>
            </ul>
           
+           <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
+           
            <ul class="subsubsub">
    <?php $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
          $updated_pages = false;
@@ -336,6 +339,8 @@ function tdomf_show_form_hacker() {
      <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a></li>
     </ul>
            
+    <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
+    
           <?php if(isset($_REQUEST['text'])) { ?>
            
            <div id="tdomf_help" class='hidden'>

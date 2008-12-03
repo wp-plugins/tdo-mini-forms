@@ -306,7 +306,7 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
       } 
       else {
         tdomf_log_message_extra("Looking at $path");
-        if(is_link($path)) {
+        if(@is_link($path)) {
           tdomf_log_message_extra("$path is a symbolic link");
         }
       }

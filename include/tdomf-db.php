@@ -38,7 +38,10 @@ function tdomf_db_create_tables() {
           $form_options = array( TDOMF_OPTION_DESCRIPTION => __('Imported from default form','tdomf'),
                                  TDOMF_OPTION_CREATEDPAGES => false,
                                  TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS => true,
-                                 TDOMF_OPTION_WIDGET_INSTANCES => 10);
+                                 TDOMF_OPTION_WIDGET_INSTANCES => 10,
+                                 TDOMF_OPTION_ALLOW_PUBLISH => true,
+                                 TDOMF_OPTION_PUBLISH_NO_MOD => true);
+
           //
           // Import from existing options
           //
@@ -467,7 +470,9 @@ function tdomf_create_form($form_name = '',$options = array()) {
                      TDOMF_OPTION_PREVIEW => true,
                      TDOMF_OPTION_FROM_EMAIL => '',
                      TDOMF_OPTION_FORM_ORDER => false,
-                     TDOMF_OPTION_WIDGET_INSTANCES => 10);
+                     TDOMF_OPTION_WIDGET_INSTANCES => 10,
+                     TDOMF_OPTION_ALLOW_PUBLISH => true,
+                     TDOMF_OPTION_PUBLISH_NO_MOD => true);
   $options = wp_parse_args($options,$defaults);
   $options = maybe_serialize($options);
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
