@@ -17,6 +17,16 @@ function tdomf_get_all_users() {
     return $wpdb->get_results( $query );
 }
 
+// Grab a list of user ids of all users, to use in the drop-down menu
+//
+function tdomf_get_all_users_count() {
+    global $wpdb;
+    $query = "SELECT count(ID) ";
+    $query .= "FROM $wpdb->users ";
+    $query .= "ORDER BY ID DESC";
+    return intval($wpdb->get_var( $query ));
+}
+
 // Add the sidebar panel
 //
 function tdomf_edit_post_panel_admin_head() {
@@ -162,6 +172,7 @@ function tdomf_show_edit_post_panel() {
                   <br/><br/>
                 <?php } ?>
                 
+                <?php if(tdomf_get_all_users_count() < TDOMF_MAX_USERS_TO_DISPLAY) { ?>
                 <select id="tdomf_submitter_user" name="tdomf_submitter_user" <?php if(!$can_edit || !$tdomf_flag || empty($submitter_id)){ ?> disabled <?php } ?> onChange="tdomf_update_panel();" >
                 <?php $users = tdomf_get_all_users();
                       foreach($users as $user) {
@@ -170,6 +181,19 @@ function tdomf_show_edit_post_panel() {
                           <option value="<?php echo $user->ID; ?>" <?php if($user->ID == $submitter_id) { ?> selected <?php } ?> ><?php echo $user->user_login; ?><?php if($user->ID == get_option(TDOMF_DEFAULT_AUTHOR)) { _e("(Default User)","tdomf"); } ?><?php if(!empty($status) && $status == TDOMF_USER_STATUS_BANNED) { _e("(Banned User)","tdomf"); } ?></option>
                       <?php } } ?>
                </select>
+                <?php } else {
+                    $submitter_username = "";
+                    if(!empty($submitter_id)) {
+                        $user_obj = new WP_User($submitter_id);
+                        $submitter_username = $user_obj->user_login;
+                    }
+                    ?>
+                    <input type="text" 
+                           name="tdomf_submitter_user" id="tdomf_submitter_user" 
+                           size="20" 
+                           value="<?php echo htmlentities($submitter_username,ENT_QUOTES,get_bloginfo('charset')); ?>" 
+                           <?php if(!$can_edit || !$tdomf_flag){ ?> disabled <?php } ?> />
+                <?php } ?>
 
                 <br/><br/>
 
@@ -257,11 +281,18 @@ function tdomf_save_post() {
     } else {
       add_post_meta($post_id, TDOMF_KEY_FLAG, true, true);
       if(isset($_POST["tdomf_user"])) {
-        $user_id = $_POST["tdomf_user"];
-        delete_post_meta($post_id, TDOMF_KEY_USER_ID);
-        add_post_meta($post_id, TDOMF_KEY_USER_ID, $user_id, true);
-        tdomf_log_message("Submitter info for post $post_id added");
-        die("alert('".sprintf(__('TDOMF: Submitter info for post %d updated','tdomf'),$post_id)."')");
+          $user_id = $_POST["tdomf_user"];
+          if(!empty($user_id) && !is_numeric($user_id)) {
+              if(($userdata = get_userdatabylogin($user_id)) != false) {
+                  $user_id = $userdata->ID;
+              } else { 
+                  die("alert('".sprintf(__("TDOMF: The user %s is not a valid user and cannot be used for Submitter","tdomf"),$user_id)."')");
+              }
+          }
+         delete_post_meta($post_id, TDOMF_KEY_USER_ID);
+         add_post_meta($post_id, TDOMF_KEY_USER_ID, $user_id, true);
+         tdomf_log_message("Submitter info for post $post_id added");
+         die("alert('".sprintf(__('TDOMF: Submitter info for post %d updated','tdomf'),$post_id)."')");
       } else {
         // do this so that we *know* that submitter user is not used
         delete_post_meta($post_id, TDOMF_KEY_USER_ID);

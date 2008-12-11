@@ -246,9 +246,10 @@ function tdomf_content_adminbuttons_filter($content=''){
      $form_id = tdomf_get_first_form_id();
    }
   
-   if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) 
-   && get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
-   && $post->post_status == 'draft') {
+   if(/*tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) 
+   &&*/ get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
+   && $post->post_status == 'draft'
+   && current_user_can('publish_posts')) {
      
        $output = "<p>";
    

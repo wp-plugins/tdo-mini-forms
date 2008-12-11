@@ -93,7 +93,7 @@ ul.tdomf_category_checklist, ul.tdomf_category_children {
 
 /* Required for AJAX progress display */
 
-.shadow {
+.tdomf_shadow {
     background: black;
     display: none;
     position: absolute;

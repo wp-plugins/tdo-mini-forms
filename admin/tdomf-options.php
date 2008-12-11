@@ -247,6 +247,7 @@ function tdomf_show_general_options() {
            $def_aut_bad = false; ?>
 
 	 <b><?php _e("Default Author","tdomf"); ?></b>
+     <?php if(tdomf_get_all_users_count() < TDOMF_MAX_USERS_TO_DISPLAY) { ?>
     <select id="tdomf_def_user" name="tdomf_def_user">
     <?php $users = tdomf_get_all_users();
           $cnt_users = 0;
@@ -259,6 +260,18 @@ function tdomf_show_general_options() {
               <option value="<?php echo $user->ID; ?>" <?php if($user->ID == $def_aut) { ?> selected <?php } ?> ><?php if($user_obj->has_cap("publish_posts")) {?><font color="red"><?php }?><?php echo $user->user_login; ?><?php if(!empty($status) && $status == TDOMF_USER_STATUS_BANNED) { ?> (Banned User) <?php } ?><?php if($user_obj->has_cap("publish_posts")) { $def_aut_bad = true; ?> (Error) </font><?php }?></option>
           <?php } } ?>
     </select>
+     <?php } else {
+         $def_aut_username = "";
+         $cnt_users = 0;
+         if($def_aut != false) {
+             $user_obj = new WP_User($def_aut);
+             $cnt_users = 1; // at least
+             if($user_obj->has_cap("publish_posts")) { $def_aut_bad; }
+             $def_aut_username = $user_obj->user_login;
+         }
+         ?>
+         <input type="text" name="tdomf_def_user" id="tdomf_def_user" size="20" value="<?php echo htmlentities($def_aut_username,ENT_QUOTES,get_bloginfo('charset')); ?>" />
+     <?php } ?>
 
     <br/><br/>
 
@@ -630,11 +643,6 @@ function tdomf_show_form_options($form_id) {
           
 <h3><?php _e("Who can access the form?","tdomf"); ?></h3>
 
-    <?php /*
-       @todo: update warnings
-       @todo: auto-publish option
-    */ ?>
-
 	<p><?php _e("You can control access to the form based on user roles, capabilities or by specific users. You can chose \"Unregistered Users\" if you want anyone to be able to access the form, including visitors to your site that do not have user accounts. The old behaviour of TDO Mini Forms allowed any user with the ability to publish posts automatic access to the form. This behaviour can now be turned off or on as required.","tdomf"); ?></p>
    
 	<?php if (!isset($wp_roles)) { $wp_roles = new WP_Roles(); }
@@ -945,12 +953,13 @@ function tdomf_show_form_options($form_id) {
     <?php $mod_email_on_pub = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id); ?>
     
 	<input type="checkbox" name="tdomf_mod_email_on_pub" id="tdomf_mod_email_on_pub" <?php if($mod_email_on_pub) echo "checked"; ?> >
-    <?php _e("Send Moderation Email even for automatically Published Post","tdomf"); ?>
+    <?php _e("Send Moderation Email even for automatically Published Post","tdomf"); ?><br/>
 
-       
-    <input type="checkbox" name="tdomf_user_publish_auto" id="tdomf_user_publish_auto" checked />
+    <?php $user_publish_auto = tdomf_get_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,$form_id); ?>
+
+    <input type="checkbox" name="tdomf_user_publish_auto" id="tdomf_user_publish_auto" <?php if($user_publish_auto) { ?> checked <?php } ?> />
     <label for="tdomf_user_publish_auto">
-    <?php _e("Automatically publish their entries","tdomf"); ?>
+    <?php _e("Users with publish rights will have their posts automatically published","tdomf"); ?>
     </label>
     
 	</p>
@@ -1367,6 +1376,14 @@ function tdomf_handle_options_actions() {
       // Default Author
 
       $def_aut = $_POST['tdomf_def_user'];
+      if(!empty($def_aut) && !is_numeric($def_aut)) {
+          if(($userdata = get_userdatabylogin($def_aut)) != false) {
+              $def_aut = $userdata->ID;
+          } else { 
+              $message .= "<font color='red'>".sprintf(__("The user %s is not a valid user and cannot be used for Default Author","tdomf"),$def_aut)."</font><br/>";
+              $def_aut = false;              
+          }
+      }
       update_option(TDOMF_DEFAULT_AUTHOR,$def_aut);
 
       // Author and Submitter fix
@@ -1640,6 +1657,11 @@ function tdomf_handle_options_actions() {
       //
       $tdomf_mod_email_on_pub = isset($_POST['tdomf_mod_email_on_pub']);
       tdomf_set_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$tdomf_mod_email_on_pub,$form_id);
+      
+      // Admin users auto-publish?
+      //
+      $tdomf_publish_no_mod = isset($_POST['tdomf_user_publish_auto']);
+      tdomf_set_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,$tdomf_publish_no_mod,$form_id);
       
       tdomf_log_message("Options Saved for Form ID $form_id");
        

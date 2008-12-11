@@ -265,7 +265,7 @@ function tdomf_form_admin_head() {
 	display: none;
 }
 
-#shadow {
+#tdomf_shadow {
 	background: black;
 	display: none;
 	position: absolute;
@@ -320,7 +320,7 @@ function tdomf_form_admin_head() {
             jQuery('#<?php echo $id; ?>control').css('border','1px solid #bbb');
         <?php } ?>
 
-        jQuery('#shadow').css('opacity','0');
+        jQuery('#tdomf_shadow').css('opacity','0');
         jQuery(widgets).each(function(o) {o='#widgetprefix-'+o; jQuery(o).css('position','relative');} );
 	}
 	function resetDroppableHeights() {
@@ -378,17 +378,17 @@ function tdomf_form_admin_head() {
         var y = ( (topOffset = ( document.body.parentNode.clientHeight - controldims[elm]['height'] ) / 2) && (topOffset > 0)) ? topOffset : 0 ;
 		jQuery(elm).css({display: 'block', width: controldims[elm]['width'] + 'px', height: controldims[elm]['height'] + 'px', position: 'absolute', right: x + 'px', top: y + 'px', zIndex: '1000' });
 		jQuery(elm).attr('class','control');
-		jQuery('#shadow').click(function() {unpopControl(elm);});
-		window.onresize = function(){maxHeight('#shadow');dragChange(elm);};
+		jQuery('#tdomf_shadow').click(function() {unpopControl(elm);});
+		window.onresize = function(){maxHeight('#tdomf_shadow');dragChange(elm);};
 		popShadow();
 	}
 	function popShadow() {
-		maxHeight('#shadow');
-		jQuery('#shadow').css({zIndex: '999', display: 'block'});
-		jQuery('#shadow').fadeTo('fast', 0.2);
+		maxHeight('#tdomf_shadow');
+		jQuery('#tdomf_shadow').css({zIndex: '999', display: 'block'});
+		jQuery('#tdomf_shadow').fadeTo('fast', 0.2);
 	}
 	function unpopShadow() {
-		jQuery('#shadow').fadeOut('fast', function() {jQuery('#shadow').hide()});
+		jQuery('#tdomf_shadow').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
 	}
 	function unpopControl(el) {
 		jQuery(el).attr('class','hidden');
@@ -609,7 +609,7 @@ function tdomf_show_form_menu() {
 		<br class="clear" />
 	</div>
 
-	<div id="shadow"> </div>
+	<div id="tdomf_shadow"> </div>
 
   <?php do_action( 'tdomf_widget_page_bottom', $form_id, $mode ); ?>
   

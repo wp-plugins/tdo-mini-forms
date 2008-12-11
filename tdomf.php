@@ -53,13 +53,21 @@ Author URI: http://thedeadone.net
 // - Bug with 2.5 and breaking wp-comments.php file
 // - Bug with file uploads and accidentially displaying an error when no error
 //   exists and therefore causing the form to break.
+// - New more powerful form access configuration
+// - Textarea and Textfield Custom Field couldn't support '0' as a valid input,
+//   as PHP would treat this as empty
+// - Fixed 'true' in title field of textarea for content
+// - Can now disable auto-publishing of admin posts
+// - Changed CSS class 'shadow' to 'tdomf_shadow' to avoid conflicts
+// - If there are too many users (say over 60), tdomf will instead ask for 
+//   login names for the users in options rather than slow down the UI 
+//   displaying a dropdown. This affects the edit-post screen and the general
+//   tdomf options page.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
-
-- Control who can access form not just by role but also by user, ip and capability.
 
 Edit Post:
   * Using same/similar form as what the post was submitted with?
@@ -67,9 +75,6 @@ Edit Post:
   * Allow various controls and access for forms: per category and by access roles
   * Editing Post implies adding/removing comments too (can replace comment submission form)
   * Unregistered user editing (requires some sort of magic code)
-
-   
-  * Custom Rules for Form access (using regex patterns against $_SERVER or PHP code)
   
 ////////////////////////////////////////////////////////////////////////////////
  */
@@ -83,24 +88,24 @@ Work Queue:
     http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
     http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
     
-    http://thedeadone.net/forum/?p=1211#comment-2790 "magic quotes" in post (potential fix)
-    
-    Bug cf with underscore - http://thedeadone.net/forum/?p=1324
-    Bug fix for "0" value in custom field - http://thedeadone.net/forum/?p=1281
-    GD Rating Plugin - http://thedeadone.net/forum/?p=1264
+    Bug cf with underscore - http://thedeadone.net/forum/?p=1324 (can't currently reproduce it)
+    GD Rating Plugin - http://thedeadone.net/forum/?p=1264 (seems to be okay with latest update)
     Bug with post times - http://thedeadone.net/forum/?p=1269
-    Bug "true" - http://thedeadone.net/forum/?p=1232#comment-2681
-    
+    User list (options and edit panel) - http://thedeadone.net/forum/?p=1352
     Geopress integration?
     
     Some simple javascript to track number of chars/words typed so far in 
     textarea: http://thedeadone.net/forum/?p=1321
     
-    Option: Schedule after latest post in queue, not just tDOMF
+    Option: Schedule after latest post in queue, not just TDOMF
     
     Add info/image of how to bring up the widget conf panel
     
+    Auto bring up the conf panel on the fix links?
+    
     list of attached files under title in moderation screen
+    
+    use ajax to "hide" the form temporarily when an error message appears...
     
    - Allow Error, StyleSheet and Validation Form Hacking
    - Allow only the Form or the Preview to be "hacked" in the Form Hacker
@@ -235,6 +240,8 @@ Existing Widget Improvements
 - Who Am I
   * Integration with WP-OpenID?
   * Allow login as part of form submit
+- Categories
+  * Categories displayed but unselectable
 
 Template Tags
 - Log
@@ -463,6 +470,7 @@ define('TDOMF_OPTION_ALLOW_CAPS',"tdomf_allow_caps");
 define('TDOMF_OPTION_ALLOW_USERS',"tdomf_allow_users");
 define('TDOMF_OPTION_ALLOW_PUBLISH',"tdomf_allow_publish");
 define('TDOMF_OPTION_PUBLISH_NO_MOD',"tdomf_option_publish_no_mod");
+define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 //////////////////////////////////////////////////
 // loading text domain for language translation
@@ -512,7 +520,6 @@ function tdomf_wp27() {
 add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
-
     $unmod_count = tdomf_get_unmoderated_posts_count();
 
     /*if(tdomf_wp25() && $unmod_count > 0) {
@@ -520,7 +527,7 @@ function tdomf_add_menus()
     } else {*/
         add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     /*}*/
-
+    
     // Options
     add_submenu_page( TDOMF_FOLDER , __('Form Manager and Options', 'tdomf'), __('Form Manager and Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
     //
@@ -532,7 +539,7 @@ function tdomf_add_menus()
     //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
-            add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
+      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     else {
       add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation Disabled', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
@@ -667,6 +674,8 @@ function tdomf_new_features() {
   // 44 = pre-0.13 release
   if($last_version < 44) {
       $features .= "<li>".__("More powerful form access configuration. Now you can select by capability and user as well as role!","tdomf")."</li>";
+      $features .= "<li>".__("2.7 Wordpress Compatibility","tdomf")."</li>";
+      $features .= "<li>".__("Can now turn off auto-publishing of users with publishing rights","tdomf")."</li>";
   }
   
   if(!empty($features)) {

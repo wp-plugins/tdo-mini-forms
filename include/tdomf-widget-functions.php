@@ -387,7 +387,7 @@ function tdomf_widget_content($args) {
       $output .= "\n<script src='$qt_path' type='text/javascript'></script>\n";
       $output .= "\n<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
     }
-    $output .= '<textarea title="true" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >'.$content_content.'</textarea>';
+    $output .= '<textarea title="'.htmlentities(__('Post Content','tdomf'),ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >'.$content_content.'</textarea>';
     if($options['quicktags'] == true) {
       $output .= "\n<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>\n";
     }
@@ -449,7 +449,7 @@ function tdomf_widget_content_hack($args) {
       $output .= "\t\t<script src='$qt_path' type='text/javascript'></script>\n";
       $output .= "\t\t<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
     }
-    $output .= "\t\t".'<textarea title="true" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >';
+    $output .= "\t\t".'<textarea title="'.htmlentities(__('Post Content','tdomf'),ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >';
     $output .= '<?php echo $content_content; ?></textarea>'."\n"; 
     if($options['quicktags'] == true) {
       $output .= "\t\t<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>";

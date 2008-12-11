@@ -454,8 +454,27 @@ function tdomf_create_post($args) {
        
      // publish (maybe)
      //
+     $publish_now = false;
      if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
-        tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
+         tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
+         $publish_now = true;
+     } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+         $testuser = new WP_User($user_id,$user->user_login);
+         $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
+         if($user_status == TDOMF_USER_STATUS_TRUSTED) {
+             tdomf_log_message("User is trusted. Publishing $post_ID!");
+             $publish_now = true;
+         }
+         else if(tdomf_get_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,$form_id) && current_user_can('publish_posts')) {
+             tdomf_log_message("User has publish rights. Publishing $post_ID!");
+             $publish_now = true;
+         }
+     }
+     
+     // publish it
+     //
+     if($publish_now){
+        //
         // Use update post instead of publish post because in WP2.3, 
         // update_post doesn't seem to add the date correctly!
         // Also when it updates a post, if comments aren't set, sets them to
@@ -481,37 +500,6 @@ function tdomf_create_post($args) {
         
         wp_update_post($post);
         $send_moderator_email = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id);
-     } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-          $testuser = new WP_User($user_id,$user->user_login);
-          $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
-          if(current_user_can('publish_posts') || $user_status == TDOMF_USER_STATUS_TRUSTED) {
-             tdomf_log_message("Publishing post $post_ID!");
-             // Use update post instead of publish post because in WP2.3, 
-             // update_post doesn't seem to add the date correctly!
-             // Also when it updates a post, if comments aren't set, sets them to
-             // empty! (Not so in WP2.2!)
-             
-            // Schedule date
-            //
-            $current_ts = current_time( 'mysql' );
-            $ts = tdomf_queue_date($form_id,$current_ts);
-            if($current_ts == $ts) {
-                $post = array (
-                  "ID"             => $post_ID,
-                  "post_status"    => 'publish',
-                  );
-            } else {
-                tdomf_log_message("Future Post Date = $ts!");
-                $post = array (
-                  "ID"             => $post_ID,
-                  "post_status"    => 'future',
-                  "post_date"      => $ts,
-                  );
-            }
-             wp_update_post($post);
-             #wp_publish_post($post_ID);
-             $send_moderator_email = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id);
-          }
      }
    } else {
      // it's spam :(
@@ -710,12 +698,12 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 		var offset = jQuery('#$form_name').offset();
 		var w = jQuery('#$form_name').width();
 		var h = jQuery('#$form_name').height();
-		jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
-		jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
-		jQuery('#shadow$form_id').fadeTo('fast', 0.2);
+		jQuery('#tdomf_shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+		jQuery('#tdomf_shadow$form_id').css({zIndex: '999', display: 'block'});
+		jQuery('#tdomf_shadow$form_id').fadeTo('fast', 0.2);
 	}
 	function ajaxUnshadow$form_id() {
-		jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#shadow').hide()});
+		jQuery('#tdomf_shadow$form_id').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
 	}
 	function ajaxProgressStop$form_id() {
 		jQuery('#ajaxProgress$form_id').attr('class','hidden');
@@ -757,7 +745,7 @@ EOT;
     if($hack) {
         $form .= "\n<!-- AJAX js end -->\n<!-- shadow required for disabling form during AJAX submit -->\n";
     }
-    $form .= "<div id='shadow$form_id' class='shadow'></div>\n";
+    $form .= "<div id='shadow$form_id' class='tdomf_shadow'></div>\n";
     if($hack) {
         $form .= "<!-- ajaxProgress holds the HTML to show during AJAX busy -->\n";
     }

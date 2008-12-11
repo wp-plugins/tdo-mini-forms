@@ -3,7 +3,7 @@
 Name: "Custom Fields"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Add a custom field to your form!
-Version: 0.6
+Version: 0.7
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -12,7 +12,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 function tdomf_widget_customfields_gen_fmt($index,$value,$options){
   $value = strval($value);
-  if(empty($value) || trim($value) == "") {
+  if($value != '0' && (empty($value) || trim($value) == "")) {
     return "";
   }
   $title = $options['title'];
@@ -35,7 +35,8 @@ function tdomf_widget_customfields_append($post_ID,$options,$index,$form_id){
   if($options['type'] == 'select') {
     $value = tdomf_widget_customfields_select_convert($value,$options);
   }
-  if(!empty($value) && (!is_string($value) || trim($value) != "") )
+  // we should only really care if the field is "empty" ... false is a valid setting
+  if(/*!empty($value) &&*/ (!is_string($value) || trim($value) != "") )
   {
     // Gen Format
     $fmt = tdomf_widget_customfields_gen_fmt($index,$value,$options);
@@ -622,7 +623,7 @@ function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
 function tdomf_widget_customfields_textfield_validate($args,$number,$options) {
   extract($args);
   
-  if($options['required'] && empty($args["customfields-textfield-$number"])) {
+  if($options['required'] && trim($args["customfields-textfield-$number"]) == '') {
     return $before_widget.sprintf(__("You must enter a value for %s!","tdomf"),$options['title']).$after_widget;
   }
   
@@ -837,7 +838,7 @@ function tdomf_widget_customfields_textarea_hack($args,$number,$options) {
 function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
   extract($args);
   $output = "";
-  if($options['required'] && (empty($args["customfields-textarea-$number"]) || trim($args["customfields-textarea-$number"]) == "")) {
+  if($options['required'] && trim($args["customfields-textarea-$number"]) == "") {
     if(!empty($options['title'])) {
       $output .= sprintf(__("You must specify some text for \"%s\".","tdomf"),$options['title']);
     } else {
