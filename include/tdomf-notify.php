@@ -184,7 +184,7 @@ function tdomf_notify_admins($post_ID,$form_id){
    $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_adminemail[$w])) {
-      $temp_message = $tdomf_form_widgets_adminemail[$w]['cb']($widget_args,$tdomf_form_widgets_adminemail[$w]['params']);
+      $temp_message = call_user_func($tdomf_form_widgets_adminemail[$w]['cb'],$widget_args,$tdomf_form_widgets_adminemail[$w]['params']);
       if($temp_message != NULL && trim($temp_message) != ""){
         $email_msg .= $temp_message;
       }

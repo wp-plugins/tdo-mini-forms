@@ -1077,13 +1077,14 @@ function tdomf_show_form_options($form_id) {
               <p><b><?php _e("No Throttling Rules currently set.","tdomf"); ?></b></p>
           <?php } ?>
 
+
+    <h3 id="ajax"><?php _e('AJAX',"tdomf"); ?> </h3>          
+          
 	<p>
 	<?php _e('You can now enable your form to use AJAX to submit posts. The form handles graceful fallback to the non-ajax version for no-javascript browsers and accessibilty.',"tdomf"); ?>
     </p>
 
     <?php $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX,$form_id); ?>
-
-    <h3 id="ajax"><?php _e('AJAX',"tdomf"); ?> </h3>
     
 	<p>
 	<b><?php _e("Use AJAX","tdomf"); ?></b>
@@ -1566,10 +1567,12 @@ function tdomf_handle_options_actions() {
       $tdomf_admin_emails = $_POST['tdomf_admin_emails'];
       $emails = split(',',$tdomf_admin_emails);
       foreach($emails as $email) {
-          if(!tdomf_check_email_address($email)) {
-              $message .= "<font color='red'>".sprintf(__("The email %s is not valid! Please update 'Who Gets Notified' with valid email addresses.","tdomf"),$email)."</font><br/>";
-              $save = false;
-              break;
+          if(!empty($email)) {
+              if(!tdomf_check_email_address($email)) {
+                  $message .= "<font color='red'>".sprintf(__("The email %s is not valid! Please update 'Who Gets Notified' with valid email addresses.","tdomf"),$email)."</font><br/>";
+                  $save = false;
+                  break;
+              }
           }
       }
       if($save) { tdomf_set_option_form(TDOMF_OPTION_ADMIN_EMAILS,$tdomf_admin_emails,$form_id); }
@@ -1790,7 +1793,7 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
             
             // if only publish set
 
-            else if($caps == false && $users == false && $role_count == $role_publish_count) {
+            else if($caps == false && $users == false && $role_count == $role_publish_count && $publish == false ) {
     
                 if($show_links) {
                     $message .= "<font color=\"red\">".sprintf(__("<b>Warning</b>: Only users who can <i>already publish posts</i>, can see the form! <a href=\"%s\">Configure on Options Page &raquo;</a>","tdomf"),get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_options_menu")."</font><br/>";
@@ -1844,7 +1847,7 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
         $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_admin_errors);
         foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
-                  $widget_message = $widgets[$w]['cb']($form_id,$widgets[$w]['params']);
+                  $widget_message = call_user_func($widgets[$w]['cb'],$form_id,$widgets[$w]['params']);
                   if(!empty($widget_message)) {
                       $message .= "<font color=\"red\">" . $widget_message . sprintf(__(" <a href='%s'>Fix &raquo;</a>","tdomf"),$uri)."</font><br/>";
                   }

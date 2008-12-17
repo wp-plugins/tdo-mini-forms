@@ -473,10 +473,10 @@ function tdomf_widget_upload_get_options($form_id) {
        $options['attach-a'] = false;
        $options['attach-thumb-a'] = false;
        $options['thumb-a'] = false;
-       $options['url'] = get_bloginfo('wpurl').'/wp-content/uploads/';
+       $options['url'] = trailingslashit(get_bloginfo('wpurl')).'wp-content/uploads/';
        $options['nohandler'] = true;
     }
-    if(!isset($options['url'])){ $options['url'] = get_bloginfo('wpurl').'/wp-content/uploads/'; }
+    if(!isset($options['url'])){ $options['url'] = trailingslashit(get_bloginfo('wpurl')).'wp-content/uploads/'; }
   return $options;
 }
 
@@ -563,9 +563,9 @@ function tdomf_widget_upload_post($args) {
         // Use direct links or wrapper
         //
         if($options['nohandler'] && trim($options['url']) != "") {
-          $uri = $options['url']."/$post_ID/".$theirfiles[$i]['name'];
+          $uri = trailingslashit($options['url'])."$post_ID/".$theirfiles[$i]['name'];
         } else {
-          $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
+          $uri = trailingslashit(get_bloginfo('wpurl')).'?tdomf_download='.$post_ID.'&id='.$i;
         }
         
         // Modify Post

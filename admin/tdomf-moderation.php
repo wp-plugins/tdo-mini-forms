@@ -358,8 +358,36 @@ function getNumChecked(form)
 
                <td><input type="checkbox" name="moderateposts[]" value="<?php echo $p->ID; ?>" /></td>
                <th scope="row"><?php echo $p->ID; ?></th>
-		       <td><?php echo $p->post_title; ?></td>
+               
 		       <td>
+               <?php echo $p->post_title; ?>
+               
+               <?php $form_id = 1;
+                     if($form_count > 1) { 
+                         $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true);
+                     } ?>
+               
+               <?php $fuoptions = tdomf_widget_upload_get_options($form_id);
+                     $index = 0;
+                     $filelinks = "";
+                     while(true) {
+                         $filename = get_post_meta($p->ID, TDOMF_KEY_DOWNLOAD_NAME.$index,true); 
+                         if($filename == false) { break; }
+                         if($fuoptions['nohandler'] && trim($fuoptions['url']) != "") {
+                             $uri = trailingslashit($fuoptions['url'])."$p->ID/".$filename;
+                         } else {
+                             $uri = trailingslashit(get_bloginfo('wpurl')).'?tdomf_download='.$p->ID.'&id='.$i;
+                         }
+                         $filelinks .= "<a href='$uri' title='".htmlentities($filename)."'>$index</a>, ";
+                         $index++;
+                     }
+                     if(!empty($filelinks)) {  ?>
+                         <br/><small><?php _e('Files: ','tdomf'); ?><?php echo $filelinks; ?></small>
+                     <?php } ?>
+               
+               </td>
+		       
+               <td>
 		       <?php $name = get_post_meta($p->ID, TDOMF_KEY_NAME, true);
 		             $email = get_post_meta($p->ID, TDOMF_KEY_EMAIL, true);
 		             $user_id = get_post_meta($p->ID, TDOMF_KEY_USER_ID, true);
@@ -383,7 +411,7 @@ function getNumChecked(form)
            
            <?php if($form_count > 1) { ?>
              <td>
-           <?php $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true);
+           <?php #$form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true);
                  if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
                    <?php _e("N/A","tdomf"); ?>
                  <?php } else { ?>

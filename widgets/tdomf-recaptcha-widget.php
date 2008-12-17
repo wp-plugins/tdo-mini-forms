@@ -3,7 +3,7 @@
 Name: "reCaptcha"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: Use recaptcha to verify user input
-Version: 1
+Version: 2
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -68,7 +68,9 @@ function tdomf_widget_recaptcha_validate($args,$preview) {
   
   $options = tdomf_widget_recaptcha_get_options($args['tdomf_form_id']);
   
-  if (empty($_POST['recaptcha_response_field'])) {
+  tdomf_log_message('dump<pre>' . var_export($args,true) . '</pre>');
+  
+  if (empty($args['recaptcha_response_field'])) {
       return __('Please complete the reCAPTCHA.','tdomf');
   }
 
@@ -78,8 +80,8 @@ function tdomf_widget_recaptcha_validate($args,$preview) {
   
     $response = recaptcha_check_answer($options['privatekey'],
         $_SERVER['REMOTE_ADDR'],
-        $_POST['recaptcha_challenge_field'],
-        $_POST['recaptcha_response_field']);
+        $args['recaptcha_challenge_field'],
+        $args['recaptcha_response_field']);
 
     if (!$response->is_valid) {
         $form_data = tdomf_get_form_data($args['tdomf_form_id']);  

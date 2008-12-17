@@ -185,7 +185,7 @@ function tdomf_preview_form($args,$mode=false) {
               if(isset($widgets[$w])) {
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
                   // all widgets need to be excuted even if not displayed
-                  $replacements[] = $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+                  $replacements[] = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }
@@ -212,7 +212,7 @@ function tdomf_preview_form($args,$mode=false) {
        foreach($widget_order as $w) {
           if(isset($widgets[$w])) {
             tdomf_log_message_extra("Looking at preview widget $w");
-            $message .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+            $message .= call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
           }
        }
    } else {
@@ -231,7 +231,7 @@ function tdomf_preview_form($args,$mode=false) {
               $message .= "%%WIDGET:$w%%\n";
           } else if(isset($widgets_h[$w])) {
               $message .= "<!-- $w start -->\n";
-              $message .= $widgets_h[$w]['cb']($widget_args,$widgets_h[$w]['params']);
+              $message .= call_user_func($widgets_h[$w]['cb'],$widget_args,$widgets_h[$w]['params']);
               $message .= "<!-- $w end -->\n";
           }
       }
@@ -271,7 +271,7 @@ function tdomf_validate_form($args,$preview = false) {
    $widget_order = tdomf_get_widget_order($form_id,$preview);
    foreach($widget_order as $w) {
 	  if(isset($widgets[$w])) {
-		$temp_message = $widgets[$w]['cb']($widget_args,$preview,$widgets[$w]['params']);
+		$temp_message = call_user_func($widgets[$w]['cb'],$widget_args,$preview,$widgets[$w]['params']);
 		if($temp_message != NULL && trim($temp_message) != ""){
 		   $message .= $temp_message;
 		}
@@ -420,7 +420,7 @@ function tdomf_create_post($args) {
    $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_post);
    foreach($widget_order as $w) {
     if(isset($widgets[$w])) {
-      $temp_message = $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+      $temp_message = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
       if($temp_message != NULL && trim($temp_message) != ""){
         $message .= $temp_message;
       }
@@ -652,7 +652,7 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
               if(isset($widgets[$w])) {
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
                   // all widgets need to be excuted even if not displayed
-                  $replacements[] = $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+                  $replacements[] = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }
@@ -698,12 +698,12 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 		var offset = jQuery('#$form_name').offset();
 		var w = jQuery('#$form_name').width();
 		var h = jQuery('#$form_name').height();
-		jQuery('#tdomf_shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
-		jQuery('#tdomf_shadow$form_id').css({zIndex: '999', display: 'block'});
-		jQuery('#tdomf_shadow$form_id').fadeTo('fast', 0.2);
+		jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+		jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
+		jQuery('#shadow$form_id').fadeTo('fast', 0.2);
 	}
 	function ajaxUnshadow$form_id() {
-		jQuery('#tdomf_shadow$form_id').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
+		jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
 	}
 	function ajaxProgressStop$form_id() {
 		jQuery('#ajaxProgress$form_id').attr('class','hidden');
@@ -726,12 +726,21 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 			jQuery('#tdomf_form${form_id}_message').attr('class','hidden');
 			document.getElementById('tdomf_form${form_id}_message').innerHTML = "";
 			document.$form_name.innerHTML = message;
+            jQuery('#$form_name').focus();
+            var offset = jQuery('#$form_name').offset();
+            window.scrollTo(offset.left,offset.top);
 		} else if(mode == "preview") {
 			jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_preview');
 			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
+            jQuery('#tdomf_form${form_id}_message').focus();
+            var offset = jQuery('#tdomf_form${form_id}_message').offset();
+            window.scrollTo(offset.left,offset.top);
 		} else {
-			jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_message');
+            jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_message');
 			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
+            var offset = jQuery('#tdomf_form${form_id}_message').offset();
+            window.scrollTo(offset.left,offset.top);
+            jQuery('#tdomf_form${form_id}_message').focus();
 		}
 		ajaxProgressStop$form_id();
 	}
@@ -820,7 +829,7 @@ EOT;
               $form .= "\t%%WIDGET:$w%%\n";
           } else {
               $form .= "\t<!-- $w start -->\n";
-              $form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+              $form .= call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
               $form .= "\t<!-- $w end -->\n";
           }
       }
@@ -836,7 +845,7 @@ EOT;
       $widget_order = tdomf_get_widget_order($form_id);
       foreach($widget_order as $w) {
           if(isset($widgets[$w])) {
-              $form .= $widgets[$w]['cb']($widget_args,$widgets[$w]['params']);
+              $form .= call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
           }
       }
   }

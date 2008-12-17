@@ -599,7 +599,7 @@ function tdomf_show_form_menu() {
 				   <span class="controlhandle"><?php echo $widgets_control[$id]['name']; ?></span>
 					<span id="<?php echo $id; ?>closer" class="controlcloser">&#215;</span>
 					<div class="controlform">
-						<?php $w['cb']($form_id,$widgets_control[$id]['params']); ?>
+						<?php call_user_func($w['cb'],$form_id,$widgets_control[$id]['params']); ?>
                   <input type="hidden" id="<?php echo $id; ?>-submit" name="<?php echo $id; ?>-submit" value="1" />
 					</div>
 				</div>

@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.5
+Version: 0.12.6
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -30,25 +30,7 @@ Author URI: http://thedeadone.net
 // 
 // See readme.txt
 //
-// v0.12.5: 
-// - A "link" to the thumbnail is stored on the post using 
-//     TDOMF_KEY_DOWNLOAD_THUMBURI key.
-// - Excerpt Widget
-// - Comments Management Widget
-// - Categories Include Field enabled (was accidently left disabled in previous
-//     release)
-// - Category Widget now has a Order by and Order options
-// - Recaptcha Widget
-// - Warning displayed if "I Agree" text is not modified
-// - Integration with Subscibe to Comments plugin via "Subscribe to Comments" 
-//     widget
-// - Publish Now button
-// - Instead of notifying specific roles that a submission is requiring 
-//     moderation, you can now specify an email list
-// - Tags Widget now has options for default tags, required and to disable 
-//     user adding tags
-//
-// v0.13:
+// v0.12.6:
 // - Hopefully, finally fixed additionally slashes being added to the content.
 // - Bug with 2.5 and breaking wp-comments.php file
 // - Bug with file uploads and accidentially displaying an error when no error
@@ -63,6 +45,13 @@ Author URI: http://thedeadone.net
 //   login names for the users in options rather than slow down the UI 
 //   displaying a dropdown. This affects the edit-post screen and the general
 //   tdomf options page.
+// - AJAX on form will scroll the window up to the preview or message if there
+//   is any so users don't miss it
+// - ReCaptcha widget now works with AJAX
+// - New permalink widget 
+// - Links to uploaded files included on the moderation screen
+// - New GeoMasup integration widget
+// - Initial Widget Class 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -88,29 +77,8 @@ Work Queue:
     http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
     http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
     
-    Bug cf with underscore - http://thedeadone.net/forum/?p=1324 (can't currently reproduce it)
-    GD Rating Plugin - http://thedeadone.net/forum/?p=1264 (seems to be okay with latest update)
-    Bug with post times - http://thedeadone.net/forum/?p=1269
-    User list (options and edit panel) - http://thedeadone.net/forum/?p=1352
-    Geopress integration?
-    
-    Some simple javascript to track number of chars/words typed so far in 
-    textarea: http://thedeadone.net/forum/?p=1321
-    
-    Option: Schedule after latest post in queue, not just TDOMF
-    
-    Add info/image of how to bring up the widget conf panel
-    
-    Auto bring up the conf panel on the fix links?
-    
-    list of attached files under title in moderation screen
-    
-    use ajax to "hide" the form temporarily when an error message appears...
-    
    - Allow Error, StyleSheet and Validation Form Hacking
    - Allow only the Form or the Preview to be "hacked" in the Form Hacker
-   - "Your Submissions" page link in WP2.6.x is now in a sub-menu. Add option
-       to have it appear somewhere more visible for users
    - Add Error Warning for custom field widgets when non-unique keys used
    - Investigate: no sidebars in widget configuration in IE.7
    - Investigate: tinymce conflict with AJAX form
@@ -118,6 +86,12 @@ Work Queue:
        http://wordpress.org/support/topic/186919#post-838957
    - Study: Replace diff with wordpress diff or add wordpress diff to options?
    - Investigate: In IE, can't select copy/paste text in text widget
+   - Option: Schedule after latest post in queue, not just TDOMF
+   - Add info/image of how to bring up the widget conf panel
+   - Investigate: Auto bring up the conf panel for widgets on the "fix" links
+   - Investigate: Bug with post times - http://thedeadone.net/forum/?p=1269
+   - Some simple javascript to track number of chars/words typed so far in textarea: http://thedeadone.net/forum/?p=1321
+   - Study: http://wordpress.org/extend/plugins/download-monitor/ integration
 */
 
 /*
@@ -268,9 +242,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "44");
+define("TDOMF_BUILD", "45");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.5");
+define("TDOMF_VERSION", "0.12.6");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -464,7 +438,7 @@ define('TDOMF_KEY_DOWNLOAD_THUMBURI',"_tdomf_download_thumburi_");
 define('TDOMF_OPTION_ADMIN_EMAILS', "tdomf_admin_emails");
 
 /////////
-// 0.13.0
+// 0.12.6
 
 define('TDOMF_OPTION_ALLOW_CAPS',"tdomf_allow_caps");
 define('TDOMF_OPTION_ALLOW_USERS',"tdomf_allow_users");
@@ -575,6 +549,7 @@ require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-upload-function
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-classes.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
@@ -676,6 +651,8 @@ function tdomf_new_features() {
       $features .= "<li>".__("More powerful form access configuration. Now you can select by capability and user as well as role!","tdomf")."</li>";
       $features .= "<li>".__("2.7 Wordpress Compatibility","tdomf")."</li>";
       $features .= "<li>".__("Can now turn off auto-publishing of users with publishing rights","tdomf")."</li>";
+      $features .= "<li>".__("New Permalink Widget","tdomf")."</li>";
+      $features .= "<li>".__("New GeoMashup Integration Widget","tdomf")."</li>";
   }
   
   if(!empty($features)) {

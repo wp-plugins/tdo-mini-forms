@@ -1,18 +1,18 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments
-Requires at least: 2.5
-Tested up to: 2.6.2
+Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
+Requires at least: 2.6
+Tested up to: 2.7
 Stable Tag: 0.12.5
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
 == Description ==
 
-This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, etc.
+This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
-**Version 0.12.5 includes integration with the reCapatcha captcha service, integration with the Subscribe-to-Plugins 2.1 plugin (allow submitters to subscribe to followup comments automatically), Comments management widget (allows you to set comments and ping status for forms and/or allow users chose if they want to allow comments), Excerpt Widget and even more bug fixes**
+**Version 0.12.6 includes integration with the GeoMashup plugin, ability to submit the permalink for a post and enhanced capability management**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -26,6 +26,7 @@ Registered users have access to a "Your Submissions" page which lists their curr
 
 = Features =
 
+* Integration with the GeoMashup plugin
 * Integration with Subcribe-to-Comments 2.1 plugin
 * Integration with Akismet and reCaptcha to prevent Spam
 * Highly customisable: Create your forms using a Widget interface and then hack it to make it work how you like!
@@ -33,6 +34,7 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Import and Export form configurations
 * Put a form in your sidebar using a widget for your Theme.
 * Submit pages instead of posts.
+* Submit posts with alternative permalinks (great for link sites)
 * Simple Question and/or Image Captcha.
 * Add Custom Fields to your Forms.
 * QuickTags support for Forms.
@@ -48,6 +50,8 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Optionally Queue published posts 
 * Numerous widgets for your theme, including a list of the top submitters
 * And many more...
+
+**Version 0.12.5 includes integration with the reCapatcha captcha service, integration with the Subscribe-to-Plugins 2.1 plugin (allow submitters to subscribe to followup comments automatically), Comments management widget (allows you to set comments and ping status for forms and/or allow users chose if they want to allow comments), Excerpt Widget and even more bug fixes**
 
 **Version 0.12 introduces the Form Hacker which allows admins the power to modify the form code from within the plugin as opposed to hacking the plugin source code. Nearly all messages to the user are configurable now.**
 
@@ -351,6 +355,24 @@ Also thanks to everyone who donated and offered feedback and testing!
 * In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)
 
 == Version History ==
+
+= v0.12.6: 17th Decemeber 2008 =
+
+* Hopefully, finally fixed additionally slashes being added to the content.
+* Bug with 2.5 and breaking wp-comments.php file
+* Bug with file uploads and accidentially displaying an error when no error exists and therefore causing the form to break.
+* New more powerful form access configuration
+* Textarea and Textfield Custom Field couldn't support '0' as a valid input, as PHP would treat this as empty
+* Fixed 'true' in title field of textarea for content
+* Can now disable auto-publishing of admin posts
+* Changed CSS class 'shadow' to 'tdomf_shadow' to avoid conflicts
+* If there are too many users (say over 60), tdomf will instead ask for login names for the users in options rather than slow down the UI displaying a dropdown. This affects the edit-post screen and the general tdomf options page.
+* AJAX on form will scroll the window up to the preview or message if there is any so users don't miss it
+* ReCaptcha widget now works with AJAX
+* New permalink widget 
+* Links to uploaded files included on the moderation screen
+* New GeoMasup integration widget
+* Initial Widget Class 
 
 = v0.12.5: 20th October 2008 =
 
