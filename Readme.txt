@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.6
 Tested up to: 2.7
-Stable Tag: 0.12.5
+Stable Tag: 0.12.6
 
 This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
@@ -333,6 +333,8 @@ Several updates to make the generated forms W3C compliance done by [Laurent Grab
 SQL Time calcuation function used in calculating next post time in queue, donated [Adam Selvidge]( http://www.myconfinedspace.com/ )
 
 reCaptcha PHP library taken from ( http://recaptcha.net/ )
+
+GeoMashup widget based on hack from [hitekhomeless]( http://hitekhomeless.net )
 
 Also thanks to everyone who donated and offered feedback and testing!
 
