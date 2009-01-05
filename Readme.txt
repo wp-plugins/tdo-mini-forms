@@ -14,6 +14,8 @@ This plugin allows you to add highly customisable forms to your website that all
 
 **Version 0.12.6 includes integration with the GeoMashup plugin, ability to submit the permalink for a post and enhanced capability management**
 
+**[Version 0.12.6 also contains a serious bug that affects Windows only hosts! Please use with caution.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/)**
+
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
 The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
