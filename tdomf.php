@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.6
+Version: 0.12.7
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -27,62 +27,60 @@ Author URI: http://thedeadone.net
 
 ////////////////////////////////////////////////////////////////////////////////
 // Version History
-// 
+//
 // See readme.txt
 //
-// v0.12.6:
-// - Hopefully, finally fixed additionally slashes being added to the content.
-// - Bug with 2.5 and breaking wp-comments.php file
-// - Bug with file uploads and accidentially displaying an error when no error
-//   exists and therefore causing the form to break.
-// - New more powerful form access configuration
-// - Textarea and Textfield Custom Field couldn't support '0' as a valid input,
-//   as PHP would treat this as empty
-// - Fixed 'true' in title field of textarea for content
-// - Can now disable auto-publishing of admin posts
-// - Changed CSS class 'shadow' to 'tdomf_shadow' to avoid conflicts
-// - If there are too many users (say over 60), tdomf will instead ask for 
-//   login names for the users in options rather than slow down the UI 
-//   displaying a dropdown. This affects the edit-post screen and the general
-//   tdomf options page.
-// - AJAX on form will scroll the window up to the preview or message if there
-//   is any so users don't miss it
-// - ReCaptcha widget now works with AJAX
-// - New permalink widget 
-// - Links to uploaded files included on the moderation screen
-// - New GeoMasup integration widget
-// - Initial Widget Class 
+// v0.12.7
+// - Form Hacker did not use FORMID so when you copied a form, it would break
+// - Updated widget classes (may "break" existing forms)
+// - Added a "link" to the Auto Respond Email widget that allows users to set
+//    a custom field on a post. Can be used to verify if the user email is
+//    valid.
+// - Fixed critical Windows host bug that would attempt to delete root drive.
+//    The add_post_meta Wordpress function would strip back slashes out of
+//    input and basically feck up the Windows path. Now the path name is
+//    "protected" before being passed to add_post_meta.
+// - Fixed post queuing. This was broken in two ways. The date/time calculation
+//    was wrong and now has been updated based on generousily donated code from
+//    Adam Selvidge. Second a change in Wordpress 2.7 meant that setting the
+//    future status was being ignored when the post was being published.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-/*
-////////////////////////////////////////////////////////////////////////////////
-
-Edit Post:
-  * Using same/similar form as what the post was submitted with?
-  * Create Edit-Post only forms
-  * Allow various controls and access for forms: per category and by access roles
-  * Editing Post implies adding/removing comments too (can replace comment submission form)
-  * Unregistered user editing (requires some sort of magic code)
-  
-////////////////////////////////////////////////////////////////////////////////
- */
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+    http://thedeadone.net/forum/?p=1618#comment-3611 (figure the category (alphanumeric) from title of post and add it)
+
+    http://thedeadone.net/forum/?p=1458#comment-3484 (dynamically displaying a form based on a checkbox)
     http://thedeadone.net/forum/?p=334#comment-2637 (additional default categories)
     http://thedeadone.net/forum/?p=1230#comment-2618 (potential solution for not saving hacked forms)
     http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
     http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
-    
+    http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
+    - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
+
+    http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
+
+   - Entry in FAQ: Widget Changes not showing up
+   - Bug: Illegal characters in file names: http://thedeadone.net/forum/?p=1544#topic-1544
+   - Allow options to format the "submitted by" text and also disabling for registered users
+   - Investigate: Integeration with NextGen
+   - Bug: Weird "From" email for post moderation emails: http://thedeadone.net/forum/?p=71
+   - Bug: No image preview when using attachment options: http://thedeadone.net/forum/?p=1498#comment-3485
+   - Quicktag like options for form hacker
+   - Bug: slashes: http://thedeadone.net/forum/?p=1444#comment-3331 (but it might be related to AJAX!)
+   - Template: List of submitters
+   - Investigate: Copy widgets to other forms
+   - Bug: Widget configuration panels not showing up: http://thedeadone.net/forum/?p=1379
+   - Code: Tags as checkboxes - http://thedeadone.net/forum/?p=1377
    - Allow Error, StyleSheet and Validation Form Hacking
    - Allow only the Form or the Preview to be "hacked" in the Form Hacker
    - Add Error Warning for custom field widgets when non-unique keys used
    - Investigate: no sidebars in widget configuration in IE.7
    - Investigate: tinymce conflict with AJAX form
-   - Investigate: upload-link error: 
+   - Investigate: upload-link error:
        http://wordpress.org/support/topic/186919#post-838957
    - Study: Replace diff with wordpress diff or add wordpress diff to options?
    - Investigate: In IE, can't select copy/paste text in text widget
@@ -100,14 +98,14 @@ Notes:
  - Potential nice hack: query.php @ line 1479
    $this->posts = apply_filters('the_posts', $this->posts);
      1. is single/page [should include category and index?]
-     2. what post? 
+     2. what post?
      3. is it tdomf, draft/unmoderation, not spam, viewer is submitter
      4. add to array
      This will allow users see their submitted posts, however comments should
      be disabled as they cannot be used in preview mode
  - What Clickable links in your posts? http://thedeadone.net/forum/?p=500#comment-1598
 */
- 
+
  /*
 ////////////////////////////////////////////////////////////////////////////////
 TODO for future versions
@@ -242,9 +240,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "45");
+define("TDOMF_BUILD", "46");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.6");
+define("TDOMF_VERSION", "0.12.7");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -501,7 +499,7 @@ function tdomf_add_menus()
     } else {*/
         add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     /*}*/
-    
+
     // Options
     add_submenu_page( TDOMF_FOLDER , __('Form Manager and Options', 'tdomf'), __('Form Manager and Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
     //
@@ -654,7 +652,11 @@ function tdomf_new_features() {
       $features .= "<li>".__("New Permalink Widget","tdomf")."</li>";
       $features .= "<li>".__("New GeoMashup Integration Widget","tdomf")."</li>";
   }
-  
+  // 46 = 0.12.7
+  if($last_version < 46) {
+      $features .= "<li>".__("Auto Respond Email widget can now provide a link to flag posts using a Custom Field","tdomf")."</li>";
+  }
+
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }
@@ -716,7 +718,7 @@ function tdomf_init(){
           tdomf_set_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,true,$form_id->form_id);
       }
   }
-  
+
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));

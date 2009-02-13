@@ -274,7 +274,7 @@ class TDOMF_Widget {
      */ 
     function setModes($modes = array()) {
         $retVal = false;
-        if(!$this->started || !is_array($modes)) {
+        if(!$this->started && is_array($modes)) {
             $retVal = true;
             $this->modes = $modes;
         }
@@ -316,13 +316,13 @@ class TDOMF_Widget {
      * @return Boolean 
      * @access public 
      */ 
-    function setInternalName($name,$prefix = "tdomf_widget_") {
+    function setInternalName($name) {
         $retVal = false;
         if(!$this->started) {
             $retVal = true;
-            $this->internalName = $prefix.$name;
+            $this->internalName = $name;
             if(!$this->optionKey) {
-                $this->optionKey = $this->internalName;
+                $this->optionKey = 'tdomf_'.$this->internalName.'_widget';
             }
         }
         return $retVal;
@@ -582,6 +582,7 @@ class TDOMF_Widget {
      */       
     function _control($form_id) {
         $options = $this->getOptions($form_id);
+        
         if ( $_POST[$this->internalName.'-submit'] ) {
             if($this->widgetTitle) {
                 $newoptions['tdomf-title'] = $_POST[$this->internalName.'-tdomf-title'];
@@ -593,8 +594,8 @@ class TDOMF_Widget {
                 $newoptions['tdomf-preview-hack'] = isset($_POST[$this->internalName.'-tdomf-preview-hack']);
             }
             if ( $options != $newoptions ) {
-                $options = $newoptions;
                 $this->updateOptions($options,$form_id);
+                $options = $newoptions;
             }
         }
         $this->control($options,$form_id);
@@ -617,17 +618,17 @@ class TDOMF_Widget {
     function controlCommon($options) {
 
         if($this->widgetTitle) { ?>
-<label for="<?php echo $this->internalName; ?>-title" style="line-height:35px;"><?php _e("Widget Title: ","tdomf"); ?></label>
-<input type="textfield" id="<?php echo $this->internalName; ?>-title" name="<?php echo $this->internalName; ?>-title" value="<?php echo htmlentities($options['tdomf-title'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
+<label for="<?php echo $this->internalName; ?>-tdomf-title" style="line-height:35px;"><?php _e("Widget Title: ","tdomf"); ?></label>
+<input type="textfield" id="<?php echo $this->internalName; ?>-title" name="<?php echo $this->internalName; ?>-tdomf-title" value="<?php echo htmlentities($options['tdomf-title'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
 <br/>
         <?php  }
         if($this->hack) { ?>
-<input type="checkbox" name="<?php echo $this->internalName; ?>-hack" id="<?php echo $this->internalName; ?>-hack" <?php if($options['tdomf-hack']) echo "checked"; ?> >
-<label for="<?php echo $this->internalName; ?>-hack" style="line-height:35px;"><?php _e("This widget can be modified in the form hacker","tdomf"); ?></label>
+<input type="checkbox" name="<?php echo $this->internalName; ?>-tdomf-hack" id="<?php echo $this->internalName; ?>-tdomf-hack" <?php if($options['tdomf-hack']) echo "checked"; ?> >
+<label for="<?php echo $this->internalName; ?>-tdomf-hack" style="line-height:35px;"><?php _e("This widget can be modified in the form hacker","tdomf"); ?></label>
 <br/>
         <?php }
-       if($this->hack) { ?>
-<input type="checkbox" name="<?php echo $this->internalName; ?>-preview-hack" id="<?php echo $this->internalName; ?>-preview-hack" <?php if($options['tdomf-preview-hack']) echo "checked"; ?> >
+       if($this->previewHack && $this->preview) { ?>
+<input type="checkbox" name="<?php echo $this->internalName; ?>-preview-hack" id="<?php echo $this->internalName; ?>-tdomf-preview-hack" <?php if($options['tdomf-preview-hack']) echo "checked"; ?> >
 <label for="<?php echo $this->internalName; ?>-preview-hack" style="line-height:35px;"><?php _e("This widget's preview can be modified in the form hacker","tdomf"); ?></label>
 <br/>
         <?php }
@@ -661,7 +662,7 @@ class TDOMF_Widget {
      * @return String 
      */      
      function formHack($args,$options) {
-         return TDOMF_MACRO_WIDGET_START.$this->internalName.TDOMF_MACRO_END;
+         return TDOMF_MACRO_WIDGET_START.$this->internalName.TDOMF_MACRO_END."\n";
      }
     
     /** 
@@ -727,6 +728,8 @@ class TDOMF_Widget {
                           'tdomf-hack' => $this->hack,
                           'tdomf-preview-hack' => $this->previewHack );
         $options = tdomf_get_option_widget($this->optionKey,$form_id);
+        # A bug in a previous version used the unmodified 'internalName' as the option key
+        if($options == false) { $options = tdomf_get_option_widget('tdomf_widget_'.$this->internalName,$form_id); }
         if($options == false) { $options = array(); }
         $options = wp_parse_args($options, $defaults);
         return $options;

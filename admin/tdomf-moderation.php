@@ -85,6 +85,8 @@ function tdomf_publish_post($post_ID,$use_queue=true) {
           "ID"             => $post_ID,
           "post_status"    => 'future',
           "post_date"      => $ts,
+          /* edit date required for wp 2.7 */
+          "edit_date"      => $ts,
           );
     }
      // Use update post instead of publish post because in WP2.3, 

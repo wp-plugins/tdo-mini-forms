@@ -295,12 +295,18 @@ function tdomf_queue_date($form_id,$current_ts)  {
     if($queue_period > 0) {
         tdomf_log_message("Queue period is $queue_period seconds");
          global $wpdb;
-          $query = "SELECT ADDTIME(post_date, SEC_TO_TIME({$queue_period})) 
+          /*$query = "SELECT ADDTIME(post_date, SEC_TO_TIME({$queue_period})) 
             FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
             WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
                 AND $wpdb->postmeta.meta_value='$form_id'
                 AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
-            ORDER BY post_date DESC LIMIT 1 ";
+            ORDER BY post_date DESC LIMIT 1 ";*/
+          $query = "SELECT DATE_ADD(post_date, INTERVAL $queue_period SECOND) as the_datetime
+            FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+            WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
+                AND $wpdb->postmeta.meta_value='$form_id'
+                AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
+            ORDER BY the_datetime DESC LIMIT 1 ";
           $next_ts = $wpdb->get_var( $query );
           if( null != $next_ts ) {
               tdomf_log_message("Sticking post in queue with ts of $next_ts");
@@ -495,9 +501,11 @@ function tdomf_create_post($args) {
               "ID"             => $post_ID,
               "post_status"    => 'future',
               "post_date"      => $ts,
+              /* edit date required for wp 2.7 */
+              "edit_date"      => $ts,
               );
         }
-        
+    
         wp_update_post($post);
         $send_moderator_email = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id);
      }
@@ -665,7 +673,11 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
       }
   }
   
-  $form_name = 'tdomf_form'.$form_id;
+  if($hack) {
+      $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID;      
+  } else {
+      $form_name = 'tdomf_form'.$form_id;
+  }
   
   if($hack) {
      $form .= "\n<!-- Form $form_id start -->\n";
@@ -857,9 +869,17 @@ EOT;
   }  
   $form .= "\t<table class='tdomf_buttons'><tr>\n";
   if(tdomf_widget_is_preview_avaliable($form_id)) {
-      $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
+      if($hack) {
+          $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.TDOMF_MACRO_FORMID.'_preview" id="tdomf_form'.TDOMF_MACRO_FORMID.'_preview" onclick="tdomfSubmit'.TDOMF_MACRO_FORMID."('preview'); return false;\" /></td>\n";
+      } else {
+          $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
+      }
   }
-  $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
+  if($hack) {
+      $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.TDOMF_MACRO_FORMID.'_send" id="tdomf_form'.TDOMF_MACRO_FORMID.'_send" onclick="tdomfSubmit'.TDOMF_MACRO_FORMID."('post'); return false;\" /></td>\n";
+  } else {
+      $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
+  }
   $form .= "\t</tr></table>\n";
   if($hack) {
         $form .= "\t<!-- form buttons end -->\n";

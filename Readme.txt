@@ -2,7 +2,7 @@
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
-Requires at least: 2.6
+Requires at least: 2.7
 Tested up to: 2.7
 Stable Tag: 0.12.6
 
@@ -12,9 +12,9 @@ This plugin allows you to add custom posting forms to your website that allows y
 
 This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
-**Version 0.12.6 includes integration with the GeoMashup plugin, ability to submit the permalink for a post and enhanced capability management**
+**Version 0.12.7 fixes [a critical bug on windows hosts.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/) Please upgrade asap if using a Windows host.**
 
-**[Version 0.12.6 also contains a serious bug that affects Windows only hosts! Please use with caution.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/)**
+**Version 0.12.7 includes support for GeoMashup plugin latest beta, improvements to the widget class (you may need to modify you forms after upgrade), Auto Respond Email can now send a link that users can click and flag the post as verified and a few more bug fixes.**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -359,6 +359,14 @@ Also thanks to everyone who donated and offered feedback and testing!
 * In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)
 
 == Version History ==
+
+= v0.12.7: 13th Feb 2009 = 
+
+* Form Hacker did not use FORMID so when you copied a form, it would break
+* Updated widget classes (may "break" existing forms)
+* Added a "link" to the Auto Respond Email widget that allows users to set a custom field on a post. Can be used to verify if the user email is valid.
+* Fixed critical Windows host bug that would attempt to delete root drive. The add_post_meta Wordpress function would strip back slashes out of input and basically feck up the Windows path. Now the path name is "protected" before being passed to add_post_meta.
+*Fixed post queuing. This was broken in two ways. The date/time calculation was wrong and now has been updated based on generousily donated code from [Adam Selvidge]( http://www.myconfinedspace.com/ ). Second a change in Wordpress 2.7 meant that setting the future status was being ignored when the post was being published.
 
 = v0.12.6: 17th Decemeber 2008 =
 

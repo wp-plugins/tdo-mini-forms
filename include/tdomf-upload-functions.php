@@ -410,7 +410,7 @@ if(isset($_GET['tdomf_upload_preview'])) {
 // Taken from http://ie2.php.net/manual/en/function.rmdir.php
 //
 function tdomf_deltree($path) {
-  if (@is_dir($path)) {
+  if (@is_dir($path) && !@is_link($path)) {
      if(function_exists('scandir')) {
         $entries = scandir($path);
      } else {
@@ -506,6 +506,7 @@ tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload')
 // Post is submitted, move files to correct area and update post with links 
 //
 function tdomf_widget_upload_post($args) {
+  global $wpdb;
   extract($args);
   $options = tdomf_widget_upload_get_options($tdomf_form_id);
   $form_data = tdomf_get_form_data($tdomf_form_id);
@@ -547,7 +548,8 @@ function tdomf_widget_upload_post($args) {
         //        
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$i,0,true);
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,$theirfiles[$i]['type'],true);
-        add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,$newpath,true);
+        // escape the "path" incase it contains '\' as WP will strip these out!
+        add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,$wpdb->escape($newpath),true);
         add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,$theirfiles[$i]['name'],true);
         
         tdomf_log_message( "File ".$theirfiles[$i]['name']." saved from tmp area to ".$newpath." with type ".$theirfiles[$i]['type']." for post $post_ID" );

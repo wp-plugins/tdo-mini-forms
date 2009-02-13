@@ -218,6 +218,11 @@ function tdomf_notify_admins($post_ID,$form_id){
 function tdomf_notify_poster_approved($post_id) {
    global $wpdb;
    
+   if(wp_is_post_revision($post_id)) {
+       tdomf_log_message_extra("tdomf_notify_poster_approved: post $post_id is a revision -- do nothing.");
+       return $post_id;
+   }
+   
    $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true);
    delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
 
@@ -265,6 +270,11 @@ function tdomf_notify_poster_approved($post_id) {
 //
 function tdomf_notify_poster_rejected($post_id) {
    global $wpdb;
+   
+   if(wp_is_post_revision($post_id)) {
+       tdomf_log_message_extra("tdomf_notify_poster_rejected: post $post_id is a revision -- do nothing.");
+       return $post_id;
+   }
    
    tdomf_log_message_extra("tdomf_notify_poster_rejected: $email");
 
