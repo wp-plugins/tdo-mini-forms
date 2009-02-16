@@ -4,17 +4,17 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.7
 Tested up to: 2.7
-Stable Tag: 0.12.6
+Stable Tag: 0.12.7
 
-This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
+This plugin allows you to add themed custom posting forms to your website that allows your readers (including non-registered) to submit posts.
 
 == Description ==
 
-This plugin allows you to add highly customisable forms to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
+This plugin allows you to add highly customisable forms that work with your Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
 **Version 0.12.7 fixes [a critical bug on windows hosts.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/) Please upgrade asap if using a Windows host.**
 
-**Version 0.12.7 includes support for GeoMashup plugin latest beta, improvements to the widget class (you may need to modify you forms after upgrade), Auto Respond Email can now send a link that users can click and flag the post as verified and a few more bug fixes.**
+**Version 0.12.7 includes support for GeoMashup plugin latest beta, improvements to the widget class (you may need to modify you forms after upgrade), Auto Respond Email can now send a link that users can click and flag the post as verified and a few more bug fixes, such as queuing publishing of approved submissions.**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 

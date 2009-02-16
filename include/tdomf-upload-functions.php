@@ -410,6 +410,7 @@ if(isset($_GET['tdomf_upload_preview'])) {
 // Taken from http://ie2.php.net/manual/en/function.rmdir.php
 //
 function tdomf_deltree($path) {
+
   if (@is_dir($path) && !@is_link($path)) {
      if(function_exists('scandir')) {
         $entries = scandir($path);
@@ -436,6 +437,17 @@ function tdomf_deltree($path) {
 function tdomf_upload_delete_post_files($post_ID) {
   // get first file, if it exists. Get directory. Delete directory and contents.
   $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.'0',true);
+  
+ // A full windows path uses ":" compared to unix
+  if(eregi(':', $filepath)) {
+      // if it's a full windows path, check to see if it contains '\' or '/'
+      if(strpos('\\', $path) === false && strpos('/', $path) === false) {
+          tdomf_log_message("Invalid windows path: $filepath - do nothing. Files will have to be deleted manually for deleted post $post_ID.",TDOMF_LOG_ERROR);
+          return;
+      }
+  }
+  
+  // 
   $dirpath = dirname($filepath);
   if(file_exists($dirpath)) {
     tdomf_deltree($dirpath);
