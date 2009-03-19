@@ -1,14 +1,38 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/* TODO: Look at AJAX again
- * TODO: Reset widgets for a specific form */
+/* New Table:
+   
+   TDOMF_DB_TABLE_EDITS
+   
+   edit_id      bigint(20)   NOT NULL auto_increment,
+   post_id      bigint(20)   NOT NULL default '0',
+   form_id      bigint(20)   NOT NULL default '0',
+   date         datetime     NOT NULL default '0000-00-00 00:00:00',
+   date_gmt     datetime     NOT NULL default '0000-00-00 00:00:00',
+   revision_id  int(11)      NOT NULL default '0',
+   edit_user_id bigint(20)   NOT NULL default '0',
+   edit_user_ip varchar(100) NOT NULL default '0'
+   edit_state   varchar(20)  NOT NULL default 'unapproved',
+   edit_data    longtext     NOT NULL default '',
+   PRIMARY KEY  (edit_ID)
+   KEY post_id  (post_ID)
+   KEY date     (date)
+   KEY form_id  (form_id)
+   
+   tdomf_create_edit
+   tdomf_delete_edit
+   tdomf_get_options_edit
+   tdomf_set_options_edit
+   tdomf_get_edits
+*/
 
 function tdomf_db_create_tables() {
   global $wpdb,$wp_roles, $table_prefix;
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
   $table_session_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  $table_edit_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
 
   if($wpdb->get_var("show tables like '$table_form_name'") != $table_form_name) {
     
@@ -113,13 +137,20 @@ function tdomf_db_create_tables() {
     tdomf_log_message("$table_widget_name does not exist. Will create it now...");
     
      $sql = "CREATE TABLE " . $table_widget_name . " (
-               id             bigint(20)   NOT NULL auto_increment,
-               form_id        bigint(20)   NOT NULL default '0',
-               widget_key     varchar(255) default NULL,
-               widget_value   longtext,
-               PRIMARY KEY    (id),
-               KEY form_id    (form_id),
-               KEY widget_key (widget_key)
+               edit_id      bigint(20)   NOT NULL auto_increment,
+               post_id      bigint(20)   NOT NULL default '0',
+               form_id      bigint(20)   NOT NULL default '0',
+               date         datetime     NOT NULL default '0000-00-00 00:00:00',
+               date_gmt     datetime     NOT NULL default '0000-00-00 00:00:00',
+               revision_id  int(11)      NOT NULL default '0',
+               user_id      bigint(20)   NOT NULL default '0',
+               ip           varchar(100) NOT NULL default '0'
+               state        varchar(20)  NOT NULL default 'unapproved',
+               data         longtext     NOT NULL default '',
+               PRIMARY KEY  (edit_id),
+               KEY post_id  (post_id),
+               KEY date     (date)
+               KEY form_id  (form_id),
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
@@ -199,6 +230,26 @@ function tdomf_db_create_tables() {
       }
   }
      
+  if($wpdb->get_var("show tables like '$table_edit_name'") != $table_edit_name ) {
+      
+      tdomf_log_message("$table_edit_name does not exist. Will create it now...");
+      
+      $sql = "CREATE TABLE " . $table_edit_name . " (
+               session_key       varchar(255) NOT NULL,
+               session_data      longtext,
+               session_timestamp int(11),
+               PRIMARY KEY  (session_key)
+             );";
+      require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+      dbDelta($sql);
+      
+      if($wpdb->get_var("show tables like '$table_edit_name'") == $table_edit_name) {
+          tdomf_log_message("$table_edit_name created successfully.",TDOMF_LOG_GOOD);
+      } else {
+          tdomf_log_message("Can't find db table $table_edit_name! Table not created.",TDOMF_LOG_ERROR);
+      }
+  }
+  
   return true;
 }
 

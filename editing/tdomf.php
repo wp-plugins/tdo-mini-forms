@@ -30,6 +30,9 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
+// v0.12.8/0.13
+// - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
+//
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break
 // - Updated widget classes (may "break" existing forms)
@@ -52,10 +55,9 @@ Author URI: http://thedeadone.net
 Work Queue:
 
     http://thedeadone.net/forum/?p=1618#comment-3611 (figure the category (alphanumeric) from title of post and add it)
-
-    http://thedeadone.net/forum/?p=1700 (Getting the thumbnails from a post using Template tags)
+    http://thedeadone.net/forum/?p=1332#comment-3889 (programatically limit size of uploaded imagE)
+	http://thedeadone.net/forum/?p=1700 (Getting the thumbnails from a post using Template tags)
     http://thedeadone.net/forum/?p=1702#comment-3763 (Thumbnail to Custom Field)
-    
     http://thedeadone.net/forum/?p=1458#comment-3484 (dynamically displaying a form based on a checkbox)
     http://thedeadone.net/forum/?p=334#comment-2637 (additional default categories)
     http://thedeadone.net/forum/?p=1230#comment-2618 (potential solution for not saving hacked forms)
@@ -63,9 +65,13 @@ Work Queue:
     http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
     http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
-    
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
-    
+   
+   - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
+   - Requred option in category field
+   - Sanatized file upload filenames/paths http://thedeadone.net/blog/v0127-of-tdo-mini-forms-just-released/comment-page-1/#comment-181601
+   - Related posts! http://thedeadone.net/forum/?p=1904#comment-3937
+   - diacritc marks reset form hacker: http://thedeadone.net/forum/?p=1888#topic-1888
    - Entry in FAQ: Widget Changes not showing up
    - Bug: Illegal characters in file names: http://thedeadone.net/forum/?p=1544#topic-1544
    - Allow options to format the "submitted by" text and also disabling for registered users
@@ -295,7 +301,8 @@ define("TDOMF_KEY_STATUS","_tdomf_status");
 // 0.7 Settings
 //
 define('TDOMF_FOLDER', dirname(plugin_basename(__FILE__)));
-define('TDOMF_FULLPATH', ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR);
+define('TDOMF_FULLPATH', WP_PLUGIN_DIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR);
+#define('TDOMF_FULLPATH', ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR);
 define('TDOMF_URLPATH', get_option('siteurl').'/wp-content/plugins/'.TDOMF_FOLDER.'/');
 define('TDOMF_WIDGET_PATH',TDOMF_FULLPATH.'widgets/');
 define('TDOMF_VERSION_CURRENT', "tdomf_version_current");
@@ -471,8 +478,8 @@ define('TDOMF_STAT_EDITED', "tdomf_stat_edited");
 // @todo Throttling for editing (don't forget message admin screen)
 // @todo Form Hacker
 
-// @todo Bug on New Form - enabling editing
 define("TDOMF_MACRO_POSTID", "%%POSTID%%");
+define("TDOMF_DB_TABLE_EDITS", "tdomf_table_edits");
 
 /* @todo
    For handling versions:

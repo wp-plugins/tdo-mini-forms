@@ -196,7 +196,7 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_def_cat").disabled = !flag;
             }
             if(flag_edit) {
-                document.getElementById("tdomf_edit_cat_only").disabled = !flag;
+                //document.getElementById("tdomf_edit_cat_only").disabled = !flag;
                 document.getElementById("tdomf_edit_cats").disabled = !flag;
             }
           }
@@ -217,17 +217,24 @@ function tdomf_show_form_options($form_id) {
             
             document.getElementById("tdomf_edit_tdomf_only").disabled = flag;
             if(flag_posts) {
-                document.getElementById("tdomf_edit_cat_only").disabled = flag;
+                //document.getElementById("tdomf_edit_cat_only").disabled = flag;
                 document.getElementById("tdomf_edit_cats").disabled = flag;
             }
-            document.getElementById("tdomf_add_edit_link").disabled = flag;
-            document.getElementById("tdomf_auto_edit_link").disabled = flag;
-            <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
-                document.getElementById("tdomf_auto_edit_link_type_your_submissions").disabled = flag;
+            
+            document.getElementById("tdomf_add_edit_link_none").disabled = flag;
+            <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?> 
+                document.getElementById("tdomf_add_edit_link_your_submissions").disabled = flag;
             <?php } ?>
-            document.getElementById("tdomf_auto_edit_link_type_page").disabled = flag;
-            document.getElementById("tdomf_auto_edit_link_type_custom").disabled = flag;
+            document.getElementById("tdomf_add_edit_link_custom").disabled = flag;
+            document.getElementById("tdomf_add_edit_link_custom_url").disabled = flag;
+            
+            document.getElementById("tdomf_auto_edit_link_none").disabled = flag;
+            <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?> 
+                document.getElementById("tdomf_auto_edit_link_your_submissions").disabled = flag;
+            <?php } ?>
+            document.getElementById("tdomf_auto_edit_link_custom").disabled = flag;
             document.getElementById("tdomf_auto_edit_link_custom_url").disabled = flag;
+            
             document.getElementById("tdomf_author_edit").disabled = flag;
             document.getElementById("tdomf_time_edit").disabled = flag;
 
@@ -264,17 +271,24 @@ function tdomf_show_form_options($form_id) {
             
             document.getElementById("tdomf_edit_tdomf_only").disabled = !flag;
             if(flag_posts) {
-                document.getElementById("tdomf_edit_cat_only").disabled = !flag;
+                //document.getElementById("tdomf_edit_cat_only").disabled = !flag;
                 document.getElementById("tdomf_edit_cats").disabled = !flag;
             }
-            document.getElementById("tdomf_add_edit_link").disabled = !flag;
-            document.getElementById("tdomf_auto_edit_link").disabled = !flag;
-            <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
-                document.getElementById("tdomf_auto_edit_link_type_your_submissions").disabled = !flag;
+            
+            document.getElementById("tdomf_add_edit_link_none").disabled = flag;
+            <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?> 
+                document.getElementById("tdomf_add_edit_link_your_submissions").disabled = flag;
             <?php } ?>
-            document.getElementById("tdomf_auto_edit_link_type_page").disabled = !flag;
-            document.getElementById("tdomf_auto_edit_link_type_custom").disabled = !flag;
-            document.getElementById("tdomf_auto_edit_link_custom_url").disabled = !flag;
+            document.getElementById("tdomf_add_edit_link_custom").disabled = flag;
+            document.getElementById("tdomf_add_edit_link_custom_url").disabled = flag;
+            
+            document.getElementById("tdomf_auto_edit_link_none").disabled = flag;
+            <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?> 
+                document.getElementById("tdomf_auto_edit_link_your_submissions").disabled = flag;
+            <?php } ?>
+            document.getElementById("tdomf_auto_edit_link_custom").disabled = flag;
+            document.getElementById("tdomf_auto_edit_link_custom_url").disabled = flag;
+            
             document.getElementById("tdomf_author_edit").disabled = !flag;
             document.getElementById("tdomf_time_edit").disabled = !flag;
             

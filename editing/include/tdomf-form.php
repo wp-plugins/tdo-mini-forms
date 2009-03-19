@@ -230,7 +230,7 @@ function tdomf_preview_form($args,$mode=false) {
   // Set mode of form
    $hack = false;   
    if(!$mode) {
-       tdomf_generate_default_form_mode($form_id);
+       $mode = tdomf_generate_default_form_mode($form_id);
    }
    if(strpos($mode,'-hack') !== false) {
        $hack = true;
@@ -403,9 +403,9 @@ function tdomf_update_post($form_id,$mode,$args) {
    global $wp_rewrite, $tdomf_form_widgets_post, $current_user;
 
    # @todo
-   # versioning/revisions
+   # versioning/revisions (check against Custom Fields)
    # moderation
-   # version history
+   # version history (db)
    # spam
    
    $post_id = intval($args['tdomf_post_id']);
@@ -451,7 +451,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    
    // flag post under tdomf (if not already)
    //
-   add_post_meta($post_ID, TDOMF_KEY_FLAG, true, true);
+   add_post_meta($post_id, TDOMF_KEY_FLAG, true, true);
    
    // disable kses filters (as it's going to be moderated)
    //
@@ -499,13 +499,6 @@ function tdomf_update_post($form_id,$mode,$args) {
      tdomf_log_message("Post widgets report error!");
      $returnVal = "<font color='red'>$message</font>\n";
    }
-   //
-   // error after editing?
-   // - delete all versions back to last logged version and return
-   // return
-   
-   // log current version
-   // delete in-between versions
 
    if($returnVal == $post_id)
    {
