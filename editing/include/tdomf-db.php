@@ -20,12 +20,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
    KEY date     (date)
    KEY form_id  (form_id)
    
-   tdomf_create_edit
-   tdomf_delete_edit
-   tdomf_get_options_edit
-   tdomf_set_options_edit
    tdomf_get_edits
 */
+
+/* BIG TODO: Optimisations: use cache to prevent multiple queries on the same data */
+  
 
 function tdomf_db_create_tables() {
   global $wpdb,$wp_roles, $table_prefix;
@@ -532,6 +531,86 @@ function tdomf_create_form($form_name = '',$options = array()) {
          "VALUES ('$form_name','".$wpdb->escape($options)."')";
   $result = $wpdb->query( $sql );
   return $wpdb->insert_id;
+}
+
+function tdomf_create_edit($post_id,$form_id,$revision_id=0,$edit_user_id=0,$edit_user_ip=0,$edit_state='unapproved',$edit_data=array()) {
+  global $wpdb;
+  $date = current_time('mysql');
+  $date_gmt = get_gmt_from_date($date);
+  $edit_data = maybe_serialize($edit_data);
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORM;
+  $sql = "INSERT INTO $table_name " .
+         "(post_id, form_id, date, date_gmt, revision_id, edit_user_id, edit_user_ip, edit_state, edit_data) " .
+         "VALUES ('$post_id','$form_id','$date','$date_gmt','$revision_id','$edit_user_id','$edit_user_ip','".$wpdb->escape($edit_state)."','".$wpdb->escape($edit_data)."')";
+  $result = $wpdb->query( $sql );
+  
+  if($result) {
+      $edit = array( "post_id" => $post_id,
+                     "form_id" => $form_id,
+                     "date" => $date,
+                     "date_gmt" => $date_gmt,
+                     "revision_id" => $revision_id,
+                     "edit_user_id" => $edit_user_id,
+                     "edit_user_ip" => $edit_user_ip,
+                     "edit_state" => $edit_state,
+                     "edit_data" => maybe_unserialize($edit_data) );#
+      $key = "tdomf_edit_" . $wpdb->insert_id;
+      wp_cache_set($key,$edit);
+  }
+  
+  return $wpdb->insert_id;
+}
+
+function tdomf_delete_edit($edit_id) {
+  global $wpdb;
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+  $query = "DELETE FROM $table_name
+            WHERE edit_id = '".$wpdb->escape($edit_id)."'";
+  $key = "tdomf_edit_" . $edit_id;            
+  wp_cache_delete($key);
+  return $wpdb->query($query);
+}
+
+function tdomf_get_data_edit($edit_id) {
+  global $wpdb;
+  $key = "tdomf_edit_" . $edit_id;
+  $edit = wp_cache_get($key);
+  if($edit == false || !isset($edit['edit_data'])) {
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "SELECT edit_data 
+                FROM $table_name 
+                WHERE edit_id = '" .$wpdb->escape($edit_id)."'";
+      $edit_data = $wpdb->get_row( $query );
+      if($edit_data != NULL) {
+          $edit_data = maybe_unserialize($edit_data->edit_data);
+          if($edit == false) {
+              $edit = array( 'edit_data' => $edit_data );
+          } else {
+              $edit['edit_data'] = $edit_data;
+          }
+          wp_cache_set($key,$edit);
+          return $edit_data;
+      }
+      return array();
+  } else {
+      if(isset($edit['edit_data'])) {
+          return $edit['edit_data'];
+      }
+      return false;
+  }
+}
+
+function tdomf_set_data_edit($edit_data,$edit_id) {
+  global $wpdb;
+  $defaults = tdomf_get_data_edit($edit_id);
+  $edit_data = wp_parse_args($edit_data,$defaults);
+  $edit_data = maybe_serialize($edit_data);
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+  $query = "UPDATE $table_name 
+            SET edit_data = '".$wpdb->escape($edit_data)."'
+            WHERE edit_id = '".$wpdb->escape($edit_id)."'";
+  // update cache
+  return $wpdb->query($query);
 }
 
 function tdomf_import_form($form_id,$options,$widgets,$caps) {

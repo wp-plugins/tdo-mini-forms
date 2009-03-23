@@ -75,6 +75,9 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
         $message = preg_replace($patterns,$replacements,$message);
     }
 
+    // A lot of people use the ID uppercase format
+    $post_ID = $post_id;
+    
     // execute any PHP code in the message    
     ob_start();
     extract($post_args,EXTR_PREFIX_INVALID,"tdomf_");

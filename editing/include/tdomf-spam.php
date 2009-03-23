@@ -3,6 +3,46 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // @REF: http://akismet.com/development/api/
 
+function tdomf_check_edit_spam($edit_id,$live=true) {
+    
+  if(!get_option(TDOMF_OPTION_SPAM)) {
+    return true;
+  }
+
+  tdomf_cleanup_spam();  
+  
+  $akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+  if(empty($akismet_key)) {
+    tdomf_log_message("No Akismet key set, cannot query if post $post_id is spam!",TDOMF_LOG_ERROR);
+    return true;
+  }
+  
+  // grab post_id / check if real
+  // grab revision_id / check if real
+  // grab ip / use later
+  // grab user_id / use later
+  
+  $edit_data = tdomf_get_data_edit($edit_id);
+  if(!$edit_data) {
+      tdomf_log_message("No edit data associated with $edit_id - will not check is spam",TDOMF_LOG_ERROR);
+      return false;
+  }
+  
+  $query_data = array();
+
+  //$query_data['user_ip'] = get_post_meta($post_id,TDOMF_KEY_IP,true);
+  if(isset($edit_data['HTTP_USER_AGENT'])) {
+     $query_data['user_agent'] = $edit_data['HTTP_USER_AGENT'];
+  }
+  if(isset($edit_data['HTTP_REFERER'])) {
+     $query_data['referrer'] = $edit_data['HTTP_REFERER'];
+  }
+  $query_data['blog'] = get_option('home');
+  $query_data['comment_type'] = 'edit-entry';
+
+  return true;
+}
+
 function tdomf_check_submissions_spam($post_id,$live=true) {
 
   if(!get_option(TDOMF_OPTION_SPAM)) {

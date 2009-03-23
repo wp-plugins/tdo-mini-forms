@@ -405,7 +405,6 @@ function tdomf_update_post($form_id,$mode,$args) {
    # @todo
    # versioning/revisions (check against Custom Fields)
    # moderation
-   # version history (db)
    # spam
    
    $post_id = intval($args['tdomf_post_id']);
@@ -500,33 +499,41 @@ function tdomf_update_post($form_id,$mode,$args) {
      $returnVal = "<font color='red'>$message</font>\n";
    }
 
+   // store information about edit
+   
    if($returnVal == $post_id)
    {
-       // add history data
-       // - user info
-       // - ip
-       // - form id
-       // - version
-
-       $history = get_post_meta($post_ID, TDOMF_KEY_HISTORY, truee);
-       if(!$history) {
-           $history = array();
-       }
-       $entry = array( 'form_id' => $form_id,
-                       'timestamp' => time());
+       $edit_revision_id = 0;
        if($revision_id) {
-           $entry['revision_id'] = $revision_id;
+           $edit_revision_id = $revision_id;
        }
+
+       // can be used by spam check
+       //
+       $edit_data = array( 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
+                           'HTTP_REFERER' => $_SERVER['HTTP_REFERER'] );
+       
+       $edit_user_id = 0;
        if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
            tdomf_log_message("Logging default submitter info (user $user_id) for this post update for $post_ID");
-           $entry['user_id'] = $user_id;
+           $edit_user_id = $user_id;
            update_usermeta($user_id, TDOMF_KEY_FLAG, true);
-           $entry['user_name'] = $current_user->user_login;
+           $edit_data["user_login"] = $current_user->user_login;           
        }
+       
+       $edit_user_ip = 0;
        if(isset($args['ip'])) {
            tdomf_log_message("Logging default ip $ip for this post update for $post_ID");
-           $entry['ip'] = $args['ip'];
+           $edit_user_ip = $args['ip'];
        }
+       
+       
+       $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
+       tdomf_log_message("Edit ID = $edit_id");      
+       
+       //function tdomf_set_data_edit($edit_data,$edit_id) {
+       //function tdomf_get_data_edit($edit_id) {
+
    }
    
    // spam?
