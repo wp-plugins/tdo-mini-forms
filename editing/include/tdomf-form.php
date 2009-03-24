@@ -471,11 +471,47 @@ function tdomf_update_post($form_id,$mode,$args) {
        wp_update_post($postargs);
    }
    
+   // store information about edit
+   
+   if($returnVal == $post_id)
+   {
+       $edit_revision_id = 0;
+       if($revision_id) {
+           $edit_revision_id = $revision_id;
+       }
+
+       // can be used by spam check
+       //
+       $edit_data = array( 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
+                           'HTTP_REFERER' => $_SERVER['HTTP_REFERER'] );
+       
+       $edit_user_id = 0;
+       if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+           tdomf_log_message("Logging default submitter info (user $user_id) for this post update for $post_id");
+           $edit_user_id = $user_id;
+           update_usermeta($user_id, TDOMF_KEY_FLAG, true);
+           $edit_data["user_login"] = $current_user->user_login;           
+       }
+       
+       $edit_user_ip = 0;
+       if(isset($args['ip'])) {
+           tdomf_log_message("Logging default ip $ip for this post update for $post_id");
+           $edit_user_ip = $args['ip'];
+       }
+       
+       
+       $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
+       tdomf_log_message("Edit ID = $edit_id");      
+       
+       // what should we do if $edit_id is bad?
+   }
+   
    tdomf_log_message("Let the widgets do their work on updating $post_id");
    
    // Widgets:post
    //
    $message = "";
+   // need to pass revision id and edit id
    $widget_args = array_merge( array( "post_ID"=>$post_id,
                                       "before_widget"=>"",
                                       "after_widget"=>"<br/>\n",
@@ -499,50 +535,11 @@ function tdomf_update_post($form_id,$mode,$args) {
      $returnVal = "<font color='red'>$message</font>\n";
    }
 
-   // store information about edit
-   
-   if($returnVal == $post_id)
-   {
-       $edit_revision_id = 0;
-       if($revision_id) {
-           $edit_revision_id = $revision_id;
-       }
-
-       // can be used by spam check
+   $send_moderator_email = true;
+   if(tdomf_check_edit_spam($edit_id,true)) {
+       
+       // Edited count
        //
-       $edit_data = array( 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
-                           'HTTP_REFERER' => $_SERVER['HTTP_REFERER'] );
-       
-       $edit_user_id = 0;
-       if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-           tdomf_log_message("Logging default submitter info (user $user_id) for this post update for $post_ID");
-           $edit_user_id = $user_id;
-           update_usermeta($user_id, TDOMF_KEY_FLAG, true);
-           $edit_data["user_login"] = $current_user->user_login;           
-       }
-       
-       $edit_user_ip = 0;
-       if(isset($args['ip'])) {
-           tdomf_log_message("Logging default ip $ip for this post update for $post_ID");
-           $edit_user_ip = $args['ip'];
-       }
-       
-       
-       $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
-       tdomf_log_message("Edit ID = $edit_id");      
-       
-       //function tdomf_set_data_edit($edit_data,$edit_id) {
-       //function tdomf_get_data_edit($edit_id) {
-
-   }
-   
-   // spam?
-   // - set flag to notify admins of spam?
-   
-   // not spam
-   if($returnVal == $post_id)
-   {
-       // - edited_count
        $edited_count = get_option(TDOMF_STAT_EDITED);
        if($edited_count == false) {
           $edited_count = 0;
@@ -550,18 +547,33 @@ function tdomf_update_post($form_id,$mode,$args) {
        $edited_count++;
        update_option(TDOMF_STAT_EDITED,$edited_count);
        tdomf_log_message("post $post_ID is number $edited_count edit!");
-   }
-   
-   // if moderation enabled, and trusted user or user has publish rights...
-   // - restore version (wp_restore_post_revision)
-   // [queuing is currently disabled for editing]
-   if($revision_id) {
-       if($returnVal == $post_id)
-       {
-           _wp_put_post_revision($revision_id);
-       } else {
-           wp_delete_revision($revision_id);
+
+       // [queuing is currently disabled for editing]
+
+       // Restore version (if using versions) and can publish
+       // (if not using revisions, post is only set to draft if !can_publish)
+       //
+       if($revision_id && $can_publish) {
+           if($returnVal == $post_id)
+           {
+               _wp_put_post_revision($revision_id);
+           } else {
+               wp_delete_revision($revision_id);
+           }
        }
+
+   }
+   else {
+     // it's spam :(
+     if(get_option(TDOMF_OPTION_SPAM_NOTIFY) == 'none') {
+       $send_moderator_email = false;
+     }
+   }
+
+   // Notify admins
+   //
+   if($send_moderator_email){
+      //todo tdomf_notify_admins($post_ID,$form_id);
    }
    
    // Re-enable filters so we dont' break anything else!

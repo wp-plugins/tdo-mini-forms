@@ -1,25 +1,7 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/* New Table:
-   
-   TDOMF_DB_TABLE_EDITS
-   
-   edit_id      bigint(20)   NOT NULL auto_increment,
-   post_id      bigint(20)   NOT NULL default '0',
-   form_id      bigint(20)   NOT NULL default '0',
-   date         datetime     NOT NULL default '0000-00-00 00:00:00',
-   date_gmt     datetime     NOT NULL default '0000-00-00 00:00:00',
-   revision_id  int(11)      NOT NULL default '0',
-   edit_user_id bigint(20)   NOT NULL default '0',
-   edit_user_ip varchar(100) NOT NULL default '0'
-   edit_state   varchar(20)  NOT NULL default 'unapproved',
-   edit_data    longtext     NOT NULL default '',
-   PRIMARY KEY  (edit_ID)
-   KEY post_id  (post_ID)
-   KEY date     (date)
-   KEY form_id  (form_id)
-   
+/*
    tdomf_get_edits
 */
 
@@ -45,6 +27,7 @@ function tdomf_db_create_tables() {
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       // Now double check the table is created!
       //
@@ -136,23 +119,17 @@ function tdomf_db_create_tables() {
     tdomf_log_message("$table_widget_name does not exist. Will create it now...");
     
      $sql = "CREATE TABLE " . $table_widget_name . " (
-               edit_id      bigint(20)   NOT NULL auto_increment,
-               post_id      bigint(20)   NOT NULL default '0',
-               form_id      bigint(20)   NOT NULL default '0',
-               date         datetime     NOT NULL default '0000-00-00 00:00:00',
-               date_gmt     datetime     NOT NULL default '0000-00-00 00:00:00',
-               revision_id  int(11)      NOT NULL default '0',
-               user_id      bigint(20)   NOT NULL default '0',
-               ip           varchar(100) NOT NULL default '0'
-               state        varchar(20)  NOT NULL default 'unapproved',
-               data         longtext     NOT NULL default '',
-               PRIMARY KEY  (edit_id),
-               KEY post_id  (post_id),
-               KEY date     (date)
-               KEY form_id  (form_id),
+               id             bigint(20)   NOT NULL auto_increment,
+               form_id        bigint(20)   NOT NULL default '0',
+               widget_key     varchar(255) default NULL,
+               widget_value   longtext,
+               PRIMARY KEY    (id),
+               KEY form_id    (form_id),
+               KEY widget_key (widget_key)
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       if($wpdb->get_var("show tables like '$table_widget_name'") == $table_widget_name) {
         
@@ -221,6 +198,7 @@ function tdomf_db_create_tables() {
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       if($wpdb->get_var("show tables like '$table_session_name'") == $table_session_name) {
           tdomf_log_message("$table_session_name created successfully.",TDOMF_LOG_GOOD);
@@ -234,18 +212,28 @@ function tdomf_db_create_tables() {
       tdomf_log_message("$table_edit_name does not exist. Will create it now...");
       
       $sql = "CREATE TABLE " . $table_edit_name . " (
-               session_key       varchar(255) NOT NULL,
-               session_data      longtext,
-               session_timestamp int(11),
-               PRIMARY KEY  (session_key)
+               edit_id      bigint(20)   NOT NULL auto_increment,
+               post_id      bigint(20)   NOT NULL default '0',
+               form_id      bigint(20)   NOT NULL default '0',
+               date         datetime     NOT NULL default '0000-00-00 00:00:00',
+               date_gmt     datetime     NOT NULL default '0000-00-00 00:00:00',
+               revision_id  int(11)      NOT NULL default '0',
+               user_id      bigint(20)   NOT NULL default '0',
+               ip           varchar(100) NOT NULL default '0',
+               state        varchar(20)  NOT NULL default 'unapproved',
+               data         longtext     NOT NULL default '',
+               PRIMARY KEY  (edit_id),
+               KEY post_id  (post_id),
+               KEY form_id  (form_id)
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       if($wpdb->get_var("show tables like '$table_edit_name'") == $table_edit_name) {
           tdomf_log_message("$table_edit_name created successfully.",TDOMF_LOG_GOOD);
       } else {
-          tdomf_log_message("Can't find db table $table_edit_name! Table not created.",TDOMF_LOG_ERROR);
+          tdomf_log_message("Can't find db table $table_edit_name! Table not created: SQL Error: $error",TDOMF_LOG_ERROR);
       }
   }
   
@@ -538,24 +526,27 @@ function tdomf_create_edit($post_id,$form_id,$revision_id=0,$edit_user_id=0,$edi
   $date = current_time('mysql');
   $date_gmt = get_gmt_from_date($date);
   $edit_data = maybe_serialize($edit_data);
-  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORM;
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
   $sql = "INSERT INTO $table_name " .
-         "(post_id, form_id, date, date_gmt, revision_id, edit_user_id, edit_user_ip, edit_state, edit_data) " .
+         "(post_id, form_id, date, date_gmt, revision_id, user_id, ip, state, data) " .
          "VALUES ('$post_id','$form_id','$date','$date_gmt','$revision_id','$edit_user_id','$edit_user_ip','".$wpdb->escape($edit_state)."','".$wpdb->escape($edit_data)."')";
   $result = $wpdb->query( $sql );
+  $error = $wpdb->last_error;
   
-  if($result) {
+  if($wpdb->insert_id > 0) {
       $edit = array( "post_id" => $post_id,
                      "form_id" => $form_id,
                      "date" => $date,
                      "date_gmt" => $date_gmt,
                      "revision_id" => $revision_id,
-                     "edit_user_id" => $edit_user_id,
-                     "edit_user_ip" => $edit_user_ip,
-                     "edit_state" => $edit_state,
-                     "edit_data" => maybe_unserialize($edit_data) );#
+                     "user_id" => $edit_user_id,
+                     "ip" => $edit_user_ip,
+                     "state" => $edit_state,
+                     "data" => maybe_unserialize($edit_data) );
       $key = "tdomf_edit_" . $wpdb->insert_id;
       wp_cache_set($key,$edit);
+  } else {
+      tdomf_log_message("Error attempting to copy in edit data to db. Last SQL Error: $error",TDOMF_LOG_ERROR);
   }
   
   return $wpdb->insert_id;
@@ -571,47 +562,82 @@ function tdomf_delete_edit($edit_id) {
   return $wpdb->query($query);
 }
 
-function tdomf_get_data_edit($edit_id) {
+function tdomf_get_edit($edit_id) {
   global $wpdb;
   $key = "tdomf_edit_" . $edit_id;
-  $edit = wp_cache_get($key);
-  if($edit == false || !isset($edit['edit_data'])) {
+  echo $key;
+  $edit_cache = wp_cache_get($key);
+  var_dump($edit_cache);
+  if($edit_cache == false || !isset($edit_cache['post_id'])) {
+      echo 'not in cache, load from db';
       $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
-      $query = "SELECT edit_data 
+      $query = "SELECT * 
                 FROM $table_name 
                 WHERE edit_id = '" .$wpdb->escape($edit_id)."'";
-      $edit_data = $wpdb->get_row( $query );
-      if($edit_data != NULL) {
-          $edit_data = maybe_unserialize($edit_data->edit_data);
-          if($edit == false) {
-              $edit = array( 'edit_data' => $edit_data );
-          } else {
-              $edit['edit_data'] = $edit_data;
-          }
-          wp_cache_set($key,$edit);
-          return $edit_data;
+      $edit = $wpdb->get_row( $query );
+      if($edit != NULL) {
+         $edit_cache = array( "post_id" => $edit->post_id,
+                              "form_id" => $edit->form_id,
+                              "date" => $edit->date,
+                              "date_gmt" => $edit->date_gmt,
+                              "revision_id" => $edit->revision_id,
+                              "user_id" => $edit->user_id,
+                              "ip" => $edit->ip,
+                              "state" => $edit->state,
+                              "data" => maybe_unserialize($$edit->data) );
+          wp_cache_set($key,$edit_cache);
+          return (object)$edit_cache;
       }
-      return array();
-  } else {
-      if(isset($edit['edit_data'])) {
-          return $edit['edit_data'];
-      }
-      return false;
+      return (object)array();
   }
+  return (object)$edit_cache;  
 }
 
-function tdomf_set_data_edit($edit_data,$edit_id) {
+function tdomf_set_state_edit($edit_state,$edit_id) {
+    // todo
+}
+
+/*function tdomf_set_data_edit($edit_data,$edit_id) {
   global $wpdb;
   $defaults = tdomf_get_data_edit($edit_id);
   $edit_data = wp_parse_args($edit_data,$defaults);
   $edit_data = maybe_serialize($edit_data);
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
   $query = "UPDATE $table_name 
-            SET edit_data = '".$wpdb->escape($edit_data)."'
+            SET data = '".$wpdb->escape($edit_data)."'
             WHERE edit_id = '".$wpdb->escape($edit_id)."'";
   // update cache
   return $wpdb->query($query);
 }
+
+function tdomf_get_data_edit($edit_id) {
+  global $wpdb;
+  $key = "tdomf_edit_" . $edit_id;
+  $edit_cache = wp_cache_get($key);
+  if($edit_cache == false || !isset($edit_cache['data'])) {
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "SELECT data 
+                FROM $table_name 
+                WHERE edit_id = '" .$wpdb->escape($edit_id)."'";
+      $edit = $wpdb->get_row( $query );
+      if($edit != NULL) {
+          $edit_data = maybe_unserialize($edit->data);
+          if($edit == false) {
+              $edit_cache = array( 'data' => $edit_data );
+          } else {
+              $edit_cache['edit_data'] = $edit_data;
+          }
+          wp_cache_set($key,$edit_cache);
+          return $edit_data;
+      }
+      return array();
+  } else {
+      if(isset($edit['data'])) {
+          return $edit['data'];
+      }
+      return false;
+  }
+}*/
 
 function tdomf_import_form($form_id,$options,$widgets,$caps) {
   global $wp_roles, $wpdb;
