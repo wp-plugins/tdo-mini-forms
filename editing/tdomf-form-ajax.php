@@ -141,7 +141,7 @@ if($_POST['tdomf_action'] == "post") {
             }
         } else if(get_post_status($post_id) == 'future') {
           tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id),true);
-        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) { 
+        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
           tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),true);
         } else {
           tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id),true);

@@ -562,10 +562,91 @@ function tdomf_delete_edit($edit_id) {
   return $wpdb->query($query);
 }
 
+function tdomf_get_edits($args) {
+    global $wpdb;
+    
+    $defaults = array('post_id' => false,
+                      'limit' => false,
+                      'sort' => 'DESC',
+                      'state' => false,
+                      'count' => false,
+                      'unique_post_ids' => false,
+                      'offset' => false);
+    $args = wp_parse_args($args, $defaults);
+    extract($args);
+    
+    #if(!isset($post_id) || !is_int($post_id)) {
+    #    return false;
+    #}
+    
+    if($sort != false && $sort != 'DESC' && $sort != 'ASC') {
+        return false;
+    }
+    
+    $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+    
+    # select
+    
+    $query = "SELECT ";
+    if($unique_post_ids) {
+        $query .= "DISTINCT(post_id) ";
+    } else if($count) { # can't do distinct and count together
+        $query .= "COUNT(edit_id) ";
+    } else {
+        $query .= "* ";        
+    }
+    
+    # from
+    
+    $query .= "FROM $table_name ";
+    
+    # where
+    
+    if($post_id != false && $post_id != 0) { 
+       $query .= "WHERE post_id = '".$wpdb->escape($post_id)."' ";
+    } else if($state != false && !empty($state)) {
+        $query .= "WHERE state = '".$wpdb->escape($state)."' ";
+    }
+    
+    # order by X limit Y
+    
+    if(!$count) {
+        if($sort) {
+           $query .= 'ORDER BY ';
+           if($unique_post_ids) {
+               $query .= 'post_id ';
+           } else {
+               $query .= 'edit_id ';
+           }
+           $query .= $wpdb->escape($sort).' ';
+        }
+    }
+
+    if($limit) {
+           $query .= 'LIMIT '.intval($limit).' ';
+    } 
+
+    if($offset) {
+           $query .= 'OFFSET '.intval($offset).' ';
+    } 
+
+    $wpdb->show_errors = true;
+    if($count) {
+       if($unique_post_ids) {
+           $edits = $wpdb->get_results( $query );
+           $edits = count($edits);
+       } else {
+           $edits = intval($wpdb->get_var( $query ));
+       }
+    } else {
+       $edits = $wpdb->get_results( $query );
+    }
+    return $edits;
+}
+
 function tdomf_get_edit($edit_id) {
   global $wpdb;
   $key = "tdomf_edit_" . $edit_id;
-  echo $key;
   $edit_cache = wp_cache_get($key);
   var_dump($edit_cache);
   if($edit_cache == false || !isset($edit_cache['post_id'])) {
@@ -594,7 +675,29 @@ function tdomf_get_edit($edit_id) {
 }
 
 function tdomf_set_state_edit($edit_state,$edit_id) {
-    // todo
+  global $wpdb;
+  $returnVal = false;
+  $key = "tdomf_edit_" . $edit_id;
+  $edit_cache = wp_cache_get($key);
+  $writedb = true;
+  if($edit_cache != false && isset($edit_cache['state'])) {
+      if($edit_cache['state'] == $edit_state) {
+          $writedb = false;
+          $returnVal = true;
+      }
+  }
+  if($writedb) {
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "UPDATE $table_name 
+                SET state = '".$wpdb->escape($edit_state)."'
+                WHERE edit_id = '".$wpdb->escape($edit_id)."'";
+      $returnVal = $wpdb->query($query);                
+  }
+  if($returnVal && $writedb && is_array($edit_cache)) {
+      $edit_cache['state'] == $edit_state;
+      wp_cache_set($key,$edit_cache);
+  }
+  return $returnVal;
 }
 
 /*function tdomf_set_data_edit($edit_data,$edit_id) {

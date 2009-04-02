@@ -3,13 +3,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 function tdomf_get_message($key,$form_id = false) {
     $message = "";
+    $mode = false;
     if($form_id === false) {
         $message = get_option($key);
     } else {
+        $mode = tdomf_generate_default_form_mode($form_id);
         $message = tdomf_get_option_form($key,$form_id);
     }
     if($message === false) {
-        $message = tdomf_get_message_default($key);
+        $message = tdomf_get_message_default($key,$mode);
     }
     return $message;
 }
@@ -97,7 +99,8 @@ function tdomf_get_message_instance($key, $form_id = false, $mode = "", $post_id
     return "";
 }
 
-function tdomf_get_message_default($key) {
+function tdomf_get_message_default($key,$mode) {
+    
     switch($key) {
         case TDOMF_OPTION_MSG_SUB_PUBLISH:
             $retVal = __("Your submission \"%%SUBMISSIONTITLE%%\" has been automatically published. You can see it <a href='%%SUBMISSIONURL%%'>here</a>. Thank you for using this service.","tdomf");
@@ -142,6 +145,32 @@ function tdomf_get_message_default($key) {
             $retVal = "";
             break;
     }
+    
+    // Edit form changes some of the defaults
+    
+    if($mode && TDOMF_Widget::isEditForm($mode)) {
+        switch($key) {
+            case TDOMF_OPTION_MSG_SUB_PUBLISH:
+                $retVal = __("Your contribution on post \"%%SUBMISSIONTITLE%%\" has been automatically published. You can see it <a href='%%SUBMISSIONURL%%'>here</a>. Thank you for using this service.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_FUTURE:
+                $retVal = __("Your contribution has been accepted and will be published on %%SUBMISSIONDATE%% at %%SUBMISSIONTIME%%. Thank you for using this service.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_SPAM:
+                $retVal = __("Your contribution has being flagged as spam! Sorry","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_MOD:
+                $retVal = __("Your contribution has been added to the moderation queue. It should appear in the next few days. Thank you for using this service.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_ERROR:
+                $retVal = __("Your contribution contained errors:<br/><br/>%%SUBMISSIONERRORS%%<br/><br/>Please correct and resubmit.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_PERM_THROTTLE:
+                $retVal = __("You have hit your contributions quota. Please wait until your existing contributions are approved.","tdomf");
+                break;            
+        }
+    }
+    
     return $retVal;
 }
 

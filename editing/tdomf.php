@@ -54,6 +54,7 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+    http://thedeadone.net/forum/?p=1905#comment-4093 (adding you're own inputs to the form)
     http://thedeadone.net/forum/?p=1618#comment-3611 (figure the category (alphanumeric) from title of post and add it)
     http://thedeadone.net/forum/?p=1332#comment-3889 (programatically limit size of uploaded imagE)
 	http://thedeadone.net/forum/?p=1700 (Getting the thumbnails from a post using Template tags)
@@ -67,6 +68,7 @@ Work Queue:
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
+   - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
    - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
    - Requred option in category field
    - Sanatized file upload filenames/paths http://thedeadone.net/blog/v0127-of-tdo-mini-forms-just-released/comment-page-1/#comment-181601
@@ -550,7 +552,8 @@ function tdomf_wp27() {
 add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
-    $unmod_count = tdomf_get_unmoderated_posts_count();
+    $unmod_count  = tdomf_get_unmoderated_posts_count();
+    $unmod_count += tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true)); 
 
     /*if(tdomf_wp25() && $unmod_count > 0) {
         add_menu_page(__('TDO Mini Forms', 'tdomf'), sprintf(__("TDO Mini Forms <span id='awaiting-mod' class='count-%d'><span class='comment-count'>%d</span></span>", 'tdomf'), $unmod_count, $unmod_count), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
@@ -578,7 +581,7 @@ function tdomf_add_menus()
       add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     else {
-      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation Disabled', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
+      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     //
     // Manage Submitters

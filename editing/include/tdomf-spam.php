@@ -1,6 +1,20 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+function tdomf_is_id_spam($id) {
+    $retValue = false;
+    if(wp_is_post_revision($id)) {
+        # todo: we need to grab the edit data associated with this revision id
+        #       if there is none, it's not spam per say
+        $retValue = false;
+    } else {
+        # if post id, we're checking against a new submission
+        #
+        $retValue = get_post_meta($id, TDOMF_KEY_SPAM);
+    }
+    return $retValue;
+}
+
 // @REF: http://akismet.com/development/api/
 
 function tdomf_check_edit_spam($edit_id,$live=true) {
@@ -89,14 +103,13 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
   if($spam_count == false) { add_option(TDOMF_STAT_SPAM,1); }
   else { update_option(TDOMF_STAT_SPAM,$spam_count++); }
   if(!$live) {
-      // we're updating a post/ but not done yet in tdomf_form
       $edited_count = get_option(TDOMF_STAT_EDITED);
       update_option(TDOMF_STAT_EDITED,$edited_count--);
   }
   
-  // update state
   tdomf_set_state_edit('spam',$edit_id);
-  */
+  tdomf_log_message("Edit $edit_id is <b>spam</b> (according to Akismet)<br/><pre>" . var_export($response,true) . "</pre>",TDOMF_LOG_BAD);
+  return false; */
   
   return true;
 }

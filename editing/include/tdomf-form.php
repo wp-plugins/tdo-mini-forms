@@ -503,7 +503,9 @@ function tdomf_update_post($form_id,$mode,$args) {
        $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
        tdomf_log_message("Edit ID = $edit_id");      
        
-       // what should we do if $edit_id is bad?
+       if($edit_id == 0) {
+           // error! do something
+       }
    }
    
    tdomf_log_message("Let the widgets do their work on updating $post_id");
@@ -511,14 +513,21 @@ function tdomf_update_post($form_id,$mode,$args) {
    // Widgets:post
    //
    $message = "";
-   // need to pass revision id and edit id
-   $widget_args = array_merge( array( "post_ID"=>$post_id,
-                                      "before_widget"=>"",
-                                      "after_widget"=>"<br/>\n",
-                                      "before_title"=>"<b>",
-                                      "after_title"=>"</b><br/>",
-                                      "mode"=>$mode),
-                                      $args);
+   $widget_args = array( "before_widget"=>"",
+                         "after_widget"=>"<br/>\n",
+                         "before_title"=>"<b>",
+                         "after_title"=>"</b><br/>",
+                         "mode"=>$mode,
+                         "edit_id"=>$edit_id);
+   // Use revision_id for post id if avaliable, this makes it transparent
+   // to the widgets
+   if($revision_id) {
+       $widget_args["post_ID"] = $revision_id;
+   } else {
+       $widget_args["post_ID"] = $post_id;
+   }
+   $widget_args = array_merge( $widget_args,
+                               $args);
    $widget_order = tdomf_get_widget_order($form_id);
    $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_post);
    foreach($widget_order as $w) {
@@ -535,45 +544,57 @@ function tdomf_update_post($form_id,$mode,$args) {
      $returnVal = "<font color='red'>$message</font>\n";
    }
 
-   $send_moderator_email = true;
-   if(tdomf_check_edit_spam($edit_id,true)) {
-       
-       // Edited count
-       //
-       $edited_count = get_option(TDOMF_STAT_EDITED);
-       if($edited_count == false) {
-          $edited_count = 0;
-       }
-       $edited_count++;
-       update_option(TDOMF_STAT_EDITED,$edited_count);
-       tdomf_log_message("post $post_ID is number $edited_count edit!");
-
-       // [queuing is currently disabled for editing]
-
-       // Restore version (if using versions) and can publish
-       // (if not using revisions, post is only set to draft if !can_publish)
-       //
-       if($revision_id && $can_publish) {
-           if($returnVal == $post_id)
-           {
-               _wp_put_post_revision($revision_id);
-           } else {
-               wp_delete_revision($revision_id);
+   if($returnVal == $post_id) 
+   {
+       $send_moderator_email = true;
+       if(tdomf_check_edit_spam($edit_id,true)) {
+           
+           // Edited count
+           //
+           $edited_count = get_option(TDOMF_STAT_EDITED);
+           if($edited_count == false) {
+              $edited_count = 0;
+           }
+           $edited_count++;
+           update_option(TDOMF_STAT_EDITED,$edited_count);
+           tdomf_log_message("Edit $edit_id is $edited_count edit!");
+    
+           // [queuing is currently disabled for editing]
+    
+           // Restore version (if using versions) and can publish
+           // (if not using revisions, post is only set to draft if !can_publish)
+           //
+           if($revision_id && $can_publish) {
+               tdomf_log_message("Can publish so setting revision $revision_id as main revision for Post $post_id");
+               wp_restore_post_revision($revision_id);
+           }
+           
+           if($can_publish) {
+               tdomf_set_state_edit('approved',$edit_id);
            }
        }
-
-   }
-   else {
-     // it's spam :(
-     if(get_option(TDOMF_OPTION_SPAM_NOTIFY) == 'none') {
-       $send_moderator_email = false;
-     }
-   }
-
-   // Notify admins
+       else {
+         // it's spam :(
+         if(get_option(TDOMF_OPTION_SPAM_NOTIFY) == 'none') {
+           $send_moderator_email = false;
+         }
+       }
+    
+       // Notify admins
+       //
+       if($send_moderator_email){
+          //todo tdomf_notify_admins($post_ID,$form_id);
+       }
+   } 
+   
+   // in case of error, delete revision as there is no point keeping it
    //
-   if($send_moderator_email){
-      //todo tdomf_notify_admins($post_ID,$form_id);
+   if($returnVal != $post_id) {
+       if($revision_id)  {
+           tdomf_log_message("There were errors, delete revision $revision_id");
+           wp_delete_revision($revision_id);
+       }
+       tdomf_delete_edit($edit_id);
    }
    
    // Re-enable filters so we dont' break anything else!
@@ -814,7 +835,7 @@ function tdomf_create_post($args) {
        tdomf_log_message("post $post_ID generated ".count($revisions)." revisions.");
        // discount the latest revision
        //$revisions = array_slice( $revisions, 0, (count($revisions) - 1) );
-       tdomf_log_message("<pre>".var_export($revisions,true)."</pre>");
+       #tdomf_log_message("<pre>".var_export($revisions,true)."</pre>");
        foreach($revisions as $rev) {
            tdomf_log_message("Deleting revisions ".$rev->ID."");
            wp_delete_post_revision( $rev->ID );

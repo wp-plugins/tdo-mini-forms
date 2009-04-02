@@ -738,8 +738,45 @@ class TDOMF_Widget {
         return $options;
     }
     
+    /** 
+     * Updates options for this widget
+     * 
+     * @access public
+     */
     function updateOptions($options,$form_id) {
         $options = tdomf_set_option_widget($this->optionKey,$options,$form_id);
+    }
+    
+    /** 
+     * Returns if the input form or mode is a edit form or not
+     * 
+     * @return Boolean
+     * @access public
+     */    
+    public static function isEditForm($mode,$form_id=false) {
+        if($form_id != false) {
+            $mode = tdomf_generate_default_form_mode($form_id);
+        }
+        if(strpos($mode, "edit-") === 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /** 
+     * Returns if the input form or mode is a submit/new form or not
+     * 
+     * @return Boolean
+     * @access public
+     */    
+    public static function isSubmitForm($mode,$form_id=false) {
+        if($form_id != false) {
+            $mode = tdomf_generate_default_form_mode($form_id); 
+        }
+        if(strpos($mode, "new-") === 0) {
+            return true;
+        }
+        return false;
     }
 }
 

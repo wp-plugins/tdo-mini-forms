@@ -200,7 +200,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        * @return String
        */      
       function preview($args,$options) {
-          tdomf_log_message("<pre>".var_export($args,true).var_export($options,true)."</pre>");
           if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
           extract($args);
           $output = "";
@@ -271,23 +270,43 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
       function post($args,$options) {
           extract($args);
   
-          // Grab existing data
-          $post = wp_get_single_post($post_ID, ARRAY_A);
-          if(!empty($post['post_content'])) {
-            $post = add_magic_quotes($post);
+          // if sumbitting a new post (as opposed to editing)
+          // make sure to *append* to post_content. For editing, overwrite.
+          //
+          if(TDOMF_Widget::isSubmitForm($mode)) {
+              
+              // Grab existing data
+              $post = wp_get_single_post($post_ID, ARRAY_A);
+              if(!empty($post['post_content'])) {
+                $post = add_magic_quotes($post);
+              }
+
+              // Append
+              $post_content = $post['post_content'];
+              if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+                tdomf_log_message("Content Widget: Stripping tags from post!");
+                $post_content .= strip_tags($content_content,$options['allowable-tags']);
+              } else {
+                $post_content .= $content_content;
+              }
+          } else { // $mode startswith "edit-"
+              // Overwrite 
+              if($options['allowable-tags'] != "" && $options['restrict-tags']) {
+                tdomf_log_message("Content Widget: Stripping tags from post!");
+                $post_content = strip_tags($content_content,$options['allowable-tags']);
+              } else {
+                $post_content = $content_content;
+              }
           }
-          $post_content = $post['post_content'];
+
+          // Title
+
           if($options['title-enable'] && !isset($content_title)) {
             $content_title = tdomf_protect_input($post['post_title']);
           }
-  
-          if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-            tdomf_log_message("Content Widget: Stripping tags from post!");
-            $post_content .= strip_tags($content_content,$options['allowable-tags']);
-          } else {
-            $post_content .= $content_content;
-          }
-  
+          
+          // Update actual post
+
           $post = array (
               "ID"                      => $post_ID,
               "post_content"            => $post_content,

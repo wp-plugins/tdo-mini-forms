@@ -123,7 +123,7 @@ if($message == NULL) {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id);
         } else if(get_post_status($post_id) == 'future') {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id);
-        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) { 
+        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id);
         } else {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id);

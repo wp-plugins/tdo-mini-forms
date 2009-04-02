@@ -211,223 +211,386 @@ function tdomf_get_published_posts_count() {
 	return intval($wpdb->get_var( $query ));
 }
 
+function tdomf_get_mod_posts_url($echo=false,$show='all',$filter='0') {
+    $url = 'admin.php?page=tdomf_show_mod_posts_menu';
+    if($show != 'all') {
+        $url .= '&show=' . $show;
+    }
+    if($filter != '0') {
+        $url .= '&filter=' . $filter;
+    }
+    if($echo) {
+        echo $url; 
+    }
+    return $url;
+}
+
+/* @todo hide posts that are pending/draft due to edits from "Pending Submissions"
+   @todo unapproved edits status
+   @todo filters: form ids, posts with edits, with no edits, by user, by IP 
+   @todo spam edits */
+
 // Show the moderation menu
 //
 function tdomf_show_mod_posts_menu() {
-   if(!tdomf_is_moderation_in_use()) { ?>
+    
+   /* if(!tdomf_is_moderation_in_use()) { ?>
    <div class="wrap">
        <h2><?php printf(__('Moderation Disabled', 'tdomf'),$limit); ?></h2>
        <p><center><b><?php printf(__('Moderation is currently disabled. You can enable it on the <a href="%s">options</a> page.',"tdomf"),"admin.php?page=tdomf_show_options_menu"); ?></b></center></p>
    </div>
    <?php
       return;
-   }
+   } */
 
    tdomf_moderation_handler();
 
-   $limit = 15;
-   if(isset($_REQUEST['limit'])){ $limit = intval($_REQUEST['limit']); }
-   $offset = 0;
-   if(isset($_REQUEST['offset'])){ $offset = intval($_REQUEST['offset']); }
-
-   if(isset($_REQUEST['f']) && $_REQUEST['f'] == "1") {
-      $posts = tdomf_get_published_posts($offset,$limit);
-      $max = tdomf_get_published_posts_count();
-   } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "2") {
-      $posts = tdomf_get_submitted_posts($offset,$limit);
-      $max = tdomf_get_submitted_posts_count();
-   } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "3") {
-      $posts = tdomf_get_spam_posts($offset,$limit);
-      $max = tdomf_get_spam_posts_count();
-   } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "4") {
-      $posts = tdomf_get_queued_posts($offset,$limit);
-      $max = tdomf_get_queued_posts_count();
-   } else {
-   	$posts = tdomf_get_unmoderated_posts($offset,$limit);
-   	$max = tdomf_get_unmoderated_posts_count();
-   }
+   $filter = 0;
+   if(isset($_REQUEST['filter'])) { $filter = intval($_REQUEST['filter']); }
    
-   $form_count = count(tdomf_get_form_ids());
-
+   $pending_count = tdomf_get_unmoderated_posts_count();
+   $scheduled_count = tdomf_get_queued_posts_count();
+   $published_count = tdomf_get_published_posts_count();
+   $spam_count = tdomf_get_spam_posts_count();
+   $all_count = tdomf_get_submitted_posts_count();
+   $form_ids = tdomf_get_form_ids();
+   $pending_edits_count = tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true));
+   $spam_edits_count = tdomf_get_edits(array('state' => 'spam', 'count' => true, 'unique_post_ids' => true)); 
+   
+   $limit = 15; # fixed
+   $paged = 1;
+   if(isset($_GET['paged'])) { $paged = intval($_GET['paged']); }
+   $offset = $limit * ($paged - 1);
+   $show = 'all';
+   if(isset($_REQUEST['show'])) { $show = $_REQUEST['show']; }
+   
+   $posts = false;
+   $max = 0;
+   if($show == 'all') {
+       $posts = tdomf_get_submitted_posts($offset,$limit);
+       $max = ceil($all_count / $limit);
+   } else if($show == 'pending_submissions') {
+       $posts = tdomf_get_unmoderated_posts($offset,$limit);
+       $max = ceil($pending_count / $limit);
+   } else if($show == 'scheduled') {
+       $posts = tdomf_get_queued_posts($offset,$limit);
+       $max = ceil($scheduled_count / $limit);
+   } else if($show == 'published') {
+       $posts = tdomf_get_published_posts($offset,$limit);
+       $max = ceil($published_count / $limit);
+   } else if($show == 'spam_submissions') {
+       $posts = tdomf_get_spam_posts($offset,$limit);
+       $max = ceil($spam_count / $limit);
+   } else if($show == 'pending_edits') {
+       $edits = tdomf_get_edits(array('state' => 'unapproved', 'unique_post_ids' => true, 'offset' => $offset, 'limit' => $limit)); 
+       $max = ceil($pending_edits_count / $limit);
+       $posts = array();
+       # a little hacky magic
+       foreach($edits as $e) {
+           $posts[] = (OBJECT) array( 'ID' => $e->post_id );
+       }
+   } else if($show == 'spam_edits') {
+       $edits = tdomf_get_edits(array('state' => 'spam', 'unique_post_ids' => true, 'offset' => $offset, 'limit' => $limit)); 
+       $max = ceil($spam_edits_count / $limit);
+       $posts = array();
+       # a little hacky magic
+       foreach($edits as $e) {
+           $posts[] = (OBJECT) array( 'ID' => $e->post_id );
+       }
+   }
+   # max is incorrect... doesn't account for form filter...
+   
+   $mode = 'list';
+   if(isset($_GET['mode'])) { $mode = $_GET['mode']; }
+   
+   $count = 0;
+   
    ?>
-
+   
    <div class="wrap">
+   
+   <?php screen_icon(); ?>
+   <h2><?php _e('Moderation', 'tdomf'); ?>
+   </h2>
 
-   <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "1") { ?>
-       <h2><?php if($offset > 0) { _e("Previous Published Submissions","tdomf"); }
-               else { printf(__('Last %d Published Submissions', 'tdomf'),$limit); } ?></h2>
-   <?php } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "2") { ?>
-       <h2><?php if($offset > 0) { _e("Previous Submissions","tdomf"); }
-               else { printf(__('Last %d Submissions', 'tdomf'),$limit); } ?></h2>
-   <?php } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "3") { ?>
-       <h2><?php if($offset > 0) { _e("Previous Spam Submissions","tdomf"); }
-               else { printf(__('Last %d Spam Submissions', 'tdomf'),$limit); } ?></h2>
-   <?php } else if(isset($_REQUEST['f']) && $_REQUEST['f'] == "4") { ?>
-       <h2><?php if($offset > 0) { _e("Previous Scheduled Submissions","tdomf"); }
-               else { printf(__('Last %d Scheduled Submissions', 'tdomf'),$limit); } ?></h2>
-   <?php } else { ?>
-       <h2><?php if($offset > 0) { _e("Previous Unmoderated Submissions","tdomf"); }
-            else { printf(__('Last %d Unmoderated Submissions', 'tdomf'),$limit); } ?></h2>
+   <form id="posts-filter" action="<?php tdomf_get_mod_posts_url(true,$show,0); ?>" method="post">
+   
+   <!-- hidden vars -->
+   
+   <ul class="subsubsub">
+   <li><a href="<?php tdomf_get_mod_posts_url(true,'all',$filter); ?>"<?php if($show == 'all') { ?> class="current"<?php } ?>><?php printf(__('All (%s)','tdomf'),$all_count); ?></a> | </li>
+   <?php if($pending_count > 0) { ?>
+      <li><a href="<?php tdomf_get_mod_posts_url(true,'pending_submissions',$filter); ?>"<?php if($show == 'pending_submissions') { ?> class="current"<?php } ?>><?php printf(__('Pending Submissions (%s)','tdomf'),$pending_count); ?></a> | </li>
    <?php } ?>
+   <?php if($scheduled_count > 0) { ?>
+      <li><a href="<?php tdomf_get_mod_posts_url(true,'scheduled',$filter); ?>"<?php if($show == 'scheduled') { ?> class="current"<?php } ?>><?php printf(__('Scheduled Submissions (%s)','tdomf'),$scheduled_count); ?></a> | </li>
+   <?php } ?>
+   <?php if($published_count > 0) { ?>
+       <li><a href="<?php tdomf_get_mod_posts_url(true,'published',$filter); ?>"<?php if($show == 'published') { ?> class="current"<?php } ?>><?php printf(__('Published (%s)','tdomf'),$published_count); ?></a> | </li>
+   <?php } ?>
+   <?php if($spam_count > 0) { ?>
+       <li><a href="<?php tdomf_get_mod_posts_url(true,'spam_submissions',$filter); ?>"<?php if($show == 'spam_submissions') { ?> class="current"<?php } ?>><?php printf(__('Spam Submissions (%s)','tdomf'),$spam_count); ?></a> | </li>
+   <?php } ?>
+   <?php if($pending_edits_count > 0) { ?>
+       <li><a href="<?php tdomf_get_mod_posts_url(true,'pending_edits',$filter); ?>"<?php if($show == 'pending_edits') { ?> class="current"<?php } ?>><?php printf(__('Pending Edits (%s)','tdomf'),$pending_edits_count); ?></a> | </li>
+   <?php } ?>
+   <?php if($spam_edits_count > 0) { ?>
+       <li><a href="<?php tdomf_get_mod_posts_url(true,'spam_edits',$filter); ?>"<?php if($show == 'spam_edits') { ?> class="current"<?php } ?>><?php printf(__('Spam Edits (%s)','tdomf'),$spam_edits_count); ?></a> | </li>
+   <?php } ?>
+   </ul>
 
-    <p><?php _e("From here you can publish, unpublish or delete any submitted post.","tdomf"); ?></p>
+   <div class="tablenav">
+   
+   <?php
+    $page_links = paginate_links( array(
+        'base' => add_query_arg( 'paged', '%#%' ),
+        'format' => '',
+        'prev_text' => __('&laquo;'),
+        'next_text' => __('&raquo;'),
+        'total' => $max,
+        'current' => $paged
+     ));
+    ?>
 
-   <form method="post" action="admin.php?page=tdomf_show_mod_posts_menu" id="filterposts" name="filterposts" >
-   <fieldset>
-	  <b><?php _e("Filter Posts","tdomf"); ?></b>
-      <select name="f">
-      <option value="0" <?php if(!isset($_REQUEST['f']) || (isset($_REQUEST['f']) && $_REQUEST['f'] == "0")){ ?> selected <?php } ?>><?php _e("Unpublished (Awaiting approval)","tdomf"); ?>
-        <option value="1" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "1"){ ?> selected <?php } ?>><?php _e("Published","tdomf"); ?>
-        <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
-            <option value="3" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "3"){ ?> selected <?php } ?>><?php printf(__("Spam (%d)","tdomf"),tdomf_get_spam_posts_count()); ?>
-        <?php } ?>
-        <option value="4" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "4"){ ?> selected <?php } ?>><?php _e("Scheduled","tdomf"); ?>        
-        <option value="2" <?php if(isset($_REQUEST['f']) && $_REQUEST['f'] == "2"){ ?> selected <?php } ?>><?php _e("All","tdomf"); ?>
-      </select>
-      <input type="submit" name="submit" value="Show" />
-   </fieldset>
-   </form>
-
-   <br/>
-
-   <?php if(count($posts) <= 0) { _e("There are no posts to moderate.","tdomf"); }
-         else { ?>
-
-<script type="text/javascript">
-<!--
-function checkAll(form)
-{
-	for (i = 0, n = form.elements.length; i < n; i++) {
-		if(form.elements[i].type == "checkbox") {
-			if(form.elements[i].checked == true)
-				form.elements[i].checked = false;
-			else
-				form.elements[i].checked = true;
-		}
-	}
-}
-
-function getNumChecked(form)
-{
-	var num = 0;
-	for (i = 0, n = form.elements.length; i < n; i++) {
-		if(form.elements[i].type == "checkbox") {
-			if(form.elements[i].checked == true)
-				num++;
-		}
-	}
-	return num;
-}
-//-->
-</script>
-
-   <form method="post" action="admin.php?page=tdomf_show_mod_posts_menu" id="moderateposts" name="moderateposts" >
+    <!-- Hide bulk actions (from top of page) and fitlers for the time being
     
-   <table class="widefat">
-   <tr>
-    <th scope="col" style="text-align: center"><input type="checkbox" onclick="checkAll(document.getElementById('moderateposts'));" /></th>
-    <th scope="col"><?php _e("ID","tdomf"); ?></th>
-    <th scope="col"><?php _e("Title","tdomf"); ?></th>
-    <th scope="col"><?php _e("Submitter","tdomf"); ?></th>
-    <th scope="col"><?php _e("IP","tdomf"); ?></th>
-    <?php if($form_count > 1) { ?>
-      <th scope="col"><?php _e("Form","tdomf"); ?></th>
+    <div class="alignleft actions">
+    <select name="action">
+    <option value="-1" selected="selected"><?php _e('Bulk Actions'); ?></option>
+    <option value="edit"><?php _e('Publish'); ?></option>
+    <option value="delete"><?php _e('Delete'); ?></option>
+    </select>
+    <input type="submit" value="<?php _e('Apply'); ?>" name="doaction" id="doaction" class="button-secondary action" />
+    <?php wp_nonce_field('bulk-posts'); ?>
+    
+    <select name='form'>
+    <option value="-1" selected="selected"><?php _e('Show All Forms','tdomf'); ?></option>
+    <?php foreach($form_ids as $form) { ?>
+       <option value="<?php echo $form->form_id; ?>"><?php printf(__('Form #%d','tdomf'),$form->form_id); ?></option>
     <?php } ?>
-    <th scope="col"><?php _e("Status","tdomf"); ?></th>
-    <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
-        <th scope="col" colspan="5" style="text-align: center"><?php _e("Actions","tdomf"); ?></th>
-    <?php } else { ?>
-        <th scope="col" colspan="4" style="text-align: center"><?php _e("Actions","tdomf"); ?></th>
-    <?php } ?>
-   </tr>
+    </select>
+    <input type="submit" id="post-query-submit" value="<?php _e('Filter'); ?>" class="button-secondary" />
+    
+    -->
+</div>
 
-   <?php $i = 0;
-         foreach($posts as $p) {
-         $i++;
-         
-         #class='unapproved'
-         $is_spam = get_post_meta($p->ID, TDOMF_KEY_SPAM); 
-                  
-         if($is_spam) { ?>
-      <tr id='post-<?php echo $p->ID; ?>' class='spam' style='background:#CCCCFF;'>
-         <?php } else if($p->post_status == 'future') { ?>
-             <tr id='post-<?php echo $p->ID; ?>' class='future' style='background:#99FF99;'>
-         <?php } else if(($i%2) == 0) { ?>
-		  <tr id='post-<?php echo $p->ID; ?>' class=''>
-	     <?php } else { ?>
-		  <tr id='post-<?php echo $p->ID; ?>' class='alternate'>
-         <?php } ?>
+<?php if ( $page_links ) { ?>
+<div class="tablenav-pages"><?php $page_links_text = sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>%s',
+	number_format_i18n( $offset ),
+	number_format_i18n( $offset+$limit ),
+	number_format_i18n( $max ),
+	$page_links
+); echo $page_links_text; ?></div>
+<?php } ?>
 
-               <td><input type="checkbox" name="moderateposts[]" value="<?php echo $p->ID; ?>" /></td>
-               <th scope="row"><?php echo $p->ID; ?></th>
-               
-		       <td>
-               <?php echo $p->post_title; ?>
-               
-               <?php $form_id = 1;
-                     if($form_count > 1) { 
-                         $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true);
-                     } ?>
-               
-               <?php $fuoptions = tdomf_widget_upload_get_options($form_id);
-                     $index = 0;
-                     $filelinks = "";
-                     while(true) {
-                         $filename = get_post_meta($p->ID, TDOMF_KEY_DOWNLOAD_NAME.$index,true); 
-                         if($filename == false) { break; }
-                         if($fuoptions['nohandler'] && trim($fuoptions['url']) != "") {
-                             $uri = trailingslashit($fuoptions['url'])."$p->ID/".$filename;
-                         } else {
-                             $uri = trailingslashit(get_bloginfo('wpurl')).'?tdomf_download='.$p->ID.'&id='.$i;
-                         }
-                         $filelinks .= "<a href='$uri' title='".htmlentities($filename)."'>$index</a>, ";
-                         $index++;
-                     }
-                     if(!empty($filelinks)) {  ?>
-                         <br/><small><?php _e('Files: ','tdomf'); ?><?php echo $filelinks; ?></small>
-                     <?php } ?>
-               
-               </td>
-		       
-               <td>
-		       <?php $name = get_post_meta($p->ID, TDOMF_KEY_NAME, true);
-		             $email = get_post_meta($p->ID, TDOMF_KEY_EMAIL, true);
-		             $user_id = get_post_meta($p->ID, TDOMF_KEY_USER_ID, true);
-		             if($user_id != false) { ?>
-		               <a href="user-edit.php?user_id=<?php echo $user_id;?>" class="edit">
-		               <?php $u = get_userdata($user_id);
-		                echo $u->user_login; ?></a>
-		             <?php } else if(!empty($name) && !empty($email)) {
-		                echo $name." (".$email.")";
-		             } else if(!empty($name)) {
+<div class="view-switch">
+	<a href="<?php echo clean_url(add_query_arg('mode', 'list', $_SERVER['REQUEST_URI'])) ?>"><img <?php if ( 'list' == $mode ) echo 'class="current"'; ?> id="view-switch-list" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('List View') ?>" alt="<?php _e('List View') ?>" /></a>
+	<a href="<?php echo clean_url(add_query_arg('mode', 'excerpt', $_SERVER['REQUEST_URI'])) ?>"><img <?php if ( 'excerpt' == $mode ) echo 'class="current"'; ?> id="view-switch-excerpt" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('Excerpt View') ?>" alt="<?php _e('Excerpt View') ?>" /></a>
+</div>
+
+<div class="clear"></div>
+
+</div> <!-- tablenav -->
+
+<div class="clear"></div>
+
+<table class="widefat post fixed" cellspacing="0">
+
+	<thead>
+	<tr>
+	<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
+	<th scope="col" id="title" class="manage-column column-title" style="">Post</th>
+	<th scope="col" id="submitted" class="manage-column column-submitted" style="">Submitted</th>
+	<th scope="col" id="edited" class="manage-column column-edited" style="">Most Recent Edit</th>
+	<th scope="col" id="status" class="manage-column column-status" style="">Status</th>
+	</tr>
+	</thead>
+
+	<tfoot>
+	<tr>
+	<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
+	<th scope="col" id="title" class="manage-column column-title" style="">Post</th>
+	<th scope="col" id="submitted" class="manage-column column-submitted" style="">Submitted</th>
+	<th scope="col" id="edited" class="manage-column column-edited" style="">Most Recent Edit</th>
+	<th scope="col" id="status" class="manage-column column-status" style="">Status</th>
+	</tr>
+	</tfoot>
+    
+    <tbody>
+    <?php foreach($posts as $p) { $count++; ?>
+
+        <?php $post = &get_post( $p->ID ); /* seems I need this later */ ?> 
+        <?php $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1)); /* and need this earlier too */ ?>
+        <?php $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
+              if($queue > 0) { $queue = true; } else { $queue = false; } ?>
+        <?php $is_spam = get_post_meta($p->ID, TDOMF_KEY_SPAM); ?>
+
+        <tr id='post-<?php echo $p->ID; ?>' class='<?php if(($count%2) != 0) { ?>alternate <?php } ?>status-<?php echo $post->post_status; ?> iedit' valign="top">
+
+        <th scope="row" class="check-column"><input type="checkbox" name="post[]" value="<?php echo $p->ID; ?>" /></th>
+        <td class="post-title column-title"><strong><a class="row-title" href="post.php?action=edit&amp;post=<?php echo $p->ID; ?>" title="Edit"><?php echo $post->post_title; ?></a></strong>
+              
+        <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> <?php } ?>
+        
+        <?php if ( 'excerpt' == $mode ){
+                 # Have to create our own excerpt, the_excerpt() doesn't cut it
+                 # here :(
+      
+                 if ( empty($post->post_excerpt) ) {
+                    $excerpt = apply_filters('the_content', $post->post_content);
+                 } else { 
+                    $excerpt = apply_filters('the_excerpt', $post->post_excerpt);
+                 }
+                 $excerpt = str_replace(']]>', ']]&gt;', $excerpt);
+                 $excerpt = wp_html_excerpt($excerpt, 252);
+                 if(strlen($excerpt) == 252){ $excerpt .= '...'; }; 
+                 echo $excerpt;
+        } ?>
+
+        <div class="row-actions">
+           <span class='edit'><a href="post.php?action=edit&amp;post=<?php echo $p->ID; ?>" title="<?php echo htmlentities(__('Edit this submission','tdomf')); ?>"><?php _e('Edit','tdomf'); ?></a> | </span>
+           <?php if($post->post_status == 'future') { ?>
+               <span class="publish"><a href="#" title="<?php echo htmlentities(__('Publish this submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
+           <?php } else if($post->post_status != 'publish') { ?>
+               <?php if($queue) { ?>
+                   <span class="publish"><a href="#" title="<?php echo htmlentities(__('Add submission to publish queue','tdomf')); ?>"><?php _e('Queue','tdomf'); ?></a> |</span>
+                   <span class="publish"><a href="#" title="<?php echo htmlentities(__('Publish submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
+               <?php } else { ?>
+                   <span class="publish"><a href="#" title="<?php echo htmlentities(__('Publish submission','tdomf')); ?>"><?php _e('Publish','tdomf'); ?></a> |</span>
+               <?php } ?>
+           <?php } else if($post->post_status == 'publish')  { ?>
+               <span class="publish"><a href="#" title="<?php echo htmlentities(__('Set submission to draft/unmoderated status.','tdomf')); ?>"><?php _e('Un-publish','tdomf'); ?></a> |</span>
+           <?php } ?>
+           <span class='delete'><a class='submitdelete' title='Delete this submission' href='<?php echo wp_nonce_url("post.php?action=delete&amp;post=$p->ID", 'delete-post_' . $p->ID); ?>' onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to delete this post \'%s\'\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Delete','tdomf'); ?></a> | </span>
+           <span class='view'><a href="http://localhost/wordpress/?p=16" title="View &quot;go go go&quot;" rel="permalink"><?php _e('View','tdomf'); ?></a> 
+           <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |</span><?php } ?>
+           <?php if(get_option(TDOMF_OPTION_SPAM)) { 
+                 if($is_spam) { ?>
+               <span class="spam"><a href="#" onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to flag this submission \'%s\' as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
+           <?php } else { ?>
+              <span class="spam" title="<?php echo htmlentities(__('Flag submission as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
+           <?php } } ?>
+        </div>
+        </td>
+        
+        <td class="column-submitted">
+       
+        <ul style="font-size: 11px;">
+        <li>
+        <?php $name = get_post_meta($p->ID, TDOMF_KEY_NAME, true);
+              $email = get_post_meta($p->ID, TDOMF_KEY_EMAIL, true);
+              $user_id = get_post_meta($p->ID, TDOMF_KEY_USER_ID, true);
+              if($user_id != false) { ?>
+                 <a href="user-edit.php?user_id=<?php echo $user_id;?>" class="edit">
+                 <?php $u = get_userdata($user_id);
+                       echo $u->user_login; ?></a>
+                 <?php } else if(!empty($name) && !empty($email)) {
+                       echo $name." (".$email.")";
+                       } else if(!empty($name)) {
                    echo $name;
                  } else if(!empty($email)) {
                    echo $email;
                  } else {
                    _e("N/A","tdomf");
                  } ?>
-		       </td>
-		       <td>
-		             <?php echo get_post_meta($p->ID, TDOMF_KEY_IP, true); ?>
-		       </td>
-           
-           <?php if($form_count > 1) { ?>
-             <td>
-           <?php #$form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true);
-                 if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
-                   <?php _e("N/A","tdomf"); ?>
-                 <?php } else { ?>
-                   <a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id ?>"><?php echo $form_id ?></a>
-                 <?php } ?>
-                 </td>
+         / <?php echo get_post_meta($p->ID, TDOMF_KEY_IP, true); ?> </li>
+        <li>
+        <?php $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true); 
+              if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
+                 <?php _e("Unknown or deleted form","tdomf"); ?>
+              <?php } else { 
+                 $form_edit_url = "admin.php?page=tdomf_show_form_options_menu&form=$form_id";
+                 $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
+                 echo '<a href="'.$form_edit_url.'">'.sprintf(__('Form #%d: %s</a>','tdomf'),$form_id,$form_name).'</a>';
+                    } ?>
+        </li>
+        <li><?php echo mysql2date(__('Y/m/d'), $post->post_date_gmt); ?></li>
+        </ul>
+        </td>
+
+        <td class="column-edited">
+        <?php $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1));
+              if($last_edit == false || empty($last_edit)) { ?>
+                      <!-- no edits -->
+        <?php } else { 
+              $last_edit = $last_edit[0]; # only care about the first entry
+              $last_edit_data = maybe_unserialize($last_edit->data); ?>
+        <ul style="font-size: 11px;">
+        <li><?php # if set... must wait till "Who Am I" widget is done
+                  $name = "";
+                  $email = "";
+                  $user_id = $last_edit->user_id;
+              if($user_id != 0) { ?>
+                 <a href="user-edit.php?user_id=<?php echo $user_id;?>" class="edit">
+                 <?php $u = get_userdata($user_id);
+                       echo $u->user_login; ?></a>
+                 <?php } else if(!empty($name) && !empty($email)) {
+                       echo $name." (".$email.")";
+                       } else if(!empty($name)) {
+                   echo $name;
+                 } else if(!empty($email)) {
+                   echo $email;
+                 } else {
+                   _e("N/A","tdomf");
+                 } ?>
+         / <?php echo $last_edit->ip; ?>
+         </li>
+        <li>
+        <?php $form_id = $last_edit->form_id; 
+              if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
+                 <?php _e("Unknown or deleted form","tdomf"); ?>
+              <?php } else { 
+                 $form_edit_url = "admin.php?page=tdomf_show_form_options_menu&form=$form_id";
+                 $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
+                 echo '<a href="'.$form_edit_url.'">'.sprintf(__('Form #%d: %s</a>','tdomf'),$form_id,$form_name).'</a>';
+                    } ?>
+         </li>
+         <li><?php echo mysql2date(__('Y/m/d'), $last_edit->date_gmt); ?></li>
+        <li><?php switch($last_edit->state) {
+                           case 'unapproved':
+                              _e('Unapproved',"tdomf");
+                              break;
+                           case 'approved':
+                               _e('Approved',"tdomf");
+                               break;
+                           case 'spam':
+                               _e('Spam',"tdomf");
+                               break;
+                           default:
+                               echo _e($last_edit->state,"tdomf");
+                               break;
+                       } ?>
+         </li>
+        </ul>
+        
+        <div class="row-actions">
+           <?php if($last_edit->revision_id != 0 
+                 && $last_edit->state != 'approved') { ?>
+              <span class='view'><a href="http://localhost/wordpress/wp-admin/revision.php?revision=<?php echo $last_edit->revision_id; ?>"><?php _e('View','tdomf'); ?></a> |<span>
+           <?php }?> 
+           <?php if($last_edit->state == 'approved') { ?>
+              <span class="edit">Revert
+              <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>
+           <?php } else if($last_edit->state == 'unapproved') { ?>
+              <span class="edit">Approve| </span>
+              <span class="edit">Compare
+              <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>
            <?php } ?>
-           
-           <?php $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
-                 if($queue > 0) { $queue = true; } else { $queue = false; } ?>
-           
-		       <td>
-               
-               <?php if($is_spam && $p->post_status == 'draft') { ?>
+        <?php if(get_option(TDOMF_OPTION_SPAM)) { 
+                 if($last_edit->state == 'spam') { ?>
+             <span class="spam" title="<?php echo htmlentities(__('Flag contributation as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
+         <php    } else { ?>
+              <span class="spam"><a href="#" title="<?php echo htmlentities(__('Flag contributation as being spam','tdomf')); ?>" onclick="if ( confirm('<?php echo js_escape(__("You are about to flag this contribution as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf')); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
+        <?php    } }?>
+           </div>
+        
+        <?php } ?>
+        
+        </td>
+        
+         <td class="status column-status">
+         <!-- todo take into account edited status -->
+         <?php if($is_spam && $p->post_status == 'draft') { ?>
                       <?php _e('Spam',"tdomf"); ?>
                    <?php } else { 
                        switch($p->post_status) {
@@ -446,99 +609,65 @@ function getNumChecked(form)
                        }
                        if($is_spam) { _e(' (Spam)',"tdomf"); } 
                    } ?>
-               </td>
-               
-		       <td><a href="<?php echo get_permalink($p->ID); ?>" class="edit"><?php _e("View","tdomf"); ?></a></td>
-
-		       <td>
-
-		       <?php if(isset($_REQUEST['f'])) { $farg = "&f=".$_REQUEST['f']; } ?>
-
-               <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
-                   <td>
-                   <?php if($is_spam) { ?>
-                       <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-hamit_'.$p->ID); ?>" class="notspam"><?php _e("Not Spam","tdomf"); ?></a>
-                   <?php } else { ?>
-                       <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-spamit_'.$p->ID); ?>" class="isspam"><?php _e("Spam It","tdomf"); ?></a>
-                   <?php } ?>
-                   </td>
-               <?php } ?>
-               
-               <td>
-               <?php if($is_spam) { ?>
-                   <!-- N/A -->
-		       <?php } else if($p->post_status == "draft") { ?>
-                   <?php if($queue) { 
-                       $publishnow_link =  wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit&nofuture=1",'tdomf-publish_'.$p->ID);
-                       $publishlater_link = wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-publish_'.$p->ID);
-                       printf(__('<a href="%s">Publish Now</a> or <a href="%s">Add to Queue</a>','tdomf'),$publishnow_link,$publishlater_link);
-                       } else { ?>
-                       <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=publish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-publish_'.$p->ID); ?>" class="publish"><?php _e("Publish","tdomf"); ?></a>
-                   <?php } ?>
-		       <?php } else { ?>
-		          <a href="<?php echo wp_nonce_url("admin.php?page=tdomf_show_mod_posts_menu&action=unpublish&post=$p->ID$farg&offset=$offset&limit=$limit",'tdomf-unpublish_'.$p->ID); ?>" class="draft"><?php _e("Un-Publish","tdomf"); ?></a>
-		       <?php } ?>
-		       </td>
-
-		       <td><a href="post.php?action=edit&post=<?php echo $p->ID ?>" class="edit"><?php _e("Edit","tdomf"); ?></a></td>
-		       <td><a href="<?php echo wp_nonce_url("post.php?action=delete&amp;post=$p->ID", 'delete-post_' . $p->ID); ?>" class='delete' ><?php _e("Delete","tdomf"); ?></a></td>
-
-           </tr>
-
-         <?php } ?>
-
-   </table>
-
-   <?php $farg = "0"; if(isset($_REQUEST['f'])) { $farg = $_REQUEST['f']; } ?>
-
-   <input type="hidden" name="limit" id="limit" value="<?php echo $limit; ?>" />
-   <input type="hidden" name="offset" id="offset" value="<?php echo $offset; ?>" />
-   <input type="hidden" name="f" id="f" value="<?php echo $farg; ?>" />
-
-   <p class="submit">
-    <?php if(get_option(TDOMF_OPTION_SPAM) && (!isset($_REQUEST['f']) || $_REQUEST['f'] == '0')) { ?>
-        <input type="submit" name="recheck_button" value="<?php _e("Recheck Unmoderated Submissions for Spam"); ?>" />
-	<?php } ?>
-    <input type="submit" name="delete_button" class="delete" value="<?php _e("Delete Checked Posts &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to delete'); return false } return confirm('You are about to delete ' + numchecked + ' posts permanently \n  \'Cancel\' to stop, \'OK\' to delete.')" />
-    <?php if(!isset($_REQUEST['f']) || $_REQUEST['f'] == '0' || $_REQUEST['f'] == '2') { ?>
-	<input type="submit" name="publish_button" value="<?php _e("Publish Checked Posts &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to publish ' + numchecked + ' posts \n  \'Cancel\' to stop, \'OK\' to publish')" />
-	<?php } ?>
-	<?php if(isset($_REQUEST['f']) && ($_REQUEST['f'] == '1' || $_REQUEST['f'] == '2')) { ?>
-	<input type="submit" name="unpublish_button" value="<?php _e("Un-Publish Checked Posts &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to un-publish ' + numchecked + ' posts \n  \'Cancel\' to stop, \'OK\' to publish')" />
-	<?php } ?>
-    <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
-        <?php if(!isset($_REQUEST['f']) || $_REQUEST['f'] == '1' || $_REQUEST['f'] == '2' || $_REQUEST['f'] == '0') { ?>
-        <input type="submit" name="spam_button" value="<?php _e("Mark Checked Posts as Spam &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to mark ' + numchecked + ' as spam \n  \'Cancel\' to stop, \'OK\' to publish')" />
-        <?php } ?>
-        <?php if($_REQUEST['f'] == '1' || $_REQUEST['f'] == '2' || $_REQUEST['f'] == '3' ) { ?>
-        <input type="submit" name="notspam_button" value="<?php _e("Mark Checked Posts as Not Spam &raquo;"); ?>" onclick="var numchecked = getNumChecked(document.getElementById('moderateposts')); if(numchecked < 1) { alert('Please select some posts to publish'); return false } return confirm('You are about to mark ' + numchecked + ' as not being spam \n  \'Cancel\' to stop, \'OK\' to publish')" />
-        <?php } ?>
+         </td>
     <?php } ?>
-	<?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-moderate-bulk'); } ?>
-   </p>
+    
+    </tbody>
+    
+</table>
 
-   </form>
+<div class="tablenav">
 
-   <br/><br/>
+<?php
+if ( $page_links )
+	echo "<div class='tablenav-pages'>$page_links_text</div>";
+?>
 
-   <div class="navigation">
-   <?php if(($max - ($offset + $limit)) > 0 ) { ?>
-      <div class="alignleft"><a href="admin.php?page=tdomf_show_mod_posts_menu&offset=<?php echo $offset + $limit; ?><?php if(isset($_REQUEST['f'])) { echo "&f=".$_REQUEST['f']; } ?>">&laquo; <?php _e("Previous Entries","tdomf"); ?></a></div>
-   <?php } ?>
+    <!-- Publish (Now)
+         Add to Publish Queue
+         Unpublish/Remove from Queue
+         Approve Edit
+         Revert Last Edit
+         Spam
+         Not Spam
+         Recheck if Spam -->
 
-   <?php if($offset > 0){ ?>
-      <div class="alignright"><a href="admin.php?page=tdomf_show_mod_posts_menu&offset=<?php echo $offset - $limit; ?><?php if(isset($_REQUEST['f'])) { echo "&f=".$_REQUEST['f']; } ?>"><?php _e("Next Entries","tdomf"); ?> &raquo;</a></div>
-   <?php } ?>
-   </div>
+    <div class="alignleft actions">
+    <select name="action">
+    <option value="-1" selected="selected"><?php _e('Bulk Actions'); ?></option>
+    <option value="edit"><?php _e('Publish'); ?></option>
+    <option value="delete"><?php _e('Delete'); ?></option>
+    </select>
+    <input type="submit" value="<?php _e('Apply'); ?>" name="doaction" id="doaction" class="button-secondary action" />
+    <?php wp_nonce_field('bulk-posts'); ?>
+    
+    <!-- hide filters
+    
+    <select name='form'>
+    <option value="-1" selected="selected"><?php _e('Show All Forms','tdomf'); ?></option>
+    <?php foreach($form_ids as $form) { ?>
+       <option value="<?php echo $form->form_id; ?>"><?php printf(__('Form #%d','tdomf'),$form->form_id); ?></option>
+    <?php } ?>
+    </select>
+    
+    -->
+    
+    <br class="clear" />
 
-   <br/><br/>
+    </div> <!-- tablenav -->
+    
+    <br class="clear" />
+    
+</div> <!-- wrap -->
 
-   <?php } ?>
+<?php /* } else { // have_posts() ?>
+<div class="clear"></div>
+<p><?php _e('No posts found') ?></p>
+<?php } */ ?>
 
-   </div> <!-- wrap -->
+</form>
 
    <?php
-
 }
 
 // Handle operations for this form
