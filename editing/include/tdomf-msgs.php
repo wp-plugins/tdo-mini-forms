@@ -151,10 +151,10 @@ function tdomf_get_message_default($key,$mode) {
     if($mode && TDOMF_Widget::isEditForm($mode)) {
         switch($key) {
             case TDOMF_OPTION_MSG_SUB_PUBLISH:
-                $retVal = __("Your contribution on post \"%%SUBMISSIONTITLE%%\" has been automatically published. You can see it <a href='%%SUBMISSIONURL%%'>here</a>. Thank you for using this service.","tdomf");
+                $retVal = __("Your contribution on post \"%%SUBMISSIONTITLE%%\" has been automatically approved. You can see it <a href='%%SUBMISSIONURL%%'>here</a>. Thank you for using this service.","tdomf");
                 break;
             case TDOMF_OPTION_MSG_SUB_FUTURE:
-                $retVal = __("Your contribution has been accepted and will be published on %%SUBMISSIONDATE%% at %%SUBMISSIONTIME%%. Thank you for using this service.","tdomf");
+                $retVal = __("Your contribution has been approved and will be published on %%SUBMISSIONDATE%% at %%SUBMISSIONTIME%%. Thank you for using this service.","tdomf");
                 break;
             case TDOMF_OPTION_MSG_SUB_SPAM:
                 $retVal = __("Your contribution has being flagged as spam! Sorry","tdomf");

@@ -414,13 +414,6 @@ function tdomf_update_post($form_id,$mode,$args) {
    // hook already performed by tdomf_create_post
    
    tdomf_log_message("Attempting to update post $post_id based on input");
-   
-   # See post.php:
-   #
-   # if ( !constant('WP_POST_REVISIONS') ) { /* revisions are not in use */ }
-   # if ( is_numeric( WP_POST_REVISIONS ) && WP_POST_REVISIONS > 0 ){ /* but revisions are retricted!!! */ }
-   #
-   # Can create a post revision using _wp_put_post_revision - edits can then go to that, then use wp_restore_post_revision to restore it
       
    $can_publish = false;
    if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)) {
@@ -441,11 +434,27 @@ function tdomf_update_post($form_id,$mode,$args) {
        }
    }
    
-   // if versioning enabled, use a version
+   // if versioning enabled, use two versions
    //
+   //   * Current represents a copy of the current revision (this will probably 
+   //     duplicate revisions but we have no way of knowing if revision X = 
+   //     current post). This will be used to support "reverting" to the 
+   //     previous version
+   //   * The other revision, is the one we'll be modifying and if it's okay
+   //     making it the actual version.
+   //
+   $current_revision_id = wp_save_post_revision($post_id);
    $revision_id = wp_save_post_revision($post_id);
-   if($revision_id == NULL) {
+   if($revision_id == NULL || $current_revision_id == NULL) {
        tdomf_log_message("Revisions disabled for post $post_id");
+       if($revision_id != NULL) {
+           wp_delete_revision($revision_id);
+           $revision_id = NULL;
+       }
+       if($current_revision_id != NULL) {
+           wp_delete_revision($current_revision_id);
+           $current_revision_id = NULL;
+       }
    }
    
    // flag post under tdomf (if not already)
@@ -476,8 +485,10 @@ function tdomf_update_post($form_id,$mode,$args) {
    if($returnVal == $post_id)
    {
        $edit_revision_id = 0;
+       $edit_current_revision_id = 0;
        if($revision_id) {
            $edit_revision_id = $revision_id;
+           $edit_current_revision_id = $current_revision_id;
        }
 
        // can be used by spam check
@@ -500,7 +511,7 @@ function tdomf_update_post($form_id,$mode,$args) {
        }
        
        
-       $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
+       $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_current_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
        tdomf_log_message("Edit ID = $edit_id");      
        
        if($edit_id == 0) {
@@ -594,7 +605,7 @@ function tdomf_update_post($form_id,$mode,$args) {
            tdomf_log_message("There were errors, delete revision $revision_id");
            wp_delete_revision($revision_id);
        }
-       tdomf_delete_edit($edit_id);
+       tdomf_delete_edit(array($edit_id));
    }
    
    // Re-enable filters so we dont' break anything else!
@@ -1368,5 +1379,20 @@ function tdomf_generate_default_form_mode($form_id) {
     }
     return $mode;
 }
+
+function tdomf_post_delete_cleanup($post_id) {
+    
+    tdomf_log_message("Post with id $post_id is being deleted");
+    $edits = tdomf_get_edits(array('post_id' => $post_id));
+    if(!empty($edits) && is_array($edits)) {
+        $edit_ids = array();
+        foreach($edits as $edit) {
+            $edit_ids [] = $edit->edit_id;
+        }
+        tdomf_log_message("Deleting associated edits " . implode(", ",$edit_ids));
+        tdomf_delete_edits($edit_ids);
+    }
+}
+add_action('delete_post', 'tdomf_post_delete_cleanup');
 
 ?>

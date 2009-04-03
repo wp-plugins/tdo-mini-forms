@@ -212,19 +212,20 @@ function tdomf_db_create_tables() {
       tdomf_log_message("$table_edit_name does not exist. Will create it now...");
       
       $sql = "CREATE TABLE " . $table_edit_name . " (
-               edit_id      bigint(20)   NOT NULL auto_increment,
-               post_id      bigint(20)   NOT NULL default '0',
-               form_id      bigint(20)   NOT NULL default '0',
-               date         datetime     NOT NULL default '0000-00-00 00:00:00',
-               date_gmt     datetime     NOT NULL default '0000-00-00 00:00:00',
-               revision_id  int(11)      NOT NULL default '0',
-               user_id      bigint(20)   NOT NULL default '0',
-               ip           varchar(100) NOT NULL default '0',
-               state        varchar(20)  NOT NULL default 'unapproved',
-               data         longtext     NOT NULL default '',
-               PRIMARY KEY  (edit_id),
-               KEY post_id  (post_id),
-               KEY form_id  (form_id)
+               edit_id              bigint(20)   NOT NULL auto_increment,
+               post_id              bigint(20)   NOT NULL default '0',
+               form_id              bigint(20)   NOT NULL default '0',
+               date                 datetime     NOT NULL default '0000-00-00 00:00:00',
+               date_gmt             datetime     NOT NULL default '0000-00-00 00:00:00',
+               revision_id          int(11)      NOT NULL default '0',
+               current_revision_id  int(11)      NOT NULL default '0',
+               user_id              bigint(20)   NOT NULL default '0',
+               ip                   varchar(100) NOT NULL default '0',
+               state                varchar(20)  NOT NULL default 'unapproved',
+               data                 longtext     NOT NULL default '',
+               PRIMARY KEY          (edit_id),
+               KEY post_id          (post_id),
+               KEY form_id          (form_id)
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
@@ -521,15 +522,15 @@ function tdomf_create_form($form_name = '',$options = array()) {
   return $wpdb->insert_id;
 }
 
-function tdomf_create_edit($post_id,$form_id,$revision_id=0,$edit_user_id=0,$edit_user_ip=0,$edit_state='unapproved',$edit_data=array()) {
+function tdomf_create_edit($post_id,$form_id,$revision_id=0,$current_revision_id=0,$edit_user_id=0,$edit_user_ip=0,$edit_state='unapproved',$edit_data=array()) {
   global $wpdb;
   $date = current_time('mysql');
   $date_gmt = get_gmt_from_date($date);
   $edit_data = maybe_serialize($edit_data);
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
   $sql = "INSERT INTO $table_name " .
-         "(post_id, form_id, date, date_gmt, revision_id, user_id, ip, state, data) " .
-         "VALUES ('$post_id','$form_id','$date','$date_gmt','$revision_id','$edit_user_id','$edit_user_ip','".$wpdb->escape($edit_state)."','".$wpdb->escape($edit_data)."')";
+         "(post_id, form_id, date, date_gmt, revision_id, current_revision_id,user_id, ip, state, data) " .
+         "VALUES ('$post_id','$form_id','$date','$date_gmt','$revision_id','$current_revision_id','$edit_user_id','$edit_user_ip','".$wpdb->escape($edit_state)."','".$wpdb->escape($edit_data)."')";
   $result = $wpdb->query( $sql );
   $error = $wpdb->last_error;
   
@@ -552,14 +553,17 @@ function tdomf_create_edit($post_id,$form_id,$revision_id=0,$edit_user_id=0,$edi
   return $wpdb->insert_id;
 }
 
-function tdomf_delete_edit($edit_id) {
+function tdomf_delete_edits($edit_ids) {
   global $wpdb;
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
-  $query = "DELETE FROM $table_name
-            WHERE edit_id = '".$wpdb->escape($edit_id)."'";
-  $key = "tdomf_edit_" . $edit_id;            
-  wp_cache_delete($key);
-  return $wpdb->query($query);
+  $query  = "DELETE FROM $table_name ";
+  $query .= "WHERE edit_id IN (".implode(",",$edit_ids).")";
+  foreach($edit_ids as $edit_id) {
+     $key = "tdomf_edit_" . $edit_id;            
+     wp_cache_delete($key);
+  }
+  $returnVal = $wpdb->query($query);
+  return $returnVal;
 }
 
 function tdomf_get_edits($args) {
@@ -630,7 +634,7 @@ function tdomf_get_edits($args) {
            $query .= 'OFFSET '.intval($offset).' ';
     } 
 
-    $wpdb->show_errors = true;
+    #$wpdb->show_errors = true;
     if($count) {
        if($unique_post_ids) {
            $edits = $wpdb->get_results( $query );

@@ -211,13 +211,45 @@ function tdomf_get_published_posts_count() {
 	return intval($wpdb->get_var( $query ));
 }
 
-function tdomf_get_mod_posts_url($echo=false,$show='all',$filter='0') {
-    $url = 'admin.php?page=tdomf_show_mod_posts_menu';
+function tdomf_get_mod_posts_url($args) {
+    
+    $defaults = array('echo' => false,
+                      'show' => 'all',
+                      'filter' => false,
+                      'action' => false,
+                      'post_id' => false,
+                      'mode' => 'list',
+                      'nonce' => false,
+                      'revision_id' => false,
+                      'edit_id' => false);
+    if(isset($_REQUEST['show'])) { $defaults['show'] = $_REQUEST['show']; }
+    if(isset($_REQUEST['mode'])) { $defaults['mode'] = $_REQUEST['mode']; }
+    if(isset($_REQUEST['filter'])) { $defaults['filter'] = $_REQUEST['filter']; }
+    $args = wp_parse_args($args, $defaults);
+    extract($args);
+    
+    $url = get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu';
     if($show != 'all') {
         $url .= '&show=' . $show;
     }
-    if($filter != '0') {
+    $url .= '&mode=' . $mode;
+    if($filter) {
         $url .= '&filter=' . $filter;
+    }
+    if($action) {
+        $url .= '&action=' . $action;
+    }
+    if($post_id) {
+        $url .= '&post=' . $post_id;
+    }
+    if($revision_id) {
+        $url .= '&revision=' . $post_id;
+    }
+    if($edit_id) {
+        $url .= '&edit=' . $post_id;
+    }
+    if($nonce) {
+        $url = wp_nonce_url($url,$nonce);
     }
     if($echo) {
         echo $url; 
@@ -304,7 +336,6 @@ function tdomf_show_mod_posts_menu() {
    if(isset($_GET['mode'])) { $mode = $_GET['mode']; }
    
    $count = 0;
-   
    ?>
    
    <div class="wrap">
@@ -313,29 +344,35 @@ function tdomf_show_mod_posts_menu() {
    <h2><?php _e('Moderation', 'tdomf'); ?>
    </h2>
 
+   <?php if(count($posts) <= 0) { ?>
+      <div class="clear"></div>
+      <p><?php _e('No submissions found','tdomf') ?></p>
+      </div> <!-- wrap --><?php 
+   return; } ?>
+   
    <form id="posts-filter" action="<?php tdomf_get_mod_posts_url(true,$show,0); ?>" method="post">
    
    <!-- hidden vars -->
    
    <ul class="subsubsub">
-   <li><a href="<?php tdomf_get_mod_posts_url(true,'all',$filter); ?>"<?php if($show == 'all') { ?> class="current"<?php } ?>><?php printf(__('All (%s)','tdomf'),$all_count); ?></a> | </li>
+   <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'all')); ?>"<?php if($show == 'all') { ?> class="current"<?php } ?>><?php printf(__('All (%s)','tdomf'),$all_count); ?></a> | </li>
    <?php if($pending_count > 0) { ?>
-      <li><a href="<?php tdomf_get_mod_posts_url(true,'pending_submissions',$filter); ?>"<?php if($show == 'pending_submissions') { ?> class="current"<?php } ?>><?php printf(__('Pending Submissions (%s)','tdomf'),$pending_count); ?></a> | </li>
+      <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'pending_submissions')); ?>"<?php if($show == 'pending_submissions') { ?> class="current"<?php } ?>><?php printf(__('Pending Submissions (%s)','tdomf'),$pending_count); ?></a> | </li>
    <?php } ?>
    <?php if($scheduled_count > 0) { ?>
-      <li><a href="<?php tdomf_get_mod_posts_url(true,'scheduled',$filter); ?>"<?php if($show == 'scheduled') { ?> class="current"<?php } ?>><?php printf(__('Scheduled Submissions (%s)','tdomf'),$scheduled_count); ?></a> | </li>
+      <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'scheduled')); ?>"<?php if($show == 'scheduled') { ?> class="current"<?php } ?>><?php printf(__('Scheduled Submissions (%s)','tdomf'),$scheduled_count); ?></a> | </li>
    <?php } ?>
    <?php if($published_count > 0) { ?>
-       <li><a href="<?php tdomf_get_mod_posts_url(true,'published',$filter); ?>"<?php if($show == 'published') { ?> class="current"<?php } ?>><?php printf(__('Published (%s)','tdomf'),$published_count); ?></a> | </li>
+       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'published')); ?>"<?php if($show == 'published') { ?> class="current"<?php } ?>><?php printf(__('Published (%s)','tdomf'),$published_count); ?></a> | </li>
    <?php } ?>
    <?php if($spam_count > 0) { ?>
-       <li><a href="<?php tdomf_get_mod_posts_url(true,'spam_submissions',$filter); ?>"<?php if($show == 'spam_submissions') { ?> class="current"<?php } ?>><?php printf(__('Spam Submissions (%s)','tdomf'),$spam_count); ?></a> | </li>
+       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'spam_submissions')); ?>"<?php if($show == 'spam_submissions') { ?> class="current"<?php } ?>><?php printf(__('Spam Submissions (%s)','tdomf'),$spam_count); ?></a> | </li>
    <?php } ?>
    <?php if($pending_edits_count > 0) { ?>
-       <li><a href="<?php tdomf_get_mod_posts_url(true,'pending_edits',$filter); ?>"<?php if($show == 'pending_edits') { ?> class="current"<?php } ?>><?php printf(__('Pending Edits (%s)','tdomf'),$pending_edits_count); ?></a> | </li>
+       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'pending_edits')); ?>"<?php if($show == 'pending_edits') { ?> class="current"<?php } ?>><?php printf(__('Pending Edits (%s)','tdomf'),$pending_edits_count); ?></a> | </li>
    <?php } ?>
    <?php if($spam_edits_count > 0) { ?>
-       <li><a href="<?php tdomf_get_mod_posts_url(true,'spam_edits',$filter); ?>"<?php if($show == 'spam_edits') { ?> class="current"<?php } ?>><?php printf(__('Spam Edits (%s)','tdomf'),$spam_edits_count); ?></a> | </li>
+       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'spam_edits')); ?>"<?php if($show == 'spam_edits') { ?> class="current"<?php } ?>><?php printf(__('Spam Edits (%s)','tdomf'),$spam_edits_count); ?></a> | </li>
    <?php } ?>
    </ul>
 
@@ -384,8 +421,8 @@ function tdomf_show_mod_posts_menu() {
 <?php } ?>
 
 <div class="view-switch">
-	<a href="<?php echo clean_url(add_query_arg('mode', 'list', $_SERVER['REQUEST_URI'])) ?>"><img <?php if ( 'list' == $mode ) echo 'class="current"'; ?> id="view-switch-list" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('List View') ?>" alt="<?php _e('List View') ?>" /></a>
-	<a href="<?php echo clean_url(add_query_arg('mode', 'excerpt', $_SERVER['REQUEST_URI'])) ?>"><img <?php if ( 'excerpt' == $mode ) echo 'class="current"'; ?> id="view-switch-excerpt" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('Excerpt View') ?>" alt="<?php _e('Excerpt View') ?>" /></a>
+	<a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'mode' => 'list')); ?>"><img <?php if ( 'list' == $mode ) echo 'class="current"'; ?> id="view-switch-list" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('List View') ?>" alt="<?php _e('List View') ?>" /></a>
+	<a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'mode' => 'excerpt')); ?>"><img <?php if ( 'excerpt' == $mode ) echo 'class="current"'; ?> id="view-switch-excerpt" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('Excerpt View') ?>" alt="<?php _e('Excerpt View') ?>" /></a>
 </div>
 
 <div class="clear"></div>
@@ -448,27 +485,29 @@ function tdomf_show_mod_posts_menu() {
         } ?>
 
         <div class="row-actions">
-           <span class='edit'><a href="post.php?action=edit&amp;post=<?php echo $p->ID; ?>" title="<?php echo htmlentities(__('Edit this submission','tdomf')); ?>"><?php _e('Edit','tdomf'); ?></a> | </span>
            <?php if($post->post_status == 'future') { ?>
-               <span class="publish"><a href="#" title="<?php echo htmlentities(__('Publish this submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
+               <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'publish_now', 'post_id' => $p->ID, 'nonce' => 'tdomf-publish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Publish this submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
            <?php } else if($post->post_status != 'publish') { ?>
                <?php if($queue) { ?>
-                   <span class="publish"><a href="#" title="<?php echo htmlentities(__('Add submission to publish queue','tdomf')); ?>"><?php _e('Queue','tdomf'); ?></a> |</span>
-                   <span class="publish"><a href="#" title="<?php echo htmlentities(__('Publish submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
+                   <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'publish', 'post_id' => $p->ID, 'nonce' => 'tdomf-publish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Add submission to publish queue','tdomf')); ?>"><?php _e('Queue','tdomf'); ?></a> |</span>
+                   <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'publish_now', 'post_id' => $p->ID, 'nonce' => 'tdomf-publish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Publish submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
                <?php } else { ?>
-                   <span class="publish"><a href="#" title="<?php echo htmlentities(__('Publish submission','tdomf')); ?>"><?php _e('Publish','tdomf'); ?></a> |</span>
+                   <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'publish_now', 'post_id' => $p->ID, 'nonce' => 'tdomf-publish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Publish submission','tdomf')); ?>"><?php _e('Publish','tdomf'); ?></a> |</span>
                <?php } ?>
            <?php } else if($post->post_status == 'publish')  { ?>
-               <span class="publish"><a href="#" title="<?php echo htmlentities(__('Set submission to draft/unmoderated status.','tdomf')); ?>"><?php _e('Un-publish','tdomf'); ?></a> |</span>
+               <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'unpublish', 'post_id' => $p->ID, 'nonce' => 'tdomf-unpublish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Set submission to draft/unmoderated status.','tdomf')); ?>"><?php _e('Un-publish','tdomf'); ?></a> |</span>
            <?php } ?>
            <span class='delete'><a class='submitdelete' title='Delete this submission' href='<?php echo wp_nonce_url("post.php?action=delete&amp;post=$p->ID", 'delete-post_' . $p->ID); ?>' onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to delete this post \'%s\'\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Delete','tdomf'); ?></a> | </span>
-           <span class='view'><a href="http://localhost/wordpress/?p=16" title="View &quot;go go go&quot;" rel="permalink"><?php _e('View','tdomf'); ?></a> 
+           <?php if($post->post_status == 'publish') { ?>
+           <span class='view'><a href="<?php echo get_permalink($p->ID); ?>" title="<?php echo htmlentities(sprintf(__('View \'%s\'','tdomf'),$post->post_title)); ?>" rel="permalink"><?php _e('View','tdomf'); ?></a> | </span>
+           <?php } ?>
+            <span class='edit'><a href="post.php?action=edit&amp;post=<?php echo $p->ID; ?>" title="<?php echo htmlentities(__('Edit this submission','tdomf')); ?>"><?php _e('Edit','tdomf'); ?></a>
            <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |</span><?php } ?>
            <?php if(get_option(TDOMF_OPTION_SPAM)) { 
                  if($is_spam) { ?>
-               <span class="spam"><a href="#" onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to flag this submission \'%s\' as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
+               <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'spamit', 'post_id' => $p->ID, 'nonce' => 'tdomf-spamit_' . $p->ID)) ?>" onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to flag this submission \'%s\' as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
            <?php } else { ?>
-              <span class="spam" title="<?php echo htmlentities(__('Flag submission as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
+              <span class="spam" title="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'hamit', 'post_id' => $p->ID, 'nonce' => 'tdomf-hamit_' . $p->ID)) ?>" ><?php _e('Not Spam','tdomf'); ?></span>
            <?php } } ?>
         </div>
         </td>
@@ -566,21 +605,22 @@ function tdomf_show_mod_posts_menu() {
         <div class="row-actions">
            <?php if($last_edit->revision_id != 0 
                  && $last_edit->state != 'approved') { ?>
-              <span class='view'><a href="http://localhost/wordpress/wp-admin/revision.php?revision=<?php echo $last_edit->revision_id; ?>"><?php _e('View','tdomf'); ?></a> |<span>
+              <span class='view'><a href="revision.php?revision=<?php echo $last_edit->revision_id; ?>"><?php _e('View','tdomf'); ?></a> |<span>
            <?php }?> 
+              <span class="delete"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'delete_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-delete_edit_' . $last_edit->edit_id)) ?>"><?php _e('Delete','tdomf'); ?></a> | </span>
            <?php if($last_edit->state == 'approved') { ?>
-              <span class="edit">Revert
+              <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'revert_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-revert_edit_' . $last_edit->edit_id)) ?>"><?php _e('Revert','tdomf'); ?></a> 
               <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>
            <?php } else if($last_edit->state == 'unapproved') { ?>
-              <span class="edit">Approve| </span>
-              <span class="edit">Compare
+              <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'approve_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-approve_edit_' . $last_edit->edit_id)) ?>"><?php _e('Approve','tdomf'); ?></a> | </span>
+              <span class="edit"><a href="revision.php?action=diff&right=<?php echo $last_edit->revision_id; ?>&left=<?php echo $last_edit->current_revision_id; ?>"><?php _e('Compare','tdomf'); ?>
               <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>
            <?php } ?>
         <?php if(get_option(TDOMF_OPTION_SPAM)) { 
                  if($last_edit->state == 'spam') { ?>
-             <span class="spam" title="<?php echo htmlentities(__('Flag contributation as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
+             <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'hamit_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-hamit_edit_' . $last_edit->edit_id)) ?>" title="<?php echo htmlentities(__('Flag contributation as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
          <php    } else { ?>
-              <span class="spam"><a href="#" title="<?php echo htmlentities(__('Flag contributation as being spam','tdomf')); ?>" onclick="if ( confirm('<?php echo js_escape(__("You are about to flag this contribution as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf')); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
+              <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'spamit_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-spamit_edit_' . $last_edit->edit_id)) ?>" title="<?php echo htmlentities(__('Flag contributation as being spam','tdomf')); ?>" onclick="if ( confirm('<?php echo js_escape(__("You are about to flag this contribution as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf')); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
         <?php    } }?>
            </div>
         
@@ -660,11 +700,6 @@ if ( $page_links )
     
 </div> <!-- wrap -->
 
-<?php /* } else { // have_posts() ?>
-<div class="clear"></div>
-<p><?php _e('No posts found') ?></p>
-<?php } */ ?>
-
 </form>
 
    <?php
@@ -673,8 +708,14 @@ if ( $page_links )
 // Handle operations for this form
 //
 function tdomf_moderation_handler() {
-   $message = "";
+   $message .= "";
 
+   # this means a post was deleted
+   #
+   if(isset($_REQUEST['deleted'])) {
+       $message .= __("Submissions deleted. ","tdomf");
+   }
+   
    if(isset($_REQUEST['recheck_button'])) {
        check_admin_referer('tdomf-moderate-bulk');
        $posts = tdomf_get_unmoderated_posts();
@@ -688,7 +729,7 @@ function tdomf_moderation_handler() {
        }
        if($list != "") {
            tdomf_log_message("These posts are actually spam: $list");
-           $message = sprintf(__("Marked these posts as spam: %s","tdomf"),$list);
+           $message .= sprintf(__("Marked these posts as spam: %s","tdomf"),$list);
        }
    }
    else if(isset($_REQUEST['delete_button'])) {
@@ -700,7 +741,7 @@ function tdomf_moderation_handler() {
          $list .= $p.",";
       }
       tdomf_log_message("Deleted $list posts");
-      $message = sprintf(__("Deleted posts: %s","tdomf"),$list);
+      $message .= sprintf(__("Deleted posts: %s","tdomf"),$list);
    } else if(isset($_REQUEST['publish_button'])) {
       check_admin_referer('tdomf-moderate-bulk');
       $posts = $_REQUEST['moderateposts'];
@@ -713,7 +754,7 @@ function tdomf_moderation_handler() {
          $list .= "<a href=\"".get_permalink($p)."\">".$p."</a>,";
       }
       tdomf_log_message("Published $list posts");
-      $message = sprintf(__("Published posts: %s","tdomf"),$list);
+      $message .= sprintf(__("Published posts: %s","tdomf"),$list);
    } else if(isset($_REQUEST['unpublish_button'])) {
       check_admin_referer('tdomf-moderate-bulk');
       $posts = $_REQUEST['moderateposts'];
@@ -723,7 +764,7 @@ function tdomf_moderation_handler() {
          $list .= $p.",";
       }
       tdomf_log_message("Unpublished $list posts");
-      $message = sprintf(__("Unpublished posts: %s","tdomf"),$list);
+      $message .= sprintf(__("Unpublished posts: %s","tdomf"),$list);
    } else if(isset($_REQUEST['spam_button'])) {
        check_admin_referer('tdomf-moderate-bulk');
        $posts = $_REQUEST['moderateposts'];
@@ -736,7 +777,7 @@ function tdomf_moderation_handler() {
        }
        if($list != "") {
            tdomf_log_message("Spammed $list posts");
-           $message = sprintf(__("Marked these posts as spam: %s","tdomf"),$list);
+           $message .= sprintf(__("Marked these posts as spam: %s","tdomf"),$list);
        }
    } else if(isset($_REQUEST['notspam_button'])) {
        check_admin_referer('tdomf-moderate-bulk');
@@ -750,30 +791,37 @@ function tdomf_moderation_handler() {
        }
        if($list != "") {
            tdomf_log_message("Hammed $list posts");
-           $message = sprintf(__("Marked these posts as not being spam: %s","tdomf"),$list);
+           $message .= sprintf(__("Marked these posts as not being spam: %s","tdomf"),$list);
        }
+   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'publish_now') {
+      $post_id = $_REQUEST['post'];
+      check_admin_referer('tdomf-publish_'.$post_id);
+      // if we're going to publish the post, then it's not spam!
+      tdomf_ham_post($post_id);
+      tdomf_publish_post($post_id,false);
+      tdomf_log_message("Published post $post_id");
+      $message .= sprintf(__("Published post <a href=\"%s\">%d</a>.","tdomf"),get_permalink($post_id),$post_id);
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'publish') {
       $post_id = $_REQUEST['post'];
       check_admin_referer('tdomf-publish_'.$post_id);
-      $queue = !isset($_REQUEST['nofuture']);
       // if we're going to publish the post, then it's not spam!
       tdomf_ham_post($post_id);
-      tdomf_publish_post($post_id,$queue);
+      tdomf_publish_post($post_id);
       tdomf_log_message("Published post $post_id");
-      $message = sprintf(__("Published post <a href=\"%s\">%d</a>.","tdomf"),get_permalink($post_id),$post_id);
+      $message .= sprintf(__("Published post <a href=\"%s\">%d</a>.","tdomf"),get_permalink($post_id),$post_id);
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'unpublish') {
       $post_id = $_REQUEST['post'];
       check_admin_referer('tdomf-unpublish_'.$post_id);
       tdomf_unpublish_post($post_id);
       tdomf_log_message("Unpublished post $post_id");
-      $message = sprintf(__("Unpublished post %d.","tdomf"),$post_id);
+      $message .= sprintf(__("Unpublished post %d.","tdomf"),$post_id);
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'spamit') {
       $post_id = $_REQUEST['post'];
       check_admin_referer('tdomf-spamit_'.$post_id);
       if(!get_post_meta($post_id, TDOMF_KEY_SPAM)) {
          tdomf_spam_post($post_id);
          tdomf_log_message("Post $post_id submitted as spam");
-         $message = sprintf(__("Post %d flagged as spam","tdomf"),$post_id);
+         $message .= sprintf(__("Post %d flagged as spam","tdomf"),$post_id);
       }
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'hamit') {
       $post_id = $_REQUEST['post'];
@@ -781,7 +829,7 @@ function tdomf_moderation_handler() {
       if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
          tdomf_ham_post($post_id);
          tdomf_log_message("Post $post_id submitted as ham");
-         $message = sprintf(__("Post %d flagged as not being spam","tdomf"),$post_id);
+         $message .= sprintf(__("Post %d flagged as not being spam","tdomf"),$post_id);
       }
    }
 
