@@ -20,7 +20,7 @@ function tdomf_is_id_spam($id) {
 function tdomf_check_edit_spam($edit_id,$live=true) {
     
   if(!get_option(TDOMF_OPTION_SPAM)) {
-    #return true;
+    return true;
   }
 
   tdomf_cleanup_spam();  
@@ -28,13 +28,13 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
   $akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
   if(empty($akismet_key)) {
     tdomf_log_message("No Akismet key set, cannot query if edit $edit_id is spam!",TDOMF_LOG_ERROR);
-    #return true;
+    return true;
   }
   
   $edit = tdomf_get_edit($edit_id);
   if(empty($edit)) {
     tdomf_log_message("Invalid edit data for $edit_id. Can't check if spam",TDOMF_LOG_ERROR);
-    #return true;
+    return true;
   }
   
   $query_data = array();
@@ -93,9 +93,9 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
   }
 
   tdomf_log_message/*_extra*/("$akismet_key.rest.akismet.com/1.1/comment-check<br/>$query_string");
-  /*$response = tdomf_akismet_send($query_string, $akismet_key.".rest.akismet.com", "/1.1/comment-check", 80);
+  $response = tdomf_akismet_send($query_string, $akismet_key.".rest.akismet.com", "/1.1/comment-check", 80);
   if ( 'false' == $response[1] ) {
-    tdomf_log_message("$post_id is not spam (according to Akismet)",TDOMF_LOG_GOOD);
+    tdomf_log_message("Edit $edit_id is not spam (according to Akismet)",TDOMF_LOG_GOOD);
     return true;
   }
 
@@ -109,7 +109,6 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
   
   tdomf_set_state_edit('spam',$edit_id);
   tdomf_log_message("Edit $edit_id is <b>spam</b> (according to Akismet)<br/><pre>" . var_export($response,true) . "</pre>",TDOMF_LOG_BAD);
-  return false; */
   
   return true;
 }
@@ -208,7 +207,178 @@ function tdomf_check_submissions_spam($post_id,$live=true) {
   return false;
 }
 
+function tdomf_spam_edit($edit_id) {
+  if(!get_option(TDOMF_OPTION_SPAM)) {
+    return;
+  }
+
+  $akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+  if(empty($akismet_key)) {
+    tdomf_log_message("No Akismet key set, cannot submit spam for edit $edit_id!",TDOMF_LOG_ERROR);
+    return;
+  }
+
+  $edit = tdomf_get_edit($edit_id);
+  if(empty($edit)) {
+    tdomf_log_message("Invalid edit data for $edit_id. Can't check if spam",TDOMF_LOG_ERROR);
+    return true;
+  }
+
+  if($edit->state == 'spam') {
+    tdomf_log_message("Edit $edit_id is already set as spam!",TDOMF_LOG_BAD);
+    return;
+  }
+
+  $query_data = array();
+  if(!empty($edit->ip)) {
+     $query_data['user_ip'] = $edit->ip;
+  }
+  if(!isset($edit->data['HTTP_USER_AGENT'])) {
+     $query_data['user_agent'] = $edit->data['HTTP_USER_AGENT'];
+  }
+  if(!isset($edit->data['HTTP_REFERER'])) {
+     $query_data['referrer'] = $edit->data['HTTP_REFERER'];
+  }
+  $query_data['blog'] = get_option('home');
+  $query_data['comment_type'] = 'edit-entry';
+  
+  if($edit->user_id != 0) {
+    $user = get_userdata($edit->user_id);
+    $query_data['comment_author_email'] = $user->user_email;
+    if(!empty($user->user_url)) {
+      $query_data['comment_author_url'] = $user->user_url;
+    }
+    $query_data['comment_author'] = $user->display_name;
+  } else {
+    if(isset($edit->data[TDOMF_KEY_NAME])) {
+      $query_data['comment_author'] = $edit->data[TDOMF_KEY_NAME];
+    }
+    if(isset($edit->data[TDOMF_KEY_EMAIL])) {
+      $query_data['comment_author_email'] = $edit->data[TDOMF_KEY_EMAIL];
+    }
+    if(isset($edit->data[TDOMF_KEY_WEB])) {
+      $query_data['comment_author_url'] = $edit->data[TDOMF_KEY_WEB];
+    }
+  }
+
+  # test - should trigger spam response
+  #$query_data['comment_author'] = 'viagra-test-123';
+
+  if($edit->revision_id == 0) {
+     $post_data = wp_get_single_post($edit->post_id, ARRAY_A);
+  } else {
+     $post_data = wp_get_single_post($edit->revision_id, ARRAY_A);
+  }
+  $query_data['comment_content'] = $post_data['post_content'];
+
+  $query_string = '';
+	foreach ( $query_data as $key => $data ) {
+		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
+  }
+
+  tdomf_log_message_extra("$akismet_key.rest.akismet.com/1.1/comment-check<br/>$query_string");
+  $response = tdomf_akismet_send($query_string, $akismet_key.".rest.akismet.com", "/1.1/submit-spam", 80);
+
+  // Flag edit as spam!
+  //
+  tdomf_set_state_edit('spam',$edit_id);
+
+  $spam_count = get_option(TDOMF_STAT_SPAM);
+  if($spam_count == false) { add_option(TDOMF_STAT_SPAM,1); }
+  else { update_option(TDOMF_STAT_SPAM,$spam_count++); }
+
+  tdomf_log_message("Edit $edit_id has been submitted as spam to Akismet)<br/><pre>" . var_export($response,true) . "</pre>");
+}
+
+function tdomf_ham_edit($edit_id) {
+  if(!get_option(TDOMF_OPTION_SPAM)) {
+    return;
+  }
+
+  $akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+  if(empty($akismet_key)) {
+    tdomf_log_message("No Akismet key set, cannot submit spam for edit $edit_id!",TDOMF_LOG_ERROR);
+    return;
+  }
+
+  $edit = tdomf_get_edit($edit_id);
+  if(empty($edit)) {
+    tdomf_log_message("Invalid edit data for $edit_id. Can't check if spam",TDOMF_LOG_ERROR);
+    return true;
+  }
+
+  if($edit->state != 'spam') {
+    tdomf_log_message("Edit $edit_id is not spam!",TDOMF_LOG_BAD);
+    return;
+  }
+
+  $query_data = array();
+  if(!empty($edit->ip)) {
+     $query_data['user_ip'] = $edit->ip;
+  }
+  if(!isset($edit->data['HTTP_USER_AGENT'])) {
+     $query_data['user_agent'] = $edit->data['HTTP_USER_AGENT'];
+  }
+  if(!isset($edit->data['HTTP_REFERER'])) {
+     $query_data['referrer'] = $edit->data['HTTP_REFERER'];
+  }
+  $query_data['blog'] = get_option('home');
+  $query_data['comment_type'] = 'edit-entry';
+  
+  if($edit->user_id != 0) {
+    $user = get_userdata($edit->user_id);
+    $query_data['comment_author_email'] = $user->user_email;
+    if(!empty($user->user_url)) {
+      $query_data['comment_author_url'] = $user->user_url;
+    }
+    $query_data['comment_author'] = $user->display_name;
+  } else {
+    if(isset($edit->data[TDOMF_KEY_NAME])) {
+      $query_data['comment_author'] = $edit->data[TDOMF_KEY_NAME];
+    }
+    if(isset($edit->data[TDOMF_KEY_EMAIL])) {
+      $query_data['comment_author_email'] = $edit->data[TDOMF_KEY_EMAIL];
+    }
+    if(isset($edit->data[TDOMF_KEY_WEB])) {
+      $query_data['comment_author_url'] = $edit->data[TDOMF_KEY_WEB];
+    }
+  }
+
+  # test - should trigger spam response
+  #$query_data['comment_author'] = 'viagra-test-123';
+
+  if($edit->revision_id == 0) {
+     $post_data = wp_get_single_post($edit->post_id, ARRAY_A);
+  } else {
+     $post_data = wp_get_single_post($edit->revision_id, ARRAY_A);
+  }
+  $query_data['comment_content'] = $post_data['post_content'];
+
+  $query_string = '';
+	foreach ( $query_data as $key => $data ) {
+		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
+  }
+
+  tdomf_log_message_extra("$akismet_key.rest.akismet.com/1.1/comment-check<br/>$query_string");
+  $response = tdomf_akismet_send($query_string, $akismet_key.".rest.akismet.com", "/1.1/submit-ham", 80);
+
+  // unflag spam
+  //
+  tdomf_set_state_edit('unapproved',$edit_id);
+
+  $spam_count = get_option(TDOMF_STAT_SPAM);
+  if($spam_count == false) { add_option(TDOMF_STAT_SPAM,0); }
+  else { update_option(TDOMF_STAT_SPAM,$spam_count--); }
+
+  $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
+  if($submitted_count == false) { add_option(TDOMF_STAT_SUBMITTED,1); }
+  else { update_option(TDOMF_STAT_SUBMITTED,$submitted_count++); }
+
+  tdomf_log_message("Edit $edit_id has been submitted as ham to Akismet<br/><pre>" . var_export($response,true) . "</pre>");
+}
+
 function tdomf_spam_post($post_id) {
+    
   if(!get_option(TDOMF_OPTION_SPAM)) {
     return;
   }
@@ -235,29 +405,34 @@ function tdomf_spam_post($post_id) {
   }
 
   $query_data = array();
-
-  $query_data['user_ip'] = get_post_meta($post_id,TDOMF_KEY_IP,true);
-	$query_data['user_agent'] = get_post_meta($post_id,TDOMF_KEY_USER_AGENT,true);
-  $query_data['referrer'] = get_post_meta($post_id,TDOMF_KEY_REFERRER,true);
-	$query_data['blog'] = get_option('home');
-  $query_data['comment_type'] = 'new-submission';
-
-  if(get_post_meta($post_id,TDOMF_KEY_USER_ID,true)) {
-    $user = get_userdata(get_post_meta($post_id,TDOMF_KEY_USER_ID,true));
+  if(!empty($edit->ip)) {
+     $query_data['user_ip'] = $edit->ip;
+  }
+  if(!isset($edit->data['HTTP_USER_AGENT'])) {
+     $query_data['user_agent'] = $edit->data['HTTP_USER_AGENT'];
+  }
+  if(!isset($edit->data['HTTP_REFERER'])) {
+     $query_data['referrer'] = $edit->data['HTTP_REFERER'];
+  }
+  $query_data['blog'] = get_option('home');
+  $query_data['comment_type'] = 'edit-entry';
+  
+  if($edit->user_id != 0) {
+    $user = get_userdata($edit->user_id);
     $query_data['comment_author_email'] = $user->user_email;
     if(!empty($user->user_url)) {
       $query_data['comment_author_url'] = $user->user_url;
     }
     $query_data['comment_author'] = $user->display_name;
   } else {
-    if(get_post_meta($post_id,TDOMF_KEY_NAME,true)) {
-      $query_data['comment_author'] = get_post_meta($post_id,TDOMF_KEY_NAME,true);
+    if(isset($edit->data[TDOMF_KEY_NAME])) {
+      $query_data['comment_author'] = $edit->data[TDOMF_KEY_NAME];
     }
-    if(get_post_meta($post_id,TDOMF_KEY_EMAIL,true)) {
-      $query_data['comment_author_email'] = get_post_meta($post_id,TDOMF_KEY_EMAIL,true);
+    if(isset($edit->data[TDOMF_KEY_EMAIL])) {
+      $query_data['comment_author_email'] = $edit->data[TDOMF_KEY_EMAIL];
     }
-    if(get_post_meta($post_id,TDOMF_KEY_WEB,true)) {
-      $query_data['comment_author_url'] = get_post_meta($post_id,TDOMF_KEY_WEB,true);
+    if(isset($edit->data[TDOMF_KEY_WEB])) {
+      $query_data['comment_author_url'] = $edit->data[TDOMF_KEY_WEB];
     }
   }
 
@@ -266,14 +441,6 @@ function tdomf_spam_post($post_id) {
 
   $post_data = wp_get_single_post($post_id, ARRAY_A);
   $query_data['comment_content'] = $post_data['post_content'];
-
-  /*if($live) {
-     $ignore = array( 'HTTP_COOKIE' );
-	   foreach ( $_SERVER as $key => $value )
-	   if ( !in_array( $key, $ignore ) ) {
-          $post_data["$key"] = $value;
-     }
-  }*/
 
   $query_string = '';
 	foreach ( $query_data as $key => $data ) {

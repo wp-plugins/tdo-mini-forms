@@ -1,10 +1,6 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/*
-   tdomf_get_edits
-*/
-
 /* BIG TODO: Optimisations: use cache to prevent multiple queries on the same data */
   
 
@@ -529,7 +525,7 @@ function tdomf_create_edit($post_id,$form_id,$revision_id=0,$current_revision_id
   $edit_data = maybe_serialize($edit_data);
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
   $sql = "INSERT INTO $table_name " .
-         "(post_id, form_id, date, date_gmt, revision_id, current_revision_id,user_id, ip, state, data) " .
+         "(post_id, form_id, date, date_gmt, revision_id, current_revision_id, user_id, ip, state, data) " .
          "VALUES ('$post_id','$form_id','$date','$date_gmt','$revision_id','$current_revision_id','$edit_user_id','$edit_user_ip','".$wpdb->escape($edit_state)."','".$wpdb->escape($edit_data)."')";
   $result = $wpdb->query( $sql );
   $error = $wpdb->last_error;
@@ -652,9 +648,7 @@ function tdomf_get_edit($edit_id) {
   global $wpdb;
   $key = "tdomf_edit_" . $edit_id;
   $edit_cache = wp_cache_get($key);
-  var_dump($edit_cache);
   if($edit_cache == false || !isset($edit_cache['post_id'])) {
-      echo 'not in cache, load from db';
       $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
       $query = "SELECT * 
                 FROM $table_name 
@@ -666,16 +660,22 @@ function tdomf_get_edit($edit_id) {
                               "date" => $edit->date,
                               "date_gmt" => $edit->date_gmt,
                               "revision_id" => $edit->revision_id,
+                              "current_revision_id" => $edit->current_revision_id,
                               "user_id" => $edit->user_id,
                               "ip" => $edit->ip,
                               "state" => $edit->state,
-                              "data" => maybe_unserialize($$edit->data) );
+                              "data" => maybe_unserialize($edit->data) );
           wp_cache_set($key,$edit_cache);
           return (object)$edit_cache;
       }
       return (object)array();
   }
   return (object)$edit_cache;  
+}
+
+function tdomf_get_state_edit($edit_id) {
+  $edit = tdomf_get_edit($edit_id);
+  return $edit->state;
 }
 
 function tdomf_set_state_edit($edit_state,$edit_id) {
@@ -943,6 +943,30 @@ function tdomf_is_moderation_in_use(){
       $retValue = true;
       break;
     }
+  }
+  return $retValue;
+}
+
+function tdomf_is_editing_in_use() {
+  $form_ids = tdomf_get_form_ids();
+  $retValue = false;
+  foreach($form_ids as $form_id) {
+      if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+          $retValue = true;
+          break;
+      }
+  }
+  return $retValue;
+}
+
+function tdomf_is_submission_in_use() {
+  $form_ids = tdomf_get_form_ids();
+  $retValue = false;
+  foreach($form_ids as $form_id) {
+      if(!tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+          $retValue = true;
+          break;
+      }
   }
   return $retValue;
 }

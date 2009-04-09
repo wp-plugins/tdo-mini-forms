@@ -459,7 +459,30 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 ////////
 // 0.13
 
-// @todo These options
+/* 
+ * @todo
+ * Throttling rules on edit form
+ * Locking edits on form with spam or unapproved edits
+ * Testing Edit Spam
+ * Viewing TDOMF Revision History (on page/template tag)
+ * AJAX Inline Editing
+ * Notify Admins for Edits
+ * Moderation screen: implement filters: form, user, ip, username, email
+ * Moderation screen: search
+ * Moderation screen: attachments
+ * tdomf_form_post and tdomf_form_ajax, checking if an edit is spam: tdomf_is_id_spam
+ * TDOMF_STAT_EDITED
+ * Form Hacker
+ * Your Submissions: Edit Forms
+ * Your Submissions: Pending Edits
+ * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, reCaptcha, Append to Post Content, 1 Question Captcha and Text 
+ * Template Tags for editing
+ * Admin Buttons to include editing approvals
+ * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM
+ * "Edited by XYZ": message in form hacker, last X edits (appear above Submitted by)
+ * ^ - "Submitted by XYZ": form hacker
+ */
+
 define('TDOMF_OPTION_FORM_EDIT',"tdomf_form_edit");
 define('TDOMF_OPTION_ALLOW_AUTHOR',"tdomf_allow_author");
 define('TDOMF_OPTION_ALLOW_TIME',"tdomf_allow_time");

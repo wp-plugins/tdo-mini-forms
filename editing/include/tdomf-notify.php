@@ -118,19 +118,26 @@ function tdomf_notify_admins($post_ID,$form_id){
 
   //Admin links
   //
-  $moderate_all_link = get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu';
+  #$moderate_all_link = get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu';
+  $moderate_all_link = tdomf_get_mod_posts_url(array());
+  $publish_link = tdomf_get_mod_posts_url(array('action' => 'publish', 'post_id' => $post_ID, 'nonce' => 'tdomf-publish_' . $post_ID));
   
   //View link
   //
-  $view_post = get_permalink($post_ID);
+  $view_post_link = get_permalink($post_ID);
 
+  $is_spam = (get_post_meta($post_ID, TDOMF_KEY_SPAM) && get_option(TDOMF_OPTION_SPAM));
+  
   //Spam links
-  //
-  $is_spam = (get_post_meta($post_ID, TDOMF_KEY_SPAM) && get_option(TDOMF_OPTION_SPAM)); 
-  $spam_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$post_ID";
-  $spam_link = wp_nonce_url($spam_link,'tdomf-spamit_'.$post_ID);
-  $ham_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$post_ID";
-  $ham_link = wp_nonce_url($ham_link,'tdomf-hamit_'.$post_ID);
+  //                                                            
+  #$spam_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$post_ID";
+  #$spam_link = wp_nonce_url($spam_link,'tdomf-spamit_'.$post_ID);
+  $spam_link = tdomf_get_mod_posts_url(array('action' => 'spamit', 'post_id' => $post_ID, 'nonce' => 'tdomf-spamit_' . $post_ID));
+
+  #$ham_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$post_ID";
+  #$ham_link = wp_nonce_url($ham_link,'tdomf-hamit_'.$post_ID);
+  $ham_link = tdomf_get_mod_posts_url(array('action' => 'hamit', 'post_id' => $post_ID, 'nonce' => 'tdomf-spamit_' . $post_ID));
+
   if($can_ban_user) {
       $ban_user_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_manage_menu&action=ban&user=$user_ID";
   }
@@ -138,7 +145,7 @@ function tdomf_notify_admins($post_ID,$form_id){
   
   // Subject line
   //
-  if($is_spam && !get_option(TDOMF_OPTION_SPAM)) {
+  if($is_spam) {
      $subject = sprintf(__("[SPAM] [%s] Please moderate this spam post","tdomf"),get_bloginfo('title'));
   } else if($status == 'publish' || $status == 'future') {
       $subject = sprintf(__("[%s] Post %s has been published","tdomf"),get_bloginfo('title'),$title);
@@ -158,7 +165,7 @@ function tdomf_notify_admins($post_ID,$form_id){
   }
   $email_msg .= sprintf(__("It was submitted using Form ID %d (\"%s\")\n","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id));
   $email_msg .= sprintf(__("This was submitted from IP %s.\n\n","tdomf"),$ip);
-  $email_msg .= sprintf(__("You can view this post from %s.\n","tdomf"),$view_post); 
+  $email_msg .= sprintf(__("You can view this post from %s.\n","tdomf"),$view_post_link); 
   if($status != 'publish' && $status != 'future') {
       $email_msg .= sprintf(__("You can moderate this submission from %s.\n","tdomf"),$moderate_all_link);
       if(!$is_spam) {

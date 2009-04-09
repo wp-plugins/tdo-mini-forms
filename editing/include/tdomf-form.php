@@ -402,11 +402,6 @@ function tdomf_queue_date($form_id,$current_ts)  {
 function tdomf_update_post($form_id,$mode,$args) {
    global $wp_rewrite, $tdomf_form_widgets_post, $current_user;
 
-   # @todo
-   # versioning/revisions (check against Custom Fields)
-   # moderation
-   # spam
-   
    $post_id = intval($args['tdomf_post_id']);
 
    $returnVal = $post_id; 
@@ -469,7 +464,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    
    // if versioning disabled
    // if moderation enabled, not trusted user, user doesn't have publish rights...
-   // ... set post to 'draft'
+   // ... set post to 'draft' 
    //
    if($revision_id == NULL && !$can_publish) {
        tdomf_log_message("Setting $post_id to draft");
