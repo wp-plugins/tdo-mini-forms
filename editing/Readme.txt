@@ -342,10 +342,10 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 == Screenshots ==
 
-1. The Form as displayed to non-registered users
-2. The Moderation page (v0.6) (Wordpress 2.3)
+1. Example of the default Submission Form as displayed to non-registered users
+2. The Moderation page (v0.13) (Wordpress 2.7.1)
 3. "Your Submissions" page for registered users (Wordpress 2.3)
-4. The Moderation page (v0.7) for approved submissions (Wordpress 2.3)
+4. Example of the default Editing Form as displayed to a logged in user (v0.13) (Wordpress 2.7.1)
 5. The overview page (Wordpress 2.3)
 6. Constructing your form using "widgets" (Wordpress 2.3)
 
