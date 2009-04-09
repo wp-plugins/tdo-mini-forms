@@ -243,6 +243,7 @@ function tdomf_db_delete_tables() {
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
   $table_session_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  $table_edit_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   
@@ -265,6 +266,13 @@ function tdomf_db_delete_tables() {
       $sql = "DROP TABLE IF EXISTS " . $table_session_name . ";";
       if($wpdb->query($sql)) {
         tdomf_log_message("Db table $table_session_name deleted!");
+      }
+  }   
+  if($wpdb->get_var("show tables like '$table_edit_name'") == $table_edit_name) {
+      tdomf_log_message("Deleting db table $table_edit_name...");
+      $sql = "DROP TABLE IF EXISTS " . $table_edit_name . ";";
+      if($wpdb->query($sql)) {
+        tdomf_log_message("Db table $table_edit_name deleted!");
       }
   }   
   return false;
@@ -571,7 +579,11 @@ function tdomf_get_edits($args) {
                       'state' => false,
                       'count' => false,
                       'unique_post_ids' => false,
-                      'offset' => false);
+                      'offset' => false,
+                      'ip' => false,
+                      'user_id' => false,
+                      'and_cond' => true,
+                      'time_diff' => false);
     $args = wp_parse_args($args, $defaults);
     extract($args);
     
@@ -600,12 +612,60 @@ function tdomf_get_edits($args) {
     
     $query .= "FROM $table_name ";
     
-    # where
+    # where conditions
+
+    $where_conditions = "";
     
     if($post_id != false && $post_id != 0) { 
-       $query .= "WHERE post_id = '".$wpdb->escape($post_id)."' ";
-    } else if($state != false && !empty($state)) {
-        $query .= "WHERE state = '".$wpdb->escape($state)."' ";
+       $where_conditions .= "post_id = '".$wpdb->escape($post_id)."' ";
+    } 
+    
+    if($state != false && !empty($state)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "state = '".$wpdb->escape($state)."' ";
+    } 
+    
+    if($ip != false && !empty($ip)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "ip = '".$wpdb->escape($ip)."' ";
+    } 
+    
+    if($user_id != false && !empty($user_id)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "user_id = '".$wpdb->escape($user_id)."' ";
+    }
+    
+    if($time_diff != false && !empty($time_diff)) {
+         if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "post_date > '".$time_diff."' ";
+    }
+    
+    if(!empty($where_conditions)) {
+        $query .= "WHERE ".$where_conditions;
     }
     
     # order by X limit Y

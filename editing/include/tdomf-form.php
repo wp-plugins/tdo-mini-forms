@@ -76,11 +76,38 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false) {
               }
           }
       }
-
   }
   
   if($edit_form) {
 
+      // Throttling rules
+      //
+      $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
+      if(is_array($rules) && !empty($rules)) {
+          foreach($rules as $rule_id => $rule) {
+              $edit_args = array();
+              if($rule['type'] == 'ip') {
+                  $edit_args['ip'] = $ip;
+              } else if($rule['type'] == 'user') {
+                  $edit_args['user_id'] = $current_user->ID;
+              }
+              if($rule['sub_type'] == 'unapproved') {
+                  $edit_args['state'] = 'unapproved';
+              }
+              if($rule['opt1']) {
+                  $edit_args['time_diff'] = tdomf_timestamp_wp_sql(time() - $rule['time']);
+              }
+              $edit_args['limit'] = $rule['count'];
+              $edit_args['sort'] = $rule['DESC'];
+              $edit_args['count'] = true;
+              $edit_count = tdomf_get_edits($edit_args);
+              if($edit_count >= $rule['count']) {
+                  tdomf_log_message("This IP $ip blocked by Throttle Rule $rule_id when accessing Form $form_id (on post $post_id)",TDOMF_LOG_BAD);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
+              }
+          }
+      }
+      
       // valid post id value
       //
       if(!$post_id) {
@@ -141,6 +168,20 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false) {
           if($diff_time > $allow_time) {
               tdomf_log_message("Post with id $post_id is outside time period by ".($diff_time-$allow_time)." seconds for $form_id!",TDOMF_LOG_ERROR);
               return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
+          }
+      }
+      
+            
+      // If a post has a spam or unapproved edit, don't edit any more
+      //
+      $last_edit = tdomf_get_edits(array('post_id' => $post_id, 'limit' => 1));
+      if(!empty($last_edit)) {
+          if($last_edit[0]->state == 'unapproved') {
+              tdomf_log_message("Post with id $post_id has an unapproved edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+              return tdomf_get_message_instance(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id);
+          } else if($last_edit[0]->state == 'spam') {
+              tdomf_log_message("Post with id $post_id has a spam edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+              return tdomf_get_message_instance(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id);
           }
       }
   }

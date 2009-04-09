@@ -9,83 +9,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Check if current user can access the form!
 //
 function tdomf_can_current_user_see_form($form_id = 1, $post_id = false) {
-   global $current_user;
-   get_currentuserinfo();
-
-   // if using default id
-   if(!tdomf_form_exists($form_id) && $form_id == 1){
-     $form_id = tdomf_get_first_form_id();
-   }
-   
-   if(is_user_logged_in()) {
-       $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
-       if($user_status == TDOMF_USER_STATUS_BANNED) {
-         // User Banned
-         return false;
-       }
-   }
-
-  $ip =  $_SERVER['REMOTE_ADDR'];
-  $banned_ips = get_option(TDOMF_BANNED_IPS);
-  if($banned_ips != false) {
-  	$banned_ips = split(";",$banned_ips);
-  	foreach($banned_ips as $banned_ip) {
-		if($banned_ip == $ip) {
-      // IP banned
-      return false;
-		}
-	 }
+  
+  // Cheat! If the message is NULL, no error was generated. This function is
+  // kept much more up to date than this one, so all good.
+  
+  $message = tdomf_check_permissions_form($form_id,$post_id);
+  if($message == NULL) {
+      return true;
   }
-  
-    if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
-
-        if(current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) {
-            // has cap
-            return true;
-        }
-        
-        if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_PUBLISH,$form_id) == true && current_user_can("publish_posts")) {
-            // can already publish
-            return true;
-        }
-        
-        if(!isset($wp_roles)) {
-            $wp_roles = new WP_Roles();
-        }
-        $roles = $wp_roles->role_objects;
-        foreach($roles as $role) {
-            if($role->name == get_option('default_role')) {
-                $def_role = $role->name;
-                break;
-            }
-        }
-        if(is_user_logged_in() && get_option('users_can_register') && isset($def_role->capabilities[TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id])) {
-            // logged in (and default role + free reg enabled)
-            return true;
-        }
-
-        $access_caps = tdomf_get_option_form(TDOMF_OPTION_ALLOW_CAPS,$form_id);
-        if(is_array($access_caps)) {
-            foreach($access_caps as $cap) {
-                if(current_user_can($cap)) {
-                    // has specific cap
-                    return true;
-                }
-            }
-        }
-
-        $allow_users = tdomf_get_option_form(TDOMF_OPTION_ALLOW_USERS,$form_id);           
-        if(is_array($allow_users) && is_user_logged_in() && in_array($current_user->ID,$allow_users)) {
-            // is one of the specific users
-            return true;
-        }             
-        
-        // if get to here => fail
-        return false;
-    }
-  
-  // all other conditions passed!
-  return true;
+  return false;
 }
 
 //////////////////////////////////////

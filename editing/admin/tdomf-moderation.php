@@ -523,7 +523,9 @@ function tdomf_show_mod_posts_menu() {
            <?php } ?>
            <span class='delete'><a class='submitdelete' title='Delete this submission' href='<?php echo wp_nonce_url("post.php?action=delete&amp;post=$p->ID", 'delete-post_' . $p->ID); ?>' onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to delete this post \'%s\'\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Delete','tdomf'); ?></a> | </span>
            <?php if($post->post_status == 'publish') { ?>
-           <span class='view'><a href="<?php echo get_permalink($p->ID); ?>" title="<?php echo htmlentities(sprintf(__('View \'%s\'','tdomf'),$post->post_title)); ?>" rel="permalink"><?php _e('View','tdomf'); ?></a> | </span>
+            <span class='view'><a href="<?php echo get_permalink($p->ID); ?>" title="<?php echo htmlentities(sprintf(__('View \'%s\'','tdomf'),$post->post_title)); ?>" rel="permalink"><?php _e('View','tdomf'); ?></a> | </span>
+           <?php } else { ?>
+            <span class='view'><a href="<?php echo get_permalink($p->ID); ?>" title="<?php echo htmlentities(sprintf(__('Preview \'%s\'','tdomf'),$post->post_title)); ?>" rel="permalink"><?php _e('Preview','tdomf'); ?></a> | </span>               
            <?php } ?>
             <span class='edit'><a href="post.php?action=edit&amp;post=<?php echo $p->ID; ?>" title="<?php echo htmlentities(__('Edit this submission','tdomf')); ?>"><?php _e('Edit','tdomf'); ?></a>
            <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |</span><?php } ?>

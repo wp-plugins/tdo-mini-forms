@@ -141,6 +141,12 @@ function tdomf_get_message_default($key,$mode) {
         case TDOMF_OPTION_MSG_INVALID_FORM:
             $retVal = __("You cannot use this form to edit this post",'tdomf');
             break;
+        case TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST:
+            $retVal = __("You cannot edit this post as there is a pending contribution to be resolved.",'tdomf');
+            break;
+        case TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST:
+            $retVal = __("You cannot edit this post as there is a pending contribution to be approved.",'tdomf');
+            break;
         default:
             $retVal = "";
             break;

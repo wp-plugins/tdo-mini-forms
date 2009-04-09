@@ -461,15 +461,13 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * Throttling rules on edit form
- * Locking edits on form with spam or unapproved edits
+ * AJAX Inline Editing
+ * Moderation screen: attachments
+ * Moderation screen: bulk actions for edits
+ * Option to disable Spam/Unapproved Edit Locking
  * Testing Edit Spam
  * Viewing TDOMF Revision History (on page/template tag)
- * AJAX Inline Editing
  * Notify Admins for Edits
- * Moderation screen: implement filters: form, user, ip, username, email
- * Moderation screen: search
- * Moderation screen: attachments
  * tdomf_form_post and tdomf_form_ajax, checking if an edit is spam: tdomf_is_id_spam
  * TDOMF_STAT_EDITED
  * Form Hacker
@@ -478,9 +476,14 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
  * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, reCaptcha, Append to Post Content, 1 Question Captcha and Text 
  * Template Tags for editing
  * Admin Buttons to include editing approvals
- * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM
+ * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM, etc.
  * "Edited by XYZ": message in form hacker, last X edits (appear above Submitted by)
  * ^ - "Submitted by XYZ": form hacker
+ * Testing editing/submitting on pages
+ *
+ * @postponed
+ * Moderation screen: implement filters: form, user, ip, username, email
+ * Moderation screen: search
  */
 
 define('TDOMF_OPTION_FORM_EDIT',"tdomf_form_edit");
@@ -491,20 +494,14 @@ define('TDOMF_OPTION_EDIT_RESTRICT_CATS',"tdomf_restrict_cats");
 define('TDOMF_OPTION_ADD_EDIT_LINK',"tdomf_add_edit_link");
 define('TDOMF_OPTION_ADD_EDIT_LINK_TEXT',"tdomf_add_edit_link_text");
 define('TDOMF_OPTION_AUTO_EDIT_LINK',"tdomf_auto_edit_link");
+define('TDOMF_STAT_EDITED', "tdomf_stat_edited");
+define("TDOMF_MACRO_POSTID", "%%POSTID%%");
+define("TDOMF_DB_TABLE_EDITS", "tdomf_table_edits");
 // @todo admin ui for...
 define('TDOMF_OPTION_MSG_INVALID_POST',"tdomf_msg_invalid_post");
 define('TDOMF_OPTION_MSG_INVALID_FORM',"tdomf_msg_invalid_form");
-
-define('TDOMF_KEY_HISTORY',"_tdomf_history");
-define('TDOMF_STAT_EDITED', "tdomf_stat_edited");
-
-// @todo Moderation for editing (don't forget message admin screen)
-//       - by versions!
-// @todo Throttling for editing (don't forget message admin screen)
-// @todo Form Hacker
-
-define("TDOMF_MACRO_POSTID", "%%POSTID%%");
-define("TDOMF_DB_TABLE_EDITS", "tdomf_table_edits");
+define('TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST',"tdomf_msg_spam_edit_on_post");
+define('TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST',"tdomf_msg_unapproved_edit_on_post");
 
 /* @todo
    For handling versions:
@@ -601,14 +598,14 @@ function tdomf_add_menus()
     //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
-      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
+      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     else {
       add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     //
     // Manage Submitters
-    add_submenu_page( TDOMF_FOLDER , __('Manage Users and IPs', 'tdomf'), __('Manage Users and IPs', 'tdomf'), 'edit_others_posts', 'tdomf_show_manage_menu', 'tdomf_show_manage_menu');
+    add_submenu_page( TDOMF_FOLDER , __('Users and IPs', 'tdomf'), __('Users and IPs', 'tdomf'), 'edit_others_posts', 'tdomf_show_manage_menu', 'tdomf_show_manage_menu');
     //
     // Log
     add_submenu_page( TDOMF_FOLDER , __('Log', 'tdomf'), __('Log', 'tdomf'), 'manage_options', 'tdomf_show_log_menu', 'tdomf_show_log_menu');

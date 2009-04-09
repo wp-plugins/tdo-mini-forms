@@ -845,7 +845,7 @@ function tdomf_show_form_options($form_id) {
 	</p>
    
     <?php printf(__("<table border=\"0\">
-                     <tr><td>Only %s submissions per</td>
+                     <tr><td>Only %s submissions/contributions per</td>
                      <td>%s</td>
                      <td>%s(optionally) per %s Seconds (1 hour = 3600 seconds)</td>
                      <td>%s</td>
@@ -874,7 +874,7 @@ function tdomf_show_form_options($form_id) {
              }
         ?>
         <li>
-        <?php printf(__("(%d) Only %d %s submissions per %s %s","tdomf"),$id,$throttle_rule['count'],$throttle_rule['sub_type'],$throttle_rule['type'],$option_string); ?>
+        <?php printf(__("(%d) Only %d %s submissions/contributions per %s %s","tdomf"),$id,$throttle_rule['count'],$throttle_rule['sub_type'],$throttle_rule['type'],$option_string); ?>
         <input type="submit" name="tdomf_remove_throttle_rule_<?php echo $id; ?>" id="tdomf_remove_throttle_rule_<?php echo $id; ?>" value="<?php _e("Remove","tdomf"); ?> &raquo;">
         </li>
     <?php } ?>
