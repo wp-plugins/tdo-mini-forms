@@ -41,17 +41,25 @@ if(!tdomf_form_exists($form_id)){
   exit(__("TDOMF: Bad Form Id","tdomf"));
 }
 
+// Submit or Edit?
+//
+$edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
+
 // Get Form Data for verficiation check
 //
 $form_data = tdomf_get_form_data($form_id);
 
 // Get Post ID if there is one
+//
 $post_id = false;
-if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+if($edit) {
     if(isset($form_data['tdomf_post_id'])) {
         $post_id = $form_data['tdomf_post_id'];
     } else if(isset($_REQUEST['tdomf_post_id'])) {
         $post_id = $_REQUEST['tdomf_post_id'];
+    } else {
+        tdomf_log_message("tdomf-form-post: Edit form %d but no post id!",TDOMF_LOG_BAD);
+        exit(__("TDOMF: Missing Post Id","tdomf"));
     }
 }
 
@@ -106,7 +114,14 @@ $message = tdomf_check_permissions_form($form_id,$post_id);
 $save_post_info = FALSE;
 $hide_form = true;
 if($message == NULL) {
-  if(isset($_POST['tdomf_form'.$form_id.'_send'])) {
+  
+  if($edit) {
+      $form_tag = $form_id.'_'.$post_id;
+  } else {
+      $form_tag = $form_id;
+  }
+    
+  if(isset($_POST['tdomf_form'.$form_tag.'_send'])) {
 
     tdomf_log_message("Someone is attempting to submit something");
 
@@ -116,15 +131,16 @@ if($message == NULL) {
       $args['ip'] = $_SERVER['REMOTE_ADDR'];
       $retVal = tdomf_create_post($args);
       // If retVal is an int it's a post id
-      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">";
+      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">";
       if(is_int($retVal)) {
         $post_id = $retVal;
         if(get_post_status($post_id) == 'publish') {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id);
         } else if(get_post_status($post_id) == 'future') {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id);
-        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
+        } else if(!$edit && get_post_meta($post_id, TDOMF_KEY_SPAM)) {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id);
+        /*} else if($edit && spam check for edits ) {*/
         } else {
           $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id);
         }
@@ -137,12 +153,12 @@ if($message == NULL) {
       }
       $message .= "</div>";
     } else {
-      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">".$message."</div>";
+      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">".$message."</div>";
       $save_post_info = TRUE;
       $hide_form = false;
       tdomf_fixslashesargs();
     }
-  } else if(isset($_POST['tdomf_form'.$form_id.'_preview'])) {
+  } else if(isset($_POST['tdomf_form'.$form_tag.'_preview'])) {
 
     // For preview, remove magic quote slashes!
     tdomf_fixslashesargs();
@@ -151,13 +167,13 @@ if($message == NULL) {
        $hide_form = false;
 	   $message = tdomf_validate_form($_POST,true);
 	   if($message == NULL) {
-           $message  = "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">";
+           $message  = "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">";
            $message .= tdomf_preview_form($_POST);
            $message .= "</div>";
 	   } else {
-           $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">".$message."</div>";
+           $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">".$message."</div>";
        }
-  } else if(isset($_POST['tdomf_form'.$form_id.'_clear'])) {
+  } else if(isset($_POST['tdomf_form'.$form_tag.'_clear'])) {
     $message = NULL;
     $save_post_info = false;
     $hide_form = false;

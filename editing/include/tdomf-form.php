@@ -5,7 +5,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for Form generation //
 //////////////////////////////
 
-// TODO: Clear and/or reset button
+// TODO: Clear and/or reset button                                                    
 
 // Checks if current user/ip has permissions to post!
 //
@@ -1064,9 +1064,21 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
   }
   
   if($hack) {
-      $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID;      
+      if($edit) {
+          $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID.'-'.TDOMF_MACRO_POSTID;
+          $form_id_safe = TDOMF_MACRO_FORMID.'_'.TDOMF_MACRO_POSTID;
+      } else {
+          $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID;
+          $form_id_safe = TDOMF_MACRO_FORMID;
+      }
   } else {
-      $form_name = 'tdomf_form'.$form_id;
+      if($edit && $post_id) {
+          $form_name = 'tdomf_form'.$form_id.'_'.$post_id;
+          $form_id_safe = $form_id.'_'.$post_id;
+      } else {
+          $form_name = 'tdomf_form'.$form_id;
+          $form_id_safe = $form_id;
+      }
   }
   
   if($hack) {
@@ -1086,34 +1098,34 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
       $form .= <<<EOT
 <script type="text/javascript">
 	//<!-- [CDATA[
-	function ajaxProgressStart$form_id() {
-		var w = jQuery('#ajaxProgress$form_id').width();
-		var h = jQuery('#ajaxProgress$form_id').height();
+	function ajaxProgressStart$form_id_safe() {
+		var w = jQuery('#ajaxProgress$form_id_safe').width();
+		var h = jQuery('#ajaxProgress$form_id_safe').height();
 		var offset = jQuery('#$form_name').offset();
 		var x = offset.left + ((jQuery('#$form_name').width() - w) / 2);
 		var y = offset.top + ((jQuery('#$form_name').height() - h) / 2);
-		jQuery('#ajaxProgress$form_id').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
-		jQuery('#ajaxProgress$form_id').attr('class','progress');
-		ajaxShadow$form_id();
+		jQuery('#ajaxProgress$form_id_safe').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
+		jQuery('#ajaxProgress$form_id_safe').attr('class','progress');
+		ajaxShadow$form_id_safe();
 	}
-	function ajaxShadow$form_id() {
+	function ajaxShadow$form_id_safe() {
 		var offset = jQuery('#$form_name').offset();
 		var w = jQuery('#$form_name').width();
 		var h = jQuery('#$form_name').height();
-		jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
-		jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
-		jQuery('#shadow$form_id').fadeTo('fast', 0.2);
+		jQuery('#shadow$form_id_safe').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+		jQuery('#shadow$form_id_safe').css({zIndex: '999', display: 'block'});
+		jQuery('#shadow$form_id_safe').fadeTo('fast', 0.2);
 	}
-	function ajaxUnshadow$form_id() {
-		jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
+	function ajaxUnshadow$form_id_safe() {
+		jQuery('#shadow$form_id_safe').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
 	}
-	function ajaxProgressStop$form_id() {
-		jQuery('#ajaxProgress$form_id').attr('class','hidden');
-		jQuery('#ajaxProgress$form_id').hide();
-		ajaxUnshadow$form_id();
+	function ajaxProgressStop$form_id_safe() {
+		jQuery('#ajaxProgress$form_id_safe').attr('class','hidden');
+		jQuery('#ajaxProgress$form_id_safe').hide();
+		ajaxUnshadow$form_id_safe();
 	}
-	function tdomfSubmit$form_id(action) {
-		ajaxProgressStart$form_id();
+	function tdomfSubmit$form_id_safe(action) {
+		ajaxProgressStart$form_id_safe();
 		var mysack = new sack("$ajax_script" );
 		mysack.execute = 1;
 		mysack.method = 'POST';
@@ -1123,31 +1135,31 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
 		mysack.runAJAX();
 		return true;
 	}
-	function tdomfDisplayMessage$form_id(message, mode) {
+	function tdomfDisplayMessage$form_id_safe(message, mode) {
 		if(mode == "full") {
-			jQuery('#tdomf_form${form_id}_message').attr('class','hidden');
-			document.getElementById('tdomf_form${form_id}_message').innerHTML = "";
+			jQuery('#tdomf_form${form_id_safe}_message').attr('class','hidden');
+			document.getElementById('tdomf_form${form_id_safe}_message').innerHTML = "";
 			document.$form_name.innerHTML = message;
             jQuery('#$form_name').focus();
             var offset = jQuery('#$form_name').offset();
             window.scrollTo(offset.left,offset.top);
 		} else if(mode == "preview") {
-			jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_preview');
-			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
-            jQuery('#tdomf_form${form_id}_message').focus();
-            var offset = jQuery('#tdomf_form${form_id}_message').offset();
+			jQuery('#tdomf_form${form_id_safe}_message').attr('class','tdomf_form_preview');
+			document.getElementById('tdomf_form${form_id_safe}_message').innerHTML = message;
+            jQuery('#tdomf_form${form_id_safe}_message').focus();
+            var offset = jQuery('#tdomf_form${form_id_safe}_message').offset();
             window.scrollTo(offset.left,offset.top);
 		} else {
-            jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_message');
-			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
-            var offset = jQuery('#tdomf_form${form_id}_message').offset();
+            jQuery('#tdomf_form${form_id_safe}_message').attr('class','tdomf_form_message');
+			document.getElementById('tdomf_form${form_id_safe}_message').innerHTML = message;
+            var offset = jQuery('#tdomf_form${form_id_safe}_message').offset();
             window.scrollTo(offset.left,offset.top);
-            jQuery('#tdomf_form${form_id}_message').focus();
+            jQuery('#tdomf_form${form_id_safe}_message').focus();
 		}
-		ajaxProgressStop$form_id();
+		ajaxProgressStop$form_id_safe();
 	}
-	function tdomfRedirect$form_id(url) {
-		ajaxProgressStop$form_id();
+	function tdomfRedirect$form_id_safe(url) {
+		ajaxProgressStop$form_id_safe();
 		window.location = url;
 	}
 	//]] -->
@@ -1156,13 +1168,13 @@ EOT;
     if($hack) {
         $form .= "\n<!-- AJAX js end -->\n<!-- shadow required for disabling form during AJAX submit -->\n";
     }
-    $form .= "<div id='shadow$form_id' class='tdomf_shadow'></div>\n";
+    $form .= "<div id='shadow$form_id_safe' class='tdomf_shadow'></div>\n";
     if($hack) {
         $form .= "<!-- ajaxProgress holds the HTML to show during AJAX busy -->\n";
     }
-    $form .= "<div id='ajaxProgress$form_id' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>\n";
+    $form .= "<div id='ajaxProgress$form_id_safe' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>\n";
     if(!$hack) {
-        $form .= "<div id='tdomf_form${form_id}_message' class='hidden'></div>";
+        $form .= "<div id='tdomf_form${form_id_safe}_message' class='hidden'></div>";
     }
   } 
   
@@ -1220,7 +1232,7 @@ EOT;
   } else {
       # use message id as re-direct because we *know* where this will appear on a non-hacked form
       #$redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
-      $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id}_message";
+      $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id_safe}_message";
   }
   $form .= "\t<div><input type='hidden' id='redirect' name='redirect' value='$redirect_url' /></div>\n";
   
@@ -1278,17 +1290,9 @@ EOT;
   }  
   $form .= "\t<table class='tdomf_buttons'><tr>\n";
   if(tdomf_widget_is_preview_avaliable($form_id)) {
-      if($hack) {
-          $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.TDOMF_MACRO_FORMID.'_preview" id="tdomf_form'.TDOMF_MACRO_FORMID.'_preview" onclick="tdomfSubmit'.TDOMF_MACRO_FORMID."('preview'); return false;\" /></td>\n";
-      } else {
-          $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
-      }
+     $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id_safe.'_preview" id="tdomf_form'.$form_id_safe.'_preview" onclick="tdomfSubmit'.$form_id_safe."('preview'); return false;\" /></td>\n";
   }
-  if($hack) {
-      $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.TDOMF_MACRO_FORMID.'_send" id="tdomf_form'.TDOMF_MACRO_FORMID.'_send" onclick="tdomfSubmit'.TDOMF_MACRO_FORMID."('post'); return false;\" /></td>\n";
-  } else {
-      $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
-  }
+  $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id_safe.'_send" id="tdomf_form'.$form_id_safe.'_send" onclick="tdomfSubmit'.$form_id_safe."('post'); return false;\" /></td>\n";
   $form .= "\t</tr></table>\n";
   if($hack) {
         $form .= "\t<!-- form buttons end -->\n";

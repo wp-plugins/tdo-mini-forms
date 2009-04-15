@@ -23,14 +23,14 @@ function tdomf_can_current_user_see_form($form_id = 1, $post_id = false) {
 //////////////////////////////////////
 // Get the form 
 //
-function tdomf_get_the_form($form_id = 1) {
-  return tdomf_generate_form($form_id);
+function tdomf_get_the_form($form_id = 1,$post_id = false) {
+  return tdomf_generate_form($form_id,false,$post_id);
 }
 
 //////////////////////////////////////
 // Display the Form
 //
-function tdomf_the_form($form_id = 1) {
+function tdomf_the_form($form_id = 1,$post_id = false) {
   echo tdomf_get_the_form($form_id);
 }
 
@@ -232,14 +232,50 @@ function tdomf_content_editlink_filter($content=''){
   $post_ID = 0;
   if(isset($post)) { $post_ID = $post->ID; }
   else if($post_ID == 0){ return $content; }
+
+  /* need to put this in the header
+<script type='text/javascript' src='<?php echo get_bloginfo('wpurl'); ?>/wp-includes/js/jquery/jquery.js'></script>
+
+<style>
+      #tdomf_form1 { display: none; }
+</style>
+
+   */
+  
+  /* javascript can search for id = "post-$post->ID" and if not, fall back to tdomf_inline_edit */
   
   $output = '';  
+  $ajax = false;
+  $script = false;
+  $forms = "";
   $form_ids = tdomf_get_form_ids();
   foreach($form_ids as $form_id) {
       if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id) && tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
+          $ajax_form = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id);
+          if($ajax_form) { $ajax = true; }
           $edit_link_style = tdomf_get_option_form(TDOMF_OPTION_ADD_EDIT_LINK,$form_id->form_id);
-          if($edit_link_style != 'none' && $edit_link_style != false) {
+          if(($ajax_form || $edit_link_style != 'none') && $edit_link_style != false) {
 
+              /* should be in header 
+              if(!$script) {
+                  $script = "<script type='text/javascript' src='".get_bloginfo('wpurl')."/wp-includes/js/jquery/jquery.js'></script>";
+                  $forms .= $script;
+              } */
+              $form_tag = $form_id->form_id; 
+              if($ajax_form) {
+                  $form_tag = $form_id->form_id . '_' . $post_ID;
+              /*$forms .= <<<EOT
+<style>
+#tdomf_form$form_tag { display: none; }
+</style>
+EOT; */
+              }
+              $js = "";
+              if($ajax_form) {
+                   $js = " onclick='tdomf_show_form$form_tag(); return false;'";
+                   /*$forms .= tdomf_get_the_form($form_id->form_id,$post_ID); */
+              }
+              
               if($edit_link_style == 'page') {
                    $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id->form_id);
                    $url = get_permalink($pages[0]);
@@ -259,13 +295,115 @@ function tdomf_content_editlink_filter($content=''){
                    }
               }
               
-              $output .= '<p><a href="'.$url.'">'.tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id->form_id).'</a></p>';
+              $output .= '<p><a href="'.$url.'"'.$js.'>'.tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id->form_id).'</a></p>';
           }
       }
   }
+  if($ajax) {
+      return "<div id='tdomf_inline_edit-$post_ID' name='tdomf_inline_edit-$post_ID'>".$content.$output."</div>".$forms;
+  } 
   return $content.$output;
 }
 add_filter('the_content', 'tdomf_content_editlink_filter');
+
+function tdomf_ajaxeditforms_action() {
+  global $post;
+  $post_ID = 0;
+  if(isset($post)) { $post_ID = $post->ID; }
+
+  $forms = array();
+  $form_ids = tdomf_get_form_ids();
+  foreach($form_ids as $form_id) {
+      $edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id);
+      $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id);
+      if($edit && $ajax && (is_page() || is_single())) {
+         if(tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
+             $forms [] = array( 'name' => '#tdomf_form'.$form_id->form_id . '_' . $post_ID,
+                                'form' => tdomf_get_the_form($form_id->form_id,$post_ID) );
+         }
+      }
+  }
+  if(!empty($forms)) {
+      /*echo "<style>\n";
+      foreach($forms as $form) {
+          echo $form['name'] . "{ display: none; background-color: white; }\n";
+      }
+      echo "\n</style>";*/
+      foreach($forms as $form) {
+          echo $form['form'];
+      }
+  }
+}
+add_action('wp_footer', 'tdomf_ajaxeditforms_action');
+
+function tdomf_ajaxeditscripts_action() {
+  global $post;
+  $post_ID = 0;
+  if(isset($post)) { $post_ID = $post->ID; }
+
+  $forms = array();
+  $form_ids = tdomf_get_form_ids();
+  foreach($form_ids as $form_id) {
+      $edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id);
+      $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id);
+      if($edit && $ajax && (is_page() || is_single())) {
+         if(tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
+             $form_tag = $form_id->form_id . '_' . $post_ID;
+             $code =  <<<EOT
+   function tdomf_show_form$form_tag(){
+      var post = document.getElementById('post-$post_ID');
+      if(post != null) {
+          var offset = jQuery('#post-$post_ID').offset();
+          var w = jQuery('#post-$post_ID').width();
+          var h = jQuery('#post-$post_ID').height();
+          /*jQuery('#post-$post_ID > *').css("display", "none");
+          jQuery('#post-$post_ID').css("display", "none"); */
+          var tag = '#post-$post_ID';
+      } else {
+          var offset = jQuery('#tdomf_inline_edit-$post_ID').offset();
+          var w = jQuery('#tdomf_inline_edit-$post_ID').width();
+          var h = jQuery('#tdomf_inline_edit-$post_ID').height();
+          /*jQuery('#tdomf_inline_edit-$post_ID').css("display", "none");*/
+          var tag = '#tdomf_inline_edit-$post_ID';
+      }
+      /*jQuery('#tdomf_form$form_tag').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+      jQuery('#tdomf_form$form_tag').css({zIndex: '999', display: 'block'});*/
+      /*jQuery('#tdomf_form$form_tag').fadeTo('fast', 0.2);
+      jQuery('#tdomf_form$form_tag').css("display", "block");*/
+      
+      /*jQuery('#tdomf_inline_edit-$post_ID').css("display", "none");
+      jQuery('#tdomf_form$form_tag').css("display", "block");*/
+      
+      /*jQuery(tag).css("display", "none");*/
+      /*jQuery(tag).fadeTo('fast', 0.2);*/
+      
+      /*jQuery(tag).remove().after('#tdomf_form$form_tag');*/
+      /*jQuery(tag).remove().after('<b>test</b>');*/
+      jQuery(tag).after( jQuery('#tdomf_form$form_tag') ).remove();
+      jQuery('#tdomf_form$form_tag').css("display", "block");
+   }
+   
+EOT;
+             $forms [] = array( 'name' => '#tdomf_form'.$form_tag,
+                                'code' => $code );
+         }
+      }
+  }
+  if(!empty($forms)) {
+      echo "<script type='text/javascript' src='".get_bloginfo('wpurl')."/wp-includes/js/jquery/jquery.js'></script>";
+      echo "<style>\n";
+      foreach($forms as $form) {
+          echo $form['name'] . "{ display: none; background-color: white; }\n";
+      }
+      echo "</style>\n";
+      echo "<script type='text/javascript'>\n";
+      foreach($forms as $form) {
+          echo $form['code'];
+      }
+      echo "</script>\n";
+  }
+}
+add_action('wp_head', 'tdomf_ajaxeditscripts_action');
 
 // return apply_filters( 'get_edit_post_link', admin_url("$file.php?{$action}$var=$post->ID"), $post->ID, $context );
 

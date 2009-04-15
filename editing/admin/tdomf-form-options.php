@@ -221,6 +221,7 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_edit_cats").disabled = flag;
             }
             
+            document.getElementById("tdomf_ajax_edit").disabled = flag;
             document.getElementById("tdomf_add_edit_link_none").disabled = flag;
             <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?> 
                 document.getElementById("tdomf_add_edit_link_your_submissions").disabled = flag;
@@ -275,6 +276,7 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_edit_cats").disabled = !flag;
             }
             
+            document.getElementById("tdomf_ajax_edit").disabled = flag;
             document.getElementById("tdomf_add_edit_link_none").disabled = flag;
             <?php if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?> 
                 document.getElementById("tdomf_add_edit_link_your_submissions").disabled = flag;
@@ -699,6 +701,11 @@ function tdomf_show_form_options($form_id) {
 
         <br/><br/>
         
+        <?php $ajax_edit = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id); ?>
+        <input type="checkbox" name="tdomf_ajax_edit" id="tdomf_ajax_edit" <?php if($ajax_edit){ ?>checked<?php }?> >
+        <label for="tdomf_ajax_edit"><?php _e("Inline Editing (requires javascript in browser, will fall back to one of the options below)","tdomf"); ?></label>
+        <br/>
+        
         <?php $add_edit_link = tdomf_get_option_form(TDOMF_OPTION_ADD_EDIT_LINK,$form_id); 
               if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS) == false && $add_edit_link == 'your_submissions') { $add_edit_link = 'none'; } 
               if($updated_pages == false && $auto_edit_link == 'page') { $add_edit_link = 'none'; }?>
@@ -730,8 +737,8 @@ function tdomf_show_form_options($form_id) {
         <br/>
         <input type="text" name="tdomf_add_edit_link_custom_url" id="tdomf_add_edit_link_custom_url" size="80" 
             <?php if($add_edit_link !== false && $add_edit_link != 'none' && $add_edit_link != 'page' && $add_edit_link != 'your_submissions') { ?>value="<?php echo $add_edit_link; ?>" <?php } else { ?>value="http://" <?php } ?>/>
-        
-        <br/><br/>
+
+            <br/><br/>
         
         <p>
         <?php _e('If your theme supports it, the edit link can be automatically updated to point to a TDOMF form instead of Wordpress\' backend. But TDOMF cannot change the permissions under which it shows. I.e. This edit link will appear according to Wordpress access rules and not the rules you set here.','tdomf'); ?>
@@ -1324,6 +1331,8 @@ function tdomf_handle_form_options_actions() {
       }
       tdomf_set_option_form(TDOMF_OPTION_ADD_EDIT_LINK,$add_edit_link,$form_id);
            
+      $ajax_edit = isset($_REQUEST['tdomf_ajax_edit']);
+      tdomf_set_option_form(TDOMF_OPTION_AJAX_EDIT,$ajax_edit,$form_id);
       
       // auto modify edit link
       

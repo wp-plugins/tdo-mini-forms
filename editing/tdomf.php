@@ -68,6 +68,7 @@ Work Queue:
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
+   - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
    - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
    - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
    - Requred option in category field
@@ -461,9 +462,11 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
+ * tdomf-form.php line 1296/1302
  * AJAX Inline Editing
  * Moderation screen: attachments
  * Moderation screen: bulk actions for edits
+ * Moderation screen: multi-select
  * Option to disable Spam/Unapproved Edit Locking
  * Testing Edit Spam
  * Viewing TDOMF Revision History (on page/template tag)
@@ -495,8 +498,9 @@ define('TDOMF_OPTION_ADD_EDIT_LINK',"tdomf_add_edit_link");
 define('TDOMF_OPTION_ADD_EDIT_LINK_TEXT',"tdomf_add_edit_link_text");
 define('TDOMF_OPTION_AUTO_EDIT_LINK',"tdomf_auto_edit_link");
 define('TDOMF_STAT_EDITED', "tdomf_stat_edited");
-define("TDOMF_MACRO_POSTID", "%%POSTID%%");
-define("TDOMF_DB_TABLE_EDITS", "tdomf_table_edits");
+define('TDOMF_MACRO_POSTID', "%%POSTID%%");
+define('TDOMF_DB_TABLE_EDITS', "tdomf_table_edits");
+define('TDOMF_OPTION_AJAX_EDIT',"tdomf_ajax_edit");
 // @todo admin ui for...
 define('TDOMF_OPTION_MSG_INVALID_POST',"tdomf_msg_invalid_post");
 define('TDOMF_OPTION_MSG_INVALID_FORM',"tdomf_msg_invalid_form");
