@@ -462,31 +462,35 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * tdomf-form.php line 1296/1302
- * AJAX Inline Editing
- * Moderation screen: attachments
- * Moderation screen: bulk actions for edits
- * Moderation screen: multi-select
- * Option to disable Spam/Unapproved Edit Locking
- * Testing Edit Spam
  * Viewing TDOMF Revision History (on page/template tag)
- * Notify Admins for Edits
- * tdomf_form_post and tdomf_form_ajax, checking if an edit is spam: tdomf_is_id_spam
  * TDOMF_STAT_EDITED
- * Form Hacker
  * Your Submissions: Edit Forms
  * Your Submissions: Pending Edits
- * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, reCaptcha, Append to Post Content, 1 Question Captcha and Text 
+ * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
+ * Displaying "Moderated" message for non-moderated users
+ * Moderation screen: bulk actions for edits
+ * Moderation screen: multi-select
+ * tdomf_form_post and tdomf_form_ajax, checking if an edit is spam
+ * Form Hacker
  * Template Tags for editing
- * Admin Buttons to include editing approvals
  * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM, etc.
  * "Edited by XYZ": message in form hacker, last X edits (appear above Submitted by)
  * ^ - "Submitted by XYZ": form hacker
  * Testing editing/submitting on pages
+ * revisions disabled error message 
+ *
+ * @live server
+ * Testing Edit Spam
+ * Notify Admins for Edits
+ * Update Admin Notification Email to use new moderation links
+ * First version only widgets that support editing: reCaptcha
  *
  * @postponed
+ * Option to disable Spam/Unapproved Edit Locking
  * Moderation screen: implement filters: form, user, ip, username, email
  * Moderation screen: search
+ * 'Back' Button for Ajax inline editing
+ * 'Reset' Button for Editing Forms
  */
 
 define('TDOMF_OPTION_FORM_EDIT',"tdomf_form_edit");

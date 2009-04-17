@@ -90,7 +90,7 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
     return $message;
 }
 
-function tdomf_get_message_instance($key, $form_id = false, $mode = "", $post_id = false, $errors = "") {
+function tdomf_get_message_instance($key, $form_id = false, $mode = false, $post_id = false, $errors = "") {
     global $current_user;
     $message = tdomf_get_message($key,$form_id);
     if(!empty($message) || $message !== false) {

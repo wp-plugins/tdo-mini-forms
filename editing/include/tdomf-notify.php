@@ -116,26 +116,22 @@ function tdomf_notify_admins($post_ID,$form_id){
   $title = $post->post_title;
   $status = $post->post_status;
 
-  //Admin links
+  // Admin links
   //
-  #$moderate_all_link = get_bloginfo('wpurl').'/wp-admin/admin.php?page=tdomf_show_mod_posts_menu';
   $moderate_all_link = tdomf_get_mod_posts_url(array());
-  $publish_link = tdomf_get_mod_posts_url(array('action' => 'publish', 'post_id' => $post_ID, 'nonce' => 'tdomf-publish_' . $post_ID));
+  $publish_post_link = tdomf_get_mod_posts_url(array('action' => 'publish', 'post_id' => $post_ID, 'nonce' => 'tdomf-publish_' . $post_ID));
+  $delete_post_link = wp_nonce_url(get_bloginfo('wpurl')."/wp-admin/post.php?action=delete&post=$post_ID",'delete-post_'.$post_ID);
+  $edit_post_link = get_bloginfo('wpurl')."/wp-admin/post.php?action=edit&amp;post=$post_ID";
   
-  //View link
+  // View link
   //
   $view_post_link = get_permalink($post_ID);
 
   $is_spam = (get_post_meta($post_ID, TDOMF_KEY_SPAM) && get_option(TDOMF_OPTION_SPAM));
   
-  //Spam links
+  // Spam links
   //                                                            
-  #$spam_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=spamit&post=$post_ID";
-  #$spam_link = wp_nonce_url($spam_link,'tdomf-spamit_'.$post_ID);
   $spam_link = tdomf_get_mod_posts_url(array('action' => 'spamit', 'post_id' => $post_ID, 'nonce' => 'tdomf-spamit_' . $post_ID));
-
-  #$ham_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_mod_posts_menu&action=hamit&post=$post_ID";
-  #$ham_link = wp_nonce_url($ham_link,'tdomf-hamit_'.$post_ID);
   $ham_link = tdomf_get_mod_posts_url(array('action' => 'hamit', 'post_id' => $post_ID, 'nonce' => 'tdomf-spamit_' . $post_ID));
 
   if($can_ban_user) {
@@ -163,21 +159,24 @@ function tdomf_notify_admins($post_ID,$form_id){
   if($is_spam) {
       $email_msg = __("This post is considered SPAM\n\n","tdomf");
   }
-  $email_msg .= sprintf(__("It was submitted using Form ID %d (\"%s\")\n","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id));
-  $email_msg .= sprintf(__("This was submitted from IP %s.\n\n","tdomf"),$ip);
-  $email_msg .= sprintf(__("You can view this post from %s.\n","tdomf"),$view_post_link); 
+  $email_msg .= sprintf(__("Form ID: %d (\"%s\")\n","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id));
+  $email_msg .= sprintf(__("Submitter IP: %s.\n\n","tdomf"),$ip);
+  $email_msg .= sprintf(__("View Post: %s.\n","tdomf"),$view_post_link); 
   if($status != 'publish' && $status != 'future') {
-      $email_msg .= sprintf(__("You can moderate this submission from %s.\n","tdomf"),$moderate_all_link);
+      $email_msg .= sprintf(__("Publish Post (will also flag post as not SPAM): %s.\n","tdomf"),$publish_post_link);
+      $email_msg .= sprintf(__("Edit Post: %s.\n","tdomf"),$edit_post_link);
       if(!$is_spam) {
           $email_msg .= sprintf(__("Flag Post as SPAM: %s.\n","tdomf"),$spam_link);
       } else {
-          $email_msg .= sprintf(__("Post is not SPAM: %s.\n","tdomf"),$ham_link);
+          $email_msg .= sprintf(__("Flag Post as not SPAM: %s.\n","tdomf"),$ham_link);
       }
       $email_msg .= sprintf(__("Ban IP: %s.\n","tdomf"),$ban_ip_link);
       if($can_ban_user) {
           $email_msg .= sprintf(__("Ban User: %s.\n","tdomf"),$ban_user_link);
       } 
+      $email_msg .= sprintf(__("Delete Post: %s.\n","tdomf"),$delete_post_link);
   }
+  $email_msg .= sprintf(__("You can moderate all submissions from %s.\n","tdomf"),$moderate_all_link);  
   $email_msg .= sprintf(__("\nContent of the post: \n\n %s \n\n","tdomf"),$content);
   
    // Widgets:adminemail

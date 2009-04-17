@@ -276,7 +276,16 @@ function tdomf_preview_form($args,$mode=false) {
    if(strpos($mode,'-hack') !== false) {
        $hack = true;
    }
+   if(strpos($mode,'edit-') !== false) {
+      $edit = true;
+  }
    
+  // grab post id
+  $post_id = false;
+  if($edit && isset($args['tdomf_post_id'])) {
+     $post_id = intval($args['tdomf_post_id']);
+  }
+  
    do_action('tdomf_preview_form_start',$form_id,$mode);
    
    // handle hacked forms
@@ -286,7 +295,7 @@ function tdomf_preview_form($args,$mode=false) {
       $hacked_message = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id);
       if($hacked_message != false) {
           $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
-          $message = tdomf_prepare_string($hacked_message, $form_id, $mode, false, "", $args);
+          $message = tdomf_prepare_string($hacked_message, $form_id, $mode, $post_id, "", $args);
           
           // basics
           $unused_patterns = array();
@@ -363,6 +372,9 @@ function tdomf_preview_form($args,$mode=false) {
    if($message == "") {
       tdomf_log_message("Couldn't generate preview!",TDOMF_LOG_ERROR);
 	  return __("Error! Could not generate a preview!","tdomf");
+   }
+   if($edit) {
+       return sprintf(__("This is a preview of your contribution:%s\n","tdomf"),$message);
    }
    return sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message);
 }
@@ -1290,9 +1302,17 @@ EOT;
   }  
   $form .= "\t<table class='tdomf_buttons'><tr>\n";
   if(tdomf_widget_is_preview_avaliable($form_id)) {
-     $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id_safe.'_preview" id="tdomf_form'.$form_id_safe.'_preview" onclick="tdomfSubmit'.$form_id_safe."('preview'); return false;\" /></td>\n";
+     $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id_safe.'_preview" id="tdomf_form'.$form_id_safe.'_preview"';
+     if($use_ajax) {
+         $form .= ' onclick="tdomfSubmit'.$form_id_safe."('preview'); return false;\"";
+     }
+     $form .= "/></td>\n";
   }
-  $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id_safe.'_send" id="tdomf_form'.$form_id_safe.'_send" onclick="tdomfSubmit'.$form_id_safe."('post'); return false;\" /></td>\n";
+  $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id_safe.'_send" id="tdomf_form'.$form_id_safe.'_send"';
+  if($use_ajax) {
+      $form .= ' onclick="tdomfSubmit'.$form_id_safe."('post'); return false;\"";
+  }
+  $form .= "/></td>\n";
   $form .= "\t</tr></table>\n";
   if($hack) {
         $form .= "\t<!-- form buttons end -->\n";

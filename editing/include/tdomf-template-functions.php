@@ -166,6 +166,9 @@ function tdomf_stylesheet(){
 }
 add_action('wp_head','tdomf_stylesheet');
 
+///////////////////////////////////
+// Add TDOMF admin buttons to post
+//
 function tdomf_content_adminbuttons_filter($content=''){
   global $post;
   $post_ID = 0;
@@ -178,8 +181,7 @@ function tdomf_content_adminbuttons_filter($content=''){
      $form_id = tdomf_get_first_form_id();
    }
   
-   if(/*tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) 
-   &&*/ get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
+   if(get_post_meta($post_ID,TDOMF_KEY_FLAG,true) 
    && $post->post_status == 'draft'
    && current_user_can('publish_posts')) {
      
@@ -227,22 +229,14 @@ function tdomf_content_adminbuttons_filter($content=''){
 }
 add_filter('the_content', 'tdomf_content_adminbuttons_filter');
 
+////////////////////////
+// Add Edit link to post
+//
 function tdomf_content_editlink_filter($content=''){
   global $post;
   $post_ID = 0;
   if(isset($post)) { $post_ID = $post->ID; }
   else if($post_ID == 0){ return $content; }
-
-  /* need to put this in the header
-<script type='text/javascript' src='<?php echo get_bloginfo('wpurl'); ?>/wp-includes/js/jquery/jquery.js'></script>
-
-<style>
-      #tdomf_form1 { display: none; }
-</style>
-
-   */
-  
-  /* javascript can search for id = "post-$post->ID" and if not, fall back to tdomf_inline_edit */
   
   $output = '';  
   $ajax = false;
@@ -251,29 +245,17 @@ function tdomf_content_editlink_filter($content=''){
   $form_ids = tdomf_get_form_ids();
   foreach($form_ids as $form_id) {
       if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id) && tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
-          $ajax_form = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id);
+          $ajax_form = ( tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id) && (is_single() || is_page()) );
           if($ajax_form) { $ajax = true; }
           $edit_link_style = tdomf_get_option_form(TDOMF_OPTION_ADD_EDIT_LINK,$form_id->form_id);
           if(($ajax_form || $edit_link_style != 'none') && $edit_link_style != false) {
-
-              /* should be in header 
-              if(!$script) {
-                  $script = "<script type='text/javascript' src='".get_bloginfo('wpurl')."/wp-includes/js/jquery/jquery.js'></script>";
-                  $forms .= $script;
-              } */
               $form_tag = $form_id->form_id; 
               if($ajax_form) {
                   $form_tag = $form_id->form_id . '_' . $post_ID;
-              /*$forms .= <<<EOT
-<style>
-#tdomf_form$form_tag { display: none; }
-</style>
-EOT; */
               }
               $js = "";
               if($ajax_form) {
                    $js = " onclick='tdomf_show_form$form_tag(); return false;'";
-                   /*$forms .= tdomf_get_the_form($form_id->form_id,$post_ID); */
               }
               
               if($edit_link_style == 'page') {
@@ -295,17 +277,21 @@ EOT; */
                    }
               }
               
-              $output .= '<p><a href="'.$url.'"'.$js.'>'.tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id->form_id).'</a></p>';
+              $output .= '<p><a href="'.$url.'"'.$js.'>'.tdomf_get_message_instance(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id->form_id,false,$post_ID).'</a></p>';
           }
       }
   }
   if($ajax) {
-      return "<div id='tdomf_inline_edit-$post_ID' name='tdomf_inline_edit-$post_ID'>".$content.$output."</div>".$forms;
+      return "<div id='tdomf_inline_edit-$post_ID' name='tdomf_inline_edit-$post_ID'>".$content.$output."</div>";
   } 
   return $content.$output;
 }
 add_filter('the_content', 'tdomf_content_editlink_filter');
 
+///////////////////////////////////////////////////////////////////////////////
+// Add forms to end of post/page outside of div structure for AJAX inline
+// editing on posts
+//
 function tdomf_ajaxeditforms_action() {
   global $post;
   $post_ID = 0;
@@ -314,9 +300,9 @@ function tdomf_ajaxeditforms_action() {
   $forms = array();
   $form_ids = tdomf_get_form_ids();
   foreach($form_ids as $form_id) {
-      $edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id);
-      $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id);
-      if($edit && $ajax && (is_page() || is_single())) {
+      if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id) && 
+         tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id) && 
+         (is_page() || is_single())) {
          if(tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
              $forms [] = array( 'name' => '#tdomf_form'.$form_id->form_id . '_' . $post_ID,
                                 'form' => tdomf_get_the_form($form_id->form_id,$post_ID) );
@@ -324,11 +310,6 @@ function tdomf_ajaxeditforms_action() {
       }
   }
   if(!empty($forms)) {
-      /*echo "<style>\n";
-      foreach($forms as $form) {
-          echo $form['name'] . "{ display: none; background-color: white; }\n";
-      }
-      echo "\n</style>";*/
       foreach($forms as $form) {
           echo $form['form'];
       }
@@ -336,55 +317,65 @@ function tdomf_ajaxeditforms_action() {
 }
 add_action('wp_footer', 'tdomf_ajaxeditforms_action');
 
+///////////////////////////////////////////////////////////////////////////////
+// Add javascript and style settings to header for AJAX inline editing on posts
+//
 function tdomf_ajaxeditscripts_action() {
   global $post;
   $post_ID = 0;
   if(isset($post)) { $post_ID = $post->ID; }
 
+  $active_form = false;
   $forms = array();
   $form_ids = tdomf_get_form_ids();
   foreach($form_ids as $form_id) {
-      $edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id);
-      $ajax = tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id);
-      if($edit && $ajax && (is_page() || is_single())) {
+      if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id) && 
+         tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id) && 
+         (is_page() || is_single())) {
          if(tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
              $form_tag = $form_id->form_id . '_' . $post_ID;
+             
+             /* 
+              * I'm sure there are probably nicer ways of doing this and it may
+              * not be practical to modify the post-tag like this, but it works
+              */
              $code =  <<<EOT
    function tdomf_show_form$form_tag(){
       var post = document.getElementById('post-$post_ID');
       if(post != null) {
-          var offset = jQuery('#post-$post_ID').offset();
-          var w = jQuery('#post-$post_ID').width();
-          var h = jQuery('#post-$post_ID').height();
-          /*jQuery('#post-$post_ID > *').css("display", "none");
-          jQuery('#post-$post_ID').css("display", "none"); */
           var tag = '#post-$post_ID';
       } else {
-          var offset = jQuery('#tdomf_inline_edit-$post_ID').offset();
-          var w = jQuery('#tdomf_inline_edit-$post_ID').width();
-          var h = jQuery('#tdomf_inline_edit-$post_ID').height();
-          /*jQuery('#tdomf_inline_edit-$post_ID').css("display", "none");*/
           var tag = '#tdomf_inline_edit-$post_ID';
       }
-      /*jQuery('#tdomf_form$form_tag').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
-      jQuery('#tdomf_form$form_tag').css({zIndex: '999', display: 'block'});*/
-      /*jQuery('#tdomf_form$form_tag').fadeTo('fast', 0.2);
-      jQuery('#tdomf_form$form_tag').css("display", "block");*/
-      
-      /*jQuery('#tdomf_inline_edit-$post_ID').css("display", "none");
-      jQuery('#tdomf_form$form_tag').css("display", "block");*/
-      
-      /*jQuery(tag).css("display", "none");*/
-      /*jQuery(tag).fadeTo('fast', 0.2);*/
-      
-      /*jQuery(tag).remove().after('#tdomf_form$form_tag');*/
-      /*jQuery(tag).remove().after('<b>test</b>');*/
-      jQuery(tag).after( jQuery('#tdomf_form$form_tag') ).remove();
-      jQuery('#tdomf_form$form_tag').css("display", "block");
+      var msg = document.getElementById('tdomf_form${form_tag}_message');
+      if(msg != null) {
+          jQuery(tag).after( jQuery('#tdomf_form${form_tag}_message') ).remove();
+          jQuery('#tdomf_form${form_tag}_message').after( jQuery('#tdomf_form$form_tag') );
+          jQuery('#tdomf_form${form_tag}_message').before("<div id='" + tag + "'>");
+          jQuery('#tdomf_form$form_tag').after("</div>");
+          jQuery('#tdomf_form$form_tag').css("display", "block");      
+      } else {                  
+          jQuery(tag).after( jQuery('#tdomf_form$form_tag') ).remove();
+          jQuery('#tdomf_form$form_tag').before("<div id='" + tag + "'>");
+          jQuery('#tdomf_form$form_tag').after("</div>");
+          jQuery('#tdomf_form$form_tag').css("display", "block");
+      }      
    }
    
 EOT;
-             $forms [] = array( 'name' => '#tdomf_form'.$form_tag,
+              /* 
+               * If form doesn't support AJAX, then we need to know if it is 
+               * active and then to trick the javascript to show it! 
+               */
+              if(!$active_form && !tdomf_get_option_form(TDOMF_OPTION_AJAX,$form_id->form_id)) {
+                  $form_data = tdomf_get_form_data($form_id->form_id);
+                  if(!empty($form_data)) {
+                      $active_form = true;
+                      $code .= "\njQuery(document).ready( function() { tdomf_show_form$form_tag(); } );\n";
+                  }
+              }
+
+              $forms [] = array( 'name' => '#tdomf_form'.$form_tag,
                                 'code' => $code );
          }
       }
@@ -405,8 +396,9 @@ EOT;
 }
 add_action('wp_head', 'tdomf_ajaxeditscripts_action');
 
-// return apply_filters( 'get_edit_post_link', admin_url("$file.php?{$action}$var=$post->ID"), $post->ID, $context );
-
+/////////////////////////////
+// Modify Edit link on theme
+//
 function tdomf_editpostlink_filter($url,$post_id){
   
   $form_ids = tdomf_get_form_ids();

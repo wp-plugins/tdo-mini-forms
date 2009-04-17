@@ -78,7 +78,11 @@ function tdomf_widget_text($args,$params) {
     $output .= "\t\t";
     $output .= $options['text'];
   } else {
-    $output .= tdomf_prepare_string($options['text'], $tdomf_form_id, $mode, false, "", $args);
+      if(!isset($tdomf_post_id)) {
+          $output .= tdomf_prepare_string($options['text'], $tdomf_form_id, $mode, false, "", $args);
+      } else {
+          $output .= tdomf_prepare_string($options['text'], $tdomf_form_id, $mode, $tdomf_post_id, "", $args);
+      }
   }
   $output .= $after_widget;
   return $output;

@@ -395,7 +395,7 @@ function tdomf_show_form_hacker() {
               <br/><br/>
           <?php } ?>
 
-          <?php if($form_edit) { ?>
+          <?php if($form_edit || tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id)) { ?>
               
               <h3><?php _e('\'Edit Post\' Link Text','tdomf'); ?></h3>
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_edit_post_link" id="tdomf_msg_edit_post_link" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>

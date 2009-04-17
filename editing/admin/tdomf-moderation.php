@@ -405,9 +405,11 @@ function tdomf_show_mod_posts_menu() {
      ));
     ?>
 
+    <?php /* Hide bulk actions (from top of page) and fitlers for the time being
+    
     <div class="alignleft actions">
     
-    <?php /* Hide bulk actions (from top of page) and fitlers for the time being
+    
     
     
     <select name="action">
@@ -426,9 +428,9 @@ function tdomf_show_mod_posts_menu() {
     </select>
     <input type="submit" id="post-query-submit" value="<?php _e('Filter'); ?>" class="button-secondary" />
     
-    */ ?>
-    
     </div>
+    
+        */ ?>
 
 <?php if ( $page_links ) { ?>
 <div class="tablenav-pages"><?php $page_links_text = sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>%s',
@@ -485,8 +487,25 @@ function tdomf_show_mod_posts_menu() {
 
         <th scope="row" class="check-column"><input type="checkbox" name="post[]" value="<?php echo $p->ID; ?>" /></th>
         <td class="post-title column-title"><strong><a class="row-title" href="post.php?action=edit&amp;post=<?php echo $p->ID; ?>" title="Edit"><?php echo $post->post_title; ?></a></strong>
-              
-        <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> <?php } ?>
+
+        <?php $fuoptions = tdomf_widget_upload_get_options($form_id);
+                     $index = 0;
+                     $filelinks = "";
+                     while(true) {
+                         $filename = get_post_meta($p->ID, TDOMF_KEY_DOWNLOAD_NAME.$index,true); 
+                         if($filename == false) { break; }
+                         if($fuoptions['nohandler'] && trim($fuoptions['url']) != "") {
+                             $uri = trailingslashit($fuoptions['url'])."$p->ID/".$filename;
+                         } else {
+                             $uri = trailingslashit(get_bloginfo('wpurl')).'?tdomf_download='.$p->ID.'&id='.$i;
+                         }
+                         $filelinks .= "<a href='$uri' title='".htmlentities($filename)."'>$index</a>, ";
+                         $index++;
+                     }
+                     if(!empty($filelinks)) {  ?>
+                         <?php _e('Uploaded Files: ','tdomf'); ?><?php echo $filelinks; ?><br/>
+                     <?php } ?>
+
         
         <?php if ( 'excerpt' == $mode ){
                  # Have to create our own excerpt, the_excerpt() doesn't cut it
@@ -500,7 +519,7 @@ function tdomf_show_mod_posts_menu() {
                  $excerpt = str_replace(']]>', ']]&gt;', $excerpt);
                  $excerpt = wp_html_excerpt($excerpt, 252);
                  if(strlen($excerpt) == 252){ $excerpt .= '...'; }; 
-                 echo $excerpt;
+                 echo '<blockquote>'.$excerpt.'</blockquote>';
         } ?>
         
         <div class="row-actions">

@@ -109,6 +109,8 @@ function tdomf_fixslashesargs() {
 //
 $message = tdomf_check_permissions_form($form_id,$post_id);
 
+var_dump($_POST);
+
 // Now either generate a preview or create a post
 //
 $save_post_info = FALSE;
@@ -120,7 +122,7 @@ if($message == NULL) {
   } else {
       $form_tag = $form_id;
   }
-    
+  
   if(isset($_POST['tdomf_form'.$form_tag.'_send'])) {
 
     tdomf_log_message("Someone is attempting to submit something");
@@ -173,6 +175,11 @@ if($message == NULL) {
 	   } else {
            $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">".$message."</div>";
        }
+       
+       // allows the final check to work when editing
+       //
+       unset($post_id);
+       
   } else if(isset($_POST['tdomf_form'.$form_tag.'_clear'])) {
     $message = NULL;
     $save_post_info = false;
