@@ -462,17 +462,14 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * Viewing TDOMF Revision History (on page/template tag)
+ * Pages ... but not including pages containing forms
  * TDOMF_STAT_EDITED
  * Your Submissions: Edit Forms
  * Your Submissions: Pending Edits
  * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
- * Displaying "Moderated" message for non-moderated users
  * Moderation screen: bulk actions for edits
  * Moderation screen: multi-select
- * tdomf_form_post and tdomf_form_ajax, checking if an edit is spam
  * Form Hacker
- * Template Tags for editing
  * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM, etc.
  * "Edited by XYZ": message in form hacker, last X edits (appear above Submitted by)
  * ^ - "Submitted by XYZ": form hacker
@@ -486,6 +483,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
  * First version only widgets that support editing: reCaptcha
  *
  * @postponed
+ * Template Tags for editing (what is actually required?)
  * Option to disable Spam/Unapproved Edit Locking
  * Moderation screen: implement filters: form, user, ip, username, email
  * Moderation screen: search

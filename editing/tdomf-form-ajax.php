@@ -49,7 +49,7 @@ if(!tdomf_form_exists($form_id)){
 
 // Submit or Edit?
 //
-$edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
+$is_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
 
 // Get Form Data for verficiation check
 //
@@ -58,8 +58,8 @@ $form_data = tdomf_get_form_data($form_id);
 function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false, $post_id = false) {
     global $form_id;
     
-    $edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
-    if($edit) {
+    $is_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
+    if($is_edit) {
         $form_tag = $form_id.'_'.$post_id;
     } else {
         $form_tag = $form_id;
@@ -83,7 +83,7 @@ function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false, $p
 // Get Post ID if there is one
 //
 $post_id = false;
-if($edit) {
+if($is_edit) {
     if(isset($form_data['tdomf_post_id'])) {
         $post_id = $form_data['tdomf_post_id'];
     } else if(isset($tdomf_args['tdomf_post_id'])) {
@@ -158,20 +158,37 @@ if($_POST['tdomf_action'] == "post") {
       $retVal = tdomf_create_post($args);
       // If retVal is an int it's a post id
       if(is_int($retVal)) {
-        $post_id = $retVal;
-        if(get_post_status($post_id) == 'publish') {
-            if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
-                die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
-            } else {
-                tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
+        if($is_edit) {
+            $edit_id = $retVal;
+            $edit = tdomf_get_edit($edit_id);
+            // @todo could probably test if $edit is real or not before proceeding
+            $post_id = $edit->post_id;
+            if($edit->state == 'approved') {
+                if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
+                    die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                } else {
+                    tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
+                }
+            } else if($edit->state == 'spam') {
+                tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),true,false,$post_id);                
+            } else { // unapproved
+                tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id),true,false,$post_id);
             }
-        } else if(get_post_status($post_id) == 'future') {
-          tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id),true,false,$post_id);
-        } else if(!$edit && get_post_meta($post_id, TDOMF_KEY_SPAM)) {
-          tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),true,false,$post_id);
-        /*} else if($edit && spam check for edits ) {*/
         } else {
-          tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id),true,false,$post_id);
+            $post_id = $retVal;
+            if(get_post_status($post_id) == 'publish') {
+                if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
+                    die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                } else {
+                    tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
+                }
+            } else if(get_post_status($post_id) == 'future') {
+              tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id),true,false,$post_id);
+            } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
+              tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),true,false,$post_id);
+            } else {
+              tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id),true,false,$post_id);
+            }
         }
       // If retVal is a string, something went wrong!
       } else {

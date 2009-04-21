@@ -30,24 +30,116 @@ function tdomf_get_all_users_count() {
 // Add the sidebar panel
 //
 function tdomf_edit_post_panel_admin_head() {
-  // Wordpress 2.5 introduced add_meta_box
-  if(function_exists('add_meta_box')) {
-     add_meta_box(
-          'tdomf',
-          __('TDOMF', "tdomf"),
-          'tdomf_show_edit_post_panel',
-          'post' );
-     add_meta_box(
-          'tdomf',
-          __('TDOMF', "tdomf"),
-          'tdomf_show_edit_post_panel',
-          'page' );
-  } else {
-     add_action('dbx_post_sidebar', 'tdomf_show_edit_post_panel');
-     add_action('dbx_page_sidebar', 'tdomf_show_edit_post_panel');
+  global $post;
+  // don't show on new post/page
+  if($post->ID > 0) {
+      $edit_count = tdomf_get_edits(array('post_id' => $post->ID, 'count' => true));
+      // Wordpress 2.5 introduced add_meta_box
+      if(function_exists('add_meta_box')) {
+         add_meta_box(
+              'tdomf',
+              __('TDO Mini Forms', 'tdomf'),
+              'tdomf_show_edit_post_panel',
+              'post' );
+         add_meta_box(
+              'tdomf',
+              __('TDO Mini Forms', 'tdomf'),
+              'tdomf_show_edit_post_panel',
+              'page' );
+         if($edit_count > 0) {
+             add_meta_box(
+                  'tdomf_revisions',
+                  __('TDO Mini Forms Revisions', 'tdomf'),
+                  'tdomf_show_edit_post_revision_panel',
+                  'post' );
+             add_meta_box(
+                  'tdomf_revisions',
+                  __('TDO Mini Forms Revisions', 'tdomf'),
+                  'tdomf_show_edit_post_revision_panel',
+                  'page' );       
+         }
+      } else {
+         add_action('dbx_post_sidebar', 'tdomf_show_edit_post_panel');
+         add_action('dbx_page_sidebar', 'tdomf_show_edit_post_panel');
+         if($edit_count > 0) {
+             add_action('dbx_post_sidebar', 'tdomf_show_edit_post_revision_panel');
+             add_action('dbx_page_sidebar', 'tdomf_show_edit_post_revision_panel');
+         }
+      }
   }
 }
 add_action( 'admin_head', 'tdomf_edit_post_panel_admin_head' );
+
+
+function tdomf_show_edit_post_revision_panel() {
+    global $post;
+    
+    // don't show on new post
+    if($post->ID > 0) {
+        $edits = tdomf_get_edits(array('post_id' => $post->ID));
+        if(count($edits) > 0) {
+            echo "<ul class='post-revisions'>\n";
+             foreach($edits as $edit) {
+                echo "<li>";
+                
+                // actual revision
+                if($edit->revision_id != 0) {
+                    echo '<a href="'.get_bloginfo('wpurl').'/wp-admin/revision.php?revision='.$edit->revision_id.'">';
+                }
+                echo mysql2date(__('d F, Y @ H:i'), $edit->date_gmt);
+                if($edit->revision_id != 0) {
+                    echo '</a>';
+                }     
+                
+                // status
+                if($edit->state == 'unapproved') {
+                      _e(' [Pending]',"tdomf");
+                } else if($edit->state == 'spam') {
+                      _e(' [Spam]',"tdomf");
+                }
+                
+                // user  
+                echo _e(' by ','tdomf');
+                $name = __("N/A","tdomf");
+                if(isset($edit->data[TDOMF_KEY_NAME])) {
+                   $name = $ledit->data[TDOMF_KEY_NAME];
+                }
+                $email = __("N/A","tdomf");
+                if(isset($edit->data[TDOMF_KEY_EMAIL])) {
+                   $email = $edit->data[TDOMF_KEY_EMAIL];
+                }
+                  
+                if($edit->user_id != 0) { ?>
+                 <a href="user-edit.php?user_id=<?php echo $edit->user_id;?>" class="edit">
+                 <?php $u = get_userdata($edit->user_id);
+                       echo $u->user_login; ?></a>
+                 <?php } else if(!empty($name) && !empty($email)) {
+                       echo $name." (".$email.")";
+                       } else if(!empty($name)) {
+                   echo $name;
+                 } else if(!empty($email)) {
+                   echo $email;
+                 } else {
+                   _e("N/A","tdomf");
+                 }
+                
+                // form
+                if(tdomf_form_exists($edit->form_id) != false) {
+                 $form_edit_url = "admin.php?page=tdomf_show_form_options_menu&form=$edit->form_id";
+                 $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$edit->form_id);
+                 _e(' using ','tdomf');
+                 echo '<a href="'.$form_edit_url.'">'.sprintf(__('Form #%d: %s','tdomf'),$edit->form_id,$form_name).'</a>';
+                }
+                
+                // ip
+                echo ' ('.$edit->ip.')'; 
+                
+                echo "</li>";
+            }
+            echo "</ul>\n";
+        }
+    }
+}
 
 
 //
@@ -148,13 +240,13 @@ function tdomf_show_edit_post_panel() {
 
      <?php if(!function_exists('add_meta_box')) { ?>
         <fieldset class="dbx-box">
-        <h3 id="posttdomf" class="dbx-handle"><?php _e('TDOMF', "tdomf"); ?></h3>
+        <h3 id="posttdomf" class="dbx-handle"><?php _e('TDO Mini Forms', "tdomf"); ?></h3>
                 <div class="dbx-content">
      <?php } ?>                
                 <fieldset>
                 <legend>
                 <input id="tdomf_flag" type="checkbox" name="tdomf_flag" <?php if($tdomf_flag){ ?>checked<?php } ?> <?php if(!$can_edit){ ?> disabled <?php } ?> onClick="tdomf_update_panel();" />
-                <label for="tdomf_flag"><?php _e("Managed by TDOMF","tdomf"); ?></label>
+                <label for="tdomf_flag"><?php _e("Include in TDO Mini Forms Moderation","tdomf"); ?></label>
                 </legend>
 
                 <br/>
@@ -243,7 +335,7 @@ function tdomf_show_edit_post_panel() {
                 <br/><br/>
 
                 <?php if($is_spam) { ?>
-                    <span style="color:red;font-size:larger;"><?php _e("Akismet thinks this post is spam!",'tdomf'); ?></span>
+                    <span style="color:red;font-size:larger;"><?php _e("Akismet thinks this submission is spam!",'tdomf'); ?></span>
                 <?php } ?>
               
                 <?php if(!empty($submitter_ip)) { ?>

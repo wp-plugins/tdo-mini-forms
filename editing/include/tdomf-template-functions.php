@@ -303,7 +303,7 @@ function tdomf_ajaxeditforms_action() {
       if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id) && 
          tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id) && 
          (is_page() || is_single())) {
-         if(tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
+         if(tdomf_check_permissions_form($form_id->form_id,$post_ID,false) == NULL) {
              $forms [] = array( 'name' => '#tdomf_form'.$form_id->form_id . '_' . $post_ID,
                                 'form' => tdomf_get_the_form($form_id->form_id,$post_ID) );
          }
@@ -332,7 +332,7 @@ function tdomf_ajaxeditscripts_action() {
       if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id) && 
          tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id->form_id) && 
          (is_page() || is_single())) {
-         if(tdomf_check_permissions_form($form_id->form_id,$post_ID) == NULL) {
+         if(tdomf_check_permissions_form($form_id->form_id,$post_ID,false) == NULL) {
              $form_tag = $form_id->form_id . '_' . $post_ID;
              
              /* 

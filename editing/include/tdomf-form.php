@@ -9,7 +9,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // Checks if current user/ip has permissions to post!
 //
-function tdomf_check_permissions_form($form_id = 1, $post_id = false) {
+function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pending_edits = true) {
    global $current_user, $wpdb, $wp_roles;
 
    get_currentuserinfo();
@@ -171,17 +171,18 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false) {
           }
       }
       
-            
-      // If a post has a spam or unapproved edit, don't edit any more
-      //
-      $last_edit = tdomf_get_edits(array('post_id' => $post_id, 'limit' => 1));
-      if(!empty($last_edit)) {
-          if($last_edit[0]->state == 'unapproved') {
-              tdomf_log_message("Post with id $post_id has an unapproved edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
-              return tdomf_get_message_instance(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id);
-          } else if($last_edit[0]->state == 'spam') {
-              tdomf_log_message("Post with id $post_id has a spam edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
-              return tdomf_get_message_instance(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id);
+      if($check_pending_edits) {
+          // If a post has a spam or unapproved edit, don't edit any more
+          //
+          $last_edit = tdomf_get_edits(array('post_id' => $post_id, 'limit' => 1));
+          if(!empty($last_edit)) {
+              if($last_edit[0]->state == 'unapproved') {
+                  tdomf_log_message("Post with id $post_id has an unapproved edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id);
+              } else if($last_edit[0]->state == 'spam') {
+                  tdomf_log_message("Post with id $post_id has a spam edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id);
+              }
           }
       }
   }
@@ -457,7 +458,9 @@ function tdomf_update_post($form_id,$mode,$args) {
 
    $post_id = intval($args['tdomf_post_id']);
 
-   $returnVal = $post_id; 
+   // set initially to post_id
+   
+   $returnVal = intval($post_id); 
    
    // hook already performed by tdomf_create_post
    
@@ -530,7 +533,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    
    // store information about edit
    
-   if($returnVal == $post_id)
+   if(is_int($returnVal))
    {
        $edit_revision_id = 0;
        $edit_current_revision_id = 0;
@@ -564,6 +567,8 @@ function tdomf_update_post($form_id,$mode,$args) {
        
        if($edit_id == 0) {
            // error! do something
+       } else {
+           $returnVal = intval($edit_id);
        }
    }
    
@@ -603,7 +608,7 @@ function tdomf_update_post($form_id,$mode,$args) {
      $returnVal = "<font color='red'>$message</font>\n";
    }
 
-   if($returnVal == $post_id) 
+   if(is_int($returnVal)) 
    {
        $send_moderator_email = true;
        if(tdomf_check_edit_spam($edit_id,true)) {
@@ -648,7 +653,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    
    // in case of error, delete revision as there is no point keeping it
    //
-   if($returnVal != $post_id) {
+   if(!is_int($returnVal)) {
        if($revision_id)  {
            tdomf_log_message("There were errors, delete revision $revision_id");
            wp_delete_revision($revision_id);
@@ -961,8 +966,8 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
   
   $form_data = tdomf_get_form_data($form_id);
   
-  // do we need post_id, and if not set, set it
-  
+  // do we need post_id, and if so set it
+
   if($edit && !$post_id) {
       if(isset($form_data['tdomf_post_id'])) {
           $post_id = $form_data['tdomf_post_id'];
@@ -971,11 +976,15 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
       }
   }
   
-  // now check if you can use the form or edit the post
+  // @todo we want to check if we can edit the post, but 
+  // we do not care about 'pending edits', if we're in the process of editing
+  // an post already! - i.e. acknowledgement screen
   
-  $form = tdomf_check_permissions_form($form_id,$post_id);
-  if($form != NULL) {
-    return $form;
+  if(!$hack) {
+      $form = tdomf_check_permissions_form($form_id,$post_id,empty($form_data));
+      if($form != NULL) {
+        return $form;
+      }
   }
 
   do_action('tdomf_generate_form_start',$form_id,$mode);

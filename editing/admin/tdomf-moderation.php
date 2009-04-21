@@ -635,7 +635,7 @@ function tdomf_show_mod_posts_menu() {
               <?php } else { 
                  $form_edit_url = "admin.php?page=tdomf_show_form_options_menu&form=$form_id";
                  $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id);
-                 echo '<a href="'.$form_edit_url.'">'.sprintf(__('Form #%d: %s</a>','tdomf'),$form_id,$form_name).'</a>';
+                 echo '<a href="'.$form_edit_url.'">'.sprintf(__('Form #%d: %s','tdomf'),$form_id,$form_name).'</a>';
                     } ?>
          </li>
          <li><?php echo mysql2date(__('Y/m/d'), $last_edit->date_gmt); ?></li>
