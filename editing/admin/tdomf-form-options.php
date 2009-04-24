@@ -691,8 +691,14 @@ function tdomf_show_form_options($form_id) {
         <?php $edit_restrict_cats = tdomf_get_option_form(TDOMF_OPTION_EDIT_RESTRICT_CATS,$form_id); 
               if(!is_array($edit_restrict_cats)){ $edit_restrict_cats = ""; }
               else { $edit_restrict_cats = join(",",$edit_restrict_cats); } ?>        
-        <br/>
+                
+        <?php $edit_page_form = tdomf_get_option_form(TDOMF_OPTION_EDIT_PAGE_FORM,$form_id); ?>
+        <input type="checkbox" name="tdomf_edit_page_form" id="tdomf_edit_page_form" <?php if($edit_page_form){ ?>checked<?php } ?> >
+        <label for="tdomf_edit_tdomf_only"><?php _e("Allow editing of pages (or posts) that contain TDO-Mini-Form forms","tdomf"); ?></label>
         
+        <br/><br/>
+        
+               
         <label for="tdomf_edit_cats">
         <?php _e("Restrict editing to posts in these categories only:","tdomf"); ?><br/>
         <small><?php _e("(List category ids seperated by a comma)","tdomf"); ?><br/></small>
@@ -780,7 +786,7 @@ function tdomf_show_form_options($form_id) {
         
        </p>
     
-    </div> <!-- form_new -->
+    </div> <!-- form_edit -->
     
     <div id="form_moderation">
 
@@ -1195,6 +1201,11 @@ function tdomf_handle_form_options_actions() {
           $edit_form = true;
       }
       tdomf_set_option_form(TDOMF_OPTION_FORM_EDIT,$edit_form,$form_id);
+      
+      // Allow pages with forms to be editted
+      
+      $edit_page_form = isset($_REQUEST['tdomf_edit_page_form']);
+      tdomf_set_option_form(TDOMF_OPTION_EDIT_PAGE_FORM,$edit_page_form,$form_id);
       
       // Allow authors to edit
       

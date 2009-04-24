@@ -162,6 +162,8 @@ function tdomf_show_edit_post_panel() {
     $is_tdomf = true;
   }
 
+  $locked = get_post_meta($post->ID, TDOMF_KEY_LOCK, true);
+  
   $submitter_id = get_post_meta($post->ID, TDOMF_KEY_USER_ID, true);
 
   $submitter_ip = get_post_meta($post->ID, TDOMF_KEY_IP, true);
@@ -179,7 +181,7 @@ function tdomf_show_edit_post_panel() {
 ?>
          <script type="text/javascript">
          //<![CDATA[
-         function tdomf_ajax_edit_post( flag, is_user, user, name, email, web )
+         function tdomf_ajax_edit_post( flag, is_user, user, name, email, web, locked )
          {
            var mysack = new sack( "<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
            mysack.execute = 1;
@@ -187,6 +189,7 @@ function tdomf_show_edit_post_panel() {
            mysack.setVar( "action", "tdomf_edit_post" );
            mysack.setVar( "post_ID", "<?php echo $post->ID; ?>" );
            mysack.setVar( "tdomf_flag", flag.checked );
+           mysack.setVar( "tdomf_locked", locked.checked );
            if(is_user.checked) {
               mysack.setVar( "tdomf_user", user.value);
            } else {
@@ -244,12 +247,18 @@ function tdomf_show_edit_post_panel() {
                 <div class="dbx-content">
      <?php } ?>                
                 <fieldset>
+                
                 <legend>
                 <input id="tdomf_flag" type="checkbox" name="tdomf_flag" <?php if($tdomf_flag){ ?>checked<?php } ?> <?php if(!$can_edit){ ?> disabled <?php } ?> onClick="tdomf_update_panel();" />
                 <label for="tdomf_flag"><?php _e("Include in TDO Mini Forms Moderation","tdomf"); ?></label>
                 </legend>
 
                 <br/>
+                
+                <input id="tdomf_locked" type="checkbox" name="tdomf_locked" <?php if($tdomf_locked){ ?>checked<?php } ?> <?php if(!$can_edit){ ?> disabled <?php } ?> onClick="tdomf_update_panel();" />
+                <label for="tdomf_locked"><?php _e('Disable Editing by TDO Mini Form Forms','tdomf'); ?></label>
+                
+                <br/><br/>
                                 
                 <?php if(!empty($submitter_id) && $submitter_id == get_option(TDOMF_DEFAULT_AUTHOR)) { ?>
                   <span style="color:red;font-size:larger;"><?php _e('The submitter of this post is set as the "default user"! Please correct!','tdomf'); ?></span>
@@ -347,7 +356,7 @@ function tdomf_show_edit_post_panel() {
                 printf(__("Submitted from Form %d.","tdomf"),$form_id); } ?>
                 </fieldset>
 
-                 <p><input type="button" value="<?php _e("Update &raquo;","tdomf"); ?>" onclick="tdomf_ajax_edit_post(this.form.tdomf_flag, tdomf_submitter_is_user, tdomf_submitter_user, tdomf_submitter_name, tdomf_submitter_email, tdomf_submitter_web);" />
+                 <p><input type="button" value="<?php _e("Update &raquo;","tdomf"); ?>" onclick="tdomf_ajax_edit_post(this.form.tdomf_flag, tdomf_submitter_is_user, tdomf_submitter_user, tdomf_submitter_name, tdomf_submitter_email, tdomf_submitter_web, this.form.tdomf_locked);" />
 
      <?php if(!function_exists('add_meta_box')) { ?>
                 </div>
@@ -366,6 +375,16 @@ add_action('wp_ajax_tdomf_edit_post', 'tdomf_save_post');
 //
 function tdomf_save_post() {
     $post_id = (int) $_POST['post_ID'];
+    
+    if($_POST['tdomf_locked'] == "false") {
+        delete_post_meta($post_id, TDOMF_KEY_LOCK);
+        tdomf_log_message("Post $post_id is now set to unlocked. Post can be edited by valid TDO Mini Form forms.");
+    } else {
+        tdomf_log_message("Post $post_id is now set to locked. Post cannot be edited by any TDO Mini Form forms.");
+        delete_post_meta($post_id, TDOMF_KEY_LOCK);
+        add_post_meta($post_id, TDOMF_KEY_LOCK, true, true);
+    }
+    
     if($_POST['tdomf_flag'] == "false") {
       delete_post_meta($post_id, TDOMF_KEY_FLAG);
       tdomf_log_message("Removed post $post_id from TDOMF");
@@ -384,7 +403,7 @@ function tdomf_save_post() {
          delete_post_meta($post_id, TDOMF_KEY_USER_ID);
          add_post_meta($post_id, TDOMF_KEY_USER_ID, $user_id, true);
          tdomf_log_message("Submitter info for post $post_id added");
-         die("alert('".sprintf(__('TDOMF: Submitter info for post %d updated','tdomf'),$post_id)."')");
+         die("alert('".sprintf(__('TDOMF: TDO Mini Forms info for post %d updated','tdomf'),$post_id)."')");
       } else {
         // do this so that we *know* that submitter user is not used
         delete_post_meta($post_id, TDOMF_KEY_USER_ID);
@@ -398,7 +417,7 @@ function tdomf_save_post() {
         delete_post_meta($post_id, TDOMF_KEY_WEB);
         add_post_meta($post_id, TDOMF_KEY_WEB, $web, true);
         tdomf_log_message("Submitter info for post $post_id added");
-        die("alert('".sprintf(__('TDOMF: Submitter info for post %d updated','tdomf'),$post_id)."')");
+        die("alert('".sprintf(__('TDOMF: TDO Mini Forms info for post %d updated','tdomf'),$post_id)."')");
       }
   }
   tdomf_log_message("Error captured in EditPostPanel:tdomf_save_post");

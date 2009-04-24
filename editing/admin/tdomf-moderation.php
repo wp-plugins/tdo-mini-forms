@@ -346,6 +346,8 @@ function tdomf_show_mod_posts_menu() {
    $bulk_sub_unpublish = false;
    $bulk_sub_spamit = false;
    $bulk_sub_hamit = false;
+   $bulk_sub_lock = false;
+   $bulk_sub_unlock = false;
    $bulk_edit_approve = false;
    $bulk_edit_revert = false;
    $bulk_edit_delete = false;
@@ -482,6 +484,7 @@ function tdomf_show_mod_posts_menu() {
         <?php $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
               if($queue > 0) { $queue = true; } else { $queue = false; } ?>
         <?php $is_spam = get_post_meta($p->ID, TDOMF_KEY_SPAM); ?>
+        <?php $locked = get_post_meta($post->ID, TDOMF_KEY_LOCK, true); ?>
 
         <tr id='post-<?php echo $p->ID; ?>' class='<?php if(($count%2) != 0) { ?>alternate <?php } ?>status-<?php echo $post->post_status; ?> iedit' valign="top">
 
@@ -541,6 +544,11 @@ function tdomf_show_mod_posts_menu() {
                <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'unpublish', 'post_id' => $p->ID, 'nonce' => 'tdomf-unpublish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Set submission to draft/unmoderated status.','tdomf')); ?>"><?php _e('Un-publish','tdomf'); ?></a> |</span>
            <?php } ?>
            <span class='delete'><a class='submitdelete' title='Delete this submission' href='<?php echo wp_nonce_url("post.php?action=delete&amp;post=$p->ID", 'delete-post_' . $p->ID); ?>' onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to delete this post \'%s\'\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Delete','tdomf'); ?></a> | </span>
+           <?php if($locked) { $bulk_sub_unlock = true; ?>
+               <span class="lock"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'unlock', 'post_id' => $p->ID, 'nonce' => 'tdomf-unlock_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Unlock submission so it can be edited.','tdomf')); ?>"><?php _e('Unlock','tdomf'); ?></a> |</span>
+           <?php } else { $bulk_sub_lock = true; ?>
+               <span class="lock"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'lock', 'post_id' => $p->ID, 'nonce' => 'tdomf-lock_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Lock submission from being edited.','tdomf')); ?>"><?php _e('Lock','tdomf'); ?></a> |</span>               
+           <?php } ?>
            <?php if($post->post_status == 'publish') { ?>
             <span class='view'><a href="<?php echo get_permalink($p->ID); ?>" title="<?php echo htmlentities(sprintf(__('View \'%s\'','tdomf'),$post->post_title)); ?>" rel="permalink"><?php _e('View','tdomf'); ?></a> | </span>
            <?php } else { ?>
@@ -664,18 +672,18 @@ function tdomf_show_mod_posts_menu() {
            <?php if($last_edit->state != 'approved') { ?>
               <span class='view'><a href="revision.php?revision=<?php echo $last_edit->revision_id; ?>"><?php _e('View','tdomf'); ?></a> |<span>
            <?php }?> 
-           <?php if($last_edit->state == 'approved') { ?>
+           <?php if($last_edit->state == 'approved') { $bulk_edit_revert = true; ?>
               <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'revert_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-revert_edit_' . $last_edit->edit_id)) ?>"><?php _e('Revert','tdomf'); ?></a> | </span>
-           <?php } else if($last_edit->state == 'unapproved' || $last_edit->state == 'spam') { ?>
+           <?php } else if($last_edit->state == 'unapproved' || $last_edit->state == 'spam') {  $bulk_edit_delete = true;  $bulk_edit_approve = true; ?>
                <span class="delete"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'delete_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-delete_edit_' . $last_edit->edit_id)) ?>"><?php _e('Delete','tdomf'); ?></a> | </span>
                <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'approve_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-approve_edit_' . $last_edit->edit_id)) ?>"><?php _e('Approve','tdomf'); ?></a> | </span>
            <?php } ?>
         <span class="edit"><a href="revision.php?action=diff&right=<?php echo $last_edit->revision_id; ?>&left=<?php echo $last_edit->current_revision_id; ?>"><?php _e('Compare','tdomf'); ?>
         <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>           
         <?php if(get_option(TDOMF_OPTION_SPAM)) { 
-                 if($last_edit->state == 'spam') { ?>
+                 if($last_edit->state == 'spam') {  $bulk_edit_hamit = true; ?>
              <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'hamit_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-hamit_edit_' . $last_edit->edit_id)) ?>" title="<?php echo htmlentities(__('Flag contributation as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
-         <php    } else { ?>
+         <php    } else {  $bulk_edit_spamit = true; ?>
               <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'spamit_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-spamit_edit_' . $last_edit->edit_id)) ?>" title="<?php echo htmlentities(__('Flag contributation as being spam','tdomf')); ?>" onclick="if ( confirm('<?php echo js_escape(__("You are about to flag this contribution as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf')); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
         <?php    } }?>
         
@@ -689,10 +697,10 @@ function tdomf_show_mod_posts_menu() {
         
          <td class="status column-status">
          <!-- todo take into account edited status -->
-         <?php if($is_spam && $p->post_status == 'draft') { ?>
+         <?php if($is_spam && $post->post_status == 'draft') { ?>
                       <?php _e('Spam',"tdomf"); ?>
                    <?php } else { 
-                       switch($p->post_status) {
+                       switch($post->post_status) {
                            case 'draft':
                               _e('Draft',"tdomf");
                               break;
@@ -703,10 +711,11 @@ function tdomf_show_mod_posts_menu() {
                                _e('Scheduled',"tdomf");
                                break;
                            default:
-                               echo _e($p->post_status,"tdomf");
+                               echo _e($post->post_status,"tdomf");
                                break;
                        }
-                       if($is_spam) { _e(' (Spam)',"tdomf"); } 
+                       if($is_spam) { _e(' (Spam)',"tdomf"); }
+                       if($locked) { _e(' [Locked]','tdomf'); }
                    } ?>
          </td>
     <?php } ?>
@@ -721,13 +730,7 @@ function tdomf_show_mod_posts_menu() {
 if ( $page_links )
 	echo "<div class='tablenav-pages'>$page_links_text</div>";
 ?>
-
-    <!-- Approve Edit
-         Revert Last Edit
-         Flag Edit as Spam
-         Flag Edit as Not Spam
-         Recheck Edits for Spam -->
-
+         
 <?php 
 if(count($posts) > 0) { 
 ?>
@@ -735,23 +738,47 @@ if(count($posts) > 0) {
     <select name="action">
     <option value="-1" selected="selected"><?php _e('Bulk Actions'); ?></option>
     <?php if($bulk_sub_publish_now) { ?>
-       <option value="publish_now"><?php _e('Publish Submission (Now)','tdomf'); ?></option>
+       <option value="publish_now"><?php _e('Publish Submissions (Now)','tdomf'); ?></option>
     <?php } ?>
     <?php if($bulk_sub_publish) { ?>
-       <option value="publish"><?php _e('Publish/Queue Submission','tdomf'); ?></option>
+       <option value="publish"><?php _e('Publish/Queue Submissions','tdomf'); ?></option>
     <?php } ?>
     <?php if($bulk_sub_unpublish) { ?>
-       <option value="unpublish"><?php _e('Un-publish Submission','tdomf'); ?></option>
+       <option value="unpublish"><?php _e('Un-publish Submissions','tdomf'); ?></option>
     <?php } ?>
-    <option value="delete"><?php _e('Delete Submission','tdomf'); ?></option>
+    <option value="delete"><?php _e('Delete Submissions','tdomf'); ?></option>
+    <?php if($bulk_sub_unlock) { ?>
+        <option value="unlock"><?php _e('Unlock Submissions','tdomf'); ?></option>
+    <?php } ?>
+    <?php if($bulk_sub_lock) { ?>
+        <option value="lock"><?php _e('Lock Submissions','tdomf'); ?></option>
+    <?php } ?>
     <?php if($bulk_sub_spamit) { ?>
-       <option value="spamit"><?php _e('Mark Submission as Spam','tdomf'); ?></option>
+       <option value="spamit"><?php _e('Mark Submissions as Spam','tdomf'); ?></option>
     <?php } ?>
     <?php if($bulk_sub_hamit) { ?>
-       <option value="hamit"><?php _e('Mark Submission as Not Spam','tdomf'); ?></option>
+       <option value="hamit"><?php _e('Mark Submissions as Not Spam','tdomf'); ?></option>
     <?php } ?>
     <?php if($bulk_sub_hamit || $bulk_sub_spamit) { ?>
        <option value="spam_recheck"><?php _e('Recheck Submssions for Spam','tdomf'); ?></option>
+    <?php } ?>
+    <?php if($bulk_edit_approve) { ?>
+        <option value="edit_approve"><?php _e('Approve Edits','tdomf'); ?></option>
+    <?php } ?>
+    <?php if($bulk_edit_revert) { ?>
+        <option value="edit_revert"><?php _e('Revert Edits','tdomf'); ?></option>
+    <?php } ?>   
+    <?php if($bulk_edit_delete) { ?>
+        <option value="edit_delete"><?php _e('Delete Edits','tdomf'); ?></option>
+    <?php } ?>     
+    <?php if($bulk_edit_spamit) { ?>
+        <option value="edit_spamit"><?php _e('Mark Edits as Spam','tdomf'); ?></option>
+    <?php } ?>     
+    <?php if($bulk_edit_hamit) { ?>
+        <option value="edit_hamit"><?php _e('Mark Edits as not Spam','tdomf'); ?></option>
+    <?php } ?>     
+    <?php if($bulk_edit_hamit || $bulk_edit_spamit) { ?>
+       <option value="edit_spam_recheck"><?php _e('Recheck Edits for Spam','tdomf'); ?></option>
     <?php } ?>
     </select>
     <input type="submit" value="<?php _e('Apply'); ?>" name="doaction" id="doaction" class="button-secondary action" />
@@ -875,7 +902,7 @@ function tdomf_moderation_handler() {
 
                $spams = array();
                foreach($posts as $p) {
-                  if(!get_post_meta($post, TDOMF_KEY_SPAM)) {
+                  if(!get_post_meta($p, TDOMF_KEY_SPAM)) {
                      tdomf_spam_post($p);
                      $spams [] = $p;
                   }
@@ -888,7 +915,7 @@ function tdomf_moderation_handler() {
 
                $hams = array();
                foreach($posts as $p) {
-                   if(get_post_meta($post, TDOMF_KEY_SPAM)) {
+                   if(get_post_meta($p, TDOMF_KEY_SPAM)) {
                        tdomf_spam_post($p);
                        $hams [] = $p;
                    }
@@ -898,6 +925,161 @@ function tdomf_moderation_handler() {
                  $message .= sprintf(__("Marked these submissions as not spam: %s","tdomf"),implode(", ", $hams));
                }
                break;
+            
+            case 'lock' :
+
+               $locks = array();
+               foreach($posts as $p) {
+                   if(!get_post_meta($p, TDOMF_KEY_LOCK)) {
+                       add_post_meta($p, TDOMF_KEY_LOCK, true, true);
+                       $locks [] = $p;
+                   }
+               }
+               if(!empty($locks)) {
+                 tdomf_log_message("Locked " .  implode(", ", $locks) . " posts");
+                 $message .= sprintf(__("Locked these posts/pages from editing: %s","tdomf"),implode(", ", $locks));
+               }
+               break;
+           
+             case 'unlock' :
+
+               $locks = array();
+               foreach($posts as $p) {
+                   if(get_post_meta($p, TDOMF_KEY_LOCK)) {
+                       delete_post_meta($p, TDOMF_KEY_LOCK);
+                       $locks [] = $p;
+                   }
+               }
+               if(!empty($locks)) {
+                 tdomf_log_message("Unlocked " .  implode(", ", $locks) . " posts");
+                 $message .= sprintf(__("Unlocked these posts/pages: %s","tdomf"),implode(", ", $locks));
+               }
+               break;
+            
+             case 'edit_spam_recheck' :
+                $spam_list = array();
+                $ham_list = array();
+                $edit_spam_list = array();
+                $edit_ham_list = array();
+                foreach($posts as $post) {
+                    
+                   $last_edit = tdomf_get_edits(array('post_id' => $post, 'limit' => 1));
+                   if($last_edit != false && !empty($last_edit)) {
+                       if(tdomf_check_edit_spam($last_edit[0]->edit_id,false)) {
+                           $ham_list [] = $post;
+                           $edit_ham_list [] = $last_edit[0]->edit_id;
+                       } else {
+                           $spam_list [] = $post;
+                           $edit_spam_list [] = $last_edit[0]->edit_id;
+                       }
+                    }
+                }
+                tdomf_log_message('Akismet thinks these edits are spam: ' .implode(", ", $edit_spam_list) );
+                $message .= sprintf(__("Marked last contribution on these submissions as spam: %s.","tdomf"),implode(", ", $spam_list));
+                tdomf_log_message('Akismet thinks these edits are not spam: ' .implode(", ", $edit_ham_list) );
+                $message .= " ";
+                $message .= sprintf(__("Marked last contribution on these submissions as not spam: %s.","tdomf"),implode(", ", $ham_list));
+                break;
+               
+            case 'edit_approve':
+                
+                $edit_list = array();
+                $post_list = array();
+                foreach($posts as $post) {
+                   $last_edit = tdomf_get_edits(array('post_id' => $post, 'limit' => 1));
+                   if(!empty($last_edit) && $last_edit[0]->state != 'approved') {
+                       $edit_list [] = $last_edit[0]->edit_id;
+                       $post_list [] = $post;
+                       if($last_edit[0]->state == 'spam') {
+                           tdomf_hamit_edit($last_edit[0]);
+                       }
+                       wp_restore_post_revision($edit->revision_id);
+                       tdomf_set_state_edit('approved',$last_edit[0]->edit_id);
+                   }
+                }
+                tdomf_log_message('These edits have been approved: ' .implode(", ", $edit_list) );
+                $message .= sprintf(__("Approved contributions on these submissions: %s.","tdomf"),implode(", ", $post_list));
+                break;
+                
+            case 'edit_revert':
+                
+                $edit_list = array();
+                $post_list = array();
+                foreach($posts as $post) {
+                   $last_edit = tdomf_get_edits(array('post_id' => $post, 'limit' => 1));
+                   
+                   if(!empty($last_edit) && $last_edit[0]->state == 'approved' 
+                       && $last_edit[0]->revision_id != 0
+                       && $last_edit[0]->current_revision_id != 0) {
+                       $edit_list [] = $last_edit[0]->edit_id;
+                       $post_list [] = $post;
+                       wp_restore_post_revision($last_edit[0]->current_revision_id);
+                       tdomf_set_state_edit('unapproved',$last_edit[0]->edit_id);
+                   }
+                   
+                }
+                tdomf_log_message('These edits have been reverted: ' .implode(", ", $edit_list) );
+                $message .= sprintf(__("Latest contribution on these submissions have been reverted: %s.","tdomf"),implode(", ", $post_list));
+                break;
+                
+            case 'edit_delete':
+                
+                $edit_list = array();
+                $post_list = array();
+                foreach($posts as $post) {
+                   $last_edit = tdomf_get_edits(array('post_id' => $post, 'limit' => 1));
+                   
+                   if(!empty($last_edit) && $last_edit[0]->state != 'approved') {
+                       $edit_list [] = $last_edit[0]->edit_id;
+                       $post_list [] = $post;
+                       if($last_edit[0]->revision_id != 0) {
+                           wp_delete_post_revision( $edit->revision_id );
+                           tdomf_log_message("Deleting revision " . $last_edit[0]->revision_id ." on post " . $post);
+                       }
+                       if($last_edit[0]->current_revision_id != 0) {
+                           wp_delete_post_revision( $last_edit[0]->current_revision_id );
+                           tdomf_log_message("Deleting revision " . $last_edit[0]->current_revision_id . " on post " . $post);
+                       }
+                   }
+                   tdomf_delete_edits($edit_list);
+                }
+                tdomf_log_message('These edits have been deleted: ' .implode(", ", $edit_list) );
+                $message .= sprintf(__("Latest contribution on these submissions have been deleted: %s.","tdomf"),implode(", ", $post_list));
+                
+                break;
+            case 'edit_spamit':
+                
+                $edit_list = array();
+                $post_list = array();
+                foreach($posts as $post) {
+                   $last_edit = tdomf_get_edits(array('post_id' => $post, 'limit' => 1));
+                   if(!empty($last_edit) && $last_edit[0]->state != 'spam') {
+                       $edit_list [] = $last_edit[0]->edit_id;
+                       $post_list [] = $post;
+                       tdomf_spamit_edit($last_edit[0]);
+                   }
+                }
+                tdomf_log_message('These edits have been marked as spam: ' .implode(", ", $edit_list) );
+                $message .= sprintf(__("Latest contribution on these submissions have been marked as spam: %s.","tdomf"),implode(", ", $post_list));
+                
+                break;
+                
+            case 'edit_hamit':
+                
+                $edit_list = array();
+                $post_list = array();
+                foreach($posts as $post) {
+                   $last_edit = tdomf_get_edits(array('post_id' => $post, 'limit' => 1));
+                   if(!empty($last_edit) && $last_edit[0]->state == 'soam') {
+                       $edit_list [] = $last_edit[0]->edit_id;
+                       $post_list [] = $post;
+                       tdomf_hamit_edit($last_edit[0]);
+                   }
+                }
+                tdomf_log_message('These edits have been marked as not spam: ' .implode(", ", $edit_list) );
+                $message .= sprintf(__("Latest contribution on these submissions have been marked as not being spam: %s.","tdomf"),implode(", ", $post_list));
+                
+                break;
                
             default :
                 tdomf_log_message('Unexpected bulk action ' . $action . ' in moderation screen!',TDOMF_LOG_BAD);
@@ -947,7 +1129,7 @@ function tdomf_moderation_handler() {
          tdomf_log_message("Post $post_id submitted as spam");
          $message .= sprintf(__("Post %d flagged as spam","tdomf"),$post_id);
       } else {
-         $message .= sprintf(__("Did not flag post %d as being spam as it is already flagged appropriately,","tdomf"),$post_id);
+         $message .= sprintf(__("Did not flag post %d as being spam as it is already flagged appropriately.","tdomf"),$post_id);
       }
       
    } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'hamit') {
@@ -959,9 +1141,31 @@ function tdomf_moderation_handler() {
          tdomf_log_message("Post $post_id submitted as ham");
          $message .= sprintf(__("Post %d flagged as not being spam","tdomf"),$post_id);
       } else {
-         $message .= sprintf(__("Did not flag post %d as not being spam as it is already flagged appropriately,","tdomf"),$post_id);
+         $message .= sprintf(__("Did not flag post %d as not being spam as it is already flagged appropriately.","tdomf"),$post_id);
       }
 
+   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'lock') {
+       
+      $post_id = $_REQUEST['post'];
+      check_admin_referer('tdomf-lock_'.$post_id);
+      if(!get_post_meta($post_id, TDOMF_KEY_LOCK)) {
+         add_post_meta($post_id, TDOMF_KEY_LOCK, true, true);
+         tdomf_log_message("Post $post_id locked");
+         $message .= sprintf(__("Post %d is now locked from editing","tdomf"),$post_id);
+      } else {
+         $message .= sprintf(__("Post %d is already locked from editing.","tdomf"),$post_id);
+      }
+   } else if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'unlock') {
+       
+      $post_id = $_REQUEST['post'];
+      check_admin_referer('tdomf-unlock_'.$post_id);
+      if(get_post_meta($post_id, TDOMF_KEY_LOCK)) {
+         delete_post_meta($post_id, TDOMF_KEY_LOCK);
+         tdomf_log_message("Post $post_id unlocked");
+         $message .= sprintf(__("Post %d is now unlocked.","tdomf"),$post_id);
+      } else {
+         $message .= sprintf(__("Post %d is already unlocked.","tdomf"),$post_id);
+      }
    }
    
    // operations on edits (contributions)

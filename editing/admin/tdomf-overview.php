@@ -152,15 +152,19 @@ function tdomf_overview_menu()  {
     	  <h3><?php _e('Stats', 'tdomf'); ?></h3>
 
           <?php $stat_sub_ever  = get_option(TDOMF_STAT_SUBMITTED);
+                $stat_edit_ever = get_option(TDOMF_STAT_EDITED);
                 $stat_unmod     = tdomf_get_unmoderated_posts_count();
+                $stat_edit_unmod  = tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true));
                 $stat_sub_cur   = tdomf_get_submitted_posts_count();
-                $stat_mod       = $stat_sub_cur - $stat_unmod; 
+                $stat_edit_cur  = tdomf_get_edits(array('count' => true, 'unique_post_ids' => true));
+                $stat_mod       = $stat_sub_cur - $stat_unmod;
+                $stat_edit_mod  = tdomf_get_edits(array('state' => 'approved', 'count' => true, 'unique_post_ids' => true)); 
                 $stat_spam      = get_option(TDOMF_STAT_SPAM); ?>
 
           <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
-              <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved. %d spam submissions have been caught by Akismet","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_mod,$stat_spam); ?>
+              <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts (or pages) submitted, %d edits submitted, %d posts approved and %d edits approved. %d spam submissions have been caught by Akismet","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_edit_ever,$stat_mod,$stat_edit_mod,$stat_spam); ?>
           <?php } else { ?>
-              <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts submitted and %d posts approved.","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_mod); ?>
+              <p><?php printf(__("You are using version %s (build %d) of the TDO Mini Forms plugin. There has been %d posts (or pages) submitted, %d edits submitted, %d posts approved and %d edits approved.","tdomf"),TDOMF_VERSION,get_option(TDOMF_VERSION_CURRENT),$stat_sub_ever,$stat_edit_ever,$stat_mod,$stat_edit_mod); ?>
           <?php } ?>
         
         <?php $rss = fetch_rss('http://thedeadone.net/forum/?cat=6&feed=rss');
@@ -268,24 +272,83 @@ function tdomf_get_post_list_line($p) {
 }
 
 function tdomf_dashboard_status() {
-  if(current_user_can('edit_others_posts')) {
-    $posts = tdomf_get_unmoderated_posts(0,15);
-    if(!empty($posts)) { 
-      ?>
-      <p>
-      <?php printf(__('You have <a href="%s">%d submissions</a> waiting for approval.', 'tdomf'),"admin.php?page=tdomf_show_mod_posts_menu&f=0",tdomf_get_unmoderated_posts_count()); ?>
-      <?php if(get_option(TDOMF_OPTION_SPAM)) { 
-                $spam_count = tdomf_get_spam_posts_count(); 
-                if($spam_count > 0) { ?>
-                  <?php printf(__('There are <a href="%s">%d spam submissions</a> in the queue.','tdomf'),"admin.php?page=tdomf_show_mod_posts_menu&f=3",$spam_count); ?>
-              <?php }
-            } ?>
-      </p>
-      <?php
+
+    $published_sub_count = tdomf_get_published_posts_count();
+    $approved_edits_count = tdomf_get_edits(array('state' => 'approved', 'count' => true));  
+    $scheduled_sub_count = tdomf_get_queued_posts_count();
+    $spam_edits_count = tdomf_get_edits(array('state' => 'spam', 'count' => true, 'unique_post_ids' => true));
+    $pending_edits_count = tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true));
+    $pending_sub_count = tdomf_get_unmoderated_posts_count();
+    $spam_sub_count = tdomf_get_spam_posts_count();
+            
+    echo '<tr>';
+
+    $num = number_format_i18n($published_sub_count);
+    $text = __ngettext( 'Approved Submission', 'Approved Submissions', $published_sub_count );
+    $url = tdomf_get_mod_posts_url(array('show' => 'all'));
+    echo '<td class="b b_approved"><a href="' . $url .'">' . $num . '</a></td>';
+    echo '<td class="first t posts"><a class="approved" href="' . $url .'">' . $text . '</a></td>';
+
+    $num = number_format_i18n($approved_edits_count);
+    $text = __ngettext( 'Approved Contribution', 'Approved Contributions', $approved_edits_count );
+    echo '<td class="b b_approved">' . $num . '</td>';
+    echo '<td class="first t posts">' . $text . '</td>';
+    
+    echo '</tr><tr>';
+   
+    if($scheduled_sub_count > 0) {
+        $num = number_format_i18n($scheduled_sub_count);
+        $text = __ngettext( 'Scheduled Submission', 'Scheduled Submissions', $scheduled_sub_count );
+        $url = tdomf_get_mod_posts_url(array('show' => 'scheduled'));
+        echo '<td class="b posts"><a href="' . $url .'">' . $num . '</a></td>';
+        echo '<td class="first t posts"><a href="' . $url .'">' . $text . '</a></td>';
+        echo '</tr><tr>';
     }
-  }
+    
+    if(get_option(TDOMF_OPTION_SPAM) && ($spam_edits_count > 0 || $spam_sub_count > 0)) {
+
+        $num = number_format_i18n($pending_sub_count);
+        $text = __ngettext( 'Pending Submission', 'Pending Submissions', $pending_sub_count );
+        $url = tdomf_get_mod_posts_url(array('show' => 'pending_submissions'));
+        echo '<td class="b b-waiting"><a class="waiting" href="' . $url .'"><span class=\'pending-count\'>' . $num . '</span></a></td>';
+        echo '<td class="first t"><a class="waiting" href="' . $url .'">' . $text . '</a></td>';
+       
+        $num = number_format_i18n($spam_sub_count);
+        $text = __ngettext( 'Spam Submission', 'Spam Submissions', $spam_sub_count );
+        $url = tdomf_get_mod_posts_url(array('show' => 'spam_submissions'));
+        echo '<td class="b b-spam"><a class="waiting" href="' . $url .'"><span class=\'spam-count\'>' . $num . '</span></a></td>';
+        echo '<td class="last t"><a class="spam" href="' . $url .'">' . $text . '</a></td>';
+    
+        echo '</tr><tr>';
+        
+        $num = number_format_i18n($pending_edits_count);
+        $text = __ngettext( 'Pending Contribution', 'Pending Contributions', $pending_edits_count );
+        echo '<td class="b b-waiting"><a class="waiting" href="' . $url .'"><span class=\'pending-count\'>' . $num . '</span></a></td>';
+        echo '<td class="first t"><a class="waiting" href="' . $url .'">' . $text . '</a></td>';
+    
+        $num = number_format_i18n($spam_edits_count);
+        $text = __ngettext( 'Spam Contribution', 'Spam Contributions', $spam_edits_count );
+        $url = tdomf_get_mod_posts_url(array('show' => 'spam_edits'));
+        echo '<td class="b b-waiting"><a class="waiting" href="' . $url .'"><span class=\'pending-count\'>' . $num . '</span></a></td>';
+        echo '<td class="first t"><a class="waiting" href="' . $url .'">' . $text . '</a></td>';
+    } else {
+        $num = number_format_i18n($pending_sub_count);
+        $url = tdomf_get_mod_posts_url(array('show' => 'pending_submissions'));
+        $text = __ngettext( 'Pending Submission', 'Pending Submissions', $pending_sub_count );
+        echo '<td class="b b-waiting"><a class="waiting" href="' . $url .'"><span class=\'pending-count\'>' . $num . '</span></a></td>';
+        echo '<td class="first t"><a class="waiting" href="' . $url .'">' . $text . '</a></td>';
+
+        $num = number_format_i18n($pending_edits_count);
+        $url = tdomf_get_mod_posts_url(array('show' => 'pending_edits'));
+        $text = __ngettext( 'Pending Contribution', 'Pending Contributions', $pending_edits_count );
+        echo '<td class="b b-waiting"><a class="waiting" href="' . $url .'"><span class=\'pending-count\'>' . $num . '</span></a></td>';
+        echo '<td class="last t"><a class="waiting" href="' . $url .'">' . $text . '</a></td>';
+
+    }
+    
+    echo '</tr>';
 }
-add_action('activity_box_end',"tdomf_dashboard_status");
+add_action('right_now_table_end','tdomf_dashboard_status');
 
 function tdomf_overview_please_upgrade() {
     $ver_cur = get_option(TDOMF_VERSION_CURRENT);

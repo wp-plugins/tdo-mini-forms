@@ -55,7 +55,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
          extract($args);
          $output = "";
          
-         if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$tdomf_form_id)) {
+         if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
              $post = get_post($tdomf_post_id);
              if($post) {
                  if(!isset($args['content_title'])) {
@@ -120,7 +120,20 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
       function formHack($args,$options) {
           if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
           extract($args);          
+         
           $output = "";
+          
+          if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
+              $output .= "\t\t".'<?php $post = get_post($post_id); if($post) {'."\n";
+              if($options['title-enable']) {
+                  $output .= "\t\t\t".'if(!isset($content_title)) { $content_title = $post->post_title; }'."\n";
+              }
+              if($options['text-enable']) {
+                  $output .= "\t\t\t".'if(!isset($content_content)) { $content_content = $post->post_content; }'."\n";
+              }
+              $output .= "\t\t".'} ?>'."\n";
+          }
+          
           if($options['title-enable']) {
             if($options['title-required']) {
               $output .= "\t\t".'<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."\n\t\t\t<br/>\n";
@@ -188,7 +201,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                                'allowable-tags' => "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>",
                                'char-limit' => 0,
                                'word-limit' => 0 );
-          $options = TDOMF_Widget::getOptions($form_id);
+          $options = TDOMF_Widget::getOptions($form_id); 
           $options = wp_parse_args($options, $defaults);
           return $options;
       }   
@@ -232,7 +245,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        * @access public
        * @return String
        */      
-      function previewHack($options) {
+      function previewHack($args,$options) {
           if(!$options['title-enable'] && !$options['text-enable']) { return ""; }
           extract($args);          
           $output = "";
@@ -389,16 +402,43 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           if(!$options['title-enable'] && !$options['text-enable']) { return ""; }  
           extract($args);
           $output = "";
+
           if($options['title-enable'] && $options['title-required']
                && (empty($content_title) || trim($content_title) == "")) {
               if($output != "") { $output .= "<br/>"; }
               $output .= __("You must specify a post title.","tdomf");
           }
+
           if($options['text-enable'] && $options['text-required']
                && (empty($content_content) || trim($content_content) == "")) {
               if($output != "") { $output .= "<br/>"; }
               $output .= __("You must specify some post text.","tdomf");
           }
+          
+          if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
+
+               // when it goes to validation, the tdomf_post_id will be the 
+               // real post id
+
+              $post = &get_post( $tdomf_post_id );
+              
+              // for post content, this is probably not the most exact way to do it
+              //
+              if($options['text-enable'] && $options['text-required']) {
+                  if(trim($post->post_content) == trim($content_content)) {
+                      if($output != "") { $output .= "<br/>"; }
+                      $output .= __("You must modify the post text.","tdomf");
+                  }
+              }
+              
+              if($options['title-enable'] && $options['title-required']) {
+                  if(trim($post->post_title) == trim($content_title)) {
+                      if($output != "") { $output .= "<br/>"; }
+                      $output .= __("You must modify the post title.","tdomf");
+                  }
+              }
+          }
+                    
           if($options['word-limit'] > 0 || $options['char-limit'] > 0) {
               
               // prefitler the content so it's as close to the end result as possible

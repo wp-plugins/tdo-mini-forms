@@ -462,33 +462,29 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * Pages ... but not including pages containing forms
- * TDOMF_STAT_EDITED
- * Your Submissions: Edit Forms
- * Your Submissions: Pending Edits
- * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
- * Moderation screen: bulk actions for edits
- * Moderation screen: multi-select
- * Form Hacker
  * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM, etc.
- * "Edited by XYZ": message in form hacker, last X edits (appear above Submitted by)
- * ^ - "Submitted by XYZ": form hacker
- * Testing editing/submitting on pages
  * revisions disabled error message 
+ * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
  *
  * @live server
  * Testing Edit Spam
  * Notify Admins for Edits
- * Update Admin Notification Email to use new moderation links
+ * Update/Test Admin Notification Email to use new moderation links
  * First version only widgets that support editing: reCaptcha
  *
  * @postponed
+ * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
+ * Option to disable Spam/Unapproved Edit Locking (require temp locks)
  * Template Tags for editing (what is actually required?)
- * Option to disable Spam/Unapproved Edit Locking
- * Moderation screen: implement filters: form, user, ip, username, email
+ * Moderation screen: implement filters: form, user, ip, username, email, page/post
  * Moderation screen: search
+ * Moderation screen: bulk buttons at top of list too
+ * Moderation screen: Locked/Unlocked filters or types
  * 'Back' Button for Ajax inline editing
  * 'Reset' Button for Editing Forms
+ * "Draft" Editing support
+ * "Edited by XYZ": message in form hacker, last X edits (appear above "Submitted by")
+ *    (and also add "Submitted by XYZ" to messages for individual forms)
  */
 
 define('TDOMF_OPTION_FORM_EDIT',"tdomf_form_edit");
@@ -503,32 +499,14 @@ define('TDOMF_STAT_EDITED', "tdomf_stat_edited");
 define('TDOMF_MACRO_POSTID', "%%POSTID%%");
 define('TDOMF_DB_TABLE_EDITS', "tdomf_table_edits");
 define('TDOMF_OPTION_AJAX_EDIT',"tdomf_ajax_edit");
+define('TDOMF_OPTION_EDIT_PAGE_FORM',"tdomf_edit_page_form");
+define('TDOMF_KEY_LOCK',"_tdomf_lock_editing");
 // @todo admin ui for...
 define('TDOMF_OPTION_MSG_INVALID_POST',"tdomf_msg_invalid_post");
 define('TDOMF_OPTION_MSG_INVALID_FORM',"tdomf_msg_invalid_form");
 define('TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST',"tdomf_msg_spam_edit_on_post");
 define('TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST',"tdomf_msg_unapproved_edit_on_post");
-
-/* @todo
-   For handling versions:
-   status: tdomf_lock (editing locking)
-   status: pending_change (awaiting moderation)
-   
-   Should we support 
-   * temporary locks(15 minutes+ prevents others from editing post until lock times out)
-   * warning that post has changed since started editing
-   
-   */
-
-// @todo your submission should only handle appropaite forms... i.e. without 
-//       post id, no edit forms, with post id, only applicable edit forms
-   
-// @todo template tags should use check_permisions and new template tags for
-//       version history, last updated, etc.
-
-// @todo First version only widgets that support editing: 
-//       Who Am I, Content, Image Captcha, I Agree, reCaptcha, 
-//       Append to Post Content, 1 Question Captcha, Text 
+define('TDOMF_OPTION_MSG_LOCKED_POST',"tdomf_msg_locked_post");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

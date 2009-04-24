@@ -287,6 +287,10 @@ function tdomf_spam_edit($edit_id) {
   if($spam_count == false) { add_option(TDOMF_STAT_SPAM,1); }
   else { update_option(TDOMF_STAT_SPAM,$spam_count++); }
 
+  $edited_count = get_option(TDOMF_STAT_EDITED);
+  if($edited_count == false) { add_option(TDOMF_STAT_EDITED,0); }
+  else { update_option(TDOMF_STAT_EDITED,$edited_count--); }    
+  
   tdomf_log_message("Edit $edit_id has been submitted as spam to Akismet)<br/><pre>" . var_export($response,true) . "</pre>");
 }
 
@@ -370,9 +374,9 @@ function tdomf_ham_edit($edit_id) {
   if($spam_count == false) { add_option(TDOMF_STAT_SPAM,0); }
   else { update_option(TDOMF_STAT_SPAM,$spam_count--); }
 
-  $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
-  if($submitted_count == false) { add_option(TDOMF_STAT_SUBMITTED,1); }
-  else { update_option(TDOMF_STAT_SUBMITTED,$submitted_count++); }
+  $edited_count = get_option(TDOMF_STAT_EDITED);
+  if($edited_count == false) { add_option(TDOMF_STAT_EDITED,1); }
+  else { update_option(TDOMF_STAT_EDITED,$edited_count++); }
 
   tdomf_log_message("Edit $edit_id has been submitted as ham to Akismet<br/><pre>" . var_export($response,true) . "</pre>");
 }
@@ -458,6 +462,10 @@ function tdomf_spam_post($post_id) {
   if($spam_count == false) { add_option(TDOMF_STAT_SPAM,1); }
   else { update_option(TDOMF_STAT_SPAM,$spam_count++); }
 
+  $submitted_count = get_option(TDOMF_STAT_SUBMITTED);
+  if($submitted_count == false) { add_option(TDOMF_STAT_SUBMITTED,0); }
+  else { update_option(TDOMF_STAT_SUBMITTED,$submitted_count--); }  
+  
   tdomf_log_message("$post_id has been submitted as spam to Akismet)<br/><pre>" . var_export($response,true) . "</pre>");
 }
 

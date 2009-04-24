@@ -147,6 +147,9 @@ function tdomf_get_message_default($key,$mode) {
         case TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST:
             $retVal = __("You cannot edit this post as there is a pending contribution to be approved.",'tdomf');
             break;
+        case TDOMF_OPTION_MSG_LOCKED_POST:
+            $retVal = __("You cannot edit this post as it has been locked from editing.",'tdomf');
+            break;
         default:
             $retVal = "";
             break;

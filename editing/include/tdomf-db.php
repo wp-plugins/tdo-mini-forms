@@ -976,7 +976,8 @@ function tdomf_get_form_ids(){
   $query = "SELECT form_id 
             FROM $table_name 
             ORDER BY form_id ASC";
-  return $wpdb->get_results($query);
+  $result = $wpdb->get_results($query);
+  return $result;
 }
 
 function tdomf_form_exists($form_id) {

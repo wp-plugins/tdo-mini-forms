@@ -267,7 +267,7 @@ function tdomf_content_editlink_filter($content=''){
                       $url .= '?tdomf_post_id='.$post_ID;
                    }                   
               } else if($edit_link_style == 'your_submissions') {
-                   $url = trailingslashit(get_bloginfo('wpurl')).'wp-admin/users.php?page=tdomf_your_submissions&tdomf_post_id='.$post_ID.'#tdomf_form'.$form_id->form_id;
+                   $url = trailingslashit(get_bloginfo('wpurl')).'wp-admin/users.php?page=tdomf_your_submissions&tdomf_post_id='.$post_ID.'#tdomf_form'.$form_id->form_id.'_'.$post_ID;
               } else if($edit_link_style != 'none') {
                    $url = $edit_link_style;
                    if(strpos($url,'?') !== false) {
@@ -415,7 +415,7 @@ function tdomf_editpostlink_filter($url,$post_id){
                       $url .= '?tdomf_post_id='.$post_ID;
                    }                   
               } else if($edit_link_style == 'your_submissions') {
-                   $url = trailingslashit(get_bloginfo('wpurl')).'wp-admin/users.php?page=tdomf_your_submissions&tdomf_post_id='.$post_ID.'#tdomf_form'.$form_id->form_id;
+                   $url = trailingslashit(get_bloginfo('wpurl')).'wp-admin/users.php?page=tdomf_your_submissions&tdomf_post_id='.$post_ID.'#tdomf_form'.$form_id->form_id.'_'.$post_ID;
               } else if($edit_link_style != 'none') {
                    $url = $edit_link_style;
                    if(strpos($url,'?') !== false) {

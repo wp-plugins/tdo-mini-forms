@@ -572,10 +572,8 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
    
         // form hacker modified
         
-        $mode = "new-post-hack";
-        if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-            $mode = "new-page-hack";
-        }
+        $mode = tdomf_generate_default_form_mode($form_id) . '-hack';
+        
         $curr_unmod_prev = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
         $org_unmod_prev = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$form_id));
         $hacked_prev = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id));

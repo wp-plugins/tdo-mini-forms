@@ -40,7 +40,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
 
   $edit_form = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id); 
   
-  // @todo if not edit form... (temp)
+  // if not edit form...
   if(!$edit_form) {
   
       // Throttling Rules
@@ -80,7 +80,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
   
   if($edit_form) {
 
-      // Throttling rules
+      // Throttling rules for edit forms
       //
       $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
       if(is_array($rules) && !empty($rules)) {
@@ -123,6 +123,14 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
       }
       
+      // check if post is locked
+      //
+      $locked = get_post_meta($post_id, TDOMF_KEY_LOCK, true);
+      if($locked) {
+          tdomf_log_message("Post with id $post_id is locked. Cannot be edited.",TDOMF_LOG_BAD);
+          return tdomf_get_message_instance(TDOMF_OPTION_MSG_LOCKED_POST,$form_id);
+      }
+      
       // check if it is a TDOMF post
       //
       if(tdomf_get_option_form(TDOMF_OPTION_EDIT_RESTRICT_TDOMF,$form_id)) {
@@ -139,6 +147,31 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       if( ($use_pages && $post['post_type'] == 'post') || (!$use_pages && $post['post_type'] == 'page')) {
           tdomf_log_message("Post with id $post_id is wrong type of post (".$post['post_type'].") for $form_id!",TDOMF_LOG_ERROR);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
+      }
+      
+      // do not allow editing of posts with forms unless explicitly asked
+      
+      if(!tdomf_get_option_form(TDOMF_OPTION_EDIT_PAGE_FORM,$form_id)) {
+          if($use_pages) {
+              $form_ids = tdomf_get_form_ids();
+              foreach($form_ids as $a_form_id) { 
+                  $created_pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$a_form_id->form_id);
+                  if(is_array($created_pages)) {
+                          foreach($created_pages as $created_page) {
+                              if($created_page == $post_id) {
+                                  tdomf_log_message("Cannot edit page with id $post_id as it is in use as a form for TDOMF!",TDOMF_LOG_ERROR);
+                                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
+                              }
+                          }
+                  }
+              }
+          }
+          // Load up the post content and check for tags
+          //
+          if(preg_match('|<!--tdomf_form.*-->|', $post['post_content']) > 0 || preg_match('|\[tdomf_form.*\]|', $post['post_content']) > 0) {
+            tdomf_log_message("Cannot edit post/page with id $post_id as it contains tags for TDOMF Forms!",TDOMF_LOG_ERROR);
+            return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
+          }
       }
       
       // check if it's in the right set of categories
@@ -475,11 +508,11 @@ function tdomf_update_post($form_id,$mode,$args) {
          $testuser = new WP_User($user_id,$user->user_login);
          $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
          if($user_status == TDOMF_USER_STATUS_TRUSTED) {
-             tdomf_log_message("User is trusted.");
+             tdomf_log_message("User is trusted => will auto-publish.",TDOMF_LOG_GOOD);
              $can_publish = true;
          }
          else if(tdomf_get_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,$form_id) && current_user_can('publish_posts')) {
-             tdomf_log_message("User has publish rights.");
+             tdomf_log_message("User has publish rights => will auto-publish",TDOMF_LOG_GOOD);
              $can_publish = true;
          }
        }
@@ -567,6 +600,7 @@ function tdomf_update_post($form_id,$mode,$args) {
        
        if($edit_id == 0) {
            // error! do something
+           tdomf_log_message("Edit $edit_id is invalid!",TDOMF_LOG_ERROR);
        } else {
            $returnVal = intval($edit_id);
        }
@@ -627,14 +661,14 @@ function tdomf_update_post($form_id,$mode,$args) {
     
            // Restore version (if using versions) and can publish
            // (if not using revisions, post is only set to draft if !can_publish)
-           //
-           if($revision_id && $can_publish) {
-               tdomf_log_message("Can publish so setting revision $revision_id as main revision for Post $post_id");
-               wp_restore_post_revision($revision_id);
-           }
            
            if($can_publish) {
                tdomf_set_state_edit('approved',$edit_id);
+               if($revision_id) {
+                   tdomf_log_message("Can publish so setting revision $revision_id as main revision for Post $post_id");
+                   wp_restore_post_revision($revision_id);
+               } 
+               // if no revisions, post was never not published
            }
        }
        else {
@@ -1027,7 +1061,7 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
               }
           }
           
-          $form = tdomf_prepare_string($hacked_form, $form_id, $mode, false, "", $post_args);
+          $form = tdomf_prepare_string($hacked_form, $form_id, $mode, $post_id, "", $post_args);
           
           // basics
           $unused_patterns = array();
