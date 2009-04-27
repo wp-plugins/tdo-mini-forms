@@ -258,7 +258,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
             // prep output
             $output .= "\t<?php ";
             $output .= '$content_content = preg_replace(\'|\<!--tdomf_form.*-->|\', \'\', $content_content);'."\n";
-            $output .= "\t".'$content_content = preg_replace(\'|\[tdomf_form.*\]|\', \'\', $content_content);'."\n";
+            $output .= "\t".'$content_content = preg_replace(\'|\\[tdomf_form.*\\]|\', \'\', $content_content);'."\n";
             if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
               $output .= "\t".'$content_content = wp_filter_post_kses($content_content);'."\n";
             }

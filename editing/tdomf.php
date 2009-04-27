@@ -32,6 +32,8 @@ Author URI: http://thedeadone.net
 //
 // v0.12.8/0.13
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
+// - Fixed '$' not working in preview
+// - Fixed characters getting eaten up in preview
 //
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break

@@ -329,7 +329,9 @@ function tdomf_preview_form($args,$mode=false) {
       $hacked_message = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id);
       if($hacked_message != false) {
           $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
+          tdomf_log_message("hacked_message  <pre>" . var_export($hacked_message,true) . "</pre>");
           $message = tdomf_prepare_string($hacked_message, $form_id, $mode, $post_id, "", $args);
+          tdomf_log_message("message  <pre>" . var_export($message,true) . "</pre>");
           
           // basics
           $unused_patterns = array();
@@ -346,9 +348,11 @@ function tdomf_preview_form($args,$mode=false) {
           $widget_order = tdomf_get_widget_order($form_id);
           foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
-                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
                   // all widgets need to be excuted even if not displayed
-                  $replacements[] = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+                  $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';                  
+                  $replacements[] = preg_quote($replacement);  
+     
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }
@@ -1080,6 +1084,9 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
               $replacements[] = "<div id='tdomf_form${form_id}_message' id='tdomf_form${form_id}_message' class='hidden'></div>";
           } else {
               $patterns[]     = '/'.TDOMF_MACRO_FORMMESSAGE.'/';
+              // prep form: the $ and \\ are special operators in preg_replace replacement string
+              $message = str_replace('$','\\$',$message);
+              $message = str_replace('\\\\','\\\\\\\\',$message);
               $replacements[] = $message;
           }
           
@@ -1103,9 +1110,10 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
           $widget_order = tdomf_get_widget_order($form_id);
           foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
-                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
                   // all widgets need to be excuted even if not displayed
-                  $replacements[] = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+                  $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
+                  $replacements[] = preg_quote($replacement);
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }
