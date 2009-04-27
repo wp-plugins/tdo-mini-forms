@@ -183,9 +183,10 @@ function tdomf_preview_form($args,$mode=false) {
           $widget_order = tdomf_get_widget_order($form_id);
           foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
+                  $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
-                  // all widgets need to be excuted even if not displayed
-                  $replacements[] = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+                  $replacements[] = preg_quote($replacement);  
+     
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }
@@ -644,6 +645,9 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
               $replacements[] = "<div id='tdomf_form${form_id}_message' id='tdomf_form${form_id}_message' class='hidden'></div>";
           } else {
               $patterns[]     = '/'.TDOMF_MACRO_FORMMESSAGE.'/';
+              // prep form: the $ and \\ are special operators in preg_replace replacement string
+              $message = str_replace('$','\\$',$message);
+              $message = str_replace('\\\\','\\\\\\\\',$message);
               $replacements[] = $message;
           }
           
@@ -658,9 +662,9 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
           $widget_order = tdomf_get_widget_order($form_id);
           foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
+                  $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
-                  // all widgets need to be excuted even if not displayed
-                  $replacements[] = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+                  $replacements[] = preg_quote($replacement);
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }

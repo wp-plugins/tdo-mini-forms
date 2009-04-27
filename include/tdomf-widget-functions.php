@@ -517,7 +517,7 @@ function tdomf_widget_content_preview_hack($args) {
     // prep output
     $output .= "\t<?php ";
     $output .= '$content_content = preg_replace(\'|\<!--tdomf_form.*-->|\', \'\', $content_content);'."\n";
-    $output .= "\t".'$content_content = preg_replace(\'|\[tdomf_form.*\]|\', \'\', $content_content);'."\n";
+    $output .= "\t".'$content_content = preg_replace(\'|\\[tdomf_form.*\\]|\', \'\', $content_content);'."\n";
     if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
       $output .= "\t".'$content_content = wp_filter_post_kses($content_content);'."\n";
     }

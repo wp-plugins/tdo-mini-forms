@@ -32,6 +32,8 @@ Author URI: http://thedeadone.net
 //
 // v0.12.8/0.13
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
+// - Fixed '$' not working in preview
+// - Fixed characters getting eaten up in preview
 //
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break
@@ -64,10 +66,12 @@ Work Queue:
     http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
     http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
     http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
+    http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
-   - Can post be created with no title? - http://thedeadone.net/forum/?p=1942#comment-4046
+   - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
+   - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
    - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
    - Requred option in category field
    - Sanatized file upload filenames/paths http://thedeadone.net/blog/v0127-of-tdo-mini-forms-just-released/comment-page-1/#comment-181601
