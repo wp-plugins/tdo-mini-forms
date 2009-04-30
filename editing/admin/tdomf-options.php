@@ -92,7 +92,7 @@ function tdomf_show_options_menu() {
 	<h3><?php _e('Auto Trust Submitter Count',"tdomf"); ?></h3>
 
 	<p>
-	<?php _e('This only counts for submitters who register with your blog and submit using a user account. You can have the user automatically changed to "trusted" after a configurable number of approved submissions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned.',"tdomf"); ?> <?php printf(__('You can change a users status (to/from trusted or banned) using the <a href="%s">Manage</a> menu',"tdomf"),"admin.php?page=tdomf_show_manage_menu"); ?>
+	<?php _e('This only counts for submitters or contributors who register with your blog and submit using a user account. You can have the user automatically changed to "trusted" after a configurable number of approved submissions and/or contributions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned.',"tdomf"); ?> <?php printf(__('You can change a users status (to/from trusted or banned) using the <a href="%s">Manage</a> menu',"tdomf"),"admin.php?page=tdomf_show_manage_menu"); ?>
 	</p>
 
 	<p>
@@ -519,6 +519,19 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
     $message .= "<br/>";
   }
   
+  # Revisions disabled => editing won't work well
+  
+  if ( !constant('WP_POST_REVISIONS') ) {
+      $form_ids = tdomf_get_form_ids();
+      foreach($form_ids as $a_form_id) {
+          if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$a_form_id->form_id)) {
+              $message .= __("Error: Post Revisioning is disabled, post editing will not work correctly!","tdomf");
+              $message .= "<br/>";
+              break;
+          }
+      }
+  }
+  
     if(isset($_REQUEST['form']) || $form_id != 0) {
         if($form_id == 0)
         {
@@ -639,8 +652,9 @@ function tdomf_get_error_messages($show_links=true, $form_id=0) {
 	 	  $message .= "<font color=\"red\">".sprintf(__("<b>Error</b>: No default author set! <a href=\"%s\">Create dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";
 	 	  tdomf_log_message("Option Default Author not set!",TDOMF_LOG_BAD);
  	  } else {
- 	  	$def_aut = new WP_User(get_option(TDOMF_DEFAULT_AUTHOR));
-      if(empty($def_aut->data->ID)) {
+          
+    $def_aut = new WP_User(get_option(TDOMF_DEFAULT_AUTHOR));
+    if(empty($def_aut->data->ID)) {
         // User does not exist! Deleting option
         delete_option(TDOMF_DEFAULT_AUTHOR);
         $message .= "<font color=\"red\">".sprintf(__("<b>Error</b>: Current Default Author does not exist! <a href=\"%s\">Create dummy user for default author automatically &raquo;</a>","tdomf"),$create_user_link)."</font><br/>";

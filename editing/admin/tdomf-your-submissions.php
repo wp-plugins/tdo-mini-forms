@@ -73,6 +73,17 @@ function tdomf_get_post_time( $d = 'U', $gmt = false, $post ) { // returns times
 	return apply_filters('get_the_time', $time, $d, $gmt);
 }
 
+// include form style sheet on page
+//
+function tdomf_show_your_submissions_admin_head() {
+   if(preg_match('/page=tdomf_your_submissions/',$_SERVER[REQUEST_URI])) {
+   ?>
+   <link rel="stylesheet" href="<?php echo TDOMF_URLPATH; ?>tdomf-style-form.css" type="text/css" media="screen" />
+   <?php
+   }
+}
+add_action( 'admin_head', 'tdomf_show_your_submissions_admin_head' );
+
 // Show the page!
 //
 function tdomf_show_your_submissions_menu() {
@@ -260,12 +271,12 @@ function tdomf_show_your_submissions_menu() {
                       $good = false;
                   }
                   if($good) { ?>
-                  <div class="wrap">
-                  <h2><?php echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?></h2>
-    <p><?php echo tdomf_get_option_form(TDOMF_OPTION_DESCRIPTION,$form_id->form_id); ?></p>
-    <?php echo tdomf_generate_form($form_id->form_id); ?>
-          <br/><br/>
-          </div>
+     <div class="wrap">
+        <h2><?php echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?></h2>
+        <p><?php echo tdomf_get_option_form(TDOMF_OPTION_DESCRIPTION,$form_id->form_id); ?></p>
+        <?php echo tdomf_generate_form($form_id->form_id); ?>
+        <br/><br/>
+     </div>
           <?php } } }
           }?>
     <?php } ?>

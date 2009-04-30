@@ -69,12 +69,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
          
          if($options['title-enable']) {
               if($options['title-required']) {
-                  $output .= '<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."<br/>\n";
+                  $output .= '<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."<br/></label>\n";
               } else {
-                  $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/>\n";
+                  $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/></label>\n";
               }
               $output .= '<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES,get_bloginfo('charset')).'" />';
-              $output .= "</label>\n";
               if($options['text-enable']) {
                   $output .= "<br/><br/>";
               }
@@ -140,9 +139,9 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
             } else {
               $output .= "\t\t".'<label for="content_title">'.__("Post Title: ","tdomf")."\n\t\t\t<br/>\n";
             }
+            $output .= "\t\t</label>\n";            
             $output .= "\t\t\t".'<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="';
             $output .= '<?php echo htmlentities($content_title,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />'."\n";
-            $output .= "\t\t</label>\n";
             if($options['text-enable']) {
               $output .= "\t\t<br/>\n\t\t<br/>\n";
             }

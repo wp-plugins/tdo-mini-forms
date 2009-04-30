@@ -464,9 +464,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * UI for TDOMF_OPTION_MSG_INVALID_POST and TDOMF_OPTION_MSG_INVALID_FORM, etc.
- * revisions disabled error message 
- * First version only widgets that support editing: Who Am I, Content, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
+ * First version only widgets that support editing: Who Am I, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
  *
  * @live server
  * Testing Edit Spam
@@ -503,7 +501,6 @@ define('TDOMF_DB_TABLE_EDITS', "tdomf_table_edits");
 define('TDOMF_OPTION_AJAX_EDIT',"tdomf_ajax_edit");
 define('TDOMF_OPTION_EDIT_PAGE_FORM',"tdomf_edit_page_form");
 define('TDOMF_KEY_LOCK',"_tdomf_lock_editing");
-// @todo admin ui for...
 define('TDOMF_OPTION_MSG_INVALID_POST',"tdomf_msg_invalid_post");
 define('TDOMF_OPTION_MSG_INVALID_FORM',"tdomf_msg_invalid_form");
 define('TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST',"tdomf_msg_spam_edit_on_post");

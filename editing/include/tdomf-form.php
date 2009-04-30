@@ -329,9 +329,7 @@ function tdomf_preview_form($args,$mode=false) {
       $hacked_message = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id);
       if($hacked_message != false) {
           $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
-          tdomf_log_message("hacked_message  <pre>" . var_export($hacked_message,true) . "</pre>");
           $message = tdomf_prepare_string($hacked_message, $form_id, $mode, $post_id, "", $args);
-          tdomf_log_message("message  <pre>" . var_export($message,true) . "</pre>");
           
           // basics
           $unused_patterns = array();
@@ -377,7 +375,6 @@ function tdomf_preview_form($args,$mode=false) {
                                           "tdomf_form_id"=>$form_id),
                                           $args);
        $widget_order = tdomf_get_widget_order($form_id);
-       tdomf_log_message_extra("Preview widgets <pre>".var_export($widgets,true)."</pre>");
        foreach($widget_order as $w) {
           if(isset($widgets[$w])) {
             tdomf_log_message_extra("Looking at preview widget $w");
@@ -534,7 +531,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    $current_revision_id = wp_save_post_revision($post_id);
    $revision_id = wp_save_post_revision($post_id);
    if($revision_id == NULL || $current_revision_id == NULL) {
-       tdomf_log_message("Revisions disabled for post $post_id");
+       tdomf_log_message("Revisions disabled for post $post_id", TDOMF_LOG_BAD);
        if($revision_id != NULL) {
            wp_delete_revision($revision_id);
            $revision_id = NULL;
@@ -642,7 +639,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    }
    // Oh dear! Errors after submission!
    if(trim($message) != "") {
-     tdomf_log_message("Post widgets report error!");
+     tdomf_log_message("Post widgets report error!",TDOMF_LOG_BAD);
      $returnVal = "<font color='red'>$message</font>\n";
    }
 
@@ -669,9 +666,12 @@ function tdomf_update_post($form_id,$mode,$args) {
            if($can_publish) {
                tdomf_set_state_edit('approved',$edit_id);
                if($revision_id) {
-                   tdomf_log_message("Can publish so setting revision $revision_id as main revision for Post $post_id");
+                   tdomf_log_message("Can publish so setting revision $revision_id as main revision for Post $post_id", TDOMF_LOG_GOOD);
                    wp_restore_post_revision($revision_id);
                } 
+               if($edit_user_id > 0) {
+                   tdomf_trust_user($edit_user_id);
+               }
                // if no revisions, post was never not published
            }
        }
@@ -693,7 +693,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    //
    if(!is_int($returnVal)) {
        if($revision_id)  {
-           tdomf_log_message("There were errors, delete revision $revision_id");
+           tdomf_log_message("There were errors, delete revision $revision_id", TDOMF_LOG_BAD);
            wp_delete_revision($revision_id);
        }
        tdomf_delete_edit(array($edit_id));

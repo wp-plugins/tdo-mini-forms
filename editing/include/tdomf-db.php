@@ -740,17 +740,21 @@ function tdomf_get_state_edit($edit_id) {
 
 function tdomf_set_state_edit($edit_state,$edit_id) {
   global $wpdb;
+  #tdomf_log_message("Updating state of edit $edit_id to $edit_state");
   $returnVal = false;
   $key = "tdomf_edit_" . $edit_id;
   $edit_cache = wp_cache_get($key);
   $writedb = true;
-  if($edit_cache != false && isset($edit_cache['state'])) {
+  if($edit_cache != false && is_array($edit_cache) && isset($edit_cache['state'])) {
+      #tdomf_log_message("There is a cache for this edit: $edit_id",TDOMF_LOG_GOOD); 
       if($edit_cache['state'] == $edit_state) {
+          tdomf_log_message("State does not need to be updated for $edit_id. It is already at " . $edit_state,TDOMF_LOG_GOOD);
           $writedb = false;
           $returnVal = true;
       }
   }
   if($writedb) {
+      #tdomf_log_message("Writing new state for $edit_id to db",TDOMF_LOG_GOOD);
       $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
       $query = "UPDATE $table_name 
                 SET state = '".$wpdb->escape($edit_state)."'
@@ -758,8 +762,10 @@ function tdomf_set_state_edit($edit_state,$edit_id) {
       $returnVal = $wpdb->query($query);                
   }
   if($returnVal && $writedb && is_array($edit_cache)) {
-      $edit_cache['state'] == $edit_state;
+      #tdomf_log_message("Updating cache for $edit_id",TDOMF_LOG_GOOD);
+      $edit_cache['state'] = $edit_state;
       wp_cache_set($key,$edit_cache);
+      #tdomf_log_message("$edit_id Cache: <pre>" . var_export($edit_cache,true) . "</pre>");
   }
   return $returnVal;
 }

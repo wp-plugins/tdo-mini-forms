@@ -990,11 +990,15 @@ function tdomf_moderation_handler() {
                    if(!empty($last_edit) && $last_edit[0]->state != 'approved') {
                        $edit_list [] = $last_edit[0]->edit_id;
                        $post_list [] = $post;
+                       $user_id = $last_edit[0]->user_id;
                        if($last_edit[0]->state == 'spam') {
                            tdomf_hamit_edit($last_edit[0]);
                        }
                        wp_restore_post_revision($edit->revision_id);
                        tdomf_set_state_edit('approved',$last_edit[0]->edit_id);
+                       if($user_id > 0) {
+                           tdomf_trust_user($user_id);
+                       }                       
                    }
                 }
                 tdomf_log_message('These edits have been approved: ' .implode(", ", $edit_list) );
@@ -1182,6 +1186,9 @@ function tdomf_moderation_handler() {
            }
            wp_restore_post_revision($edit->revision_id);
            tdomf_set_state_edit('approved',$edit_id);
+           if($edit->user_id > 0) {
+               tdomf_trust_user($edit->user_id);
+           }
            tdomf_log_message("Edit $edit_id has been approved on post " . $edit->post_id);
            $message .= sprintf(__('Contribution to <a href="%s">Post %d</a> has been approved and published',"tdomf"),get_permalink($edit->post_id),$edit->post_id);
        } else {
