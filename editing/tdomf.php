@@ -34,6 +34,7 @@ Author URI: http://thedeadone.net
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
 // - Fixed '$' not working in preview
 // - Fixed characters getting eaten up in preview
+// - Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
 //
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break
@@ -464,7 +465,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * First version only widgets that support editing: Who Am I, Image Captcha, I Agree, Append to Post Content, 1 Question Captcha and Text
+ * First version only widgets that support editing: I Agree, Append to Post Content, 1 Question Captcha and Text
  *
  * @live server
  * Testing Edit Spam

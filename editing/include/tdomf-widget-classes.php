@@ -408,9 +408,10 @@ class TDOMF_Widget {
                tdomf_register_form_widget_preview($this->internalName, $this->displayName, array($this, '_preview'), $this->modes);
            }
            
-           if($this->previewHack)
+           if($this->previewHack) {
                tdomf_log_message( '['.$this->internalName.'] Preview hack');
                tdomf_register_form_widget_preview_hack($this->internalName, $this->displayName, array($this, '_previewHack'), $this->modes);
+           }
            
            if($this->validate)
                tdomf_register_form_widget_validate($this->internalName, $this->displayName, array($this, '_validate'), $this->modes);

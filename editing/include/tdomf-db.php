@@ -770,47 +770,40 @@ function tdomf_set_state_edit($edit_state,$edit_id) {
   return $returnVal;
 }
 
-/*function tdomf_set_data_edit($edit_data,$edit_id) {
-  global $wpdb;
-  $defaults = tdomf_get_data_edit($edit_id);
-  $edit_data = wp_parse_args($edit_data,$defaults);
-  $edit_data = maybe_serialize($edit_data);
-  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
-  $query = "UPDATE $table_name 
-            SET data = '".$wpdb->escape($edit_data)."'
-            WHERE edit_id = '".$wpdb->escape($edit_id)."'";
-  // update cache
-  return $wpdb->query($query);
+function tdomf_get_data_edit($edit_id) {
+  $edit = tdomf_get_edit($edit_id);
+  return maybe_unserialize($edit->data);
 }
 
-function tdomf_get_data_edit($edit_id) {
+function tdomf_set_data_edit($edit_data,$edit_id) {
   global $wpdb;
+  $returnVal = false;
   $key = "tdomf_edit_" . $edit_id;
   $edit_cache = wp_cache_get($key);
-  if($edit_cache == false || !isset($edit_cache['data'])) {
-      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
-      $query = "SELECT data 
-                FROM $table_name 
-                WHERE edit_id = '" .$wpdb->escape($edit_id)."'";
-      $edit = $wpdb->get_row( $query );
-      if($edit != NULL) {
-          $edit_data = maybe_unserialize($edit->data);
-          if($edit == false) {
-              $edit_cache = array( 'data' => $edit_data );
-          } else {
-              $edit_cache['edit_data'] = $edit_data;
-          }
-          wp_cache_set($key,$edit_cache);
-          return $edit_data;
+  $writedb = true;
+  if($edit_cache != false && is_array($edit_cache) && isset($edit_cache['data'])) {
+      if($edit_cache['data'] == $edit_data) {
+          #tdomf_log_message("Data does not need to be updated for $edit_id. It is already at <pre>" . var_export($edit_state,true) . "</pre>",TDOMF_LOG_GOOD);
+          $writedb = false;
+          $returnVal = true;
       }
-      return array();
-  } else {
-      if(isset($edit['data'])) {
-          return $edit['data'];
-      }
-      return false;
   }
-}*/
+  if($writedb) {
+      #tdomf_log_message("Writing new data for $edit_id to db",TDOMF_LOG_GOOD);
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "UPDATE $table_name 
+                SET data = '".$wpdb->escape(maybe_serialize($edit_data))."'
+                WHERE edit_id = '".$wpdb->escape($edit_id)."'";
+      $returnVal = $wpdb->query($query);                
+  }
+  if($returnVal && $writedb && is_array($edit_cache)) {
+      #tdomf_log_message("Updating cache for $edit_id",TDOMF_LOG_GOOD);
+      $edit_cache['data'] = $edit_data;
+      wp_cache_set($key,$edit_cache);
+      #tdomf_log_message("$edit_id Cache: <pre>" . var_export($edit_cache,true) . "</pre>");
+  }
+  return $returnVal;
+}
 
 function tdomf_import_form($form_id,$options,$widgets,$caps) {
   global $wp_roles, $wpdb;

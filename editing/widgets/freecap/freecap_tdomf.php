@@ -1,4 +1,4 @@
-<?
+<?php
 /************************************************************\
 *
 *		freeCap v1.4.1 Copyright 2005 Howard Yeend
@@ -25,9 +25,9 @@
 
 // Load up Wordpress
 //
-$wp_load = realpath("../../../wp-load.php");
+$wp_load = realpath("../../../../../wp-load.php");
 if(!file_exists($wp_load)) {
-  $wp_config = realpath("../../../wp-config.php");
+  $wp_config = realpath("../../../../../wp-config.php");
   if (!file_exists($wp_config)) {
       exit("Can't find wp-config.php or wp-load.php");
   } else {
@@ -40,6 +40,12 @@ if(!file_exists($wp_load)) {
 global $wpdb;
 
 $form_id = intval($_REQUEST['tdomf_form_id']);
+$form_tag = $form_id;
+$post_id = false;
+if(isset($_REQUEST['tdomf_post_id'])) { 
+   $post_id = intval($_REQUEST['tdomf_post_id']);
+   $form_tag = $form_id . '_' . $post_id;
+} 
 
 // loading text domain for language translation
 //
@@ -82,7 +88,7 @@ $seed_func = "mt_srand";
 // crc32 supported by PHP4.0.1+
 $hash_func = "sha1";
 // store in session so can validate in form processor
-$form_data['hash_func_'.$form_id] = $hash_func;
+$form_data['hash_func_'.$form_tag] = $hash_func;
 
 // image type:
 // possible values: "jpg", "png", "gif"
@@ -211,12 +217,12 @@ $im2 = ImageCreate($width, $height);
 //////////////////////////////////////////////////////
 ////// Avoid Brute Force Attacks:
 //////////////////////////////////////////////////////
-if(empty($form_data['freecap_attempts_'.$form_id]))
+if(empty($form_data['freecap_attempts_'.$form_tag]))
 {
-	$form_data['freecap_attempts_'.$form_id] = 1;
+	$form_data['freecap_attempts_'.$form_tag] = 1;
   tdomf_save_form_data($form_id,$form_data);
 } else {
-	$form_data['freecap_attempts_'.$form_id]++;
+	$form_data['freecap_attempts_'.$form_tag]++;
   tdomf_save_form_data($form_id,$form_data);
   
 	// if more than ($max_attempts) refreshes, block further refreshes
@@ -226,9 +232,9 @@ if(empty($form_data['freecap_attempts_'.$form_id]))
 	// in short, there's little point trying to avoid brute forcing
 	// the best way to protect against BF attacks is to ensure the dictionary is not
 	// accessible via the web or use random string option
-	if($form_data['freecap_attempts_'.$form_id]>$max_attempts)
+	if($form_data['freecap_attempts_'.$form_tag]>$max_attempts)
 	{
-		$form_data['freecap_word_hash_'.$form_id] = false;
+		$form_data['freecap_word_hash_'.$form_tag] = false;
 
 		$bg = ImageColorAllocate($im,255,255,255);
 		ImageColorTransparent($im,$bg);
@@ -383,7 +389,7 @@ if($use_dict==1)
 // so even if your site is 100% secure, someone else's site on your server might not be
 // hence, even if attackers can read the session file, they can't get the freeCap word
 // (though most hashes are easy to brute force for simple strings)
-$form_data['freecap_word_hash_'.$form_id] = $hash_func($word);
+$form_data['freecap_word_hash_'.$form_tag] = $hash_func($word);
 tdomf_save_form_data($form_id,$form_data);
 
 
