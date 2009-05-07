@@ -2,10 +2,12 @@
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
 /** 
-* Super class for widget classes 
+* Super class for widget classes. Supports validation, preview, hacking, admin
+* email, admin error and multiple instances. Common features can be added to
+* all widgets via this class.
 * 
 * @author Mark Cunningham <tdomf@thedeadone.net> 
-* @version 1.0 
+* @version 2.0 
 * @since 0.13.0
 * @access public 
 * @copyright Mark Cunningham
@@ -258,6 +260,142 @@ class TDOMF_Widget {
     }
     
     /** 
+     * Multiple Instances Support
+     * 
+     * @var integer 
+     * @access public 
+     * @see enableMultipleInstances(() 
+     */    
+    var $multipleInstances = false;
+    
+    /** 
+     * Key of Multiple Instances count option
+     * 
+     * @var integer 
+     * @access public 
+     * @see enableMultipleInstances(() 
+     */    
+    var $multipleInstancesOptionKey = false;
+    
+    /** 
+     * Display name of multiple instances (must include a %d)
+     * 
+     * @var integer 
+     * @access public 
+     * @see enableMultipleInstances(() 
+     */    
+    var $multipleInstancesDisplayName = false;
+    
+    /** 
+     * Sets modes widget supports. Must be done before widget is started.
+     * 
+     * @return Boolean 
+     * @access public 
+     */ 
+    function enableMultipleInstances($multipleInstances = true, $displayName = false, $optionKey = false) {    
+        $this->multipleInstances = $multipleInstances;
+        if($displayName) {
+            $this->multipleInstancesDisplayName = $displayName;
+        } else {
+            $this->multipleInstancesDisplayName = $this->displayName;
+        }        
+        if($optionKey) {
+            $this->multipleInstancesOptionKey = $optionKey;
+        } else {
+            $this->multipleInstancesOptionKey = 'tdomf_'.$this->internalName.'_widget';
+        }
+        return true;
+    }   
+    
+    /** 
+     * Displays the Multiple Instances Form on the Widget Page
+     * 
+     * @access private 
+     */     
+    function _multipleInstancesForm($form_id,$mode) {
+        $count = tdomf_get_option_widget($this->multipleInstancesOptionKey,$form_id);
+        if($count <= 0){ $count = 1; }
+        $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+        if($max == false){ $max = 9; }
+        if($count > ($max+1)){ $count = ($max+1); }
+  
+        if($max > 1) {
+  ?>
+  <div class="wrap">
+    <form method="post">
+      <h2><?php echo $this->displayName ?></h2>
+      <p style="line-height: 30px;"><?php printf(_("How many %s widgets would you like?","tdomf"),$this->displayName); ?>
+      <select id="tdomf-widget-<?php echo $this->internalName; ?>-number" name="tdomf-widget-<?php echo $this->internalName; ?>-number" value="<?php echo $count; ?>">
+      <?php for($i = 1; $i < ($max+1); $i++) { ?>
+        <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
+      <?php } ?>
+      </select>
+      <span class="submit">
+        <input type="submit" value="<?php _e("Save","tdomf"); ?>" id="tdomf-widget-<?php echo $this->internalName; ?>-number-submit" name="tdomf-widget-<?php echo $this->internalName; ?>-number-submit" />
+      </span>
+      </p>
+    </form>
+  </div><?php 
+        }
+    }
+    
+    /** 
+     * Handles the multiple instances input from the form on the Widget Page
+     * 
+     * @access private 
+     */      
+    function _multipleInstancesHandler($form_id,$mode) {
+        if ( isset($_POST['tdomf-widget-'.$this->internalName.'-number-submit']) ) {
+        $count = $_POST['tdomf-widget-'.$this->internalName.'-number'];
+        if($count > 0){ tdomf_set_option_widget($this->multipleInstancesOptionKey,$count,$form_id); }
+      }
+    }
+    
+    /** 
+     * Does the initilisation of multiple instance widgets
+     * 
+     * @access private 
+     */  
+    function _multipleInstancesInit($form_id,$mode) {
+        $count = tdomf_get_option_widget($this->multipleInstancesOptionKey,$form_id);
+        if($count <= 0){ $count = 1; } 
+     
+        $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+        if($max <= 1){ $count = 1; }
+        else if($count > ($max+1)){ $count = $max + 1; }
+     
+        for($i = 1; $i <= $count; $i++) {          
+           tdomf_register_form_widget($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_form'), $this->modes, $i);
+               
+           if($this->hack)
+               tdomf_register_form_widget_hack($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_formHack'), $this->modes, $i);
+           
+           if($this->control)
+               tdomf_register_form_widget_control($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_control'), $this->controlWidth, $this->controlHeight, $this->modes, $i);
+           
+           if($this->preview) {
+               tdomf_register_form_widget_preview($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_preview'), $this->modes, $i);
+           }
+           
+           if($this->previewHack) {
+               tdomf_register_form_widget_preview_hack($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_previewHack'), $this->modes, $i);
+           }
+           
+           if($this->validate)
+               tdomf_register_form_widget_validate($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_validate'), $this->modes, $i);
+           
+           if($this->post)
+               tdomf_register_form_widget_post($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_post'), $this->modes, $i);
+           
+           if($this->adminEmail)
+               tdomf_register_form_widget_adminemail($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_adminEmail'), $this->modes, $i);
+           
+           if($this->adminError)
+               tdomf_register_form_widget_admin_error($this->internalName.$i,sprintf($this->multipleInstancesDisplayName,$i), array($this, '_adminError'), $this->modes, $i);
+        }
+    }
+    
+    /** 
      * Modes the widget supports
      * 
      * @var Array 
@@ -289,15 +427,25 @@ class TDOMF_Widget {
      * @see enableWidgetTitle() 
      */
     var $widgetTitle = false;
-    
+
+    /** 
+     * For backwards compatibility, you can set the previous title key
+     * 
+     * @var boolean 
+     * @access public 
+     * @see enableWidgetTitle() 
+     */
+    var $widgetTitleKey = 'tdomf-title';
+        
     /** 
      * Enables support for title in widget display
      * 
      * @return Boolean 
      * @access public 
      */ 
-    function enableWidgetTitle($widgetTitle = true) {
+    function enableWidgetTitle($widgetTitle = true,$widgetTitleKey = 'tdomf-title') {
         $this->widgetTitle = $widgetTitle;
+        $this->widgetTitleKey = $widgetTitleKey;
         return true;
     }
 
@@ -348,6 +496,9 @@ class TDOMF_Widget {
         if(!$this->started) {
             $retVal = true;
             $this->displayName = $name;
+            if($this->multipleInstances && !$this->multipleInstancesDisplayName) {
+                $this->multipleInstancesDisplayName = $name;
+            }
         }
         return $retVal;
     }   
@@ -389,58 +540,71 @@ class TDOMF_Widget {
         /* do nothing */
     }
     
+    /**
+     * Start widget
+     *
+     * @access public
+     */
     function start() {
        $retVal = false;
        if(!$this->started || !$this->internalName || !$this->displayName)
        {
            $retVal = true;
            
-           tdomf_register_form_widget($this->internalName, $this->displayName, array($this, '_form'), $this->modes);
-           
-           if($this->hack)
-               tdomf_register_form_widget_hack($this->internalName,$this->displayName, array($this, '_formHack'), $this->modes);
-           
-           if($this->control)
-               tdomf_register_form_widget_control($this->internalName, $this->displayName, array($this, '_control'), $this->controlWidth, $this->controlHeight, $this->modes);
-           
-           if($this->preview) {
-               tdomf_log_message( '['.$this->internalName.'] Preview enabled');
-               tdomf_register_form_widget_preview($this->internalName, $this->displayName, array($this, '_preview'), $this->modes);
+           if($this->multipleInstances) {
+               add_action('tdomf_widget_page_bottom',array($this,'_multipleInstancesForm'),10,2);
+               add_action('tdomf_control_form_start',array($this,'_multipleInstancesHandler'),10,2);
+               add_action('tdomf_generate_form_start',array($this,'_multipleInstancesInit'),10,2);
+               add_action('tdomf_control_form_start',array($this,'_multipleInstancesInit'),10,2);
+               
+               // for multiple instances, init is handled in _multipleInstancesInit function
+               
+           } else { 
+               tdomf_register_form_widget($this->internalName, $this->displayName, array($this, '_form'), $this->modes);
+               
+               if($this->hack)
+                   tdomf_register_form_widget_hack($this->internalName,$this->displayName, array($this, '_formHack'), $this->modes);
+               
+               if($this->control)
+                   tdomf_register_form_widget_control($this->internalName, $this->displayName, array($this, '_control'), $this->controlWidth, $this->controlHeight, $this->modes);
+               
+               if($this->preview) {
+                   tdomf_register_form_widget_preview($this->internalName, $this->displayName, array($this, '_preview'), $this->modes);
+               }
+               
+               if($this->previewHack) {
+                   tdomf_register_form_widget_preview_hack($this->internalName, $this->displayName, array($this, '_previewHack'), $this->modes);
+               }
+               
+               if($this->validate)
+                   tdomf_register_form_widget_validate($this->internalName, $this->displayName, array($this, '_validate'), $this->modes);
+               
+               if($this->post)
+                   tdomf_register_form_widget_post($this->internalName, $this->displayName, array($this, '_post'), $this->modes);
+               
+               if($this->adminEmail)
+                   tdomf_register_form_widget_adminemail($this->internalName, $this->displayName, array($this, '_adminEmail'), $this->modes);
+               
+               if($this->adminError)
+                   tdomf_register_form_widget_admin_error($this->internalName, $this->displayName, array($this, '_adminError'), $this->modes);
            }
-           
-           if($this->previewHack) {
-               tdomf_log_message( '['.$this->internalName.'] Preview hack');
-               tdomf_register_form_widget_preview_hack($this->internalName, $this->displayName, array($this, '_previewHack'), $this->modes);
-           }
-           
-           if($this->validate)
-               tdomf_register_form_widget_validate($this->internalName, $this->displayName, array($this, '_validate'), $this->modes);
-           
-           if($this->post)
-               tdomf_register_form_widget_post($this->internalName, $this->displayName, array($this, '_post'), $this->modes);
-           
-           if($this->adminEmail)
-               tdomf_register_form_widget_adminemail($this->internalName, $this->displayName, array($this, '_adminEmail'), $this->modes);
-           
-           if($this->adminError)
-               tdomf_register_form_widget_admin_error($this->internalName, $this->displayName, array($this, '_adminError'), $this->modes);
        }
         return $retVal;
     }
-
+    
     /** 
      * Wraps form output of the widget
      * 
      * @return String 
      * @access private 
      */ 
-    function _form($args) {
+    function _form($args,$params=array()) {
         extract($args);
-        $options = $this->getOptions($tdomf_form_id);
+        $options = $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
 
         $output = $before_widget;
-        if($this->widgetTitle && $options['tdomf-title'] != "") {
-            $output .= $before_title.$options['tdomf-title'].$after_title;
+        if($this->widgetTitle && $options[$this->widgetTitleKey] != "") {
+            $output .= $before_title.$options[$this->widgetTitleKey].$after_title;
         }
         $output .= $this->form($args,$options);
         $output .= $after_widget;
@@ -464,9 +628,9 @@ class TDOMF_Widget {
      * @return Mixed 
      * @access private 
      */     
-    function _post($args) {
+    function _post($args,$params=array()) {
         extract($args);
-        $options = $this->getOptions($tdomf_form_id);
+        $options = $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
         return $this->post($args,$options);
     }
     
@@ -487,16 +651,16 @@ class TDOMF_Widget {
      * @return String
      * @access private 
      */         
-    function _preview($args) {
+    function _preview($args,$params=array()) {
         extract($args);
-        $options =  $this->getOptions($tdomf_form_id);
+        $options =  $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
     
         $output = "";    
         $widget_output = $this->preview($args,$options);
         if($widget_output && !empty($widget_output)) {
           $output  = $before_widget;
-          if($this->widgetTitle && $options['tdomf-title'] != '') {
-              $output .= $before_title.$options['tdomf-title'].$after_title;
+          if($this->widgetTitle && $options[$this->widgetTitleKey] != '') {
+              $output .= $before_title.$options[$this->widgetTitleKey].$after_title;
           }
           $output .= $widget_output;  
           $output .= $after_widget;
@@ -521,9 +685,9 @@ class TDOMF_Widget {
      * @return Mixed
      * @access private 
      */      
-    function _validate($args,$preview) {
+    function _validate($args,$preview,$params=array()) {
         extract($args);
-        $options = $this->getOptions($tdomf_form_id);
+        $options = $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
         
         if(!$preview || $this->validatePreview) {
             $output = $this->validate($args,$options,$preview);
@@ -552,15 +716,15 @@ class TDOMF_Widget {
      * @return String
      * @access private 
      */        
-    function _adminEmail($args){
+    function _adminEmail($args,$params=array()){
         extract($args);
-        $options = $this->getOptions($tdomf_form_id);
+        $options = $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
         $output = "";    
         $widget_output = $this->adminEmail($args,$options,$post_ID);
         if($widget_output && !empty($widget_output)) {
           $output  = $before_widget;
-          if($this->widgetTitle && $options['tdomf-title'] != '') {
-              $output .= $before_title.$options['tdomf-title'].$after_title;
+          if($this->widgetTitle && $options[$this->widgetTitleKey] != '') {
+              $output .= $before_title.$options[$this->widgetTitleKey].$after_title;
           }
           $output .= $widget_output;  
           $output .= $after_widget;
@@ -584,25 +748,26 @@ class TDOMF_Widget {
      * 
      * @access private 
      */       
-    function _control($form_id) {
-        $options = $this->getOptions($form_id);
-        
-        if ( $_POST[$this->internalName.'-submit'] ) {
+    function _control($form_id,$params=array()) {
+        $index = $this->getIndexFromParams($params);
+        $options = $this->getOptions($form_id,$index);
+                
+        if ( $_POST[$this->internalName.$index.'-submit'] ) {
             if($this->widgetTitle) {
-                $newoptions['tdomf-title'] = $_POST[$this->internalName.'-tdomf-title'];
+                $newoptions[$this->widgetTitleKey] = $_POST[$this->internalName.$index.'-tdomf-title'];
             }
             if($this->hack) {
-                $newoptions['tdomf-hack'] = isset($_POST[$this->internalName.'-tdomf-hack']);
+                $newoptions['tdomf-hack'] = isset($_POST[$this->internalName.$index.'-tdomf-hack']);
             }
             if($this->previewHack) {
-                $newoptions['tdomf-preview-hack'] = isset($_POST[$this->internalName.'-tdomf-preview-hack']);
+                $newoptions['tdomf-preview-hack'] = isset($_POST[$this->internalName.$index.'-tdomf-preview-hack']);
             }
             if ( $options != $newoptions ) {
-                $this->updateOptions($options,$form_id);
+                $this->updateOptions($options,$form_id,$index);
                 $options = $newoptions;
             }
         }
-        $this->control($options,$form_id);
+        $this->control($options,$form_id,$index);
     }
     
     /** 
@@ -610,7 +775,7 @@ class TDOMF_Widget {
      * 
      * @access public
      */     
-    function control() {
+    function control($options,$form_id,$index='') {
         # do nothing
     }
 
@@ -619,21 +784,21 @@ class TDOMF_Widget {
      * 
      * @access public
      */    
-    function controlCommon($options) {
+    function controlCommon($options,$index='') {
 
         if($this->widgetTitle) { ?>
-<label for="<?php echo $this->internalName; ?>-tdomf-title" style="line-height:35px;"><?php _e("Widget Title: ","tdomf"); ?></label>
-<input type="textfield" id="<?php echo $this->internalName; ?>-title" name="<?php echo $this->internalName; ?>-tdomf-title" value="<?php echo htmlentities($options['tdomf-title'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
+<label for="<?php echo $this->internalName.$index; ?>-tdomf-title" style="line-height:35px;"><?php _e("Widget Title: ","tdomf"); ?></label>
+<input type="textfield" id="<?php echo $this->internalName.$index; ?>-title" name="<?php echo $this->internalName.$index; ?>-tdomf-title" value="<?php echo htmlentities($options[$this->widgetTitleKey],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
 <br/>
         <?php  }
         if($this->hack) { ?>
-<input type="checkbox" name="<?php echo $this->internalName; ?>-tdomf-hack" id="<?php echo $this->internalName; ?>-tdomf-hack" <?php if($options['tdomf-hack']) echo "checked"; ?> >
-<label for="<?php echo $this->internalName; ?>-tdomf-hack" style="line-height:35px;"><?php _e("This widget can be modified in the form hacker","tdomf"); ?></label>
+<input type="checkbox" name="<?php echo $this->internalName.$index; ?>-tdomf-hack" id="<?php echo $this->internalName.$index; ?>-tdomf-hack" <?php if($options['tdomf-hack']) echo "checked"; ?> >
+<label for="<?php echo $this->internalName.$index; ?>-tdomf-hack" style="line-height:35px;"><?php _e("This widget can be modified in the form hacker","tdomf"); ?></label>
 <br/>
         <?php }
        if($this->previewHack && $this->preview) { ?>
-<input type="checkbox" name="<?php echo $this->internalName; ?>-preview-hack" id="<?php echo $this->internalName; ?>-tdomf-preview-hack" <?php if($options['tdomf-preview-hack']) echo "checked"; ?> >
-<label for="<?php echo $this->internalName; ?>-preview-hack" style="line-height:35px;"><?php _e("This widget's preview can be modified in the form hacker","tdomf"); ?></label>
+<input type="checkbox" name="<?php echo $this->internalName.$index; ?>-preview-hack" id="<?php echo $this->internalName.$index; ?>-tdomf-preview-hack" <?php if($options['tdomf-preview-hack']) echo "checked"; ?> >
+<label for="<?php echo $this->internalName.$index; ?>-preview-hack" style="line-height:35px;"><?php _e("This widget's preview can be modified in the form hacker","tdomf"); ?></label>
 <br/>
         <?php }
     }
@@ -644,13 +809,13 @@ class TDOMF_Widget {
      * @return String 
      * @access private 
      */ 
-    function _formHack($args) {
+    function _formHack($args,$params=array()) {
         extract($args);
-        $options = $this->getOptions($tdomf_form_id);
+        $options = $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
         if($options['tdomf-hack']) {
             $output = $before_widget;
-            if($this->widgetTitle && $options['tdomf-title'] != "") {
-                $output .= $before_title.$options['tdomf-title'].$after_title;
+            if($this->widgetTitle && $options[$this->widgetTitleKey] != "") {
+                $output .= $before_title.$options[$this->widgetTitleKey].$after_title;
             }
             $output .= $this->formHack($args,$options);
             $output .= $after_widget;
@@ -675,13 +840,13 @@ class TDOMF_Widget {
      * @return String 
      * @access private 
      */ 
-    function _previewHack($args) {
+    function _previewHack($args,$params=array()) {
         extract($args);
-        $options = $this->getOptions($tdomf_form_id);
+        $options = $this->getOptions($tdomf_form_id,$this->getIndexFromParams($params));
         if($options['tdomf-hack']) {
             $output = $before_widget;
-            if($this->widgetTitle && $options['tdomf-title'] != "") {
-                $output .= $before_title.$options['tdomf-title'].$after_title;
+            if($this->widgetTitle && $options[$this->widgetTitleKey] != "") {
+                $output .= $before_title.$options[$this->widgetTitleKey].$after_title;
             }
             $output .= $this->previewHack($args,$options);
             $output .= $after_widget;
@@ -706,8 +871,8 @@ class TDOMF_Widget {
      * @return String 
      * @access private 
      */ 
-     function _adminError($form_id) {
-        $options = $this->getOptions($form_id);
+     function _adminError($form_id,$params=array()) {
+        $options = $this->getOptions($form_id,$this->getIndexFromParams($params));
         return $this->adminError($options,$form_id);
      }
      
@@ -715,7 +880,7 @@ class TDOMF_Widget {
      * Individual widgets that implement an error handler should override this function
      * 
      * @access public
-     * @return String 
+     * @return Mixed 
      */       
      function adminError($options,$form_id) {
          return "";
@@ -727,11 +892,11 @@ class TDOMF_Widget {
      * @return Array
      * @access public
      */       
-    function getOptions($form_id) {
-        $defaults = array('tdomf-title' => $this->displayName,
-                          'tdomf-hack' => $this->hack,
-                          'tdomf-preview-hack' => $this->previewHack );
-        $options = tdomf_get_option_widget($this->optionKey,$form_id);
+    function getOptions($form_id,$index='') {
+        $defaults = array( $this->widgetTitleKey => $this->displayName,
+                          'tdomf-hack'           => $this->hack,
+                          'tdomf-preview-hack'   => $this->previewHack );
+        $options = tdomf_get_option_widget($this->optionKey.$index,$form_id);
         # A bug in a previous version used the unmodified 'internalName' as the option key
         if($options == false) { $options = tdomf_get_option_widget('tdomf_widget_'.$this->internalName,$form_id); }
         if($options == false) { $options = array(); }
@@ -744,8 +909,8 @@ class TDOMF_Widget {
      * 
      * @access public
      */
-    function updateOptions($options,$form_id) {
-        $options = tdomf_set_option_widget($this->optionKey,$options,$form_id);
+    function updateOptions($options,$form_id,$index='') {
+        $options = tdomf_set_option_widget($this->optionKey.$index,$options,$form_id);
     }
     
     /** 
@@ -778,6 +943,22 @@ class TDOMF_Widget {
             return true;
         }
         return false;
+    }
+    
+    /** 
+     * Returns the index from an input param
+     * 
+     * @return Mixed
+     */ 
+    function getIndexFromParams($params = array()) {
+        $index = '';
+        if($this->multipleInstances) {
+            $index = 0;
+            if(is_array($params) && count($params) >= 1){
+                $index = $params[0];
+            }
+        }
+        return $index;
     }
 }
 

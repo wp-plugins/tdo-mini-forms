@@ -71,6 +71,7 @@ Work Queue:
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
+   - image capatcha must update after failed "submit"
    - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
    - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
    - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
@@ -140,18 +141,10 @@ New Features
   * Select from pre-configured Styles
   * Submit new style to include in TDOMF
 - Email verification of non-registered users
-- Edit Posts
-  * Using same/similar form as what the post was submitted with?
-  * Create Edit-Post only forms
-  * Allow various controls and access for forms: per category and by access roles
-  * Editing Post implies adding/removing comments too (can replace comment submission form)
-  * Unregistered user editing (requires some sort of magic code)
 - Manage Downloads page
-- Option to display the moderation menu like the "comment moderation" page (i.e. with little extracts of the posts/pages)
 - Authors of posts should be able to see "previews" of post
 - Get input during validation of form (for capatchas)
 - Option to use "Post ready for review" instead of draft for unapproved submitted posts
-- On Options and Widgets Page, set the "title" of the Form links to the given title of the form
 - Turn Forms into multiple steps
 - Shortcode Support
 
@@ -160,7 +153,6 @@ New Form Options
 - Hide Form on Preview
 - Forms can be used to submit links, emails, etc.
 - Select Form Style/include Custom CSS
-- Control who can access form not just by role but also by user, ip and capability.
 
 New Widgets
 - Widget to allow user to enter a date to post the submission (as in future post)
@@ -176,10 +168,10 @@ New Widgets
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
-- All widgets should have a title field
 - Textfield Class (support numeric, date, email, webpage, etc.)
 - Textarea Class
 - Copy Widget to another Form
+- Individual save
 - Upload Files
   * Multiple Instances
   * Thumbnail size
@@ -465,7 +457,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * First version only widgets that support editing: I Agree, Append to Post Content, 1 Question Captcha and Text
+ * First version only widgets that support editing: 1 Question Captcha, Append to Post Content
  *
  * @live server
  * Testing Edit Spam
@@ -477,10 +469,9 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
  * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
  * Option to disable Spam/Unapproved Edit Locking (require temp locks)
  * Template Tags for editing (what is actually required?)
- * Moderation screen: implement filters: form, user, ip, username, email, page/post
+ * Moderation screen: implement filters: form, user, ip, username, email, page/post, un/locked
  * Moderation screen: search
  * Moderation screen: bulk buttons at top of list too
- * Moderation screen: Locked/Unlocked filters or types
  * 'Back' Button for Ajax inline editing
  * 'Reset' Button for Editing Forms
  * "Draft" Editing support

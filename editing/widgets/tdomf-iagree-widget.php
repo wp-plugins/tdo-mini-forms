@@ -3,97 +3,136 @@
 Name: "I Agree"
 URI: http://thedeadone.net/software/tdo-mini-forms-wordpress-plugin/
 Description: This widget provides a checkbox that the user must click before a post will be accept such as the classic "I Agree" buttons.
-Version: 4
+Version: 5
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
 
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
-
-// Get Options for this widget
-//
-function tdomf_widget_iagree_get_options($form_id) {
-  $options = tdomf_get_option_widget('tdomf_iagree_widget',$form_id);
-    if($options == false) {
-       $options = array();
-       $options['text'] = __("I agree with the <a href='#'>posting policy</a>.","tdomf");
-       $options['error-text'] = __("You must agree with <a href='#'>posting policy</a> policy before submission!","tdomf");
-    }
-  return $options;
-}
-
-//////////////////////////////
-// Display the widget! 
-//
-function tdomf_widget_iagree($args) {
-  extract($args);
-  $options = tdomf_widget_iagree_get_options($tdomf_form_id);
   
-  $output  = $before_widget;  
-  $output .= '<input type="checkbox" name="iagree" id="iagree" ';
-  if($args['iagree']) { $output .= "checked "; }
-  $output .= '/><label for="iagree" class="required" > ';
-  $output .= $options['text'];
-  $output .= ' </label>';
-  $output .= $after_widget;
-  return $output;
-}
-tdomf_register_form_widget('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree');
+  /** 
+   * I Agree. This widget provides a checkbox that the user must click before a post will be accept such as the classic "I Agree" buttons.
+   * 
+   * @author Mark Cunningham <tdomf@thedeadone.net> 
+   * @version 4.0 
+   * @since 0.13.0
+   * @access public 
+   * @copyright Mark Cunningham
+   * 
+   */ 
+  class TDOMF_WidgetIAgree extends TDOMF_Widget
+  {
+      /** 
+       * Initilise and start widget
+       * 
+       * @access public
+       */ 
+      function TDOMF_WidgetIAgree() {
+          $this->enableHack();
+          $this->enableValidate();
+          $this->enableControl(true,400,350);
+          $this->setInternalName('i-agree');
+          $this->setDisplayName(__('I Agree','tdomf'));
+          $this->setOptionKey('tdomf_iagree_widget');
+          $this->enableAdminError();
+          $this->start();
+      }
+      
+      /**
+       * Overrides "getOptions" with defaults for this widget
+       * 
+       * @access public
+       * @return array
+       */
+      function getOptions($form_id) {
+          $defaults = array(   'text' => __("I agree with the <a href='#'>posting policy</a>.","tdomf"),
+                               'error-text' => __("You must agree with <a href='#'>posting policy</a> policy before submission!","tdomf") );
+          $options = TDOMF_Widget::getOptions($form_id); 
+          $options = wp_parse_args($options, $defaults);
+          return $options;
+      }   
+      
+      /**
+       * What to display in form
+       * 
+       * @access public
+       * @return String
+       */
+      function form($args,$options) {
+         global $current_user;
+         get_currentuserinfo();
+         extract($args);
+         $output = "";
+         
+         $output .= '<input type="checkbox" name="iagree" id="iagree" ';
+         if($args['iagree']) { $output .= "checked "; }
+         $output .= '/><label for="iagree" class="required" > ';
+         $output .= $options['text'];
+         $output .= ' </label>';
+         return $output;
+      }     
+      
+      /**
+       * Code for hacking form output
+       * 
+       * @access public
+       * @return String
+       */
+      function formHack($args,$options) {
+            global $current_user;
+            get_currentuserinfo();
+            extract($args);
+            $output = "";
+            $output .= "\t\t".'<input type="checkbox" name="iagree" id="iagree" ';
+            $output .= "<?php if(\$iagree) { echo 'checked'; } ?>";
+            $output .= ' />'."\n\t\t".'<label for="iagree" class="required" > ';
+            $output .= $options['text'];
+            $output .= ' </label>';
+            return $output;
+      }
+      
+      /**
+       * Validate widget input
+       * 
+       * @access public
+       * @return Mixed
+       */
+      function validate($args,$options,$preview) {
+          // only preview - no validation required
+          if($preview) {
+              return NULL;
+          }
+          extract($args);
+          if(!isset($iagree)) {
+              return $options['error-text'];
+          } else {
+              return NULL;
+          }
+      }
+      
+      /**
+       * Configuration panel for widget
+       * 
+       * @access public
+       */      
+      function control($options,$form_id) {
+          
+          // Store settings for this widget
+          //
+          if ( $_POST[$this->internalName.'-submit'] ) {
+                 $newoptions['text'] = $_POST['i-agree-text'];
+                 $newoptions['error-text'] = $_POST['i-agree-error-text'];
+                 $options = wp_parse_args($newoptions, $options);
+                 $this->updateOptions($options,$form_id);
+          }
 
-function tdomf_widget_iagree_hack($args) {
-  extract($args);
-  $options = tdomf_widget_iagree_get_options($tdomf_form_id);
-  
-  $output  = $before_widget;  
-  $output .= "\t\t".'<input type="checkbox" name="iagree" id="iagree" ';
-  $output .= "<?php if(\$iagree) { echo 'checked'; } ?>";
-  $output .= ' />'."\n\t\t".'<label for="iagree" class="required" > ';
-  $output .= $options['text'];
-  $output .= ' </label>';
-  $output .= $after_widget;
-  return $output;
-}
-tdomf_register_form_widget_hack('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_hack');
-
-//////////////////////////////////////
-// User must Agree! 
-//
-function tdomf_widget_iagree_validate($args,$preview) {
-  if($preview) {
-    return NULL;
-  }
-  extract($args);
-  $options = tdomf_widget_iagree_get_options($tdomf_form_id);
-  if(!isset($iagree)) {
-    return $before_widget.$options['error-text'].$after_widget;
-  } else {
-    return NULL;
-  }
-}
-tdomf_register_form_widget_validate('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_validate');
-
-///////////////////////////////////////////////////
-// Display and handle content widget control panel 
-//
-function tdomf_widget_iagree_control($form_id) {
-  $options = tdomf_widget_iagree_get_options($form_id);
-  // Store settings for this widget
-    if ( $_POST['i-agree-submit'] ) {
-     $newoptions['text'] = $_POST['i-agree-text'];
-     $newoptions['error-text'] = $_POST['i-agree-error-text'];
-     if ( $options != $newoptions ) {
-        $options = $newoptions;
-        tdomf_set_option_widget('tdomf_iagree_widget', $options, $form_id);
-        
-     }
-  }
-
-   // Display control panel for this widget
-  
-  extract($options);
-
+          // Display control panel for this widget
+          //
+          extract($options);
         ?>
 <div>
+
+<?php $this->controlCommon($options); ?>
 
 <i><?php _e("HTML is permissible in messages.","tdomf"); ?></i>
 
@@ -109,19 +148,26 @@ function tdomf_widget_iagree_control($form_id) {
 
 </div>
         <?php 
-}
-tdomf_register_form_widget_control('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_control', 400, 300);
+     }
 
-function tdomf_widget_iagree_admin_error($form_id) {
-    
-  $options = tdomf_widget_iagree_get_options($form_id,true);
-
-  $output = "";  
-  if($options['text'] == __("I agree with the <a href='#'>posting policy</a>.","tdomf")) {
-      $output .= __('<b>Warning</b>: You have not modified the text in "I Agree" widget. This contains just a place holder text and should be at least updated to point to <i>your</i> submission policy.','tdomf');
+     /** 
+     * Display error to user for mis-configuration
+     * 
+     * @access public
+     * @return String
+     */       
+     function adminError($options,$form_id) {
+         $output = "";  
+         if($options['text'] == __("I agree with the <a href='#'>posting policy</a>.","tdomf")) {
+             $output .= __('<b>Warning</b>: You have not modified the text in "I Agree" widget. This contains just a place holder text and should be at least updated to point to <i>your</i> submission policy.','tdomf');
+         }
+         return $output;
+     }
   }
-  
-  return $output;
-}
-tdomf_register_form_widget_admin_error('i-agree',__('I Agree','tdomf'), 'tdomf_widget_iagree_admin_error');
+
+  // Create and start the widget
+  //
+  global $tdomf_widget_iagree;
+  $tdomf_widget_iagree = new TDOMF_WidgetIAgree();  
+
 ?>

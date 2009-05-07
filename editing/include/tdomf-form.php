@@ -19,7 +19,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
    if(is_user_logged_in()) {
        $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
        if($user_status == TDOMF_USER_STATUS_BANNED) {
-          tdomf_log_message("Banned user $current_user->user_name tried to submit a post!",TDOMF_LOG_ERROR);
+          tdomf_log_message_extra("Banned user $current_user->user_name tried to submit a post!",TDOMF_LOG_ERROR);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_USER,$form_id); 
        }
    }
@@ -32,7 +32,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
   	$banned_ips = split(";",$banned_ips);
   	foreach($banned_ips as $banned_ip) {
 		if($banned_ip == $ip) {
-           tdomf_log_message("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
+           tdomf_log_message_extra("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
            return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id);
 		}
 	 }
@@ -71,7 +71,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
               $results = $wpdb->get_results( $query );
               #var_dump($results);
               if(count($results) >= $rule['count']) {
-                  tdomf_log_message("IP $ip blocked by Throttle Rule $rule_id",TDOMF_LOG_BAD);
+                  tdomf_log_message_extra("IP $ip blocked by Throttle Rule $rule_id",TDOMF_LOG_BAD);
                   return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
               }
           }
@@ -102,7 +102,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
               $edit_args['count'] = true;
               $edit_count = tdomf_get_edits($edit_args);
               if($edit_count >= $rule['count']) {
-                  tdomf_log_message("This IP $ip blocked by Throttle Rule $rule_id when accessing Form $form_id (on post $post_id)",TDOMF_LOG_BAD);
+                  tdomf_log_message_extra("This IP $ip blocked by Throttle Rule $rule_id when accessing Form $form_id (on post $post_id)",TDOMF_LOG_BAD);
                   return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
               }
           }
@@ -111,7 +111,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       // valid post id value
       //
       if(!$post_id) {
-          tdomf_log_message("Bad post_id $post_id!",TDOMF_LOG_ERROR);
+          tdomf_log_message_extra("Bad post_id $post_id!",TDOMF_LOG_ERROR);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
       }
       
@@ -119,7 +119,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       //
       $post = wp_get_single_post($post_id, ARRAY_A);
       if($post == NULL) {
-          tdomf_log_message("Post with id $post_id does not exist!",TDOMF_LOG_ERROR);
+          tdomf_log_message_extra("Post with id $post_id does not exist!",TDOMF_LOG_ERROR);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
       }
       
@@ -127,7 +127,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       //
       $locked = get_post_meta($post_id, TDOMF_KEY_LOCK, true);
       if($locked) {
-          tdomf_log_message("Post with id $post_id is locked. Cannot be edited.",TDOMF_LOG_BAD);
+          tdomf_log_message_extra("Post with id $post_id is locked. Cannot be edited.",TDOMF_LOG_BAD);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_LOCKED_POST,$form_id);
       }
       
@@ -136,7 +136,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       if(tdomf_get_option_form(TDOMF_OPTION_EDIT_RESTRICT_TDOMF,$form_id)) {
           $tdomf_flag = get_post_meta($post_id, TDOMF_KEY_FLAG, true);
           if($tdomf_flag == false || empty($tdomf_flag)) {
-              tdomf_log_message("Post with id $post_id is not a TDOMF post and cannot be edited with form $form_id!",TDOMF_LOG_ERROR);
+              tdomf_log_message_extra("Post with id $post_id is not a TDOMF post and cannot be edited with form $form_id!",TDOMF_LOG_ERROR);
               return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
           }
       }
@@ -145,7 +145,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       //      
       $use_pages = tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id);
       if( ($use_pages && $post['post_type'] == 'post') || (!$use_pages && $post['post_type'] == 'page')) {
-          tdomf_log_message("Post with id $post_id is wrong type of post (".$post['post_type'].") for $form_id!",TDOMF_LOG_ERROR);
+          tdomf_log_message_extra("Post with id $post_id is wrong type of post (".$post['post_type'].") for $form_id!",TDOMF_LOG_ERROR);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
       }
       
@@ -159,7 +159,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
                   if(is_array($created_pages)) {
                           foreach($created_pages as $created_page) {
                               if($created_page == $post_id) {
-                                  tdomf_log_message("Cannot edit page with id $post_id as it is in use as a form for TDOMF!",TDOMF_LOG_ERROR);
+                                  tdomf_log_message_extra("Cannot edit page with id $post_id as it is in use as a form for TDOMF!",TDOMF_LOG_ERROR);
                                   return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
                               }
                           }
@@ -169,7 +169,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
           // Load up the post content and check for tags
           //
           if(preg_match('|<!--tdomf_form.*-->|', $post['post_content']) > 0 || preg_match('|\[tdomf_form.*\]|', $post['post_content']) > 0) {
-            tdomf_log_message("Cannot edit post/page with id $post_id as it contains tags for TDOMF Forms!",TDOMF_LOG_ERROR);
+            tdomf_log_message_extra("Cannot edit post/page with id $post_id as it contains tags for TDOMF Forms!",TDOMF_LOG_ERROR);
             return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
           }
       }
@@ -187,7 +187,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
                   }
               }
               if(!$good_cat) {
-                  tdomf_log_message("Post with id $post_id is in wrong categories for $form_id!",TDOMF_LOG_ERROR);
+                  tdomf_log_message_extra("Post with id $post_id is in wrong categories for $form_id!",TDOMF_LOG_ERROR);
                   return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
               }
           }
@@ -199,7 +199,7 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       if($allow_time > 0) {
           $diff_time = time() - strtotime($post['post_date']);
           if($diff_time > $allow_time) {
-              tdomf_log_message("Post with id $post_id is outside time period by ".($diff_time-$allow_time)." seconds for $form_id!",TDOMF_LOG_ERROR);
+              tdomf_log_message_extra("Post with id $post_id is outside time period by ".($diff_time-$allow_time)." seconds for $form_id!",TDOMF_LOG_ERROR);
               return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
           }
       }
@@ -210,10 +210,10 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
           $last_edit = tdomf_get_edits(array('post_id' => $post_id, 'limit' => 1));
           if(!empty($last_edit)) {
               if($last_edit[0]->state == 'unapproved') {
-                  tdomf_log_message("Post with id $post_id has an unapproved edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+                  tdomf_log_message_extra("Post with id $post_id has an unapproved edit " . $last_edit[0]->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
                   return tdomf_get_message_instance(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id);
               } else if($last_edit[0]->state == 'spam') {
-                  tdomf_log_message("Post with id $post_id has a spam edit " . $last_edit->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+                  tdomf_log_message_extra("Post with id $post_id has a spam edit " . $last_edit[0]->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
                   return tdomf_get_message_instance(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id);
               }
           }
