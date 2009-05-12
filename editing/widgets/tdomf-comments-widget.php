@@ -73,7 +73,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
     }
     return $output;
   }
-  tdomf_register_form_widget('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments');
+  tdomf_register_form_widget('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments', $modes = array('new'));
  
   function tdomf_widget_comments_hack($args) {
     $options = tdomf_widget_comments_get_options($args['tdomf_form_id']);
@@ -150,7 +150,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
     }
     return $output;
     }
-  tdomf_register_form_widget_hack('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_hack');
+  tdomf_register_form_widget_hack('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_hack', $modes = array('new'));
   
   function tdomf_widget_comments_preview($args) {
     extract($args);
@@ -189,7 +189,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
     }
     return $output;
   }
-  tdomf_register_form_widget_preview('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_preview');
+  tdomf_register_form_widget_preview('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_preview', $modes = array('new'));
 
   function tdomf_widget_comments_preview_hack($args) {
     extract($args);
@@ -228,7 +228,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
     }
     return $output;
   }
-  tdomf_register_form_widget_preview_hack('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_preview_hack');
+  tdomf_register_form_widget_preview_hack('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_preview_hack', $modes = array('new'));
 
   function tdomf_widget_comments_adminemail($args) {
     $options = tdomf_widget_comments_get_options($args['tdomf_form_id']);
@@ -255,7 +255,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
     return $output;
   }
-  tdomf_register_form_widget_adminemail('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_adminemail');
+  tdomf_register_form_widget_adminemail('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_adminemail', $modes = array('new'));
   
   
   function tdomf_widget_comments_post($args) {
@@ -301,7 +301,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
     
     return NULL;
   }
-  tdomf_register_form_widget_post('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_post');
+  tdomf_register_form_widget_post('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_post', $modes = array('new'));
 
     function tdomf_widget_comments_get_options($form_id) {
         $options = tdomf_get_option_widget('tdomf_comment_widget',$form_id);
@@ -367,6 +367,6 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_control', 700, 400);
+tdomf_register_form_widget_control('comments',__('Comments Management',"tdomf"), 'tdomf_widget_comments_control', 700, 400, $modes = array('new'));
   
 ?>

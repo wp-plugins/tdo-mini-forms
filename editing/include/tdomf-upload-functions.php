@@ -509,7 +509,7 @@ function tdomf_widget_upload($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload');
+tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload', $modes = array('new'));
 
 //////////////////////////////
 // Post-post stuff
@@ -772,7 +772,7 @@ function tdomf_widget_upload_post($args) {
  
   return NULL;
 }
-tdomf_register_form_widget_post('upload-files','Upload Files', 'tdomf_widget_upload_post');
+tdomf_register_form_widget_post('upload-files','Upload Files', 'tdomf_widget_upload_post', $modes = array('new'));
 
 ////////////////////////////////
 // Validate uploads if possible
@@ -799,7 +799,7 @@ function tdomf_widget_upload_validate($args,$preview) {
   }
   return NULL;
 }
-tdomf_register_form_widget_validate('upload-files','Upload Files', 'tdomf_widget_upload_validate');
+tdomf_register_form_widget_validate('upload-files','Upload Files', 'tdomf_widget_upload_validate', $modes = array('new'));
 
 //////////////////////////////
 // Preview uplaods if possible
@@ -843,7 +843,7 @@ function tdomf_widget_upload_preview($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview('upload-files','Upload Files', 'tdomf_widget_upload_preview');
+tdomf_register_form_widget_preview('upload-files','Upload Files', 'tdomf_widget_upload_preview', $modes = array('new'));
 
 ////////////////////////////////////
 // Add info on files to admin email 
@@ -872,7 +872,7 @@ function tdomf_widget_upload_adminemail($args) {
   }
   return  $before_widget.__("No files uploaded with this post!","tdomf").$after_widget;
 }
-tdomf_register_form_widget_adminemail('upload-files','Upload Files', 'tdomf_widget_upload_adminemail');
+tdomf_register_form_widget_adminemail('upload-files','Upload Files', 'tdomf_widget_upload_adminemail', $modes = array('new'));
 
 ///////////////////////////////////////////////////
 // Display and handle content widget control panel 
@@ -1013,6 +1013,6 @@ function tdomf_widget_upload_control($form_id) {
 </p>
         <?php 
 }
-tdomf_register_form_widget_control('upload-files','Upload Files', 'tdomf_widget_upload_control', 550, 750);
+tdomf_register_form_widget_control('upload-files','Upload Files', 'tdomf_widget_upload_control', 550, 750, $modes = array('new'));
 
 ?>

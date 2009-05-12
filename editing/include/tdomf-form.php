@@ -685,7 +685,7 @@ function tdomf_update_post($form_id,$mode,$args) {
        // Notify admins
        //
        if($send_moderator_email){
-          //todo tdomf_notify_admins($post_ID,$form_id);
+          tdomf_notify_admins_edit($edit_id,$form_id);
        }
    } 
    

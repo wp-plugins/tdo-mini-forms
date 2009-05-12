@@ -78,7 +78,7 @@ function tdomf_widget_excerpt($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt');
+tdomf_register_form_widget('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt', $modes = array('new'));
 
 // Hacked version
 //
@@ -124,7 +124,7 @@ function tdomf_widget_excerpt_hack($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_hack('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_hack');
+tdomf_register_form_widget_hack('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_hack', $modes = array('new'));
 
 ///////////////////////////////////////
 // Preview the post's excerpt
@@ -154,7 +154,7 @@ function tdomf_widget_excerpt_preview($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_preview');
+tdomf_register_form_widget_preview('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_preview', $modes = array('new'));
 
 ///////////////////////////////////////
 // Hack the preview the post's excerpt and title
@@ -182,7 +182,7 @@ function tdomf_widget_excerpt_preview_hack($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_preview_hack('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_preview_hack');
+tdomf_register_form_widget_preview_hack('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_preview_hack', $modes = array('new'));
 
 ///////////////////////////////////////
 // Add the excerpt to the post 
@@ -213,7 +213,7 @@ function tdomf_widget_excerpt_post($args) {
   $post_ID = wp_update_post($post);
   return NULL;
 }
-tdomf_register_form_widget_post('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_post');
+tdomf_register_form_widget_post('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_post', $modes = array('new'));
 
 ///////////////////////////////////////////////////
 // Display and handle excerpt widget control panel 
@@ -264,7 +264,7 @@ function tdomf_widget_excerpt_control($form_id) {
 </div>
         <?php 
 }
-tdomf_register_form_widget_control('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_control', 340, 520);
+tdomf_register_form_widget_control('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_control', 340, 520, $modes = array('new'));
 
 ///////////////////////////////////////
 // Validate title and excerpt from form 
@@ -307,6 +307,6 @@ function tdomf_widget_excerpt_validate($args,$preview) {
     return NULL;
   }
 }
-tdomf_register_form_widget_validate('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_validate');
+tdomf_register_form_widget_validate('excerpt',__('Excerpt','tdomf'), 'tdomf_widget_excerpt_validate', $modes = array('new'));
 
 ?>

@@ -35,6 +35,8 @@ Author URI: http://thedeadone.net
 // - Fixed '$' not working in preview
 // - Fixed characters getting eaten up in preview
 // - Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
+// - Added a message to the Form Creator to indicate if a the Form Hacker 
+//    has been enabled and will prevent changes to form.
 //
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break
@@ -71,6 +73,10 @@ Work Queue:
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
+   - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
+   - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
+   - auto-delete spam not working (must also delete edits)
+   - http://thedeadone.net/forum/?p=2100#comment-4278 (alternative input?)
    - image capatcha must update after failed "submit"
    - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
    - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
@@ -457,12 +463,9 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
 /* 
  * @todo
- * First version only widgets that support editing: 1 Question Captcha, Append to Post Content
  *
  * @live server
  * Testing Edit Spam
- * Notify Admins for Edits
- * Update/Test Admin Notification Email to use new moderation links
  * First version only widgets that support editing: reCaptcha
  *
  * @postponed

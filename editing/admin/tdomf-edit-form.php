@@ -466,6 +466,10 @@ function tdomf_show_form_menu() {
     
 		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Most Widgets can be individually configured once you have dropped them on the form. Just click on the right-most icon on the Widget title. Widgets will be executed and displayed in order from top to bottom. If you wish to change the order they are displayed in but not executed in, please use the Form Hacker to do so.',"tdomf"); ?></p>
 
+        <?php if(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id) != false) { ?>
+            <p><font color='red'><?php _e('The Form Hacker has been set for this form. This means that any changes to widgets will not appear on the form until you reset the Form Hacker. Only the backend processing of the form will be affected by these changes.',"tdomf"); ?></font></p>
+        <?php } ?>
+        
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
       
       <input type="hidden" id="tdomf-form-id" name="tdomf-form-id" value="<?php echo $form_id; ?>" />

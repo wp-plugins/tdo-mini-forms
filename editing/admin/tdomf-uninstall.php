@@ -224,6 +224,7 @@ function tdomf_uninstall() {
     delete_post_meta($post->ID, TDOMF_KEY_IP);
     delete_post_meta($post->ID, TDOMF_KEY_USER_ID);
     delete_post_meta($post->ID, TDOMF_KEY_USER_NAME);
+    delete_post_meta($post->ID, TDOMF_KEY_LOCK);
   }
   echo "<span style='color:green;'>";
   _e("DONE","tdomf"); 

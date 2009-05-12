@@ -44,7 +44,8 @@ if(!isset($tdomf_args['tdomf_form_id'])) {
 $form_id = intval($tdomf_args['tdomf_form_id']);
 if(!tdomf_form_exists($form_id)){
   tdomf_log_message("tdomf-form-ajax: Bad form id %d!",TDOMF_LOG_BAD);
-  die( "tdomfDisplayMessage$form_id('TDOMF: Bad Form Id','full');" );
+  #die( "tdomfDisplayMessage$form_id('TDOMF: Bad Form Id','full');" );
+  die( "alert('".__("TDOMF: Bad Form id!","tdomf")."');" );
 }
 
 // Submit or Edit?
@@ -69,7 +70,7 @@ function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false, $p
     #$message = str_replace("\n"," ",$message);
     $message = preg_replace('/\r\n|\n\r|\r/', '\n', str_replace('\'', '\\' . '\'', str_replace('\\', '\\\\', $message)));
     $message = str_replace("\n"," ",$message);
-    #tdomf_log_message("sending '$message' via ajax...");
+    tdomf_log_message("sending '$message' via ajax (tdomfDisplayMessage$form_tag)...");
     #$message = htmlentities($message,ENT_COMPAT);
     if($full) {
         die( "tdomfDisplayMessage$form_tag('$message','full');" );
@@ -90,7 +91,8 @@ if($is_edit) {
         $post_id = $tdomf_args['tdomf_post_id'];
     } else {
         tdomf_log_message("tdomf-form-ajax: Edit form %d but no post id!",TDOMF_LOG_BAD);
-        tdomf_ajax_exit($form_id,__("TDOMF (AJAX) ERROR: Missing Post Id!","tdomf"),true,false,$post_id);
+        #tdomf_ajax_exit($form_id,__("TDOMF (AJAX) ERROR: Missing Post Id!","tdomf"),true,false,$post_id);
+        die( "alert('".__("TDOMF (AJAX) ERROR: Missing Post Id!","tdomf")."');" );
     }
 }
 

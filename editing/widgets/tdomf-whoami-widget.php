@@ -39,7 +39,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enableValidatePreview();
           $this->enablePost();
           $this->enableWidgetTitle();
-          $this->enableControl(true,600,380);
+          $this->enableControl(true,600,420);
           $this->setInternalName('who-am-i');
           $this->setDisplayName(__('Who Am I','tdomf'));
           $this->setOptionKey('tdomf_whoami_widget');

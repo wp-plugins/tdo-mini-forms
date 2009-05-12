@@ -31,9 +31,9 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enableWidgetTitle(true,'title');
           $this->enableHack();
           $this->enableControl(true,500,570);
-          $this->setInternalName('text-');
+          $this->setInternalName('1qcaptcha');
           $this->setDisplayName(__('Text','tdomf'));
-          $this->setOptionKey('tdomf_text_widget_'); // index is appended
+          $this->setOptionKey('tdomf_1qcaptcha_widget'); // index is appended
           $this->enableMultipleInstances(true,__('Text %d','tdomf'),'tdomf_text_widget_count');
           $this->start();
       }

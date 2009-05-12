@@ -144,9 +144,9 @@ function tdomf_notify_admins($post_ID,$form_id){
   if($is_spam) {
      $subject = sprintf(__("[SPAM] [%s] Please moderate this spam post","tdomf"),get_bloginfo('title'));
   } else if($status == 'publish' || $status == 'future') {
-      $subject = sprintf(__("[%s] Post %s has been published","tdomf"),get_bloginfo('title'),$title);
+      $subject = sprintf(__("[%s] Post '%s' has been published","tdomf"),get_bloginfo('title'),$title);
   } else {
-     $subject = sprintf(__("[%s] Please moderate this new post request from %s","tdomf"),get_bloginfo('title'),$submitter_name);
+     $subject = sprintf(__("[%s] Please moderate this new post request from '%s'","tdomf"),get_bloginfo('title'),$submitter_name);
   }
   
   // Email Body
@@ -165,9 +165,9 @@ function tdomf_notify_admins($post_ID,$form_id){
   if($status != 'publish' && $status != 'future') {
       $email_msg .= sprintf(__("Publish Post (will also flag post as not SPAM): %s.\n","tdomf"),$publish_post_link);
       $email_msg .= sprintf(__("Edit Post: %s.\n","tdomf"),$edit_post_link);
-      if(!$is_spam) {
+      if(!$is_spam && get_option(TDOMF_OPTION_SPAM)) {
           $email_msg .= sprintf(__("Flag Post as SPAM: %s.\n","tdomf"),$spam_link);
-      } else {
+      } else if($is_spam){
           $email_msg .= sprintf(__("Flag Post as not SPAM: %s.\n","tdomf"),$ham_link);
       }
       $email_msg .= sprintf(__("Ban IP: %s.\n","tdomf"),$ban_ip_link);
@@ -186,7 +186,153 @@ function tdomf_notify_admins($post_ID,$form_id){
                          "after_widget"  => "\n\n",
                          "before_title"  => "",
                          "after_title"   => "\n\n",
-                         "tdomf_form_id" => $form_id);
+                         "tdomf_form_id" => $form_id,
+                         "tdomf_post_id" => $post_ID);
+   $widget_order = tdomf_get_widget_order($form_id);
+   foreach($widget_order as $w) {
+	  if(isset($tdomf_form_widgets_adminemail[$w])) {
+      $temp_message = call_user_func($tdomf_form_widgets_adminemail[$w]['cb'],$widget_args,$tdomf_form_widgets_adminemail[$w]['params']);
+      if($temp_message != NULL && trim($temp_message) != ""){
+        $email_msg .= $temp_message;
+      }
+	  }
+   }
+   
+  $email_msg .= sprintf(__("Best Regards\nTDOMF @ %s","tdomf"),get_bloginfo("title"));
+
+  // prepare body
+  //
+  $email_msg = str_replace("\n","\r\n",$email_msg);
+  
+  // Use custom from field
+  //
+  if(tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id)) {
+
+  	// We can modify the "from" field by using the "header" option at the end!
+  	//
+  	$headers = "MIME-Version: 1.0\n" .
+  	           "From: ". tdomf_get_option_form(TDOMF_OPTION_FROM_EMAIL,$form_id) . "\n" .
+  	           "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
+
+  	return @wp_mail($email_list, $subject, $email_msg, $headers);
+  } else {
+  	return @wp_mail($email_list, $subject, $email_msg);
+  }
+}
+
+// Notify Admins to tell them that a post is awaiting moderation
+//
+function tdomf_notify_admins_edit($edit_id,$form_id){
+  global $wpdb,$tdomf_form_widgets_adminemail;
+
+  // grab email addresses
+  $email_list = tdomf_get_admin_emails($form_id);
+  if($email_list == "") {
+     tdomf_log_message("Could not get any email addresses to notify. No moderation notification email sent.",TDOMF_LOG_BAD);
+     return false;
+  }
+  
+  $edit = tdomf_get_edit($edit_id);
+  
+  // Submitter Info
+  //
+  $can_ban_user = false;
+  $submitter_string = "N/A";
+  if($edit->user_id != 0) {
+     $submitter_string = $edit->data["user_login"];
+     $can_ban_user = true;
+  } else if(isset($edit->data[TDOMF_KEY_NAME])) {
+     $submitter_string = $edit->data[TDOMF_KEY_NAME];
+     if(isset($edit->data[TDOMF_KEY_EMAIL])) {
+        $submitter_string .= " (".$edit->data[TDOMF_KEY_EMAIL].")";
+     }
+  }
+
+  // Title and content of post
+  //
+  if($edit->revision_id != 0) {
+      $post = get_post($edit->revision_id);
+  } else {
+      $post = get_post($edit->post_id);
+  }
+  $content = $post->post_content;
+  $title = $post->post_title;
+  $status = $post->post_status;
+
+  // Links
+  //
+  $moderate_edit_link = tdomf_get_mod_posts_url(array('show' => 'pending_edits'));
+  $approve_edit_link = tdomf_get_mod_posts_url(array('action' => 'approve_edit', 'edit_id' => $edit_id, 'nonce' => 'tdomf-approve_edit_' . $edit_id));
+  $delete_edit_link = tdomf_get_mod_posts_url(array('action' => 'delete_edit', 'edit_id' => $edit_id, 'nonce' => 'tdomf-approve_edit_' . $edit_id));
+  $compare_edit_link = get_bloginfo('wpurl')."/wp-admin/revision.php?action=diff&right=".$edit->revision_id."&left=".$edit->current_revision_id;
+  $spamit_edit_link = tdomf_get_mod_posts_url(array('action' => 'hamit_edit', 'edit_id' => $edit_id, 'nonce' => 'tdomf-hamit_edit_' . $edit_id));
+  $hamit_edit_link = tdomf_get_mod_posts_url(array('action' => 'spamit_edit', 'edit_id' => $edit_id, 'nonce' => 'tdomf-hamit_edit_' . $edit_id));
+  $view_edit_link = get_bloginfo('wpurl')."/wp-admin/revision.php?revision=".$edit->revision_id;
+
+  $is_spam = ($edit->state == 'spam' && get_option(TDOMF_OPTION_SPAM));
+  
+  if($can_ban_user) {
+      $ban_user_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_manage_menu&action=ban&user=$edit->user_id";
+  }
+  $ban_ip_link = get_bloginfo('wpurl')."/wp-admin/admin.php?page=tdomf_show_manage_menu&mode=ip&action=ban&ip=$edit->ip";
+  
+  // Subject line
+  //
+  if($is_spam) {
+     $subject = sprintf(__("[SPAM] [%s] Please moderate this spam edit (%d)","tdomf"),get_bloginfo('title'),$edit_id);
+  } else if($edit->state == 'approved') {
+      $subject = sprintf(__("[%s] Edit (%d) on Post '%s' has been approved","tdomf"),get_bloginfo('title'),$edit_id,$title);
+  } else {
+     $subject = sprintf(__("[%s] Please moderate this new edit (%d) from '%s'","tdomf"),get_bloginfo('title'),$edit_id,$submitter_name);
+  }
+  
+  // Email Body
+  //
+  if($edit->state == 'approved') {
+      $email_msg = sprintf(__("Edit (%d) on Post \"%s\" from %s has been published.\n\n","tdomf"),$edit_id,$title,$submitter_string);
+  } else {
+      $email_msg  = sprintf(__("A new edit (%d) on post with title \"%s\" from %s is awaiting your approval.\n\n","tdomf"),$edit_id,$title,$submitter_string);
+  }
+  if($is_spam) {
+      $email_msg = __("This edit is considered SPAM\n\n","tdomf");
+  }
+  $email_msg .= sprintf(__("Form ID: %d (\"%s\")\n","tdomf"),$edit->form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$edit->form_id));
+  $email_msg .= sprintf(__("Submitter IP: %s.\n\n","tdomf"),$edit->ip);
+  $email_msg .= sprintf(__("View Edit: %s.\n","tdomf"),$view_edit_link); 
+  if($edit->revision_id != 0 && $edit->current_revision_id != 0) {
+      $email_msg .= sprintf(__("Compare with previous: %s.\n","tdomf"),$compare_edit_link);
+  }
+  if($edit->state != 'approved') {
+      $email_msg .= sprintf(__("Approve edit (will also flag edit as not SPAM): %s\n","tdomf"),$approve_edit_link);
+      if(!$is_spam && get_option(TDOMF_OPTION_SPAM)) {
+          $email_msg .= sprintf(__("Flag Edit as SPAM: %s\n","tdomf"),$spamit_edit_link);
+      } else if($is_spam){
+          $email_msg .= sprintf(__("Flag Edit as not SPAM: %s\n","tdomf"),$hamit_edit_link);
+      }
+      $email_msg .= sprintf(__("Ban IP: %s\n","tdomf"),$ban_ip_link);
+      if($can_ban_user) {
+          $email_msg .= sprintf(__("Ban User: %s\n","tdomf"),$ban_user_link);
+      } 
+      $email_msg .= sprintf(__("Delete Edit: %s\n","tdomf"),$delete_edit_link);
+  }
+  $email_msg .= sprintf(__("You can moderate all edits from %s\n","tdomf"),$moderate_edit_link);  
+  $email_msg .= sprintf(__("\nContent of the post: \n\n %s \n\n","tdomf"),$content);
+  
+   // Widgets:adminemail
+   //
+   $widget_args = array( "before_widget" => "",
+                         "after_widget"  => "\n\n",
+                         "before_title"  => "",
+                         "after_title"   => "\n\n",
+                         "tdomf_form_id" => $form_id,
+                         "edit_id"=>$edit_id);
+   if($edit->revision_id != 0) {
+       $widget_args["post_ID"] = $edit->revision_id;
+       $widget_args["tdomf_post_id"] = $edit->revision_id;
+   } else {
+       $widget_args["post_ID"] = $edit->post_id;
+       $widget_args["tdomf_post_id"] = $edit->post_id;
+   }
    $widget_order = tdomf_get_widget_order($form_id);
    foreach($widget_order as $w) {
 	  if(isset($tdomf_form_widgets_adminemail[$w])) {
@@ -391,7 +537,7 @@ function tdomf_widget_notifyme($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget('notifyme', 'Notify Me', 'tdomf_widget_notifyme');
+tdomf_register_form_widget('notifyme', 'Notify Me', 'tdomf_widget_notifyme', $modes = array('new'));
 
 // Widget core
 //
@@ -421,7 +567,7 @@ function tdomf_widget_notifyme_hack($args) {
   $output .= $after_widget;
   return $output;
 }
-tdomf_register_form_widget_hack('notifyme', 'Notify Me', 'tdomf_widget_notifyme_hack');
+tdomf_register_form_widget_hack('notifyme', 'Notify Me', 'tdomf_widget_notifyme_hack', $modes = array('new'));
 
 // Widget validate input
 //
@@ -436,7 +582,7 @@ function tdomf_widget_notifyme_validate($args,$preview) {
   }
   return NULL;
 }
-tdomf_register_form_widget_validate('notifyme', 'Notify Me', 'tdomf_widget_notifyme_validate');
+tdomf_register_form_widget_validate('notifyme', 'Notify Me', 'tdomf_widget_notifyme_validate', $modes = array('new'));
 
 // Widget post submitted post-op
 //
@@ -459,7 +605,7 @@ function tdomf_widget_notifyme_post($args) {
   }
   return NULL;
 }
-tdomf_register_form_widget_post('notifyme', 'Notify Me', 'tdomf_widget_notifyme_post');
+tdomf_register_form_widget_post('notifyme', 'Notify Me', 'tdomf_widget_notifyme_post', $modes = array('new'));
 
 function tdomf_widget_notify_get_message($form_id,$type,$process=false,$post_id=false) {
     $options = tdomf_get_option_widget('notifyme',$form_id);
