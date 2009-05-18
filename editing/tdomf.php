@@ -59,6 +59,7 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+    http://thedeadone.net/forum/?p=2224#comment-4315 (custom validation)
     http://thedeadone.net/forum/?p=1905#comment-4093 (adding you're own inputs to the form)
     http://thedeadone.net/forum/?p=1618#comment-3611 (figure the category (alphanumeric) from title of post and add it)
     http://thedeadone.net/forum/?p=1332#comment-3889 (programatically limit size of uploaded imagE)
@@ -73,6 +74,7 @@ Work Queue:
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
+   - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
    - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
    - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
    - auto-delete spam not working (must also delete edits)
@@ -465,7 +467,6 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
  * @todo
  *
  * @live server
- * Testing Edit Spam
  * First version only widgets that support editing: reCaptcha
  *
  * @postponed
@@ -501,6 +502,8 @@ define('TDOMF_OPTION_MSG_INVALID_FORM',"tdomf_msg_invalid_form");
 define('TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST',"tdomf_msg_spam_edit_on_post");
 define('TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST',"tdomf_msg_unapproved_edit_on_post");
 define('TDOMF_OPTION_MSG_LOCKED_POST',"tdomf_msg_locked_post");
+define('TDOMF_KEY_SUBMISSION_DATE', "_tdomf_submission_date");
+define('TDOMF_KEY_SUBMISSION_DATE_GMT', "_tdomf_submission_date_gmt");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

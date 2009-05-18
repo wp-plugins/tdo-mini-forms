@@ -67,8 +67,6 @@ function tdomf_widget_customfields_append($post_ID,$options,$index,$form_id){
 //
 function tdomf_widget_customfields_number_bottom($form_id,$mode){
     if(tdomf_form_exists($form_id) && TDOMF_Widget::isSubmitForm($mode,$form_id)) {
-      var_dump($form_id);
-      var_dump($mode);
       $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
       if($count <= 0){ $count = 1; } 
       $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);

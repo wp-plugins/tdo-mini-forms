@@ -562,7 +562,7 @@ function tdomf_show_mod_posts_menu() {
                <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'spamit', 'post_id' => $p->ID, 'nonce' => 'tdomf-spamit_' . $p->ID)) ?>" onclick="if ( confirm('<?php echo js_escape(sprintf(__("You are about to flag this submission \'%s\' as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf'),$post->post_title)); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
            <?php } else { 
                     $bulk_sub_hamit = true; ?>
-              <span class="spam" title="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'hamit', 'post_id' => $p->ID, 'nonce' => 'tdomf-hamit_' . $p->ID)) ?>" ><?php _e('Not Spam','tdomf'); ?></span>
+              <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'hamit', 'post_id' => $p->ID, 'nonce' => 'tdomf-hamit_' . $p->ID)) ?>" ><?php _e('Not Spam','tdomf'); ?></span>
            <?php } } ?>
         </div>
         </td>
@@ -598,7 +598,18 @@ function tdomf_show_mod_posts_menu() {
                  echo '<a href="'.$form_edit_url.'">'.sprintf(__('Form #%d: %s</a>','tdomf'),$form_id,$form_name).'</a>';
                     } ?>
         </li>
-        <li><?php echo mysql2date(__('Y/m/d'), $post->post_date_gmt); ?></li>
+        <li>
+        <?php if($post->post_status != 'publish' && $post->post_status != 'future') { 
+                 $post_date_gmt = get_post_meta($p->ID, TDOMF_KEY_SUBMISSION_DATE, true);
+                 if($post_date_gmt) {
+                    echo mysql2date(__('Y/m/d'), $post_date_gmt);
+                 } else {
+                    #echo mysql2date(__('Y/m/d'), $post->post_modified_gmt);
+                 }
+              } else { 
+                 echo mysql2date(__('Y/m/d'), $post->post_date_gmt); 
+              } ?>
+        </li>
         </ul>
         </td>
 
@@ -678,12 +689,12 @@ function tdomf_show_mod_posts_menu() {
                <span class="delete"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'delete_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-delete_edit_' . $last_edit->edit_id)) ?>"><?php _e('Delete','tdomf'); ?></a> | </span>
                <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'approve_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-approve_edit_' . $last_edit->edit_id)) ?>"><?php _e('Approve','tdomf'); ?></a> | </span>
            <?php } ?>
-        <span class="edit"><a href="revision.php?action=diff&right=<?php echo $last_edit->revision_id; ?>&left=<?php echo $last_edit->current_revision_id; ?>"><?php _e('Compare','tdomf'); ?>
+        <span class="edit"><a href="revision.php?action=diff&right=<?php echo $last_edit->revision_id; ?>&left=<?php echo $last_edit->current_revision_id; ?>"><?php _e('Compare','tdomf'); ?></a>
         <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>           
         <?php if(get_option(TDOMF_OPTION_SPAM)) { 
                  if($last_edit->state == 'spam') {  $bulk_edit_hamit = true; ?>
              <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'hamit_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-hamit_edit_' . $last_edit->edit_id)) ?>" title="<?php echo htmlentities(__('Flag contributation as not being spam','tdomf')); ?>" ><?php _e('Not Spam','tdomf'); ?></span>
-         <php    } else {  $bulk_edit_spamit = true; ?>
+         <?php    } else {  $bulk_edit_spamit = true; ?>
               <span class="spam"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'spamit_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-spamit_edit_' . $last_edit->edit_id)) ?>" title="<?php echo htmlentities(__('Flag contributation as being spam','tdomf')); ?>" onclick="if ( confirm('<?php echo js_escape(__("You are about to flag this contribution as spam\n \'Cancel\' to stop, \'OK\' to delete.",'tdomf')); ?>') ) { return true;}return false;"><?php _e('Spam','tdomf');  ?></a></span>
         <?php    } }?>
         

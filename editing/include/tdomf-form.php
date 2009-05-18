@@ -747,6 +747,10 @@ function tdomf_create_post($args) {
    //
    $def_title = tdomf_get_log_timestamp();
    
+   // Date of submission of post
+   //
+   $date = current_time('mysql');
+   $date_gmt = get_gmt_from_date($date);
    // Build post and post it as draft
    //
    $post = array (
@@ -800,6 +804,10 @@ function tdomf_create_post($args) {
    //
    add_post_meta($post_ID, TDOMF_KEY_FORM_ID, $form_id, true);
 
+   // Submission dates
+   //
+   add_post_meta($post_ID, TDOMF_KEY_SUBMISSION_DATE, $date, true);
+   add_post_meta($post_ID, TDOMF_KEY_SUBMISSION_DATE_GMT, $date_gmt, true);
    
    tdomf_log_message("Let the widgets do their work on newly created $post_ID");
 

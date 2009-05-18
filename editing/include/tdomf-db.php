@@ -583,7 +583,8 @@ function tdomf_get_edits($args) {
                       'ip' => false,
                       'user_id' => false,
                       'and_cond' => true,
-                      'time_diff' => false);
+                      'time_diff' => false,
+                      'older_than' => false);
     $args = wp_parse_args($args, $defaults);
     extract($args);
     
@@ -661,7 +662,18 @@ function tdomf_get_edits($args) {
                 $where_conditions .= ' OR ';
             }
         }
-        $where_conditions .= "post_date > '".$time_diff."' ";
+        $where_conditions .= "date > '".$time_diff."' ";
+    } 
+
+    if($older_than != false && !empty($older_than)) {
+         if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "date < '".$older_than."' ";
     }
     
     if(!empty($where_conditions)) {
@@ -690,6 +702,7 @@ function tdomf_get_edits($args) {
            $query .= 'OFFSET '.intval($offset).' ';
     } 
 
+    #tdomf_log_message( $query );
     #$wpdb->show_errors = true;
     if($count) {
        if($unique_post_ids) {

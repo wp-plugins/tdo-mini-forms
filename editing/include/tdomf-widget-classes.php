@@ -334,7 +334,7 @@ class TDOMF_Widget {
   <div class="wrap">
     <form method="post">
       <h2><?php echo $this->displayName ?></h2>
-      <p style="line-height: 30px;"><?php printf(_("How many %s widgets would you like?","tdomf"),$this->displayName); ?>
+      <p style="line-height: 30px;"><?php printf(__("How many %s widgets would you like?","tdomf"),$this->displayName); ?>
       <select id="tdomf-widget-<?php echo $this->internalName; ?>-number" name="tdomf-widget-<?php echo $this->internalName; ?>-number" value="<?php echo $count; ?>">
       <?php for($i = 1; $i < ($max+1); $i++) { ?>
         <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>

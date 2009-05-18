@@ -33,14 +33,30 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
     if($post_id !== false) {
         $post = &get_post($post_id);
         
+        // "post_date" is now only updated when a post is published
+        // so now submission date is captured in a custom field
+        // Failing that, go back to the old method of post_modified
+        //
+        if($post->post_status == 'publish' || $post->post_status =='future') {
+            $submission_date = mysql2date(get_option('date_format'),$post->post_date_gmt);
+            $submission_time = mysql2date(get_option('time_format'),$post->post_date_gmt);
+        } else if(get_post_meta($post_id,TDOMF_KEY_SUBMISSION_DATE_GMT,true)) {
+            $date = get_post_meta($post_id,TDOMF_KEY_SUBMISSION_DATE_GMT,true);
+            $submission_date = mysql2date(get_option('date_format'),$date);
+            $submission_time = mysql2date(get_option('time_format'),$date);
+        } else {
+            $submission_date = mysql2date(get_option('date_format'),$post->post_modified_gmt);
+            $submission_time = mysql2date(get_option('time_format'),$post->post_modified_gmt);
+        }
+               
         // url, date and time are safe but title is not: scrub
         $patterns = array ( '/'.TDOMF_MACRO_SUBMISSIONURL.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONDATE.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONTIME.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONTITLE.'/');
         $replacements = array( get_permalink($post_id),
-                               mysql2date(get_option('date_format'),$post->post_date),
-                               mysql2date(get_option('time_format'),$post->post_date),
+                               $submission_date,
+                               $submission_time,
                                tdomf_protect_input($post->post_title));
                 
         $message = preg_replace($patterns,$replacements,$message);

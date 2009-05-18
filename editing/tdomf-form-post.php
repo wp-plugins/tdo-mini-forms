@@ -205,7 +205,7 @@ if($message == NULL) {
 //
 $form_data = tdomf_get_form_data($form_id);
 
-if(!isset($post_id) || $publish || !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
+if(!isset($post_id) || !$publish || !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
   // Go back to form with args
   //
   $redirect_url = $_POST['redirect'];

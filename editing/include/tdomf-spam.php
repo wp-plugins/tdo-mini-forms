@@ -108,9 +108,8 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
   }
   
   tdomf_set_state_edit('spam',$edit_id);
-  tdomf_log_message("Edit $edit_id is <b>spam</b> (according to Akismet)<br/><pre>" . var_export($response,true) . "</pre>",TDOMF_LOG_BAD);
-  
-  return true;
+  tdomf_log_message("Edit $edit_id is <b>spam</b> (according to Akismet)<br/><pre>" . var_export($response,true) . "</pre>",TDOMF_LOG_BAD); 
+  return false;
 }
 
 function tdomf_check_submissions_spam($post_id,$live=true) {
@@ -617,6 +616,26 @@ function tdomf_cleanup_spam() {
 
    if(!get_option(TDOMF_OPTION_SPAM_AUTO_DELETE)) { return; }
 
+   // delete edit spam older than a month
+
+   $edit_list = '';
+   $time_diff = tdomf_timestamp_wp_sql(time() - 2592000); // 1 month in seconds
+   $edits = tdomf_get_edits(array('state' => 'spam',
+                                  'older_than' => $time_diff));
+   if(count($edits) > 0) {
+      foreach($edits as $edit) {
+         $edit_list [] = $edit->edit_id;
+         if($edit->revision_id != 0) {
+            wp_delete_post_revision( $edit->revision_id );
+         }
+         if($edit->current_revision_id != 0) {
+            wp_delete_post_revision( $last_edit[0]->current_revision_id );
+         }
+      }
+      tdomf_delete_edits($edit_list);
+      tdomf_log_message("Deleting spam edits older than a month: " . implode(",", $edit_list));
+   }
+
    // delete spam more than a month old
 
    $query = "SELECT ID, post_modified_gmt
@@ -625,20 +644,36 @@ function tdomf_cleanup_spam() {
              WHERE meta_key = '".TDOMF_KEY_SPAM."'";
    $spam_posts = $wpdb->get_results( $query );
 
-   $list = "";
    if(count($spam_posts) > 0) {
+       $list = "";
        foreach($spam_posts as $post) {
-           $last_updated = strtotime( $post->post_modified_gmt );
-           $diff = time() - $last_updated;
-           $diff = $diff / 86400; // number of days
-           if($diff >= 30) {
-               $list .= $post->ID.", ";
-               wp_delete_post($post->ID);
+           // we use to use post_modified_gmt but since 2.6 or 2.7 this is
+           // no longer set when the post is initially created in draft
+          
+           $post_date_gmt = get_post_meta($post->ID, TDOMF_KEY_SUBMISSION_DATE, true);
+           if($post_data_gmt != false) {
+              $post_date_ts = mysql2date('U',$post_date_gmt);      
+              $diff = time() - $post_date_ts;
+              #if($diff >= 2952000) { // 1 month (30 days)
+              if($diff >= 1) { // 1 month (30 days)
+                 $list .= $post->ID.", ";
+                 wp_delete_post($post->ID);
+              }
+              tdomf_log_message($post->ID . ' ' . $post_data_ts . ' ' . $diff);
            }
+
+           #$last_updated = strtotime( $post->post_modified_gmt );
+           #$diff = time() - $last_updated;
+           #if($diff >= 2952000) { // 1 month (30 days)
+           #    $list .= $post->ID.", ";
+           #    wp_delete_post($post->ID);
+           #}
        }
-   }
-   if($list != "") {
-       tdomf_log_message("Deleting spam posts older than a month: $list");
+       if($list != "") {
+          tdomf_log_message("Deleting spam posts older than a month: $list");
+       }
+   } else {
+       tdomf_log_message("No spam submissions to clean up!",TDOMF_LOG_GOOD);
    }
 }
 ?>
