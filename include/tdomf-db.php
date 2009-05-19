@@ -1,14 +1,15 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
-/* TODO: Look at AJAX again
- * TODO: Reset widgets for a specific form */
+/* BIG TODO: Optimisations: use cache to prevent multiple queries on the same data */
+  
 
 function tdomf_db_create_tables() {
   global $wpdb,$wp_roles, $table_prefix;
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
   $table_session_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  $table_edit_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
 
   if($wpdb->get_var("show tables like '$table_form_name'") != $table_form_name) {
     
@@ -22,6 +23,7 @@ function tdomf_db_create_tables() {
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       // Now double check the table is created!
       //
@@ -123,6 +125,7 @@ function tdomf_db_create_tables() {
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       if($wpdb->get_var("show tables like '$table_widget_name'") == $table_widget_name) {
         
@@ -191,6 +194,7 @@ function tdomf_db_create_tables() {
              );";
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
       dbDelta($sql);
+      $error = $wpdb->last_error;
       
       if($wpdb->get_var("show tables like '$table_session_name'") == $table_session_name) {
           tdomf_log_message("$table_session_name created successfully.",TDOMF_LOG_GOOD);
@@ -199,6 +203,37 @@ function tdomf_db_create_tables() {
       }
   }
      
+  if($wpdb->get_var("show tables like '$table_edit_name'") != $table_edit_name ) {
+      
+      tdomf_log_message("$table_edit_name does not exist. Will create it now...");
+      
+      $sql = "CREATE TABLE " . $table_edit_name . " (
+               edit_id              bigint(20)   NOT NULL auto_increment,
+               post_id              bigint(20)   NOT NULL default '0',
+               form_id              bigint(20)   NOT NULL default '0',
+               date                 datetime     NOT NULL default '0000-00-00 00:00:00',
+               date_gmt             datetime     NOT NULL default '0000-00-00 00:00:00',
+               revision_id          int(11)      NOT NULL default '0',
+               current_revision_id  int(11)      NOT NULL default '0',
+               user_id              bigint(20)   NOT NULL default '0',
+               ip                   varchar(100) NOT NULL default '0',
+               state                varchar(20)  NOT NULL default 'unapproved',
+               data                 longtext     NOT NULL default '',
+               PRIMARY KEY          (edit_id),
+               KEY post_id          (post_id),
+               KEY form_id          (form_id)
+             );";
+      require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+      dbDelta($sql);
+      $error = $wpdb->last_error;
+      
+      if($wpdb->get_var("show tables like '$table_edit_name'") == $table_edit_name) {
+          tdomf_log_message("$table_edit_name created successfully.",TDOMF_LOG_GOOD);
+      } else {
+          tdomf_log_message("Can't find db table $table_edit_name! Table not created: SQL Error: $error",TDOMF_LOG_ERROR);
+      }
+  }
+  
   return true;
 }
 
@@ -208,6 +243,7 @@ function tdomf_db_delete_tables() {
   $table_form_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $table_widget_name = $wpdb->prefix . TDOMF_DB_TABLE_WIDGETS;
   $table_session_name = $wpdb->prefix . TDOMF_DB_TABLE_SESSIONS;
+  $table_edit_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   
@@ -230,6 +266,13 @@ function tdomf_db_delete_tables() {
       $sql = "DROP TABLE IF EXISTS " . $table_session_name . ";";
       if($wpdb->query($sql)) {
         tdomf_log_message("Db table $table_session_name deleted!");
+      }
+  }   
+  if($wpdb->get_var("show tables like '$table_edit_name'") == $table_edit_name) {
+      tdomf_log_message("Deleting db table $table_edit_name...");
+      $sql = "DROP TABLE IF EXISTS " . $table_edit_name . ";";
+      if($wpdb->query($sql)) {
+        tdomf_log_message("Db table $table_edit_name deleted!");
       }
   }   
   return false;
@@ -483,6 +526,298 @@ function tdomf_create_form($form_name = '',$options = array()) {
   return $wpdb->insert_id;
 }
 
+function tdomf_create_edit($post_id,$form_id,$revision_id=0,$current_revision_id=0,$edit_user_id=0,$edit_user_ip=0,$edit_state='unapproved',$edit_data=array()) {
+  global $wpdb;
+  $date = current_time('mysql');
+  $date_gmt = get_gmt_from_date($date);
+  $edit_data = maybe_serialize($edit_data);
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+  $sql = "INSERT INTO $table_name " .
+         "(post_id, form_id, date, date_gmt, revision_id, current_revision_id, user_id, ip, state, data) " .
+         "VALUES ('$post_id','$form_id','$date','$date_gmt','$revision_id','$current_revision_id','$edit_user_id','$edit_user_ip','".$wpdb->escape($edit_state)."','".$wpdb->escape($edit_data)."')";
+  $result = $wpdb->query( $sql );
+  $error = $wpdb->last_error;
+  
+  if($wpdb->insert_id > 0) {
+      $edit = array( "post_id" => $post_id,
+                     "form_id" => $form_id,
+                     "date" => $date,
+                     "date_gmt" => $date_gmt,
+                     "revision_id" => $revision_id,
+                     "user_id" => $edit_user_id,
+                     "ip" => $edit_user_ip,
+                     "state" => $edit_state,
+                     "data" => maybe_unserialize($edit_data) );
+      $key = "tdomf_edit_" . $wpdb->insert_id;
+      wp_cache_set($key,$edit);
+  } else {
+      tdomf_log_message("Error attempting to copy in edit data to db. Last SQL Error: $error",TDOMF_LOG_ERROR);
+  }
+  
+  return $wpdb->insert_id;
+}
+
+function tdomf_delete_edits($edit_ids) {
+  global $wpdb;
+  $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+  $query  = "DELETE FROM $table_name ";
+  $query .= "WHERE edit_id IN (".implode(",",$edit_ids).")";
+  foreach($edit_ids as $edit_id) {
+     $key = "tdomf_edit_" . $edit_id;            
+     wp_cache_delete($key);
+  }
+  $returnVal = $wpdb->query($query);
+  return $returnVal;
+}
+
+function tdomf_get_edits($args) {
+    global $wpdb;
+    
+    $defaults = array('post_id' => false,
+                      'limit' => false,
+                      'sort' => 'DESC',
+                      'state' => false,
+                      'count' => false,
+                      'unique_post_ids' => false,
+                      'offset' => false,
+                      'ip' => false,
+                      'user_id' => false,
+                      'and_cond' => true,
+                      'time_diff' => false,
+                      'older_than' => false);
+    $args = wp_parse_args($args, $defaults);
+    extract($args);
+    
+    #if(!isset($post_id) || !is_int($post_id)) {
+    #    return false;
+    #}
+    
+    if($sort != false && $sort != 'DESC' && $sort != 'ASC') {
+        return false;
+    }
+    
+    $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+    
+    # select
+    
+    $query = "SELECT ";
+    if($unique_post_ids) {
+        $query .= "DISTINCT(post_id) ";
+    } else if($count) { # can't do distinct and count together
+        $query .= "COUNT(edit_id) ";
+    } else {
+        $query .= "* ";        
+    }
+    
+    # from
+    
+    $query .= "FROM $table_name ";
+    
+    # where conditions
+
+    $where_conditions = "";
+    
+    if($post_id != false && $post_id != 0) { 
+       $where_conditions .= "post_id = '".$wpdb->escape($post_id)."' ";
+    } 
+    
+    if($state != false && !empty($state)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "state = '".$wpdb->escape($state)."' ";
+    } 
+    
+    if($ip != false && !empty($ip)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "ip = '".$wpdb->escape($ip)."' ";
+    } 
+    
+    if($user_id != false && !empty($user_id)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "user_id = '".$wpdb->escape($user_id)."' ";
+    }
+    
+    if($time_diff != false && !empty($time_diff)) {
+         if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "date > '".$time_diff."' ";
+    } 
+
+    if($older_than != false && !empty($older_than)) {
+         if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "date < '".$older_than."' ";
+    }
+    
+    if(!empty($where_conditions)) {
+        $query .= "WHERE ".$where_conditions;
+    }
+    
+    # order by X limit Y
+    
+    if(!$count) {
+        if($sort) {
+           $query .= 'ORDER BY ';
+           if($unique_post_ids) {
+               $query .= 'post_id ';
+           } else {
+               $query .= 'edit_id ';
+           }
+           $query .= $wpdb->escape($sort).' ';
+        }
+    }
+
+    if($limit) {
+           $query .= 'LIMIT '.intval($limit).' ';
+    } 
+
+    if($offset) {
+           $query .= 'OFFSET '.intval($offset).' ';
+    } 
+
+    #tdomf_log_message( $query );
+    #$wpdb->show_errors = true;
+    if($count) {
+       if($unique_post_ids) {
+           $edits = $wpdb->get_results( $query );
+           $edits = count($edits);
+       } else {
+           $edits = intval($wpdb->get_var( $query ));
+       }
+    } else {
+       $edits = $wpdb->get_results( $query );
+    }
+    return $edits;
+}
+
+function tdomf_get_edit($edit_id) {
+  global $wpdb;
+  $key = "tdomf_edit_" . $edit_id;
+  $edit_cache = wp_cache_get($key);
+  if($edit_cache == false || !isset($edit_cache['post_id'])) {
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "SELECT * 
+                FROM $table_name 
+                WHERE edit_id = '" .$wpdb->escape($edit_id)."'";
+      $edit = $wpdb->get_row( $query );
+      if($edit != NULL) {
+         $edit_cache = array( "post_id" => $edit->post_id,
+                              "form_id" => $edit->form_id,
+                              "date" => $edit->date,
+                              "date_gmt" => $edit->date_gmt,
+                              "revision_id" => $edit->revision_id,
+                              "current_revision_id" => $edit->current_revision_id,
+                              "user_id" => $edit->user_id,
+                              "ip" => $edit->ip,
+                              "state" => $edit->state,
+                              "data" => maybe_unserialize($edit->data) );
+          wp_cache_set($key,$edit_cache);
+          return (object)$edit_cache;
+      }
+      return (object)array();
+  }
+  return (object)$edit_cache;  
+}
+
+function tdomf_get_state_edit($edit_id) {
+  $edit = tdomf_get_edit($edit_id);
+  return $edit->state;
+}
+
+function tdomf_set_state_edit($edit_state,$edit_id) {
+  global $wpdb;
+  #tdomf_log_message("Updating state of edit $edit_id to $edit_state");
+  $returnVal = false;
+  $key = "tdomf_edit_" . $edit_id;
+  $edit_cache = wp_cache_get($key);
+  $writedb = true;
+  if($edit_cache != false && is_array($edit_cache) && isset($edit_cache['state'])) {
+      #tdomf_log_message("There is a cache for this edit: $edit_id",TDOMF_LOG_GOOD); 
+      if($edit_cache['state'] == $edit_state) {
+          tdomf_log_message("State does not need to be updated for $edit_id. It is already at " . $edit_state,TDOMF_LOG_GOOD);
+          $writedb = false;
+          $returnVal = true;
+      }
+  }
+  if($writedb) {
+      #tdomf_log_message("Writing new state for $edit_id to db",TDOMF_LOG_GOOD);
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "UPDATE $table_name 
+                SET state = '".$wpdb->escape($edit_state)."'
+                WHERE edit_id = '".$wpdb->escape($edit_id)."'";
+      $returnVal = $wpdb->query($query);                
+  }
+  if($returnVal && $writedb && is_array($edit_cache)) {
+      #tdomf_log_message("Updating cache for $edit_id",TDOMF_LOG_GOOD);
+      $edit_cache['state'] = $edit_state;
+      wp_cache_set($key,$edit_cache);
+      #tdomf_log_message("$edit_id Cache: <pre>" . var_export($edit_cache,true) . "</pre>");
+  }
+  return $returnVal;
+}
+
+function tdomf_get_data_edit($edit_id) {
+  $edit = tdomf_get_edit($edit_id);
+  return maybe_unserialize($edit->data);
+}
+
+function tdomf_set_data_edit($edit_data,$edit_id) {
+  global $wpdb;
+  $returnVal = false;
+  $key = "tdomf_edit_" . $edit_id;
+  $edit_cache = wp_cache_get($key);
+  $writedb = true;
+  if($edit_cache != false && is_array($edit_cache) && isset($edit_cache['data'])) {
+      if($edit_cache['data'] == $edit_data) {
+          #tdomf_log_message("Data does not need to be updated for $edit_id. It is already at <pre>" . var_export($edit_state,true) . "</pre>",TDOMF_LOG_GOOD);
+          $writedb = false;
+          $returnVal = true;
+      }
+  }
+  if($writedb) {
+      #tdomf_log_message("Writing new data for $edit_id to db",TDOMF_LOG_GOOD);
+      $table_name = $wpdb->prefix . TDOMF_DB_TABLE_EDITS;
+      $query = "UPDATE $table_name 
+                SET data = '".$wpdb->escape(maybe_serialize($edit_data))."'
+                WHERE edit_id = '".$wpdb->escape($edit_id)."'";
+      $returnVal = $wpdb->query($query);                
+  }
+  if($returnVal && $writedb && is_array($edit_cache)) {
+      #tdomf_log_message("Updating cache for $edit_id",TDOMF_LOG_GOOD);
+      $edit_cache['data'] = $edit_data;
+      wp_cache_set($key,$edit_cache);
+      #tdomf_log_message("$edit_id Cache: <pre>" . var_export($edit_cache,true) . "</pre>");
+  }
+  return $returnVal;
+}
+
 function tdomf_import_form($form_id,$options,$widgets,$caps) {
   global $wp_roles, $wpdb;
   
@@ -653,7 +988,8 @@ function tdomf_get_form_ids(){
   $query = "SELECT form_id 
             FROM $table_name 
             ORDER BY form_id ASC";
-  return $wpdb->get_results($query);
+  $result = $wpdb->get_results($query);
+  return $result;
 }
 
 function tdomf_form_exists($form_id) {
@@ -680,6 +1016,30 @@ function tdomf_is_moderation_in_use(){
       $retValue = true;
       break;
     }
+  }
+  return $retValue;
+}
+
+function tdomf_is_editing_in_use() {
+  $form_ids = tdomf_get_form_ids();
+  $retValue = false;
+  foreach($form_ids as $form_id) {
+      if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+          $retValue = true;
+          break;
+      }
+  }
+  return $retValue;
+}
+
+function tdomf_is_submission_in_use() {
+  $form_ids = tdomf_get_form_ids();
+  $retValue = false;
+  foreach($form_ids as $form_id) {
+      if(!tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+          $retValue = true;
+          break;
+      }
   }
   return $retValue;
 }

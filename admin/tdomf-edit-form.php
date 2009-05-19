@@ -21,11 +21,7 @@ add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_sh
 function tdomf_form_admin_head() {
    global $tdomf_form_widgets, $tdomf_form_widgets_control;
    $form_id = tdomf_edit_form_form_id();
-   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-     $mode = "new-page";
-   } else {
-     $mode = "new-post";
-   }
+   $mode = tdomf_generate_default_form_mode($form_id);
    do_action('tdomf_control_form_start',$form_id,$mode);
    $widgets = tdomf_filter_widgets($mode,$tdomf_form_widgets);
    $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);
@@ -444,11 +440,8 @@ function tdomf_show_form_menu() {
 
   tdomf_log_mem_usage(__FILE__,__LINE__);
   
-  if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-    $mode = "new-page";
-  } else {
-    $mode = "new-post";
-  }
+  $mode = tdomf_generate_default_form_mode($form_id);
+  
   $widgets = tdomf_filter_widgets($mode,$tdomf_form_widgets);
   tdomf_log_mem_usage(__FILE__,__LINE__);
   $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);
@@ -464,64 +457,19 @@ function tdomf_show_form_menu() {
          <div id="message" class="updated fade"><p><?php echo $message; ?></p></div>
         <?php } ?>
 
-  <?php if(count($form_ids) > 1 && tdomf_wp23()) { ?>
-    <div class="wrap">
-    <?php foreach($form_ids as $single_form_id) { ?>
-      
-      <?php if($single_form_id->form_id == $form_id) { ?>
-        <b>
-      <?php } else { ?>
-        <a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $single_form_id->form_id; ?>">
-      <?php } ?>
-      
-      <?php printf(__("Form %d","tdomf"),$single_form_id->form_id); ?><?php if($single_form_id->form_id == $form_id) { ?></b><?php } else {?></a><?php } ?> |
-
-      <?php } ?>
-    </div>
-  <?php } ?>
+        <?php tdomf_forms_top_toolbar($form_id, 'tdomf_show_form_menu'); ?>
   
 <div class="wrap">
 		<h2><?php printf(__("Form Arrangement for Form %d: \"%s\"","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id)); ?></h2>
 
-    <?php if(count($form_ids) > 1 && tdomf_wp25()) { ?>
-      <ul class="subsubsub">
-    <?php foreach($form_ids as $single_form_id) { ?>
-      <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $single_form_id->form_id; ?>"<?php if($single_form_id->form_id == $form_id) { ?> class="current" <?php } ?>>
-          <?php printf(__("Form %d","tdomf"),$single_form_id->form_id); ?></a>
-          |</li>
-      <?php } ?>
-      </ul>
-      <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
-  <?php } ?>
-    
-  <ul class="subsubsub">
-   <?php $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
-         $updated_pages = false;
-         if($pages != false) {
-            $updated_pages = array();
-            foreach($pages as $page_id) {
-              if(get_permalink($page_id) != false) {
-                $updated_pages[] = $page_id; 
-              }
-            }
-            if(count($updated_pages) == 0) { $updated_pages = false; }
-            tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$updated_pages,$form_id);
-    } ?>
-    <?php if($updated_pages != false) { ?>
-      <li><a href="<?php echo get_permalink($updated_pages[0]); ?>" title="<?php _e("Live on your blog!","tdomf"); ?>" ><?php _e("View Page &raquo;","tdomf"); ?></a> |</li>
-    <?php } ?>
-    <?php if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id) && get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
-      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
-      <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
-    <?php } ?>
-     <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>"><?php printf(__("Options &raquo;","tdomf"),$form_id); ?></a> |</li>
-     <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>"><?php printf(__("Hack Form &raquo;","tdomf"),$form_id); ?></a></li>
-    </ul>
-  
-    <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
+        <?php tdomf_forms_under_title_toolbar($form_id, 'tdomf_show_form_menu'); ?>
     
 		<p><?php _e('You can drag-drop, order and configure "widgets" for your form below. Most Widgets can be individually configured once you have dropped them on the form. Just click on the right-most icon on the Widget title. Widgets will be executed and displayed in order from top to bottom. If you wish to change the order they are displayed in but not executed in, please use the Form Hacker to do so.',"tdomf"); ?></p>
 
+        <?php if(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id) != false) { ?>
+            <p><font color='red'><?php _e('The Form Hacker has been set for this form. This means that any changes to widgets will not appear on the form until you reset the Form Hacker. Only the backend processing of the form will be affected by these changes.',"tdomf"); ?></font></p>
+        <?php } ?>
+        
 		<form id="sbadmin" method="post" onsubmit="serializeAll();">
       
       <input type="hidden" id="tdomf-form-id" name="tdomf-form-id" value="<?php echo $form_id; ?>" />
@@ -629,8 +577,10 @@ function tdomf_handle_editformmenu_actions() {
   }
   
   #if (get_magic_quotes_gpc()) {
-      function stripslashes_array($array) {
-          return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
+      if(!function_exists('stripslashes_array')) {
+          function stripslashes_array($array) {
+              return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
+          }
       }
       #$_COOKIE = stripslashes_array($_COOKIE);
       #$_FILES = stripslashes_array($_FILES);

@@ -3,13 +3,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 function tdomf_get_message($key,$form_id = false) {
     $message = "";
+    $mode = false;
     if($form_id === false) {
         $message = get_option($key);
     } else {
+        $mode = tdomf_generate_default_form_mode($form_id);
         $message = tdomf_get_option_form($key,$form_id);
     }
     if($message === false) {
-        $message = tdomf_get_message_default($key);
+        $message = tdomf_get_message_default($key,$mode);
     }
     return $message;
 }
@@ -31,14 +33,30 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
     if($post_id !== false) {
         $post = &get_post($post_id);
         
+        // "post_date" is now only updated when a post is published
+        // so now submission date is captured in a custom field
+        // Failing that, go back to the old method of post_modified
+        //
+        if($post->post_status == 'publish' || $post->post_status =='future') {
+            $submission_date = mysql2date(get_option('date_format'),$post->post_date_gmt);
+            $submission_time = mysql2date(get_option('time_format'),$post->post_date_gmt);
+        } else if(get_post_meta($post_id,TDOMF_KEY_SUBMISSION_DATE_GMT,true)) {
+            $date = get_post_meta($post_id,TDOMF_KEY_SUBMISSION_DATE_GMT,true);
+            $submission_date = mysql2date(get_option('date_format'),$date);
+            $submission_time = mysql2date(get_option('time_format'),$date);
+        } else {
+            $submission_date = mysql2date(get_option('date_format'),$post->post_modified_gmt);
+            $submission_time = mysql2date(get_option('time_format'),$post->post_modified_gmt);
+        }
+               
         // url, date and time are safe but title is not: scrub
         $patterns = array ( '/'.TDOMF_MACRO_SUBMISSIONURL.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONDATE.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONTIME.'/',
                             '/'.TDOMF_MACRO_SUBMISSIONTITLE.'/');
         $replacements = array( get_permalink($post_id),
-                               mysql2date(get_option('date_format'),$post->post_date),
-                               mysql2date(get_option('time_format'),$post->post_date),
+                               $submission_date,
+                               $submission_time,
                                tdomf_protect_input($post->post_title));
                 
         $message = preg_replace($patterns,$replacements,$message);
@@ -77,6 +95,7 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
 
     // A lot of people use the ID uppercase format
     $post_ID = $post_id;
+    
     // execute any PHP code in the message    
     ob_start();
     extract($post_args,EXTR_PREFIX_INVALID,"tdomf_");
@@ -87,7 +106,7 @@ function tdomf_prepare_string($message, $form_id = false, $mode = "", $post_id =
     return $message;
 }
 
-function tdomf_get_message_instance($key, $form_id = false, $mode = "", $post_id = false, $errors = "") {
+function tdomf_get_message_instance($key, $form_id = false, $mode = false, $post_id = false, $errors = "") {
     global $current_user;
     $message = tdomf_get_message($key,$form_id);
     if(!empty($message) || $message !== false) {
@@ -96,7 +115,8 @@ function tdomf_get_message_instance($key, $form_id = false, $mode = "", $post_id
     return "";
 }
 
-function tdomf_get_message_default($key) {
+function tdomf_get_message_default($key,$mode) {
+    
     switch($key) {
         case TDOMF_OPTION_MSG_SUB_PUBLISH:
             $retVal = __("Your submission \"%%SUBMISSIONTITLE%%\" has been automatically published. You can see it <a href='%%SUBMISSIONURL%%'>here</a>. Thank you for using this service.","tdomf");
@@ -127,11 +147,55 @@ function tdomf_get_message_default($key) {
             break;
         case TDOMF_OPTION_MSG_PERM_INVALID_NOUSER:
             $retVal = __("Unregistered users do not currently have permissions to use this form.","tdomf");
-            break;            
+            break;
+        case TDOMF_OPTION_ADD_EDIT_LINK_TEXT:
+            $retVal = __("Edit","tdomf");
+            break;
+        case TDOMF_OPTION_MSG_INVALID_POST:
+            $retVal = __("That post you are attempting to edit is invalid",'tdomf');
+            break;
+        case TDOMF_OPTION_MSG_INVALID_FORM:
+            $retVal = __("You cannot use this form to edit this post",'tdomf');
+            break;
+        case TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST:
+            $retVal = __("You cannot edit this post as there is a pending contribution to be resolved.",'tdomf');
+            break;
+        case TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST:
+            $retVal = __("You cannot edit this post as there is a pending contribution to be approved.",'tdomf');
+            break;
+        case TDOMF_OPTION_MSG_LOCKED_POST:
+            $retVal = __("You cannot edit this post as it has been locked from editing.",'tdomf');
+            break;
         default:
             $retVal = "";
             break;
     }
+    
+    // Edit form changes some of the defaults
+    
+    if($mode && TDOMF_Widget::isEditForm($mode)) {
+        switch($key) {
+            case TDOMF_OPTION_MSG_SUB_PUBLISH:
+                $retVal = __("Your contribution on post \"%%SUBMISSIONTITLE%%\" has been automatically approved. You can see it <a href='%%SUBMISSIONURL%%'>here</a>. Thank you for using this service.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_FUTURE:
+                $retVal = __("Your contribution has been approved and will be published on %%SUBMISSIONDATE%% at %%SUBMISSIONTIME%%. Thank you for using this service.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_SPAM:
+                $retVal = __("Your contribution has being flagged as spam! Sorry","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_MOD:
+                $retVal = __("Your contribution has been added to the moderation queue. It should appear in the next few days. Thank you for using this service.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_SUB_ERROR:
+                $retVal = __("Your contribution contained errors:<br/><br/>%%SUBMISSIONERRORS%%<br/><br/>Please correct and resubmit.","tdomf");
+                break;
+            case TDOMF_OPTION_MSG_PERM_THROTTLE:
+                $retVal = __("You have hit your contributions quota. Please wait until your existing contributions are approved.","tdomf");
+                break;            
+        }
+    }
+    
     return $retVal;
 }
 

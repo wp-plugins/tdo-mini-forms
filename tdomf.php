@@ -34,6 +34,9 @@ Author URI: http://thedeadone.net
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
 // - Fixed '$' not working in preview
 // - Fixed characters getting eaten up in preview
+// - Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
+// - Added a message to the Form Creator to indicate if a the Form Hacker 
+//    has been enabled and will prevent changes to form.
 //
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break
@@ -56,6 +59,8 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+    http://thedeadone.net/forum/?p=2224#comment-4315 (custom validation)
+    http://thedeadone.net/forum/?p=1905#comment-4093 (adding you're own inputs to the form)
     http://thedeadone.net/forum/?p=1618#comment-3611 (figure the category (alphanumeric) from title of post and add it)
     http://thedeadone.net/forum/?p=1332#comment-3889 (programatically limit size of uploaded imagE)
 	http://thedeadone.net/forum/?p=1700 (Getting the thumbnails from a post using Template tags)
@@ -66,10 +71,15 @@ Work Queue:
     http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
     http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
     http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
-    http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
    
+   - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
+   - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
+   - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
+   - auto-delete spam not working (must also delete edits)
+   - http://thedeadone.net/forum/?p=2100#comment-4278 (alternative input?)
+   - image capatcha must update after failed "submit"
    - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
    - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
    - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
@@ -94,7 +104,7 @@ Work Queue:
    - Add Error Warning for custom field widgets when non-unique keys used
    - Investigate: no sidebars in widget configuration in IE.7
    - Investigate: tinymce conflict with AJAX form
-   - Investigate: upload-link error:
+   - Investigate: upload-link error: 
        http://wordpress.org/support/topic/186919#post-838957
    - Study: Replace diff with wordpress diff or add wordpress diff to options?
    - Investigate: In IE, can't select copy/paste text in text widget
@@ -112,14 +122,14 @@ Notes:
  - Potential nice hack: query.php @ line 1479
    $this->posts = apply_filters('the_posts', $this->posts);
      1. is single/page [should include category and index?]
-     2. what post?
+     2. what post? 
      3. is it tdomf, draft/unmoderation, not spam, viewer is submitter
      4. add to array
      This will allow users see their submitted posts, however comments should
      be disabled as they cannot be used in preview mode
  - What Clickable links in your posts? http://thedeadone.net/forum/?p=500#comment-1598
 */
-
+ 
  /*
 ////////////////////////////////////////////////////////////////////////////////
 TODO for future versions
@@ -139,18 +149,10 @@ New Features
   * Select from pre-configured Styles
   * Submit new style to include in TDOMF
 - Email verification of non-registered users
-- Edit Posts
-  * Using same/similar form as what the post was submitted with?
-  * Create Edit-Post only forms
-  * Allow various controls and access for forms: per category and by access roles
-  * Editing Post implies adding/removing comments too (can replace comment submission form)
-  * Unregistered user editing (requires some sort of magic code)
 - Manage Downloads page
-- Option to display the moderation menu like the "comment moderation" page (i.e. with little extracts of the posts/pages)
 - Authors of posts should be able to see "previews" of post
 - Get input during validation of form (for capatchas)
 - Option to use "Post ready for review" instead of draft for unapproved submitted posts
-- On Options and Widgets Page, set the "title" of the Form links to the given title of the form
 - Turn Forms into multiple steps
 - Shortcode Support
 
@@ -159,7 +161,6 @@ New Form Options
 - Hide Form on Preview
 - Forms can be used to submit links, emails, etc.
 - Select Form Style/include Custom CSS
-- Control who can access form not just by role but also by user, ip and capability.
 
 New Widgets
 - Widget to allow user to enter a date to post the submission (as in future post)
@@ -175,10 +176,10 @@ New Widgets
 
 Existing Widget Improvements
 - Any widget with a size or length field should be customisable.
-- All widgets should have a title field
 - Textfield Class (support numeric, date, email, webpage, etc.)
 - Textarea Class
 - Copy Widget to another Form
+- Individual save
 - Upload Files
   * Multiple Instances
   * Thumbnail size
@@ -459,6 +460,51 @@ define('TDOMF_OPTION_ALLOW_PUBLISH',"tdomf_allow_publish");
 define('TDOMF_OPTION_PUBLISH_NO_MOD',"tdomf_option_publish_no_mod");
 define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 
+////////
+// 0.13
+
+/* 
+ * @todo
+ *
+ * @live server
+ * First version only widgets that support editing: reCaptcha
+ *
+ * @postponed
+ * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
+ * Option to disable Spam/Unapproved Edit Locking (require temp locks)
+ * Template Tags for editing (what is actually required?)
+ * Moderation screen: implement filters: form, user, ip, username, email, page/post, un/locked
+ * Moderation screen: search
+ * Moderation screen: bulk buttons at top of list too
+ * 'Back' Button for Ajax inline editing
+ * 'Reset' Button for Editing Forms
+ * "Draft" Editing support
+ * "Edited by XYZ": message in form hacker, last X edits (appear above "Submitted by")
+ *    (and also add "Submitted by XYZ" to messages for individual forms)
+ */
+
+define('TDOMF_OPTION_FORM_EDIT',"tdomf_form_edit");
+define('TDOMF_OPTION_ALLOW_AUTHOR',"tdomf_allow_author");
+define('TDOMF_OPTION_ALLOW_TIME',"tdomf_allow_time");
+define('TDOMF_OPTION_EDIT_RESTRICT_TDOMF',"tdomf_restrict_tdomf");
+define('TDOMF_OPTION_EDIT_RESTRICT_CATS',"tdomf_restrict_cats");
+define('TDOMF_OPTION_ADD_EDIT_LINK',"tdomf_add_edit_link");
+define('TDOMF_OPTION_ADD_EDIT_LINK_TEXT',"tdomf_add_edit_link_text");
+define('TDOMF_OPTION_AUTO_EDIT_LINK',"tdomf_auto_edit_link");
+define('TDOMF_STAT_EDITED', "tdomf_stat_edited");
+define('TDOMF_MACRO_POSTID', "%%POSTID%%");
+define('TDOMF_DB_TABLE_EDITS', "tdomf_table_edits");
+define('TDOMF_OPTION_AJAX_EDIT',"tdomf_ajax_edit");
+define('TDOMF_OPTION_EDIT_PAGE_FORM',"tdomf_edit_page_form");
+define('TDOMF_KEY_LOCK',"_tdomf_lock_editing");
+define('TDOMF_OPTION_MSG_INVALID_POST',"tdomf_msg_invalid_post");
+define('TDOMF_OPTION_MSG_INVALID_FORM',"tdomf_msg_invalid_form");
+define('TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST',"tdomf_msg_spam_edit_on_post");
+define('TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST',"tdomf_msg_unapproved_edit_on_post");
+define('TDOMF_OPTION_MSG_LOCKED_POST',"tdomf_msg_locked_post");
+define('TDOMF_KEY_SUBMISSION_DATE', "_tdomf_submission_date");
+define('TDOMF_KEY_SUBMISSION_DATE_GMT', "_tdomf_submission_date_gmt");
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -507,33 +553,40 @@ function tdomf_wp27() {
 add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
-    $unmod_count = tdomf_get_unmoderated_posts_count();
+    $unmod_count  = tdomf_get_unmoderated_posts_count();
+    $unmod_count += tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true)); 
 
     /*if(tdomf_wp25() && $unmod_count > 0) {
         add_menu_page(__('TDO Mini Forms', 'tdomf'), sprintf(__("TDO Mini Forms <span id='awaiting-mod' class='count-%d'><span class='comment-count'>%d</span></span>", 'tdomf'), $unmod_count, $unmod_count), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     } else {*/
         add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     /*}*/
-
+    
     // Options
-    add_submenu_page( TDOMF_FOLDER , __('Form Manager and Options', 'tdomf'), __('Form Manager and Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
+    add_submenu_page( TDOMF_FOLDER , __('Options', 'tdomf'), __('Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
     //
-    // Generate Form
-    add_submenu_page( TDOMF_FOLDER , __('Form Widgets', 'tdomf'), __('Form Widgets', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
+    // Form Options
+    add_submenu_page( TDOMF_FOLDER , __('Form Options', 'tdomf'), __('Form Options', 'tdomf'), 'manage_options', 'tdomf_show_form_options_menu', 'tdomf_show_form_options_menu');
     //
-    // Form hacker
+    // Form Widgets
+    add_submenu_page( TDOMF_FOLDER , __('Form Creator', 'tdomf'), __('Form Creator', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
+    //
+    // Form Hacker
     add_submenu_page( TDOMF_FOLDER , __('Form Hacker', 'tdomf'), __('Form Hacker', 'tdomf'), 'manage_options', 'tdomf_show_form_hacker', 'tdomf_show_form_hacker');
+    //
+    // Form Export
+    add_submenu_page( TDOMF_FOLDER , __('Form Export', 'tdomf'), __('Form Export', 'tdomf'), 'manage_options', 'tdomf_show_form_export_menu', 'tdomf_show_form_export_menu');
     //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
-      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Awaiting Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
+      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), sprintf(__('Moderation (%d)', 'tdomf'), $unmod_count), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     else {
-      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation Disabled', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
+      add_submenu_page( TDOMF_FOLDER , __('Moderation', 'tdomf'), __('Moderation', 'tdomf'), 'edit_others_posts', 'tdomf_show_mod_posts_menu', 'tdomf_show_mod_posts_menu');
     }
     //
     // Manage Submitters
-    add_submenu_page( TDOMF_FOLDER , __('Manage', 'tdomf'), __('Manage', 'tdomf'), 'edit_others_posts', 'tdomf_show_manage_menu', 'tdomf_show_manage_menu');
+    add_submenu_page( TDOMF_FOLDER , __('Users and IPs', 'tdomf'), __('Users and IPs', 'tdomf'), 'edit_others_posts', 'tdomf_show_manage_menu', 'tdomf_show_manage_menu');
     //
     // Log
     add_submenu_page( TDOMF_FOLDER , __('Log', 'tdomf'), __('Log', 'tdomf'), 'manage_options', 'tdomf_show_log_menu', 'tdomf_show_log_menu');
@@ -565,6 +618,8 @@ require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-classes.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-options.php');
+require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-export.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
@@ -733,7 +788,7 @@ function tdomf_init(){
           tdomf_set_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,true,$form_id->form_id);
       }
   }
-
+  
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));

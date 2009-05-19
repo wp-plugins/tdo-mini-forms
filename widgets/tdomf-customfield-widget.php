@@ -65,35 +65,36 @@ function tdomf_widget_customfields_append($post_ID,$options,$index,$form_id){
 // Add a menu option to control the number of cf widgets to the bottom of the 
 // tdomf widget page
 //
-function tdomf_widget_customfields_number_bottom(){
-  $form_id = tdomf_edit_form_form_id();
-  $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
-  if($count <= 0){ $count = 1; } 
-  $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
-  if($max == false){ $max = 9; }
-  if($count > ($max+1)){ $count = ($max+1); }
-  
-  if($max > 1) {
-  ?>
-  <div class="wrap">
-    <form method="post">
-      <h2><?php _e("Custom Fields Widgets","tdomf"); ?></h2>
-      <p style="line-height: 30px;"><?php _e("How many Custom Fields widgets would you like?","tdomf"); ?>
-      <select id="tdomf-widget-customfields-number" name="tdomf-widget-customfields-number" value="<?php echo $count; ?>">
-      <?php for($i = 1; $i < ($max+1); $i++) { ?>
-        <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
-      <?php } ?>
-      </select>
-      <span class="submit">
-        <input type="submit" value="Save" id="tdomf-widget-customfields-number-submit" name="tdomf-widget-customfields-number-submit" />
-      </span>
-      </p>
-    </form>
-  </div>
-  <?php 
-  }
+function tdomf_widget_customfields_number_bottom($form_id,$mode){
+    if(tdomf_form_exists($form_id) && TDOMF_Widget::isSubmitForm($mode,$form_id)) {
+      $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
+      if($count <= 0){ $count = 1; } 
+      $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
+      if($max == false){ $max = 9; }
+      if($count > ($max+1)){ $count = ($max+1); }
+      
+      if($max > 1) {
+      ?>
+      <div class="wrap">
+        <form method="post">
+          <h2><?php _e("Custom Fields Widgets","tdomf"); ?></h2>
+          <p style="line-height: 30px;"><?php _e("How many Custom Fields widgets would you like?","tdomf"); ?>
+          <select id="tdomf-widget-customfields-number" name="tdomf-widget-customfields-number" value="<?php echo $count; ?>">
+          <?php for($i = 1; $i < ($max+1); $i++) { ?>
+            <option value="<?php echo $i; ?>" <?php if($i == $count) { ?> selected="selected" <?php } ?>><?php echo $i; ?></option>
+          <?php } ?>
+          </select>
+          <span class="submit">
+            <input type="submit" value="Save" id="tdomf-widget-customfields-number-submit" name="tdomf-widget-customfields-number-submit" />
+          </span>
+          </p>
+        </form>
+      </div>
+      <?php 
+      }
+    }
 }
-add_action('tdomf_widget_page_bottom','tdomf_widget_customfields_number_bottom');
+add_action('tdomf_widget_page_bottom','tdomf_widget_customfields_number_bottom', 10, 2);
 
 // Get Options for this widget
 //
@@ -461,19 +462,19 @@ function tdomf_widget_customfields_control($form_id,$params) {
         <?php 
 }
 
-function tdomf_widget_customfields_handle_number($form_id) {
-  if(tdomf_form_exists($form_id)) {   
+function tdomf_widget_customfields_handle_number($form_id, $mode) {
+  if(tdomf_form_exists($form_id) && TDOMF_Widget::isSubmitForm($mode,$form_id)) {   
      if (isset( $_POST['tdomf-widget-customfields-number-submit'] )) {
        $count = $_POST['tdomf-widget-customfields-number'];
        if($count > 0){ tdomf_set_option_widget('tdomf_customfields_widget_count',$count,$form_id); }
      }
   }
 }
-#add_action('tdomf_widget_page_top','tdomf_widget_customfields_handle_number');
-add_action('tdomf_control_form_start','tdomf_widget_customfields_handle_number');
+#add_action('tdomf_widget_page_top','tdomf_widget_customfields_handle_number', 10, 2);
+add_action('tdomf_control_form_start','tdomf_widget_customfields_handle_number', 10, 2);
 
-function tdomf_widget_customfields_init($form_id){
-  if(tdomf_form_exists($form_id)) {
+function tdomf_widget_customfields_init($form_id,$mode){
+  if(tdomf_form_exists($form_id) && TDOMF_Widget::isSubmitForm($mode,$form_id)) {
     $count = tdomf_get_option_widget('tdomf_customfields_widget_count',$form_id);
     if($count <= 0){ $count = 1; } 
     $max = tdomf_get_option_form(TDOMF_OPTION_WIDGET_INSTANCES,$form_id);
@@ -481,22 +482,22 @@ function tdomf_widget_customfields_init($form_id){
     else if($count > ($max+1)){ $count = $max + 1; }
     
     for($i = 1; $i <= $count; $i++) {
-      tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields', array(), $i);
-      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 820, array(), $i);
-      tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', array(), $i);
-      tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', array(), $i);
-      tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array(), $i);
-      tdomf_register_form_widget_adminemail("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_adminemail', array(), $i);
-      tdomf_register_form_widget_hack("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_hack', array(), $i);
-      tdomf_register_form_widget_admin_error("customfields-$i", "Custom Fields $i", 'tdomf_widget_customfields_admin_error', array(), $i);
+      tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields', array('new'), $i);
+      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 820, array('new'), $i);
+      tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', array('new'), $i);
+      tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', array('new'), $i);
+      tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array('new'), $i);
+      tdomf_register_form_widget_adminemail("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_adminemail', array('new'), $i);
+      tdomf_register_form_widget_hack("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_hack', array('new'), $i);
+      tdomf_register_form_widget_admin_error("customfields-$i", "Custom Fields $i", 'tdomf_widget_customfields_admin_error', array('new'), $i);
     }
   }
 }
-add_action('tdomf_create_post_start','tdomf_widget_customfields_init');
-add_action('tdomf_generate_form_start','tdomf_widget_customfields_init');
-add_action('tdomf_preview_form_start','tdomf_widget_customfields_init');
-add_action('tdomf_validate_form_start','tdomf_widget_customfields_init');
-add_action('tdomf_control_form_start','tdomf_widget_customfields_init');
+add_action('tdomf_create_post_start','tdomf_widget_customfields_init', 10, 2);
+add_action('tdomf_generate_form_start','tdomf_widget_customfields_init', 10, 2);
+add_action('tdomf_preview_form_start','tdomf_widget_customfields_init', 10, 2);
+add_action('tdomf_validate_form_start','tdomf_widget_customfields_init', 10, 2);
+add_action('tdomf_control_form_start','tdomf_widget_customfields_init', 10, 2);
 #add_action('tdomf_widget_page_top','tdomf_widget_customfields_init');
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -274,7 +274,8 @@ function getNumChecked(form)
 	<th scope="col"><?php _e("Display Name","tdomf"); ?></th>
 	<th scope="col"><?php _e("Role","tdomf"); ?></th>
 	<th scope="col"><?php _e("Status","tdomf"); ?></th>
-   <th scope="col"><?php _e("Approved<br/>(Submitted)","tdomf"); ?></th>
+    <th scope="col"><?php _e("Submitted<br/>Approved/Total","tdomf"); ?></th>
+    <th scope="col"><?php _e("Contributed<br/>Approved/Total","tdomf"); ?></th>
     <th scope="col" colspan="2" style="text-align: center">Actions</th>
    </tr>
 
@@ -301,7 +302,11 @@ function getNumChecked(form)
 			         $userrole = new WP_User($u->ID);
 			         foreach($roles as $role) {
                         if($userrole->has_cap($role->name)) {
-                           $user_role = $wp_roles->role_names[$role->name];
+                            if(function_exists('translate_with_context')) {
+                                $user_role = translate_with_context($wp_roles->role_names[$role->name]);
+                            } else { 
+                                $user_role = $wp_roles->role_names[$role->name]; 
+                            }
                            break;
                         }
                      } ?>
@@ -316,9 +321,10 @@ function getNumChecked(form)
 		             } else { _e(get_usermeta($u->ID,TDOMF_KEY_STATUS),"tdomf"); } ?>
 		       </td>
 
-             <td><?php echo tdomf_get_users_published_posts_count($u->ID); ?>
-                 (<?php echo tdomf_get_users_submitted_posts_count($u->ID); ?>)</td>
+             <td><?php echo tdomf_get_users_published_posts_count($u->ID); ?>/<?php echo tdomf_get_users_submitted_posts_count($u->ID); ?></td>
 
+             <td><?php echo tdomf_get_edits(array('user_id' => $u->ID, 'count' => true, 'state' => 'approved')); ?>/<?php echo tdomf_get_edits(array('user_id' => $u->ID, 'count' => true)); ?></td>
+                 
            <?php if(isset($_REQUEST['f'])) { $farg = "&f=".$_REQUEST['f']; } ?>                 
                  
 		       <td>
@@ -747,45 +753,57 @@ function tdomf_manage_handler() {
    <?php }
 }
 
-// Auto-trust user (should this be in this file?)
+// Set this user to trusted, if it makes sense
 //
-function tdomf_auto_trust_user($post_id) {
+function tdomf_trust_user($user_id) 
+{
+    #tdomf_log_message("Check if user $user_id's status needs to be updated");
+    if($user_id && $user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+        $trust_count = intval(get_option(TDOMF_OPTION_TRUST_COUNT));
+        #tdomf_log_message("trust count = $trust_count");
+        if($trust_count >= 0) {
+           $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
+           $user_role = new WP_User($user_id);
+           if($user_status != TDOMF_USER_STATUS_TRUSTED && !$user_role->has_cap("publish_posts")) {
+               /** @todo bug: the counts here include posts that were automatically published, which isn't exactly correct, but it'll do. */
+               $approved_submissions_count = tdomf_get_users_published_posts_count($user_id);
+               #tdomf_log_message("User $user_id's approved submissions = $approved_submissions_count");
+               $approved_edit_count = tdomf_get_edits(array('user_id' => $user_id, 'count' => true, 'state' => 'approved'));
+               #tdomf_log_message("User $user_id's approved edits = $approved_edit_count");
+               $approved_total = $approved_submissions_count + $approved_edit_count;
+               // 0 is a valid trust count, means that at least one approved post makes the user truested
+               if(($trust_count == 0 && $approved_total > 0) || ($trust_count > 0 && $trust_count <= $approved_total)) {
+                   tdomf_log_message("User $user_id has $approved_submissions_count approved submissions and $approved_edit_count approved contributions. Automatically setting the user to trusted. Well done.",TDOMF_LOG_GOOD);
+                   update_usermeta($user_id, TDOMF_KEY_FLAG, true);
+                   update_usermeta($user_id, TDOMF_KEY_STATUS, TDOMF_USER_STATUS_TRUSTED);
+               } else {
+                   #tdomf_log_message("User $user_id's approved total $approved_total does hit trust count's threshold of $trust_count");
+               }
+           } else {
+               #tdomf_log_message("User $user_id is already trusted (current status='$user_status') or can publish posts");
+           }
+        } else {
+            #tdomf_log_message("trust count < 0, feature disabled");
+        }
+    } else {
+        #tdomf_log_message("User $user_id is invalid or the default author", TDOMF_LOG_ERROR);
+    }
+}
+
+// Auto-trust user
+//
+function tdomf_trust_user_publish_post_action($post_id) {
    global $wpdb;
 
-   // only care about posts managed by TDOMF...
-   //
    if(get_post_meta($post_id,TDOMF_KEY_FLAG,true)) {
-      
        $user_id = get_post_meta($post_id, TDOMF_KEY_USER_ID, true);
-       // ... posts submitted by a registered user and not the default user...
-       //
-       if($user_id && $user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-         
-         $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
-         $user_role = new WP_User($user_ID);
-  
-         // ... and if user can't publish his own posts and the option is enabled...
-         //
-         if($user_status != TDOMF_USER_STATUS_TRUSTED && !$user_role->has_cap("publish_posts") && get_option(TDOMF_OPTION_TRUST_COUNT)) {
-  
-           $trust_count = intval(get_option(TDOMF_OPTION_TRUST_COUNT));
-           $approved_count = tdomf_get_users_published_posts_count($user_id);
-  
-           // ... and finally
-           //
-           if($trust_count != -1 && $approved_count >= $trust_count) {
-             tdomf_log_message("User $user_id has $approved_count approved posts. Automatically setting the user to approved!",TDOMF_LOG_GOOD);
-             update_usermeta($user_id, TDOMF_KEY_FLAG, true);
-             update_usermeta($user_id, TDOMF_KEY_STATUS, TDOMF_USER_STATUS_TRUSTED);
-           }
-         }
-       }
+       tdomf_trust_user($user_id);
    }
    
    // phew!
    
    return $post_id;
 }
-add_action('publish_post', 'tdomf_auto_trust_user');
+add_action('publish_post', 'tdomf_trust_user_publish_post_action');
 
 ?>

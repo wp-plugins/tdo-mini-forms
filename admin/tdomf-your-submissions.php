@@ -73,23 +73,40 @@ function tdomf_get_post_time( $d = 'U', $gmt = false, $post ) { // returns times
 	return apply_filters('get_the_time', $time, $d, $gmt);
 }
 
+// include form style sheet on page
+//
+function tdomf_show_your_submissions_admin_head() {
+   if(preg_match('/page=tdomf_your_submissions/',$_SERVER[REQUEST_URI])) {
+   ?>
+   <link rel="stylesheet" href="<?php echo TDOMF_URLPATH; ?>tdomf-style-form.css" type="text/css" media="screen" />
+   <?php
+   }
+}
+add_action( 'admin_head', 'tdomf_show_your_submissions_admin_head' );
+
 // Show the page!
 //
 function tdomf_show_your_submissions_menu() {
   global $current_user;
 
+  // how many of the recently published/approved entries to see
+  //
+  $limit = 10;
+  
   get_currentuserinfo();
   
   $tdomf_flag = get_usermeta($current_user->ID,TDOMF_KEY_FLAG);
   $sub_total = tdomf_get_users_submitted_posts_count($current_user->ID);
   $app_total = tdomf_get_users_published_posts_count($current_user->ID);
   $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
-  $app_posts = tdomf_get_user_published_posts($current_user->ID,0,5);
+  $app_posts = tdomf_get_user_published_posts($current_user->ID,0,$limit);
   $mod_posts = tdomf_get_user_draft_posts($current_user->ID);
   $mod_total = count($mod_posts);
   $fut_posts = tdomf_get_user_scheduled_posts($current_user->ID);
   $fut_total = count($fut_posts);
- 
+  $unapp_edits = tdomf_get_edits(array('state' => 'unapproved', 'unique_post_ids' => true, 'user_id' => $current_user->ID));
+  $app_edits = tdomf_get_edits(array('state' => 'approved', 'unique_post_ids' => true, 'user_id' => $current_user->ID, 'limit' => $limit));
+  
   ?>
 
   <div class="wrap">
@@ -173,6 +190,44 @@ function tdomf_show_your_submissions_menu() {
        <?php } ?>
     <?php } ?>      
       
+    <?php if(!empty($app_edits)) {
+            $num = number_format_i18n(count($app_edits));
+            $text = __ngettext( 'Your Last Approved Contribution', 'Your Last %d Approved Contributions', count($app_edits) );
+            ?>
+        <h3><?php printf($text, count($app_edits)); ?></h3>
+        <ul>
+        <?php foreach($app_edits as $app_edit) { ?>
+            <li>
+            <?php $edit = tdomf_get_edits(array('state' => 'approved', 'post_id' =>$app_edit->post_id, 'user_id' => $current_user->ID, 'limit' => 1));
+                  $edit = $edit[0];
+                  $t_time = get_the_time(__('Y/m/d g:i:s A'));
+                  $h_time = mysql2date(__('Y/m/d'), $edit->date);
+                  $post = get_post($app_edit->post_id);
+                  printf(__("<a href='%s'>%s</a> edited %s","tdomf"),get_permalink($app_edit->post_id),$post->post_title,"<abbr title='$t_time'>$h_time</abbr>"); ?>
+            </li>
+        <?php } ?>
+        </ul>
+    <?php } ?>
+    
+    <?php if(!empty($unapp_edits)) {
+            $num = number_format_i18n(count($unapp_edits));
+            $text = __ngettext( 'Your Contribution awaiting Moderation', 'Your Contributions awaiting Moderation', count($unapp_edits) );
+            ?>
+        <h3><?php printf($text, count($unapp_edits)); ?></h3>
+        <ul>
+        <?php foreach($unapp_edits as $unapp_edit) { ?>
+            <li>
+            <?php $edit = tdomf_get_edits(array('state' => 'unapproved', 'post_id' =>$unapp_edit->post_id, 'user_id' => $current_user->ID, 'limit' => 1));
+                  $edit = $edit[0];
+                  $t_time = get_the_time(__('Y/m/d g:i:s A'));
+                  $h_time = mysql2date(__('Y/m/d'), $edit->date);
+                  $post = get_post($unapp_edit->post_id);
+                  printf(__("<a href='%s'>%s</a> edited %s","tdomf"),get_permalink($unapp_edit->post_id),$post->post_title,"<abbr title='$t_time'>$h_time</abbr>"); ?>
+            </li>
+        <?php } ?>
+        </ul>
+    <?php } ?>
+    
      </div>
       
      <!-- Form formatting -->     
@@ -207,14 +262,22 @@ function tdomf_show_your_submissions_menu() {
     <?php $form_ids = tdomf_get_form_ids(); 
           if(!empty($form_ids)) {
             foreach($form_ids as $form_id) { 
-              if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id->form_id)) { ?>
-                  <div class="wrap">
-                  <h2><?php echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?></h2>
-    <p><?php echo tdomf_get_option_form(TDOMF_OPTION_DESCRIPTION,$form_id->form_id); ?></p>
-    <?php echo tdomf_generate_form($form_id->form_id); ?>
-          <br/><br/>
-          </div>
-            <?php } }
+              if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id->form_id)) {
+                  $edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id->form_id); 
+                  $post_id = false;
+                  if(isset($_REQUEST['tdomf_post_id'])) { $post_id = intval($_REQUEST['tdomf_post_id']); }
+                  $good = true;
+                  if($edit && tdomf_check_permissions_form($form_id->form_id, $post_id) != NULL) {
+                      $good = false;
+                  }
+                  if($good) { ?>
+     <div class="wrap">
+        <h2><?php echo tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id->form_id); ?></h2>
+        <p><?php echo tdomf_get_option_form(TDOMF_OPTION_DESCRIPTION,$form_id->form_id); ?></p>
+        <?php echo tdomf_generate_form($form_id->form_id); ?>
+        <br/><br/>
+     </div>
+          <?php } } }
           }?>
     <?php } ?>
     

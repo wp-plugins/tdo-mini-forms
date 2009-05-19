@@ -135,11 +135,10 @@ function tdomf_form_hacker_diff($form_id) {
 function tdomf_form_hacker_actions($form_id) {
 
   if(tdomf_form_exists($form_id)) {
-    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-       $mode = "new-page-hack";
-    } else {
-       $mode = "new-post-hack";
-    }
+    
+    $mode = tdomf_generate_default_form_mode($form_id);
+    $mode .= '-hack';
+    
     #@session_start();
     $message = "";
     if(isset($_REQUEST['tdomf_form_hack_save'])) {
@@ -198,6 +197,13 @@ function tdomf_form_hacker_actions($form_id) {
          tdomf_set_form_message($form_id, 'tdomf_msg_perm_throttle', TDOMF_OPTION_MSG_PERM_THROTTLE);
          tdomf_set_form_message($form_id, 'tdomf_msg_perm_invalid_user', TDOMF_OPTION_MSG_PERM_INVALID_USER);
          tdomf_set_form_message($form_id, 'tdomf_msg_perm_invalid_nouser', TDOMF_OPTION_MSG_PERM_INVALID_NOUSER);
+         tdomf_set_form_message($form_id, 'tdomf_msg_edit_post_link', TDOMF_OPTION_ADD_EDIT_LINK_TEXT);
+         tdomf_set_form_message($form_id, 'tdomf_msg_invalid_post', TDOMF_OPTION_MSG_INVALID_POST);
+         tdomf_set_form_message($form_id, 'tdomf_msg_invalid_form', TDOMF_OPTION_MSG_INVALID_FORM);
+         tdomf_set_form_message($form_id, 'tdomf_msg_spam_edit_on_post', TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST);
+         tdomf_set_form_message($form_id, 'tdomf_msg_unapproved_edit_on_post', TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST);
+         tdomf_set_form_message($form_id, 'tdomf_msg_locked_post', TDOMF_OPTION_MSG_LOCKED_POST);
+         
          $message = __("Messages Updated.","tdomf");
      } else if(isset($_REQUEST['tdomf_hack_messages_reset'])) {
          check_admin_referer('tdomf-form-hacker');
@@ -211,13 +217,19 @@ function tdomf_form_hacker_actions($form_id) {
          tdomf_set_option_form(TDOMF_OPTION_MSG_PERM_THROTTLE,false,$form_id);
          tdomf_set_option_form(TDOMF_OPTION_MSG_PERM_INVALID_USER,false,$form_id);
          tdomf_set_option_form(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,false,$form_id);
+         tdomf_set_option_form(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,false,$form_id);
+         tdomf_set_option_form(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,false,$form_id);
+         tdomf_set_option_form(TDOMF_OPTION_MSG_INVALID_POST,false,$form_id);
+         tdomf_set_option_form(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,false,$form_id);
+         tdomf_set_option_form(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,false,$form_id);
+         tdomf_set_option_form(TDOMF_OPTION_MSG_LOCKED_POST,false,$form_id);
          $message = __("Messages Reset.","tdomf");         
     } else if(isset($_REQUEST['dismiss'])) {
          check_admin_referer('tdomf-form-hacker');
-         $mode = "new-post-hack";
-         if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-            $mode = "new-page-hack";
-         }
+         
+         $mode = tdomf_generate_default_form_mode($form_id);
+         $mode .= '-hack';
+         
          if(isset($_REQUEST['type']) && $_REQUEST['type'] == 'preview')
          {
              $curr = tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode);
@@ -262,11 +274,9 @@ function tdomf_show_form_hacker() {
     </div>
   <?php } else {
 
-    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-      $mode = "new-page-hack";
-    } else {
-       $mode = "new-post-hack";
-    }
+    $mode = tdomf_generate_default_form_mode($form_id);
+    $mode .= '-hack';
+      
     tdomf_form_hacker_actions($form_id);
     
     $message = tdomf_get_error_messages(true,$form_id);
@@ -274,13 +284,15 @@ function tdomf_show_form_hacker() {
         <div id="message" class="updated fade"><p><?php echo $message; ?></p></div>
     <?php }
     
+    tdomf_forms_top_toolbar($form_id, 'tdomf_show_form_hacker');
+    
     $form_ids = tdomf_get_form_ids(); ?>
         
         <div class="wrap">
         <?php if(!isset($_REQUEST['text'])) { ?>
-          <h2><?php _e('Form Hacker', 'tdomf') ?></h2>
+          <h2><?php printf(__("Form Hacker for Form %d: \"%s\"","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id)); ?></h2>            
         <?php } else { ?>
-          <h2><?php _e('Message Hacker', 'tdomf') ?></h2>
+          <h2><?php printf(__("Message Hacker for Form %d: \"%s\"","tdomf"),$form_id,tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id)); ?></h2>            
         <?php } ?>
 
           <script type="text/javascript">
@@ -296,57 +308,16 @@ function tdomf_show_form_hacker() {
             }
           </script>
           
-          <?php if(count($form_ids) > 1) { ?>
-                <ul class="subsubsub">
-                <?php foreach($form_ids as $single_form_id) { ?>
-                    <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $single_form_id->form_id; ?>"<?php if($single_form_id->form_id == $form_id) { ?> class="current" <?php } ?>>
-                    <?php printf(__("Form %d","tdomf"),$single_form_id->form_id); ?></a> | </li>
-                <?php } ?>
-                </ul>
-                <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
-          <?php } ?>
-
-           <ul class="subsubsub">
-               <li><a href="admin.php?page=tdomf_show_form_hacker&form=<?php echo $form_id; ?>"<?php if(!isset($_REQUEST['text'])) { ?> class="current" <?php } ?>><?php _e("Form") ?></a> | </li>
-               <li><a href="admin.php?page=tdomf_show_form_hacker&text&form=<?php echo $form_id; ?>"<?php if(isset($_REQUEST['text'])) { ?> class="current" <?php } ?>><?php _e("Messages") ?></a> | </li>
-               <li><a id='tdomf_show_help' href="javascript:tdomfShowHelp()" ><?php _e("Show Help","tdomf"); ?></a></li>
-               <li><a id='tdomf_hide_help' href="javascript:tdomfHideHelp()" class='hidden'><?php _e("Hide Help","tdomf"); ?></a></li>
-           </ul>
-          
-           <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
-           
-           <ul class="subsubsub">
-   <?php $pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$form_id);
-         $updated_pages = false;
-         if($pages != false) {
-            $updated_pages = array();
-            foreach($pages as $page_id) {
-              if(get_permalink($page_id) != false) {
-                $updated_pages[] = $page_id; 
-              }
-            }
-            if(count($updated_pages) == 0) { $updated_pages = false; }
-            tdomf_set_option_form(TDOMF_OPTION_CREATEDPAGES,$updated_pages,$form_id);
-    } ?>
-    <?php if($updated_pages != false) { ?>
-      <li><a href="<?php echo get_permalink($updated_pages[0]); ?>" title="<?php _e("Live on your blog!","tdomf"); ?>" ><?php _e("View Page &raquo;","tdomf"); ?></a> |</li>
-    <?php } ?>
-    <?php if(tdomf_get_option_form(TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS,$form_id) && get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) { ?>
-      <li><a href="users.php?page=tdomf_your_submissions#tdomf_form<?php echo $form_id; ?>" title="<?php _e("Included on the 'Your Submissions' page!",'tdomf'); ?>" >
-      <?php _e("View on 'Your Submissions' &raquo;","tdomf"); ?></a> |</li>
-    <?php } ?>
-     <li><a href="admin.php?page=tdomf_show_options_menu&form=<?php echo $form_id; ?>"><?php printf(__("Options &raquo;","tdomf"),$form_id); ?></a> |</li>
-     <li><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets &raquo;","tdomf"),$form_id); ?></a></li>
-    </ul>
-           
-    <?php if(tdomf_wp27()) { ?><br/><br/><?php } ?>
+          <?php tdomf_forms_under_title_toolbar($form_id, 'tdomf_show_form_hacker'); ?>
     
           <?php if(isset($_REQUEST['text'])) { ?>
            
-           <div id="tdomf_help" class='hidden'>
+          <!-- <div id="tdomf_help" class='hidden'> -->
           
           <p><?php _e("You can use this page to modify any messages outputed from TDOMF for your form. From here you can change the post published messages, post held in moderation, etc. etc.","tdomf"); ?></p>
             
+          <?php $form_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id); ?> 
+          
           <p><?php _e("PHP code can be included in the hacked messages. Also TDOMF will automatically expand these macro strings:","tdomf"); ?>
              <ul>
              <li><?php printf(__("<code>%s</code> - User name of the currently logged in user","tdomf"),TDOMF_MACRO_USERNAME); ?>
@@ -355,14 +326,21 @@ function tdomf_show_form_hacker() {
              <li><?php printf(__("<code>%s</code> - Name of the Form (set in options)","tdomf"),TDOMF_MACRO_FORMNAME); ?>
              <li><?php printf(__("<code>%s</code> - Form Description (set in options)","tdomf"),TDOMF_MACRO_FORMDESCRIPTION); ?>
              <li><?php printf(__("<code>%s</code> - Submission Errors","tdomf"),TDOMF_MACRO_SUBMISSIONERRORS); ?>
+             <?php if($form_edit) { ?>
+             <li><?php printf(__("<code>%s</code> - URL of Post/Page being edited","tdomf"),TDOMF_MACRO_SUBMISSIONURL); ?>
+             <li><?php printf(__("<code>%s</code> - Original Submission Date","tdomf"),TDOMF_MACRO_SUBMISSIONDATE); ?>             
+             <li><?php printf(__("<code>%s</code> - Original Submission Time","tdomf"),TDOMF_MACRO_SUBMISSIONTIME); ?>
+             <li><?php printf(__("<code>%s</code> - Title of Post/Page being edited","tdomf"),TDOMF_MACRO_SUBMISSIONTITLE); ?>
+             <?php } else { ?>
              <li><?php printf(__("<code>%s</code> - URL of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONURL); ?>
              <li><?php printf(__("<code>%s</code> - Date of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONDATE); ?>             
              <li><?php printf(__("<code>%s</code> - Time of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONTIME); ?>
              <li><?php printf(__("<code>%s</code> - Title of Submission","tdomf"),TDOMF_MACRO_SUBMISSIONTITLE); ?>
+             <?php } ?>
              </ul>
           </p>
           
-          </div>
+          <!-- </div> -->
           
           <form method="post">
           <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-form-hacker'); } ?>
@@ -373,7 +351,7 @@ function tdomf_show_form_hacker() {
           </p>
           
           <?php if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)){ ?>
-              <h3><?php _e('Submission Published','tdomf'); ?></h3>
+              <h3><?php if($form_edit) { _e('Contribution Approved','tdomf'); } else { _e('Submission Published','tdomf'); } ?></h3>
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_publish" id="tdomf_msg_sub_publish" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
@@ -385,18 +363,18 @@ function tdomf_show_form_hacker() {
           <?php } ?>
           
           <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
-              <h3><?php _e('Submission is Spam','tdomf'); ?></h3>
+              <h3><?php if($form_edit) { _e('Contribution is Spam','tdomf'); } else { _e('Submission is Spam','tdomf'); } ?></h3>
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_spam" id="tdomf_msg_sub_spam" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
           <?php if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){ ?>
-              <h3><?php _e('Submission awaiting Moderation','tdomf'); ?></h3>
+              <h3><?php if($form_edit) { _e('Contribution awaiting Moderation','tdomf'); } else { _e('Submission awaiting Moderation','tdomf'); } ?></h3>
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_mod" id="tdomf_msg_sub_mod" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_MOD,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
-          <h3><?php _e('Submission contains Errors','tdomf'); ?></h3>
+          <h3><?php if($form_edit) { _e('Contribution contains Errors','tdomf'); } else { _e('Submission contains Errors','tdomf'); } ?></h3>
           <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_error" id="tdomf_msg_sub_error" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_ERROR,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
           <br/><br/>
           
@@ -426,6 +404,42 @@ function tdomf_show_form_hacker() {
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_invalid_nouser" id="tdomf_msg_perm_invalid_nouser" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
+
+          <?php if($form_edit) { ?>
+
+              <?php if(tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id)) { ?>
+              
+                 <h3><?php _e('\'Edit Post\' Link Text','tdomf'); ?></h3>
+                 <textarea title="true" rows="5" cols="70" name="tdomf_msg_edit_post_link" id="tdomf_msg_edit_post_link" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+                 <br/><br/>
+             
+              <?php } ?>
+              
+              <h3><?php _e('Invalid Post for Form','tdomf'); ?></h3>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_post" id="tdomf_msg_invalid_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <br/><br/>
+              
+              <h3><?php _e('Invalid Form for Post','tdomf'); ?></h3>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_form" id="tdomf_msg_invalid_form" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_FORM,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <br/><br/>
+              
+              <h3><?php _e('Locked Post','tdomf'); ?></h3>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_locked_post" id="tdomf_msg_locked_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_LOCKED_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <br/><br/>
+              
+              <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
+
+                 <h3><?php _e('Spam Edit on Post','tdomf'); ?></h3>
+                 <textarea title="true" rows="5" cols="70" name="tdomf_msg_spam_edit_on_post" id="tdomf_msg_spam_edit_on_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+                 <br/><br/>
+                  
+              <?php } ?>
+              
+             <h3><?php _e('Unapproved Edit on Post','tdomf'); ?></h3>
+             <textarea title="true" rows="5" cols="70" name="tdomf_msg_unapproved_edit_on_post" id="tdomf_msg_unapproved_edit_on_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+             <br/><br/>
+
+          <?php } ?>
           
           <?php do_action('tdomf_form_hacker_messages_bottom',$form_id,$mode); ?>
                     
@@ -438,7 +452,7 @@ function tdomf_show_form_hacker() {
           
           <?php } else { ?>
           
-          <div id="tdomf_help" class='hidden'>
+          <!-- <div id="tdomf_help" class='hidden'> -->
           
           <p><?php _e("You can use this page to hack the generated HTML code for your form without modifing the code of TDOMF. Please only do this if you know what you are doing. From here you can modify titles, default values, re-arrange fields, etc. etc.","tdomf"); ?></p>
              
@@ -460,7 +474,7 @@ function tdomf_show_form_hacker() {
              </ul>
           </p>
           
-          </div>
+          <!-- </div> -->
  
           <form method="post">
           <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-form-hacker'); } ?>

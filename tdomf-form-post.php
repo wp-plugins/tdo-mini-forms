@@ -1,9 +1,5 @@
 <?php
 
-// Disable revisions *before* everything else
-//
-define('WP_POST_REVISIONS', false);
-
 //////////////////////////
 // Process Form Request //
 //////////////////////////
@@ -45,9 +41,27 @@ if(!tdomf_form_exists($form_id)){
   exit(__("TDOMF: Bad Form Id","tdomf"));
 }
 
+// Submit or Edit?
+//
+$is_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
+
 // Get Form Data for verficiation check
 //
 $form_data = tdomf_get_form_data($form_id);
+
+// Get Post ID if there is one
+//
+$post_id = false;
+if($is_edit) {
+    if(isset($form_data['tdomf_post_id'])) {
+        $post_id = $form_data['tdomf_post_id'];
+    } else if(isset($_REQUEST['tdomf_post_id'])) {
+        $post_id = $_REQUEST['tdomf_post_id'];
+    } else {
+        tdomf_log_message("tdomf-form-post: Edit form %d but no post id!",TDOMF_LOG_BAD);
+        exit(__("TDOMF: Missing Post Id","tdomf"));
+    }
+}
 
 // Security Check
 //
@@ -93,14 +107,21 @@ function tdomf_fixslashesargs() {
 
 // Double check user permissions
 //
-$message = tdomf_check_permissions_form($form_id);
+$message = tdomf_check_permissions_form($form_id,$post_id);
 
 // Now either generate a preview or create a post
 //
 $save_post_info = FALSE;
 $hide_form = true;
 if($message == NULL) {
-  if(isset($_POST['tdomf_form'.$form_id.'_send'])) {
+  
+  if($is_edit) {
+      $form_tag = $form_id.'_'.$post_id;
+  } else {
+      $form_tag = $form_id;
+  }
+  
+  if(isset($_POST['tdomf_form'.$form_tag.'_send'])) {
 
     tdomf_log_message("Someone is attempting to submit something");
 
@@ -109,18 +130,35 @@ if($message == NULL) {
       $args = $_POST;
       $args['ip'] = $_SERVER['REMOTE_ADDR'];
       $retVal = tdomf_create_post($args);
-      // If retVal is an int it's a post id
-      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">";
+      // If retVal is an int it's a post id or an edit id
+      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">";
+      $publish = false;
       if(is_int($retVal)) {
-        $post_id = $retVal;
-        if(get_post_status($post_id) == 'publish') {
-          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id);
-        } else if(get_post_status($post_id) == 'future') {
-          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id);
-        } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) { 
-          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id);
+        if($is_edit) {
+            $edit_id = $retVal;
+            $edit = tdomf_get_edit($edit_id);
+            // @todo could probably test if $edit is real or not before proceeding
+            $post_id = $edit->post_id;
+            if($edit->state == 'approved') {
+                $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id);
+                $publish = true;
+            } else if($edit->state == 'spam') {
+                $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id,false,$post_id);
+            } else { // unapproved
+                $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id);
+            }
         } else {
-          $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id);
+            $post_id = $retVal;
+            if(get_post_status($post_id) == 'publish') {
+              $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id);
+              $publish = true;
+            } else if(get_post_status($post_id) == 'future') {
+              $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id,false,$post_id);
+            } else if(get_post_meta($post_id, TDOMF_KEY_SPAM)) {
+              $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id,false,$post_id);
+            } else {
+              $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id);
+            }
         }
       // If retVal is a string, something went wrong!
       } else {
@@ -131,12 +169,12 @@ if($message == NULL) {
       }
       $message .= "</div>";
     } else {
-      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">".$message."</div>";
+      $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">".$message."</div>";
       $save_post_info = TRUE;
       $hide_form = false;
       tdomf_fixslashesargs();
     }
-  } else if(isset($_POST['tdomf_form'.$form_id.'_preview'])) {
+  } else if(isset($_POST['tdomf_form'.$form_tag.'_preview'])) {
 
     // For preview, remove magic quote slashes!
     tdomf_fixslashesargs();
@@ -145,13 +183,18 @@ if($message == NULL) {
        $hide_form = false;
 	   $message = tdomf_validate_form($_POST,true);
 	   if($message == NULL) {
-           $message  = "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">";
+           $message  = "<div class=\"tdomf_form_preview\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">";
            $message .= tdomf_preview_form($_POST);
            $message .= "</div>";
 	   } else {
-           $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_id."_message\" name=\"tdomf_form".$form_id."_message\">".$message."</div>";
+           $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">".$message."</div>";
        }
-	} else if(isset($_POST['tdomf_form'.$form_id.'_clear'])) {
+       
+       // allows the final check to work when editing
+       //
+       unset($post_id);
+       
+  } else if(isset($_POST['tdomf_form'.$form_tag.'_clear'])) {
     $message = NULL;
     $save_post_info = false;
     $hide_form = false;
@@ -162,7 +205,7 @@ if($message == NULL) {
 //
 $form_data = tdomf_get_form_data($form_id);
 
-if(!isset($post_id) || get_post_status($post_id) != 'publish' || !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
+if(!isset($post_id) || !$publish || !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
   // Go back to form with args
   //
   $redirect_url = $_POST['redirect'];

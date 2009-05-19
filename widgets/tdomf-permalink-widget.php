@@ -137,7 +137,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        * @access public
        * @return String
        */      
-      function previewHack($options) {
+      function previewHack($args,$options) {
           
           $output  = "\t<?php \$permalink = strip_tags(trim(\$permalink));\n"; 
           $output .= "\tif(!empty(\$permalink)) { ?>\n";

@@ -5,21 +5,21 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Code for Form generation //
 //////////////////////////////
 
-// TODO: Clear and/or reset button
+// TODO: Clear and/or reset button                                                    
 
 // Checks if current user/ip has permissions to post!
 //
-function tdomf_check_permissions_form($form_id = 1) {
+function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pending_edits = true) {
    global $current_user, $wpdb, $wp_roles;
 
    get_currentuserinfo();
-
+   
    // User Banned
    //
    if(is_user_logged_in()) {
        $user_status = get_usermeta($current_user->ID,TDOMF_KEY_STATUS);
        if($user_status == TDOMF_USER_STATUS_BANNED) {
-          tdomf_log_message("Banned user $current_user->user_name tried to submit a post!",TDOMF_LOG_ERROR);
+          tdomf_log_message_extra("Banned user $current_user->user_name tried to submit a post!",TDOMF_LOG_ERROR);
           return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_USER,$form_id); 
        }
    }
@@ -32,51 +32,210 @@ function tdomf_check_permissions_form($form_id = 1) {
   	$banned_ips = split(";",$banned_ips);
   	foreach($banned_ips as $banned_ip) {
 		if($banned_ip == $ip) {
-           tdomf_log_message("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
+           tdomf_log_message_extra("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
            return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id);
 		}
 	 }
   }
 
-  // Throttling Rules
-  //
-  $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
-  if(is_array($rules) && !empty($rules)) {
-      foreach($rules as $rule_id => $rule) {
-          $query = "SELECT ID, post_status, post_date ";
-          $query .= "FROM $wpdb->posts ";
-          $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
-          if($rule['type'] == 'ip') {
-              $query .= "WHERE meta_key = '".TDOMF_KEY_IP."' ";
-              $query .= "AND meta_value = '$ip' ";
-          } else if($rule['type'] == 'user') {
-              $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
-              $query .= "AND meta_value = '".$current_user->ID."' ";
-          }
-          if($rule['sub_type'] == 'unapproved') {
-              $query .= "AND post_status = 'draft' ";
-          }
-          if($rule['opt1']) {
-              // this may be inaccurate!
-              $timestamp = tdomf_timestamp_wp_sql(time() - $rule['time']);
-              $query .= "AND post_date > '$timestamp' ";
-          }
-          $query .= "ORDER BY post_date ASC ";
-          $query .= "LIMIT " . ($rule['count'] + 1);
-          $results = $wpdb->get_results( $query );
-          #var_dump($results);
-          if(count($results) >= $rule['count']) {
-              tdomf_log_message("IP $ip blocked by Throttle Rule $rule_id",TDOMF_LOG_BAD);
-              return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
+  $edit_form = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id); 
+  
+  // if not edit form...
+  if(!$edit_form) {
+  
+      // Throttling Rules
+      //
+      $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
+      if(is_array($rules) && !empty($rules)) {
+          foreach($rules as $rule_id => $rule) {
+              $query = "SELECT ID, post_status, post_date ";
+              $query .= "FROM $wpdb->posts ";
+              $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+              if($rule['type'] == 'ip') {
+                  $query .= "WHERE meta_key = '".TDOMF_KEY_IP."' ";
+                  $query .= "AND meta_value = '$ip' ";
+              } else if($rule['type'] == 'user') {
+                  $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
+                  $query .= "AND meta_value = '".$current_user->ID."' ";
+              }
+              if($rule['sub_type'] == 'unapproved') {
+                  $query .= "AND post_status = 'draft' ";
+              }
+              if($rule['opt1']) {
+                  // this may be inaccurate!
+                  $timestamp = tdomf_timestamp_wp_sql(time() - $rule['time']);
+                  $query .= "AND post_date > '$timestamp' ";
+              }
+              $query .= "ORDER BY post_date ASC ";
+              $query .= "LIMIT " . ($rule['count'] + 1);
+              $results = $wpdb->get_results( $query );
+              #var_dump($results);
+              if(count($results) >= $rule['count']) {
+                  tdomf_log_message_extra("IP $ip blocked by Throttle Rule $rule_id",TDOMF_LOG_BAD);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
+              }
           }
       }
   }
+  
+  if($edit_form) {
 
+      // Throttling rules for edit forms
+      //
+      $rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id);
+      if(is_array($rules) && !empty($rules)) {
+          foreach($rules as $rule_id => $rule) {
+              $edit_args = array();
+              if($rule['type'] == 'ip') {
+                  $edit_args['ip'] = $ip;
+              } else if($rule['type'] == 'user') {
+                  $edit_args['user_id'] = $current_user->ID;
+              }
+              if($rule['sub_type'] == 'unapproved') {
+                  $edit_args['state'] = 'unapproved';
+              }
+              if($rule['opt1']) {
+                  $edit_args['time_diff'] = tdomf_timestamp_wp_sql(time() - $rule['time']);
+              }
+              $edit_args['limit'] = $rule['count'];
+              $edit_args['sort'] = $rule['DESC'];
+              $edit_args['count'] = true;
+              $edit_count = tdomf_get_edits($edit_args);
+              if($edit_count >= $rule['count']) {
+                  tdomf_log_message_extra("This IP $ip blocked by Throttle Rule $rule_id when accessing Form $form_id (on post $post_id)",TDOMF_LOG_BAD);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id);
+              }
+          }
+      }
+      
+      // valid post id value
+      //
+      if(!$post_id) {
+          tdomf_log_message_extra("Bad post_id $post_id!",TDOMF_LOG_ERROR);
+          return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
+      }
+      
+      // check if post exists
+      //
+      $post = wp_get_single_post($post_id, ARRAY_A);
+      if($post == NULL) {
+          tdomf_log_message_extra("Post with id $post_id does not exist!",TDOMF_LOG_ERROR);
+          return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
+      }
+      
+      // check if post is locked
+      //
+      $locked = get_post_meta($post_id, TDOMF_KEY_LOCK, true);
+      if($locked) {
+          tdomf_log_message_extra("Post with id $post_id is locked. Cannot be edited.",TDOMF_LOG_BAD);
+          return tdomf_get_message_instance(TDOMF_OPTION_MSG_LOCKED_POST,$form_id);
+      }
+      
+      // check if it is a TDOMF post
+      //
+      if(tdomf_get_option_form(TDOMF_OPTION_EDIT_RESTRICT_TDOMF,$form_id)) {
+          $tdomf_flag = get_post_meta($post_id, TDOMF_KEY_FLAG, true);
+          if($tdomf_flag == false || empty($tdomf_flag)) {
+              tdomf_log_message_extra("Post with id $post_id is not a TDOMF post and cannot be edited with form $form_id!",TDOMF_LOG_ERROR);
+              return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
+          }
+      }
+      
+      // form is being used with right post type (i.e. page versus post)
+      //      
+      $use_pages = tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id);
+      if( ($use_pages && $post['post_type'] == 'post') || (!$use_pages && $post['post_type'] == 'page')) {
+          tdomf_log_message_extra("Post with id $post_id is wrong type of post (".$post['post_type'].") for $form_id!",TDOMF_LOG_ERROR);
+          return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
+      }
+      
+      // do not allow editing of posts with forms unless explicitly asked
+      
+      if(!tdomf_get_option_form(TDOMF_OPTION_EDIT_PAGE_FORM,$form_id)) {
+          if($use_pages) {
+              $form_ids = tdomf_get_form_ids();
+              foreach($form_ids as $a_form_id) { 
+                  $created_pages = tdomf_get_option_form(TDOMF_OPTION_CREATEDPAGES,$a_form_id->form_id);
+                  if(is_array($created_pages)) {
+                          foreach($created_pages as $created_page) {
+                              if($created_page == $post_id) {
+                                  tdomf_log_message_extra("Cannot edit page with id $post_id as it is in use as a form for TDOMF!",TDOMF_LOG_ERROR);
+                                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
+                              }
+                          }
+                  }
+              }
+          }
+          // Load up the post content and check for tags
+          //
+          if(preg_match('|<!--tdomf_form.*-->|', $post['post_content']) > 0 || preg_match('|\[tdomf_form.*\]|', $post['post_content']) > 0) {
+            tdomf_log_message_extra("Cannot edit post/page with id $post_id as it contains tags for TDOMF Forms!",TDOMF_LOG_ERROR);
+            return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_POST,$form_id);
+          }
+      }
+      
+      // check if it's in the right set of categories
+      //
+      if(!$use_pages) {
+          $form_cats = tdomf_get_option_form(TDOMF_OPTION_EDIT_RESTRICT_CATS);
+          if(is_array($form_cats) && !empty($form_cats)) {
+              $good_cat = false;
+              foreach($form_cats as $form_cat) {
+                  if(in_array($form_cat,$post['post_category'])) {
+                      $good_cat = true;
+                      break;
+                  }
+              }
+              if(!$good_cat) {
+                  tdomf_log_message_extra("Post with id $post_id is in wrong categories for $form_id!",TDOMF_LOG_ERROR);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
+              }
+          }
+      }
+      
+      // Is it within the time limit?
+      //
+      $allow_time = tdomf_get_option_form(TDOMF_OPTION_ALLOW_TIME,$form_id);
+      if($allow_time > 0) {
+          $diff_time = time() - strtotime($post['post_date']);
+          if($diff_time > $allow_time) {
+              tdomf_log_message_extra("Post with id $post_id is outside time period by ".($diff_time-$allow_time)." seconds for $form_id!",TDOMF_LOG_ERROR);
+              return tdomf_get_message_instance(TDOMF_OPTION_MSG_INVALID_FORM,$form_id);
+          }
+      }
+      
+      if($check_pending_edits) {
+          // If a post has a spam or unapproved edit, don't edit any more
+          //
+          $last_edit = tdomf_get_edits(array('post_id' => $post_id, 'limit' => 1));
+          if(!empty($last_edit)) {
+              if($last_edit[0]->state == 'unapproved') {
+                  tdomf_log_message_extra("Post with id $post_id has an unapproved edit " . $last_edit[0]->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id);
+              } else if($last_edit[0]->state == 'spam') {
+                  tdomf_log_message_extra("Post with id $post_id has a spam edit " . $last_edit[0]->edit_id . ". Cannot edit at this point.",TDOMF_LOG_ERROR);
+                  return tdomf_get_message_instance(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id);
+              }
+          }
+      }
+  }
   
     // What users can access the form
     //
     if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id) == false) {
 
+        // is current user the original submitter
+        //
+        if($edit_form && tdomf_get_option_form(TDOMF_OPTION_ALLOW_AUTHOR,$form_id) && is_user_logged_in()) {
+            $submitter_user_id = get_post_meta($post_id, TDOMF_KEY_USER_ID, true);
+            if(!empty($submitter_user_id) && $submitter_user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+                $current_user = wp_get_current_user();
+                if($current_user->ID == $submitter_user_id) {
+                    return NULL;
+                }
+            }
+        }
+        
         // does the current user have the capability
         //
         if(current_user_can(TDOMF_CAPABILITY_CAN_SEE_FORM.'_'.$form_id)) { 
@@ -124,7 +283,7 @@ function tdomf_check_permissions_form($form_id = 1) {
             return NULL;
         }
         
-        // If you get this point, all other checkes failed
+        // If you get this point, all other checks failed
         //
         if(is_user_logged_in()) {
             return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_INVALID_USER,$form_id);
@@ -142,21 +301,25 @@ function tdomf_preview_form($args,$mode=false) {
    global $tdomf_form_widgets_preview,$tdomf_form_widgets_preview_hack;
 
    $form_id = intval($args['tdomf_form_id']);
-   
-   // Set mode of form
-   $hack = false;
-   if($mode === false) {
-      if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-         $mode = "new-page";
-      } else {
-         $mode = "new-post";
-      }
-   } else {
-      if(strpos($mode,'-hack') !== false) {
-         $hack = true;
-      }
+
+  // Set mode of form
+   $hack = false;   
+   if(!$mode) {
+       $mode = tdomf_generate_default_form_mode($form_id);
    }
-      
+   if(strpos($mode,'-hack') !== false) {
+       $hack = true;
+   }
+   if(strpos($mode,'edit-') !== false) {
+      $edit = true;
+  }
+   
+  // grab post id
+  $post_id = false;
+  if($edit && isset($args['tdomf_post_id'])) {
+     $post_id = intval($args['tdomf_post_id']);
+  }
+  
    do_action('tdomf_preview_form_start',$form_id,$mode);
    
    // handle hacked forms
@@ -166,13 +329,13 @@ function tdomf_preview_form($args,$mode=false) {
       $hacked_message = tdomf_get_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,$form_id);
       if($hacked_message != false) {
           $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_preview);
-          $message = tdomf_prepare_string($hacked_message, $form_id, $mode, false, "", $args);
+          $message = tdomf_prepare_string($hacked_message, $form_id, $mode, $post_id, "", $args);
           
           // basics
           $unused_patterns = array();
           $patterns     = array ();
           $replacements = array ();
-       
+
           // widgets
           $widget_args = array_merge( array( "before_widget"=>"<p>\n",
                                       "after_widget"=>"\n</p>\n",
@@ -183,18 +346,20 @@ function tdomf_preview_form($args,$mode=false) {
           $widget_order = tdomf_get_widget_order($form_id);
           foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
+                  // all widgets need to be excuted even if not displayed
                   $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
-                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
+                  $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';                  
                   $replacements[] = preg_quote($replacement);  
      
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
               }
           }
-          
+
           // create message
           $message = preg_replace($patterns,$replacements,$message);
           $message = preg_replace($unused_patterns,"",$message);
+          
           return $message;
       }
    } 
@@ -242,6 +407,9 @@ function tdomf_preview_form($args,$mode=false) {
    if($message == "") {
       tdomf_log_message("Couldn't generate preview!",TDOMF_LOG_ERROR);
 	  return __("Error! Could not generate a preview!","tdomf");
+   }
+   if($edit) {
+       return sprintf(__("This is a preview of your contribution:%s\n","tdomf"),$message);
    }
    return sprintf(__("This is a preview of your submission:%s\n","tdomf"),$message);
 }
@@ -317,6 +485,233 @@ function tdomf_queue_date($form_id,$current_ts)  {
     return $current_ts;
 }
 
+// Updates a post using args
+//
+function tdomf_update_post($form_id,$mode,$args) {
+   global $wp_rewrite, $tdomf_form_widgets_post, $current_user;
+
+   $post_id = intval($args['tdomf_post_id']);
+
+   // set initially to post_id
+   
+   $returnVal = intval($post_id); 
+   
+   // hook already performed by tdomf_create_post
+   
+   tdomf_log_message("Attempting to update post $post_id based on input");
+      
+   $can_publish = false;
+   if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)) {
+       $can_publish = true;
+   } else if(is_user_logged_in()) {
+       $user_id = $current_user->ID;
+       if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+         $testuser = new WP_User($user_id,$user->user_login);
+         $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
+         if($user_status == TDOMF_USER_STATUS_TRUSTED) {
+             tdomf_log_message("User is trusted => will auto-publish.",TDOMF_LOG_GOOD);
+             $can_publish = true;
+         }
+         else if(tdomf_get_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,$form_id) && current_user_can('publish_posts')) {
+             tdomf_log_message("User has publish rights => will auto-publish",TDOMF_LOG_GOOD);
+             $can_publish = true;
+         }
+       }
+   }
+   
+   // if versioning enabled, use two versions
+   //
+   //   * Current represents a copy of the current revision (this will probably 
+   //     duplicate revisions but we have no way of knowing if revision X = 
+   //     current post). This will be used to support "reverting" to the 
+   //     previous version
+   //   * The other revision, is the one we'll be modifying and if it's okay
+   //     making it the actual version.
+   //
+   $current_revision_id = wp_save_post_revision($post_id);
+   $revision_id = wp_save_post_revision($post_id);
+   if($revision_id == NULL || $current_revision_id == NULL) {
+       tdomf_log_message("Revisions disabled for post $post_id", TDOMF_LOG_BAD);
+       if($revision_id != NULL) {
+           wp_delete_revision($revision_id);
+           $revision_id = NULL;
+       }
+       if($current_revision_id != NULL) {
+           wp_delete_revision($current_revision_id);
+           $current_revision_id = NULL;
+       }
+   }
+   
+   // flag post under tdomf (if not already)
+   //
+   add_post_meta($post_id, TDOMF_KEY_FLAG, true, true);
+   
+   // disable kses filters (as it's going to be moderated)
+   //
+   if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){
+     kses_remove_filters();
+   }
+   
+   // if versioning disabled
+   // if moderation enabled, not trusted user, user doesn't have publish rights...
+   // ... set post to 'draft' 
+   //
+   if($revision_id == NULL && !$can_publish) {
+       tdomf_log_message("Setting $post_id to draft");
+       $postargs = array (
+           "ID"          => $post_id,
+           "post_status" => "draft",
+           );
+       wp_update_post($postargs);
+   }
+   
+   // store information about edit
+   
+   if(is_int($returnVal))
+   {
+       $edit_revision_id = 0;
+       $edit_current_revision_id = 0;
+       if($revision_id) {
+           $edit_revision_id = $revision_id;
+           $edit_current_revision_id = $current_revision_id;
+       }
+
+       // can be used by spam check
+       //
+       $edit_data = array( 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
+                           'HTTP_REFERER' => $_SERVER['HTTP_REFERER'] );
+       
+       $edit_user_id = 0;
+       if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+           tdomf_log_message("Logging default submitter info (user $user_id) for this post update for $post_id");
+           $edit_user_id = $user_id;
+           update_usermeta($user_id, TDOMF_KEY_FLAG, true);
+           $edit_data["user_login"] = $current_user->user_login;           
+       }
+       
+       $edit_user_ip = 0;
+       if(isset($args['ip'])) {
+           tdomf_log_message("Logging default ip $ip for this post update for $post_id");
+           $edit_user_ip = $args['ip'];
+       }
+       
+       
+       $edit_id = tdomf_create_edit($post_id,$form_id,$edit_revision_id,$edit_current_revision_id,$edit_user_id,$edit_user_ip,'unapproved',$edit_data);
+       tdomf_log_message("Edit ID = $edit_id");      
+       
+       if($edit_id == 0) {
+           // error! do something
+           tdomf_log_message("Edit $edit_id is invalid!",TDOMF_LOG_ERROR);
+       } else {
+           $returnVal = intval($edit_id);
+       }
+   }
+   
+   tdomf_log_message("Let the widgets do their work on updating $post_id");
+   
+   // Widgets:post
+   //
+   $message = "";
+   $widget_args = array( "before_widget"=>"",
+                         "after_widget"=>"<br/>\n",
+                         "before_title"=>"<b>",
+                         "after_title"=>"</b><br/>",
+                         "mode"=>$mode,
+                         "edit_id"=>$edit_id);
+   // Use revision_id for post id if avaliable, this makes it transparent
+   // to the widgets
+   if($revision_id) {
+       $widget_args["post_ID"] = $revision_id;
+   } else {
+       $widget_args["post_ID"] = $post_id;
+   }
+   $widget_args = array_merge( $widget_args,
+                               $args);
+   $widget_order = tdomf_get_widget_order($form_id);
+   $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_post);
+   foreach($widget_order as $w) {
+    if(isset($widgets[$w])) {
+      $temp_message = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
+      if($temp_message != NULL && trim($temp_message) != ""){
+        $message .= $temp_message;
+      }
+	  }
+   }
+   // Oh dear! Errors after submission!
+   if(trim($message) != "") {
+     tdomf_log_message("Post widgets report error!",TDOMF_LOG_BAD);
+     $returnVal = "<font color='red'>$message</font>\n";
+   }
+
+   if(is_int($returnVal)) 
+   {
+       $send_moderator_email = true;
+       if(tdomf_check_edit_spam($edit_id,true)) {
+           
+           // Edited count
+           //
+           $edited_count = get_option(TDOMF_STAT_EDITED);
+           if($edited_count == false) {
+              $edited_count = 0;
+           }
+           $edited_count++;
+           update_option(TDOMF_STAT_EDITED,$edited_count);
+           tdomf_log_message("Edit $edit_id is $edited_count edit!");
+    
+           // [queuing is currently disabled for editing]
+    
+           // Restore version (if using versions) and can publish
+           // (if not using revisions, post is only set to draft if !can_publish)
+           
+           if($can_publish) {
+               tdomf_set_state_edit('approved',$edit_id);
+               if($revision_id) {
+                   tdomf_log_message("Can publish so setting revision $revision_id as main revision for Post $post_id", TDOMF_LOG_GOOD);
+                   wp_restore_post_revision($revision_id);
+               } 
+               if($edit_user_id > 0) {
+                   tdomf_trust_user($edit_user_id);
+               }
+               // if no revisions, post was never not published
+           }
+       }
+       else {
+         // it's spam :(
+         if(get_option(TDOMF_OPTION_SPAM_NOTIFY) == 'none') {
+           $send_moderator_email = false;
+         }
+       }
+    
+       // Notify admins
+       //
+       if($send_moderator_email){
+          tdomf_notify_admins_edit($edit_id,$form_id);
+       }
+   } 
+   
+   // in case of error, delete revision as there is no point keeping it
+   //
+   if(!is_int($returnVal)) {
+       if($revision_id)  {
+           tdomf_log_message("There were errors, delete revision $revision_id", TDOMF_LOG_BAD);
+           wp_delete_revision($revision_id);
+       }
+       tdomf_delete_edit(array($edit_id));
+   }
+   
+   // Re-enable filters so we dont' break anything else!
+   //
+   if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
+     kses_init_filters();
+   }
+   
+   // hook
+   //
+   do_action('tdomf_create_post_end',$post_ID,$form_id,$mode);
+   
+   return $returnVal;
+}
+
 // Creates a post using args
 //
 function tdomf_create_post($args) {
@@ -325,13 +720,16 @@ function tdomf_create_post($args) {
    $form_id = intval($args['tdomf_form_id']);
    
    // Set mode of page
-   if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-     $mode = "new-page";
-   } else {
-     $mode = "new-post";
-   }
+   //
+   $mode = tdomf_generate_default_form_mode($form_id);
    
    do_action('tdomf_create_post_start',$form_id,$mode);
+
+   // if editing a post don't use this function!
+   //
+   if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+       return tdomf_update_post($form_id,$mode,$args);
+   }
    
    tdomf_log_message("Attempting to create a post based on submission");
 
@@ -349,6 +747,11 @@ function tdomf_create_post($args) {
    //
    $def_title = tdomf_get_log_timestamp();
    
+   // Date of submission of post
+   //
+   $date = current_time('mysql');
+   $date_gmt = get_gmt_from_date($date);
+
    // Build post and post it as draft
    //
    $post = array (
@@ -402,6 +805,10 @@ function tdomf_create_post($args) {
    //
    add_post_meta($post_ID, TDOMF_KEY_FORM_ID, $form_id, true);
 
+   // Submission dates
+   //
+   add_post_meta($post_ID, TDOMF_KEY_SUBMISSION_DATE, $date, true);
+   add_post_meta($post_ID, TDOMF_KEY_SUBMISSION_DATE_GMT, $date_gmt, true);
    
    tdomf_log_message("Let the widgets do their work on newly created $post_ID");
 
@@ -506,7 +913,7 @@ function tdomf_create_post($args) {
               "edit_date"      => $ts,
               );
         }
-    
+        
         wp_update_post($post);
         $send_moderator_email = tdomf_get_option_form(TDOMF_OPTION_MOD_EMAIL_ON_PUB,$form_id);
      }
@@ -529,9 +936,23 @@ function tdomf_create_post($args) {
    if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && current_user_can('unfiltered_html') == false){
      kses_init_filters();
    }
-   
-   do_action('tdomf_create_post_end',$post_ID,$form_id,$mode);
 
+   do_action('tdomf_create_post_end',$post_ID,$form_id,$mode);
+   
+   // Delete all versions but latest
+   //
+   if( WP_POST_REVISIONS ) {
+       $revisions = wp_get_post_revisions( $post_ID, array( 'order' => 'ASC' ) );
+       tdomf_log_message("post $post_ID generated ".count($revisions)." revisions.");
+       // discount the latest revision
+       //$revisions = array_slice( $revisions, 0, (count($revisions) - 1) );
+       #tdomf_log_message("<pre>".var_export($revisions,true)."</pre>");
+       foreach($revisions as $rev) {
+           tdomf_log_message("Deleting revisions ".$rev->ID."");
+           wp_delete_post_revision( $rev->ID );
+       }
+   }
+   
    return intval($post_ID);
 }
 
@@ -559,7 +980,7 @@ function tdomf_generate_form_key($form_id) {
 
 // Create the form!
 //
-function tdomf_generate_form($form_id = 1,$mode = false) {
+function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
   global $tdomf_form_widgets,$tdomf_form_widgets_hack;
 
   if(!tdomf_form_exists($form_id)) {
@@ -568,27 +989,49 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 
   // Set mode of form
   $hack = false;
+  $edit = false;
   if($mode === false) {
-      if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-         $mode = "new-page";
-      } else {
-         $mode = "new-post";
-      }
+      $mode = tdomf_generate_default_form_mode($form_id);
   } else {
       if(strpos($mode,'-hack') !== false) {
          $hack = true;
       }
   }
+  if(strpos($mode,'edit-') !== false) {
+      $edit = true;
+  }
   
+  
+  // @todo log an error if wrong edit/new or post/page is used
   
   $use_ajax = tdomf_widget_is_ajax_avaliable($form_id);
-  if($use_ajax) {
+  if($use_ajax && strpos($mode,'ajax') === false) {
       $mode .= "-ajax";
   }
+  
+  // grab form data
+  
+  $form_data = tdomf_get_form_data($form_id);
+  
+  // do we need post_id, and if so set it
 
-  $form = tdomf_check_permissions_form($form_id);
-  if($form != NULL) {
-    return $form;
+  if($edit && !$post_id) {
+      if(isset($form_data['tdomf_post_id'])) {
+          $post_id = $form_data['tdomf_post_id'];
+      } else if(isset($_REQUEST['tdomf_post_id'])) {
+          $post_id = $_REQUEST['tdomf_post_id'];
+      }
+  }
+  
+  // @todo we want to check if we can edit the post, but 
+  // we do not care about 'pending edits', if we're in the process of editing
+  // an post already! - i.e. acknowledgement screen
+  
+  if(!$hack) {
+      $form = tdomf_check_permissions_form($form_id,$post_id,empty($form_data));
+      if($form != NULL) {
+        return $form;
+      }
   }
 
   do_action('tdomf_generate_form_start',$form_id,$mode);
@@ -601,8 +1044,7 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
       $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets);
   }
   $form = "";
-  $form_data = tdomf_get_form_data($form_id);
-  
+    
   // handle hacked forms
   //
   if(!$hack) {
@@ -632,12 +1074,18 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
               }
           }
           
-          $form = tdomf_prepare_string($hacked_form, $form_id, $mode, false, "", $post_args);
+          $form = tdomf_prepare_string($hacked_form, $form_id, $mode, $post_id, "", $post_args);
           
           // basics
           $unused_patterns = array();
-          $patterns     = array ( '/'.TDOMF_MACRO_FORMKEY.'/' );
-          $replacements = array ( tdomf_generate_form_key($form_id) );
+          $patterns     = array ( '/'.TDOMF_MACRO_FORMKEY.'/');
+          $replacements = array ( tdomf_generate_form_key($form_id));
+          
+          // post id
+          if($edit) {
+              $patterns[] = '/'.TDOMF_MACRO_POSTID.'/';
+              $replacements[] = $post_id;
+          }
 
           // message
           if($use_ajax && $message == false) {
@@ -659,9 +1107,19 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
                                            "tdomf_form_id"=>$form_id,
                                            "mode"=>$mode),
                                            $post_args);
+          if($edit) {
+              if(!isset($widget_args['tdomf_post_id'])) {
+                  $widget_args['tdomf_post_id'] = $post_id;
+              }
+              // old way
+              if(!isset($widget_args['post_ID'])) {
+                  $widget_args['post_ID'] = $post_id;
+              }
+          }
           $widget_order = tdomf_get_widget_order($form_id);
           foreach($widget_order as $w) {
               if(isset($widgets[$w])) {
+                  // all widgets need to be excuted even if not displayed
                   $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
                   $replacements[] = preg_quote($replacement);
@@ -678,9 +1136,21 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
   }
   
   if($hack) {
-      $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID;      
+      if($edit) {
+          $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID.'-'.TDOMF_MACRO_POSTID;
+          $form_id_safe = TDOMF_MACRO_FORMID.'_'.TDOMF_MACRO_POSTID;
+      } else {
+          $form_name = 'tdomf_form'.TDOMF_MACRO_FORMID;
+          $form_id_safe = TDOMF_MACRO_FORMID;
+      }
   } else {
-      $form_name = 'tdomf_form'.$form_id;
+      if($edit && $post_id) {
+          $form_name = 'tdomf_form'.$form_id.'_'.$post_id;
+          $form_id_safe = $form_id.'_'.$post_id;
+      } else {
+          $form_name = 'tdomf_form'.$form_id;
+          $form_id_safe = $form_id;
+      }
   }
   
   if($hack) {
@@ -700,34 +1170,34 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
       $form .= <<<EOT
 <script type="text/javascript">
 	//<!-- [CDATA[
-	function ajaxProgressStart$form_id() {
-		var w = jQuery('#ajaxProgress$form_id').width();
-		var h = jQuery('#ajaxProgress$form_id').height();
+	function ajaxProgressStart$form_id_safe() {
+		var w = jQuery('#ajaxProgress$form_id_safe').width();
+		var h = jQuery('#ajaxProgress$form_id_safe').height();
 		var offset = jQuery('#$form_name').offset();
 		var x = offset.left + ((jQuery('#$form_name').width() - w) / 2);
 		var y = offset.top + ((jQuery('#$form_name').height() - h) / 2);
-		jQuery('#ajaxProgress$form_id').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
-		jQuery('#ajaxProgress$form_id').attr('class','progress');
-		ajaxShadow$form_id();
+		jQuery('#ajaxProgress$form_id_safe').css({display: 'block', height: h + 'px', width: w + 'px', position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '1000' });
+		jQuery('#ajaxProgress$form_id_safe').attr('class','progress');
+		ajaxShadow$form_id_safe();
 	}
-	function ajaxShadow$form_id() {
+	function ajaxShadow$form_id_safe() {
 		var offset = jQuery('#$form_name').offset();
 		var w = jQuery('#$form_name').width();
 		var h = jQuery('#$form_name').height();
-		jQuery('#shadow$form_id').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
-		jQuery('#shadow$form_id').css({zIndex: '999', display: 'block'});
-		jQuery('#shadow$form_id').fadeTo('fast', 0.2);
+		jQuery('#shadow$form_id_safe').css({ width: w + 'px', height: h + 'px', position: 'absolute', left: offset.left + 'px', top: offset.top + 'px' });
+		jQuery('#shadow$form_id_safe').css({zIndex: '999', display: 'block'});
+		jQuery('#shadow$form_id_safe').fadeTo('fast', 0.2);
 	}
-	function ajaxUnshadow$form_id() {
-		jQuery('#shadow$form_id').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
+	function ajaxUnshadow$form_id_safe() {
+		jQuery('#shadow$form_id_safe').fadeOut('fast', function() {jQuery('#tdomf_shadow').hide()});
 	}
-	function ajaxProgressStop$form_id() {
-		jQuery('#ajaxProgress$form_id').attr('class','hidden');
-		jQuery('#ajaxProgress$form_id').hide();
-		ajaxUnshadow$form_id();
+	function ajaxProgressStop$form_id_safe() {
+		jQuery('#ajaxProgress$form_id_safe').attr('class','hidden');
+		jQuery('#ajaxProgress$form_id_safe').hide();
+		ajaxUnshadow$form_id_safe();
 	}
-	function tdomfSubmit$form_id(action) {
-		ajaxProgressStart$form_id();
+	function tdomfSubmit$form_id_safe(action) {
+		ajaxProgressStart$form_id_safe();
 		var mysack = new sack("$ajax_script" );
 		mysack.execute = 1;
 		mysack.method = 'POST';
@@ -737,31 +1207,31 @@ function tdomf_generate_form($form_id = 1,$mode = false) {
 		mysack.runAJAX();
 		return true;
 	}
-	function tdomfDisplayMessage$form_id(message, mode) {
+	function tdomfDisplayMessage$form_id_safe(message, mode) {
 		if(mode == "full") {
-			jQuery('#tdomf_form${form_id}_message').attr('class','hidden');
-			document.getElementById('tdomf_form${form_id}_message').innerHTML = "";
+			jQuery('#tdomf_form${form_id_safe}_message').attr('class','hidden');
+			document.getElementById('tdomf_form${form_id_safe}_message').innerHTML = "";
 			document.$form_name.innerHTML = message;
             jQuery('#$form_name').focus();
             var offset = jQuery('#$form_name').offset();
             window.scrollTo(offset.left,offset.top);
 		} else if(mode == "preview") {
-			jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_preview');
-			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
-            jQuery('#tdomf_form${form_id}_message').focus();
-            var offset = jQuery('#tdomf_form${form_id}_message').offset();
+			jQuery('#tdomf_form${form_id_safe}_message').attr('class','tdomf_form_preview');
+			document.getElementById('tdomf_form${form_id_safe}_message').innerHTML = message;
+            jQuery('#tdomf_form${form_id_safe}_message').focus();
+            var offset = jQuery('#tdomf_form${form_id_safe}_message').offset();
             window.scrollTo(offset.left,offset.top);
 		} else {
-            jQuery('#tdomf_form${form_id}_message').attr('class','tdomf_form_message');
-			document.getElementById('tdomf_form${form_id}_message').innerHTML = message;
-            var offset = jQuery('#tdomf_form${form_id}_message').offset();
+            jQuery('#tdomf_form${form_id_safe}_message').attr('class','tdomf_form_message');
+			document.getElementById('tdomf_form${form_id_safe}_message').innerHTML = message;
+            var offset = jQuery('#tdomf_form${form_id_safe}_message').offset();
             window.scrollTo(offset.left,offset.top);
-            jQuery('#tdomf_form${form_id}_message').focus();
+            jQuery('#tdomf_form${form_id_safe}_message').focus();
 		}
-		ajaxProgressStop$form_id();
+		ajaxProgressStop$form_id_safe();
 	}
-	function tdomfRedirect$form_id(url) {
-		ajaxProgressStop$form_id();
+	function tdomfRedirect$form_id_safe(url) {
+		ajaxProgressStop$form_id_safe();
 		window.location = url;
 	}
 	//]] -->
@@ -770,13 +1240,13 @@ EOT;
     if($hack) {
         $form .= "\n<!-- AJAX js end -->\n<!-- shadow required for disabling form during AJAX submit -->\n";
     }
-    $form .= "<div id='shadow$form_id' class='tdomf_shadow'></div>\n";
+    $form .= "<div id='shadow$form_id_safe' class='tdomf_shadow'></div>\n";
     if($hack) {
         $form .= "<!-- ajaxProgress holds the HTML to show during AJAX busy -->\n";
     }
-    $form .= "<div id='ajaxProgress$form_id' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>\n";
+    $form .= "<div id='ajaxProgress$form_id_safe' class='hidden'>".__('Please wait a moment while your submission is processed...','tdomf')."</div>\n";
     if(!$hack) {
-        $form .= "<div id='tdomf_form${form_id}_message' class='hidden'></div>";
+        $form .= "<div id='tdomf_form${form_id_safe}_message' class='hidden'></div>";
     }
   } 
   
@@ -817,14 +1287,24 @@ EOT;
   
   // Form id
   //
-  $form .= "\t<div><input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' /></div>\n";
-
+  if($hack) {
+      $form .= "\t<div><input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='".TDOMF_MACRO_FORMID."' /></div>\n";
+      if($edit) {
+          $form .= "\t<div><input type='hidden' id='tdomf_form_id' name='tdomf_post_id' value='".TDOMF_MACRO_POSTID."' /></div>\n";
+      }
+  } else {
+      $form .= "\t<div><input type='hidden' id='tdomf_form_id' name='tdomf_form_id' value='$form_id' /></div>\n";
+      if($edit) {
+          $form .= "\t<div><input type='hidden' id='tdomf_form_id' name='tdomf_post_id' value='$post_id' /></div>\n";
+      }
+  }
+  
   if($hack) {
       $redirect_url = TDOMF_MACRO_FORMURL;
   } else {
       # use message id as re-direct because we *know* where this will appear on a non-hacked form
       #$redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
-      $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id}_message";
+      $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id_safe}_message";
   }
   $form .= "\t<div><input type='hidden' id='redirect' name='redirect' value='$redirect_url' /></div>\n";
   
@@ -858,6 +1338,15 @@ EOT;
                                            "tdomf_form_id"=>$form_id,
                                            "mode"=>$mode),
                                     $post_args);
+      if($edit) {
+          if(!isset($widget_args['tdomf_post_id'])) {
+              $widget_args['tdomf_post_id'] = $post_id;
+          }
+          // old way
+          if(!isset($widget_args['post_ID'])) {
+              $widget_args['post_ID'] = $post_id;
+          }
+      }
       $widget_order = tdomf_get_widget_order($form_id);
       foreach($widget_order as $w) {
           if(isset($widgets[$w])) {
@@ -873,17 +1362,17 @@ EOT;
   }  
   $form .= "\t<table class='tdomf_buttons'><tr>\n";
   if(tdomf_widget_is_preview_avaliable($form_id)) {
-      if($hack) {
-          $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.TDOMF_MACRO_FORMID.'_preview" id="tdomf_form'.TDOMF_MACRO_FORMID.'_preview" onclick="tdomfSubmit'.TDOMF_MACRO_FORMID."('preview'); return false;\" /></td>\n";
-      } else {
-          $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id.'_preview" id="tdomf_form'.$form_id.'_preview" onclick="tdomfSubmit'.$form_id."('preview'); return false;\" /></td>\n";
-      }
+     $form .= "\t\t".'<td><input type="submit" value="'.__("Preview","tdomf").'" name="tdomf_form'.$form_id_safe.'_preview" id="tdomf_form'.$form_id_safe.'_preview"';
+     if($use_ajax) {
+         $form .= ' onclick="tdomfSubmit'.$form_id_safe."('preview'); return false;\"";
+     }
+     $form .= "/></td>\n";
   }
-  if($hack) {
-      $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.TDOMF_MACRO_FORMID.'_send" id="tdomf_form'.TDOMF_MACRO_FORMID.'_send" onclick="tdomfSubmit'.TDOMF_MACRO_FORMID."('post'); return false;\" /></td>\n";
-  } else {
-      $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id.'_send" id="tdomf_form'.$form_id.'_send" onclick="tdomfSubmit'.$form_id."('post'); return false;\" /></td>\n";
+  $form .= "\t\t".'<td><input type="submit" value="'.__("Send","tdomf").'" name="tdomf_form'.$form_id_safe.'_send" id="tdomf_form'.$form_id_safe.'_send"';
+  if($use_ajax) {
+      $form .= ' onclick="tdomfSubmit'.$form_id_safe."('post'); return false;\"";
   }
+  $form .= "/></td>\n";
   $form .= "\t</tr></table>\n";
   if($hack) {
         $form .= "\t<!-- form buttons end -->\n";
@@ -993,5 +1482,37 @@ function tdomf_save_form_data($form_id,$form_data) {
       tdomf_session_set(0,$form_data);
    }
 }
+
+function tdomf_generate_default_form_mode($form_id) {
+    if(tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id)) {
+        $mode = 'edit';
+    } else {
+        $mode = 'new';
+    }
+    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
+        $mode .= '-page';
+    } else {
+        $mode .= '-post';
+    }
+    if(tdomf_widget_is_ajax_avaliable($form_id)) {
+        $mode .= '-ajax';
+    }
+    return $mode;
+}
+
+function tdomf_post_delete_cleanup($post_id) {
+    
+    tdomf_log_message("Post with id $post_id is being deleted");
+    $edits = tdomf_get_edits(array('post_id' => $post_id));
+    if(!empty($edits) && is_array($edits)) {
+        $edit_ids = array();
+        foreach($edits as $edit) {
+            $edit_ids [] = $edit->edit_id;
+        }
+        tdomf_log_message("Deleting associated edits " . implode(", ",$edit_ids));
+        tdomf_delete_edits($edit_ids);
+    }
+}
+add_action('delete_post', 'tdomf_post_delete_cleanup');
 
 ?>
