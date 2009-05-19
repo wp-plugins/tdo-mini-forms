@@ -751,6 +751,7 @@ function tdomf_create_post($args) {
    //
    $date = current_time('mysql');
    $date_gmt = get_gmt_from_date($date);
+
    // Build post and post it as draft
    //
    $post = array (

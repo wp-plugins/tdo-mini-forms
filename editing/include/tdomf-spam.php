@@ -647,33 +647,37 @@ function tdomf_cleanup_spam() {
    if(count($spam_posts) > 0) {
        $list = "";
        foreach($spam_posts as $post) {
+
            // we use to use post_modified_gmt but since 2.6 or 2.7 this is
            // no longer set when the post is initially created in draft
-          
+           //
+        
            $post_date_gmt = get_post_meta($post->ID, TDOMF_KEY_SUBMISSION_DATE, true);
-           if($post_data_gmt != false) {
+           if($post_date_gmt != false) {
               $post_date_ts = mysql2date('U',$post_date_gmt);      
               $diff = time() - $post_date_ts;
-              #if($diff >= 2952000) { // 1 month (30 days)
-              if($diff >= 1) { // 1 month (30 days)
+              if($diff >= 2952000) { // 1 month (30 days)
                  $list .= $post->ID.", ";
                  wp_delete_post($post->ID);
               }
               tdomf_log_message($post->ID . ' ' . $post_data_ts . ' ' . $diff);
-           }
+           } else {
 
-           #$last_updated = strtotime( $post->post_modified_gmt );
-           #$diff = time() - $last_updated;
-           #if($diff >= 2952000) { // 1 month (30 days)
-           #    $list .= $post->ID.", ";
-           #    wp_delete_post($post->ID);
-           #}
+              // old way
+              //
+              $last_updated = strtotime( $post->post_modified_gmt );
+              $diff = time() - $last_updated;
+              if($diff >= 2952000) { // 1 month (30 days)
+                $list .= $post->ID.", ";
+                wp_delete_post($post->ID);
+             }
+           }
        }
        if($list != "") {
           tdomf_log_message("Deleting spam posts older than a month: $list");
        }
    } else {
-       tdomf_log_message("No spam submissions to clean up!",TDOMF_LOG_GOOD);
+       #tdomf_log_message("No spam submissions to clean up!",TDOMF_LOG_GOOD);
    }
 }
 ?>
