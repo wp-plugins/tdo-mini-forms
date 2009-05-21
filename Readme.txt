@@ -1,41 +1,39 @@
 === Plugin Name ===
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
-Tags: anonymous, posting, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
-Requires at least: 2.7
-Tested up to: 2.7
-Stable Tag: 0.12.7
+Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
+Requires at least: 2.7.1
+Tested up to: 2.7.1
+Stable Tag: 0.13
 
-This plugin allows you to add themed custom posting forms to your website that allows your readers (including non-registered) to submit posts.
+This plugin allows you to add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
 == Description ==
 
-This plugin allows you to add highly customisable forms that work with your Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit posts. The posts are kept in "draft" until an admin can publish them (also configurable). It can optionally use Akismet to check if submissions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
+This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
-**Version 0.12.7 fixes [a critical bug on windows hosts.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/) Please upgrade asap if using a Windows host.**
+**Version 0.13 is a major update. You may need to double check you're Form widgets have the correct settings. This update adds forms that can be used for Editing. The admin backend is also, partly, updated to take advantage of Wordpress' 2.7 features. Only a few bugs are fixed in this release. The following release will contain mostly bug fixes. This update will only work on 2.7+ versions of Wordpress. **
 
-**Version 0.12.7 includes support for GeoMashup plugin latest beta, improvements to the widget class (you may need to modify you forms after upgrade), Auto Respond Email can now send a link that users can click and flag the post as verified and a few more bug fixes, such as queuing publishing of approved submissions.**
+TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/), [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
-TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/) and a [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
+The plugin provides an extensive moderation view so administrators and editors can see posts and edits awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions and edits.
 
-The plugin provides an extensive moderation view so administrators and editors can see posts awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions. (It should be noted that submissions from users that can already publish using the normal Wordpress UI, will be automatically published.)
+Administrators can configure the forms using drag and drop "widgets". They are based on the same model as Wordpress' built-in Theme widgets and it is possible to write your own.
 
-Administrators can configure the forms using drag and drop "widgets". They are based on the same model as Wordpress' built-in Theme widgets and it is possible to write your own. With 0.7, more options are available and it is now much easier to integrate with your theme. You don't even need to modify your theme any more to display submitter information and you can even add a form as a sidebar widget to your form.
-
-Registered users have access to a "Your Submissions" page which lists their current submissions awaiting approval and links to their approved submissions.
+Registered users have access to a "Your Submissions" page which lists their current submissions and edits awaiting approval and links to their approved submissions.
 
 * [Demo Site]( http://thedeadone.net/forums )
 
 = Features =
 
+* Submission and Editing of Posts and Pages
 * Integration with the GeoMashup plugin
 * Integration with Subcribe-to-Comments 2.1 plugin
 * Integration with Akismet and reCaptcha to prevent Spam
 * Highly customisable: Create your forms using a Widget interface and then hack it to make it work how you like!
 * Create as many forms as you like.
 * Import and Export form configurations
-* Put a form in your sidebar using a widget for your Theme.
-* Submit pages instead of posts.
+* Put a form in your sidebar using a widget for your Theme or put the form in a page or post.
 * Submit posts with alternative permalinks (great for link sites)
 * Simple Question and/or Image Captcha.
 * Add Custom Fields to your Forms.
@@ -53,11 +51,9 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Numerous widgets for your theme, including a list of the top submitters
 * And many more...
 
-**Version 0.12.5 includes integration with the reCapatcha captcha service, integration with the Subscribe-to-Plugins 2.1 plugin (allow submitters to subscribe to followup comments automatically), Comments management widget (allows you to set comments and ping status for forms and/or allow users chose if they want to allow comments), Excerpt Widget and even more bug fixes**
+**Version 0.12.7 fixes [a critical bug on windows hosts.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/) Please upgrade asap if using a Windows host.**
 
-**Version 0.12 introduces the Form Hacker which allows admins the power to modify the form code from within the plugin as opposed to hacking the plugin source code. Nearly all messages to the user are configurable now.**
-
-**Verision 0.11 provides intregration with Akismet, Submission Throttling, Import and Export of Form settings, Queuing Approved Post, Top Submitter theme widget and numerous bug fixes!**
+**Version 0.12.7 includes support for GeoMashup plugin latest beta, improvements to the widget class (you may need to modify you forms after upgrade), Auto Respond Email can now send a link that users can click and flag the post as verified and a few more bug fixes, such as queuing publishing of approved submissions.**
 
 == Installation ==
 
@@ -135,6 +131,8 @@ You can use the [TDOMF Support Forum]( http://thedeadone.net/forum ) or you can 
 
 [TDO Mini Forms News]( http://thedeadone.net/index.php?tag=tdomf ) and here is the [RSS Feed]( http://thedeadone.net/index.php?tag=tdomf&feed=rss2 ).
 
+You can also follow me on twitter [@thedeadone](https://twitter.com/thedeadone). I'll be posting updates about TDO Mini Forms with the tag #tdomf. 
+
 = How do I add a form to a page or post? =
 
 You can use the button in the options menu to create a page automatically.
@@ -157,13 +155,13 @@ There are options to automatically modify the the_author tag with submitter info
 
 = What template tags are available? =
 
-(Replace '1' with the ID of the form you are interested in)
+(Replace '1' with the ID of the form you are interested in and replace '100' with the post id of the post or page you wish to edit. If not editing a page, leave out or set to 'false'.)
 
-`<?php if(tdomf_can_current_user_see_form(1)) { ?> Link to form <?php } ?>`
+`<?php if(tdomf_can_current_user_see_form(1,100)) { ?> Link to form <?php } ?>`
 
-`<?php echo tdomf_get_the_form(1); ?>`
+`<?php echo tdomf_get_the_form(1,100); ?>`
 
-`<?php tdomf_the_form(1); ?>`
+`<?php tdomf_the_form(1,100); ?>`
 
 These tags must be used within the loop:
 
@@ -357,8 +355,34 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Missing Sidebars in Widget Control in IE7
 * Issue with Widgets on new install of wp2.6.1
 * In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)
+* The 'gmt_offset' is not used in the macro subsitituion for %%SUBMISSIONDATE%% 
+* Incomatibilitiy with with "vbbridge"
+* Image capatcha must update after failed "submit"
+* Possible incompatibility with Google XML Sitemaps plugin
+* Bug with GeoMashup Integration
+* TwitterTools not working with TDOMF publish
+* Missing Required option in category field
+* Sanatized file upload filenames/paths
+* Diacritc marks reset form hacker
+* Bug: Weird "From" email for post moderation emails
+* Bug: No image preview when using attachment options
+* Bug with AJAX and slashes
+* Bug: Widget configuration panels not showing up
+* Investigate: tinymce conflict with AJAX form
+* Investigate: upload-link error
+* Investigate: Bug with post times
+
 
 == Version History ==
+
+= v0.13: 22nd May 2009 =
+
+* Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
+* Fixed '$' not working in preview
+* Fixed characters getting eaten up in preview
+* Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
+* Added a message to the Form Creator to indicate if a the Form Hacker has been enabled and will prevent changes to form.
+* Forms to edit posts and pages
 
 = v0.12.7: 13th Feb 2009 = 
 

@@ -30,13 +30,14 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
-// v0.12.8/0.13
+// v0.13
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
 // - Fixed '$' not working in preview
 // - Fixed characters getting eaten up in preview
 // - Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
 // - Added a message to the Form Creator to indicate if a the Form Hacker 
 //    has been enabled and will prevent changes to form.
+// - Forms to edit posts and pages
 //
 // v0.12.7
 // - Form Hacker did not use FORMID so when you copied a form, it would break
@@ -255,9 +256,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "46");
+define("TDOMF_BUILD", "47");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.12.7");
+define("TDOMF_VERSION", "0.13");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -726,7 +727,11 @@ function tdomf_new_features() {
   if($last_version < 46) {
       $features .= "<li>".__("Auto Respond Email widget can now provide a link to flag posts using a Custom Field","tdomf")."</li>";
   }
-
+  // 47 = 0.13
+  if($last_version < 47) {
+      $features .= "<li>".__("<b>You can now created forms to edit posts and pages!</b>","tdomf")."</li>";
+  }
+  
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
   }
