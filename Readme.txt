@@ -6,7 +6,7 @@ Requires at least: 2.7.1
 Tested up to: 2.7.1
 Stable Tag: 0.13
 
-This plugin allows you to add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
+This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
 == Description ==
 
