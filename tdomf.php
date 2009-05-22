@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.12.7
+Version: 0.13
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -35,7 +35,7 @@ Author URI: http://thedeadone.net
 // - Fixed '$' not working in preview
 // - Fixed characters getting eaten up in preview
 // - Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
-// - Added a message to the Form Creator to indicate if a the Form Hacker 
+// - Added a message to the Form Creator to indicate if a the Form Hacker
 //    has been enabled and will prevent changes to form.
 // - Forms to edit posts and pages
 //
@@ -74,7 +74,7 @@ Work Queue:
     http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
     - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
     http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
-   
+
    - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
    - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
    - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
@@ -105,7 +105,7 @@ Work Queue:
    - Add Error Warning for custom field widgets when non-unique keys used
    - Investigate: no sidebars in widget configuration in IE.7
    - Investigate: tinymce conflict with AJAX form
-   - Investigate: upload-link error: 
+   - Investigate: upload-link error:
        http://wordpress.org/support/topic/186919#post-838957
    - Study: Replace diff with wordpress diff or add wordpress diff to options?
    - Investigate: In IE, can't select copy/paste text in text widget
@@ -123,14 +123,14 @@ Notes:
  - Potential nice hack: query.php @ line 1479
    $this->posts = apply_filters('the_posts', $this->posts);
      1. is single/page [should include category and index?]
-     2. what post? 
+     2. what post?
      3. is it tdomf, draft/unmoderation, not spam, viewer is submitter
      4. add to array
      This will allow users see their submitted posts, however comments should
      be disabled as they cannot be used in preview mode
  - What Clickable links in your posts? http://thedeadone.net/forum/?p=500#comment-1598
 */
- 
+
  /*
 ////////////////////////////////////////////////////////////////////////////////
 TODO for future versions
@@ -464,7 +464,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 ////////
 // 0.13
 
-/* 
+/*
  * @todo
  *
  * @live server
@@ -555,14 +555,14 @@ add_action('admin_menu', 'tdomf_add_menus');
 function tdomf_add_menus()
 {
     $unmod_count  = tdomf_get_unmoderated_posts_count();
-    $unmod_count += tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true)); 
+    $unmod_count += tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true));
 
     /*if(tdomf_wp25() && $unmod_count > 0) {
         add_menu_page(__('TDO Mini Forms', 'tdomf'), sprintf(__("TDO Mini Forms <span id='awaiting-mod' class='count-%d'><span class='comment-count'>%d</span></span>", 'tdomf'), $unmod_count, $unmod_count), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     } else {*/
         add_menu_page(__('TDO Mini Forms', 'tdomf'), __('TDO Mini Forms', 'tdomf'), 'edit_others_posts', TDOMF_FOLDER, 'tdomf_overview_menu');
     /*}*/
-    
+
     // Options
     add_submenu_page( TDOMF_FOLDER , __('Options', 'tdomf'), __('Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
     //
@@ -793,7 +793,7 @@ function tdomf_init(){
           tdomf_set_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,true,$form_id->form_id);
       }
   }
-  
+
   // Update build number
   if(get_option(TDOMF_VERSION_CURRENT) != TDOMF_BUILD) {
     update_option(TDOMF_VERSION_LAST,get_option(TDOMF_VERSION_CURRENT));
