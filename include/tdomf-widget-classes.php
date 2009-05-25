@@ -1014,7 +1014,7 @@ class TDOMF_Widget {
      * @return Boolean
      * @access public
      */    
-    public static function isEditForm($mode,$form_id=false) {
+    /*public static*/ function isEditForm($mode,$form_id=false) {
         if($form_id != false) {
             $mode = tdomf_generate_default_form_mode($form_id);
         }
@@ -1030,7 +1030,7 @@ class TDOMF_Widget {
      * @return Boolean
      * @access public
      */    
-    public static function isSubmitForm($mode,$form_id=false) {
+    /*public static*/ function isSubmitForm($mode,$form_id=false) {
         if($form_id != false) {
             $mode = tdomf_generate_default_form_mode($form_id); 
         }

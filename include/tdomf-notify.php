@@ -487,7 +487,7 @@ add_action('delete_post', 'tdomf_notify_poster_rejected');
 // Do we need to display a email input?
 //
 function tdomf_widget_notifyme_show_email_input($form_id){
-  global $current_user;
+  global $current_user,$tdomf_widget_whoami;
   get_currentuserinfo();
   $show_email_input = true;
   if(is_user_logged_in() && tdomf_check_email_address($current_user->user_email)) {
@@ -495,8 +495,8 @@ function tdomf_widget_notifyme_show_email_input($form_id){
     $show_email_input = false;
   } else { 
     $widgets_in_use = tdomf_get_widget_order($form_id);
-    if(in_array("who-am-i",$widgets_in_use)) {
-      $whoami_options = tdomf_widget_whoami_get_options($form_id);
+    if(in_array("who-am-i",$widgets_in_use) && isset($tdomf_widget_whoami)) {
+      $whoami_options = $tdomf_widget_whoami->getOptions($form_id);
       if($whoami_options['email-enable'] && $whoami_options['email-required']) {
         // great, who-am-i widget will provide a valid email address!
         $show_email_input = false;

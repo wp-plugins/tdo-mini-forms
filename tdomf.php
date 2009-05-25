@@ -30,6 +30,12 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
+// v0.13.1
+// - Fixed "Notify" and "Auto-Respond" widgets as theses were preventing 
+//   not logged in users from accessing forms
+// - Removed "public static" from class definitions as they are not part of 
+//   php4.
+//
 // v0.13
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
 // - Fixed '$' not working in preview
@@ -38,21 +44,6 @@ Author URI: http://thedeadone.net
 // - Added a message to the Form Creator to indicate if a the Form Hacker
 //    has been enabled and will prevent changes to form.
 // - Forms to edit posts and pages
-//
-// v0.12.7
-// - Form Hacker did not use FORMID so when you copied a form, it would break
-// - Updated widget classes (may "break" existing forms)
-// - Added a "link" to the Auto Respond Email widget that allows users to set
-//    a custom field on a post. Can be used to verify if the user email is
-//    valid.
-// - Fixed critical Windows host bug that would attempt to delete root drive.
-//    The add_post_meta Wordpress function would strip back slashes out of
-//    input and basically feck up the Windows path. Now the path name is
-//    "protected" before being passed to add_post_meta.
-// - Fixed post queuing. This was broken in two ways. The date/time calculation
-//    was wrong and now has been updated based on generousily donated code from
-//    Adam Selvidge. Second a change in Wordpress 2.7 meant that setting the
-//    future status was being ignored when the post was being published.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
