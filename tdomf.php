@@ -35,6 +35,7 @@ Author URI: http://thedeadone.net
 //   not logged in users from accessing forms
 // - Removed "public static" from class definitions as they are not part of 
 //   php4.
+// - Hacker replacements buggered - affected Upload Files widget
 //
 // v0.13
 // - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path

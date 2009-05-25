@@ -7,6 +7,13 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // TODO: Clear and/or reset button                                                    
 
+function tdomf_preg_prepare($message) {
+    // prep form: the $ and \\ are special operators in preg_replace replacement string
+     $message = str_replace('$','\\$',$message);
+     $message = str_replace('\\\\','\\\\\\\\',$message);
+     return $message;
+}
+
 // Checks if current user/ip has permissions to post!
 //
 function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pending_edits = true) {
@@ -349,7 +356,7 @@ function tdomf_preview_form($args,$mode=false) {
                   // all widgets need to be excuted even if not displayed
                   $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';                  
-                  $replacements[] = preg_quote($replacement);  
+                  $replacements[] =  tdomf_preg_prepare($replacement);  
      
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
@@ -1122,10 +1129,10 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
                   // all widgets need to be excuted even if not displayed
                   $replacement = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
                   $patterns[]     = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
-                  $replacements[] = preg_quote($replacement);
+                  $replacements[] = tdomf_preg_prepare($replacement);
               } else {
                    $unused_patterns[] = '/'.TDOMF_MACRO_WIDGET_START.$w.TDOMF_MACRO_END.'/';
-              }
+              }                                                                                             
           }
           
           // create form
