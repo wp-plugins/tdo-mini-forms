@@ -4,13 +4,15 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.7.1
 Tested up to: 2.7.1
-Stable Tag: 0.13
+Stable Tag: 0.13.1
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
 == Description ==
 
 This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
+
+**Version 0.13.1 includes a number of bugs fixes. The plugin wuold not work on PHP4 and for some users the forms would not appear to non-registered users**
 
 **Version 0.13 is a major update. You may need to double check you're Form widgets have the correct settings. This update adds forms that can be used for Editing. The admin backend is also, partly, updated to take advantage of Wordpress' 2.7 features. Only a few bugs are fixed in this release. The following release will contain mostly bug fixes. This update will only work on 2.7+ versions of Wordpress. **
 
@@ -65,7 +67,7 @@ Also make sure that the files in the root of tdo-mini-forms can be accessed from
 
 Once you've got it installed, active the plugin via the usual Wordpress plugin menu. Make sure you then configure it via the main TDOMF menu in the Wordpress Administration backend.
 
-You must assign a user as the "Default Author". This user must not have rights to publish or edit posts, i.e. they should be of the subscriber role. When posts are submitted from unregistered users, this "Default Author" user is set as the author of the post to keep Wordpress happy. The TDOMF options menu can automatically create a dummy user to set as the Default Author. This is the recommended approach.
+You must assign a user as the "Default Author". This user must **not** have rights to publish or edit posts, i.e. they should be of the subscriber role. When posts are submitted from unregistered users, this "Default Author" user is set as the author of the post to keep Wordpress happy. The TDOMF options menu can automatically create a dummy user to set as the Default Author. This is the recommended approach.
 
 On the options menu, there is a button to automatically create a page with the necessary tag to display your form. There are also other options to help integrate with your theme on this page. For more information on Theme integration, please refer to the Frequently Asked Questions of this readme.
 
@@ -77,17 +79,17 @@ Before installing the new version of TDO Mini Forms, delete the TDOMiniForms fro
 
 Please check the Frequently Asked Questions for answers to many of the common issues that arise.
 
-If you are using the wp-cache or wp-super-cache plugins, please make sure that any page that uses a TDO Mini Forms form is **not** cached. If you cache the form it'll may contain an old "key" and will cause "Bad Data" error messages and also you will not be able to preview or see admin messages.
+If you are using the wp-cache or wp-super-cache plugins, please make sure that any page that uses a TDO Mini Forms form are **not** cached. If you cache the form it'll may contain an old "key" and will cause "Bad Data" error messages and also you will not be able to preview or see admin messages.
 
 If you are using any plugins that will execute PHP code within post content/title or custom field, it is recommended to disable them or at the very least make sure that moderation is enabled and all submissions are scanned for malicious code. PHP code and Javascript tags can be submitted as part of input to any part of the form, in some cases Wordpress will strip them out. But custom fields, especially, will not be filtered automatically (this can be desirable, for example if you want people to post snippets of javascript code). 
 
 = Creating a Form =
 
-To start, go to "Form Manager and Options" menu under the main "TDO Mini Forms" menu in your admin dashboard. Make sure you've set a valid Default Author (who does not have publish rights). Go through the general options and make sure everything is okay.
+To start, go to "Options" menu under the main "TDO Mini Forms" menu in your admin dashboard. Make sure you've set a valid Default Author (who does not have publish rights). Go through the general options and make sure everything is okay.
 
-By default, TDO Mini Forms must have at least one form. You can have multiple forms, with various different options in your configuration. You can even copy an existing Form. The forms are listed at the top of this menu, so choose Form 1 if this is the first time you have configured TDO Mini Forms. Read through the options and configure as appropriate. You can automatically create a page on your blog to hold the form from here.
+By default, TDO Mini Forms must have at least one form. You can have multiple forms, with various different options in your configuration. You can even copy an existing Form. When you visit any of the Form specific menus, the forms are listed at the top of this menu, so choose go to "Form Options" and select Form 1 if this is the first time you have configured TDO Mini Forms. Read through the options and configure as appropriate. You can automatically create a page on your blog to hold the form from here.
 
-Now move on to the Form Widgets. From here you can configure what is on the Form and how it is processed by dragging and dropping "widgets" from the "Available Widgets" pool to "Your Form" and then configuring the widgets by clicking on the left icon for the widget. It is important to remember that widgets are processed from top down, so they will appear on your form in that order and they will be executed in that order when the form input is previewed, validated and submitted. This can mean that one widget can overwrite a submitted posts settings from another widget (for example multiple Categories widgets can overwrite the default category and themselves). At this stage, try using the form and making sure it works the way you want. 
+Now move on to the "Create". From here you can configure what is on the Form and how it is processed by dragging and dropping "widgets" from the "Available Widgets" pool to "Your Form" and then configuring the widgets by clicking on the left icon for the widget. It is important to remember that widgets are processed from top down, so they will appear on your form in that order and they will be executed in that order when the form input is previewed, validated and submitted. This can mean that one widget can overwrite a submitted posts settings from another widget (for example multiple Categories widgets can overwrite the default category and themselves). At this stage, try using the form and making sure it works the way you want. 
 
 If you're happy with the generated Form and the submitted posts it creates, then you are finished. However if you want to tweak stuff, change some of the messages, re-arrange fields you can move onto the Form Hacker. You must be careful with the Form Hacker as it is quite powerful and there is very little debugging or error reporting going on. You can totally change how your Form appears and even behaves using the Form Hacker. See the following section "Using the Form Hacker" for more on using the Form Hacker.
 
@@ -109,12 +111,27 @@ The Form Hacker has a number of "macros". These are special strings that are aut
 
 = Getting even more out of your Form =
 
-You can now attach additionally PHP code to your form using the "Append to Content" widget. If you drag and drop this widget to your Form, you can use it to add anything you like to the post content, however you can also insert PHP code that will get called when the submission is being processed (and any outputed info gets added to the post content).
+You can now attach additionally PHP code to your form using the "Append to Content" widget. If you drag and drop this widget to your Form, you can use it to add anything you like to the post content, however you can also insert PHP code that will get called when the submission is being processed (and any outputted info gets added to the post content).
 
 For some examples, on the support forums, the Append to Content widget has been used to use the value set in [Custom Field as the Title]( http://thedeadone.net/forum/?p=418#comment-1542 ) and to use the [Submitter's username as Title]( http://thedeadone.net/forum/?p=269#comment-1459  )
 
 == Frequently Asked Questions ==
 
+Here are some useful topics from the [Support Forms]( http://thedeadone.net/forum )
+
+* [Using a form outside of Wordpress]( http://thedeadone.net/forum/?p=3161#comment-4421 )
+* [Custom validation to prevent duplicate post titles]( http://thedeadone.net/forum/?p=2814#comment-4406 )
+* [Hacking TDOMF to redirect to a custom URL]( http://thedeadone.net/forum/?p=3131#comment-4402 )
+* [Creating your own validation routine]( http://thedeadone.net/forum/?p=2224#comment-4315 )
+* [How to add and process you're own inputs on a form]( http://thedeadone.net/forum/?p=1905#comment-4093 )
+* [Figure the category (alphanumeric) from title of post and add it] ( http://thedeadone.net/forum/?p=1618#comment-3611 )
+* [Dynamically displaying a form based on a checkbox]( http://thedeadone.net/forum/?p=1458#comment-3484 )
+* [Additional Default Categories]( http://thedeadone.net/forum/?p=334#comment-2637 )
+* [Potential Solution to not Saving Hacked Forms]( http://thedeadone.net/forum/?p=1230#comment-2571 )
+* [Another Custom Title Example]( http://thedeadone.net/forum/?p=1230#comment-2680 )
+* [Appending the Excerpt to the Content]( http://thedeadone.net/forum/?p=1306#comment-2862 )
+* [Overwriting Default Category]( http://thedeadone.net/forum/?p=1613#comment-3613 )
+    
 = Plugin clashes and "Server 500 Errors" using Wordpress 2.6.2 =
 
 A number of users experinced random 500 errors using TDO Mini Forms and conflicts with other plugins under Wordpress 2.6.2. If you experince a 500 error, please check your host's error logs. If you don't know how to do that, contant your host.
@@ -146,6 +163,10 @@ to any post or page. The plugin will replace this with your Form 1. If you have 
 You can add it to your template directly using this template tag:
 
 `<?php tdomf_the_form(1); ?>`
+
+If it's an edit form, you'll have to supply the post id:
+
+`<?php tdomf_the_form(1,326); ?>`
 
 = How do I display the submitter info? =
 
@@ -183,6 +204,14 @@ With v0.8, you can allow users to upload files. You can specify what files can b
 
 To add the option to upload files, as admin, go into the TDOMF menu and then the widgets menu. On that page you can drap and drop widgets. Just drag and drop the "Upload Files" widget.
 
+More from the Support Forums:
+
+* [Programatically limit the size of an uploaded image]( http://thedeadone.net/forum/?p=1332#comment-3889 )
+* [Styling the appearance of the Thumbnail using the Append widget]( http://thedeadone.net/forum/?p=1306#comment-2862 )
+* [How to integrate with lightbox](  http://thedeadone.net/forum/?p=323#comment-3582 )
+* [Getting the image thumbnails from a post using Template Tags]( http://thedeadone.net/forum/?p=1700 )
+* [Thumbnail to Custom Field]( http://thedeadone.net/forum/?p=1700 )
+
 = I want to allow only certain people to access the form =
 
 The best way to do this is to use Wordpress roles. Create a role using the [Role Manager Plugin](http://redalt.com/Resources/Plugins/Role+Manager "Role Manager Plugin"). This plugin has nothing to do with me. Make sure it is not the default role and that it can't `edit_other_posts` or `publish_posts`. Then you can use the TDOMF options page to set that as the only role that can access the form.
@@ -200,6 +229,8 @@ You can disable moderation in the options menu for a specific form and all posts
 Enable moderation and it'll work. If you disable moderation, posts get passed through kses to remove nasty scripts before being published. This removes YouTube code. If you have to approve posts, you can make sure no-one has snuck in something tricky.
 
 Alternativily you can use a custom field. Add the Custom Field widget to your form, set it as a URL and ask your submitters to add the URL of the YouTube video they want to include. Then in your theme, you can use the Custom Fields template tags to automatically display the YouTube video underneath the submitted post. Or you can use another plugin that gives you tags to support YouTube and have the Custom Field append the YouTube link with the tags to your post.
+
+See also [How to submitting YouTube with v0.13+]( http://thedeadone.net/forum/?p=3156#comment-4423 ) on the support forums.
 
 = Can we use TinyMCE, FckEditor, Niced for writing posts? =
 
@@ -351,10 +382,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 * If you deactivate the plugin at a later date, links to uploaded files will break (as they use a wrapper in the plugin). However with v0.9.3, you can set an option in the "Upload Files" widget to use direct links instead of the wrapper. In v0.10.3, the default is to use direct links but you can switch back to the handler if this does not work correctly for you.
 * Uploading a bmp image with attachment and thumbnail options turns on causes an error. Wordpress does not support bitmaps for thumbnail generation.
-* The queuing functionality may get the time wrong if period set to greater than an hour
-* Missing Sidebars in Widget Control in IE7
-* Issue with Widgets on new install of wp2.6.1
-* In IE, can't select, copy or paste test into the Text widget (possible a common bug for IE and Wordpress)
+* In IE, can't select text in the Text widget (possible a common bug for IE and Wordpress)
 * The 'gmt_offset' is not used in the macro subsitituion for %%SUBMISSIONDATE%% 
 * Incomatibilitiy with with "vbbridge"
 * Image capatcha must update after failed "submit"
@@ -374,6 +402,12 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 
 == Version History ==
+
+= v0.13.1: 26th May 2009 =
+
+* Fixed "Notify" and "Auto-Respond" widgets as theses were preventing not logged in users from accessing forms
+* Removed "public static" from class definitions as they are not part of php4.
+* Hacker replacements buggered - affected Upload Files widget
 
 = v0.13: 22nd May 2009 =
 

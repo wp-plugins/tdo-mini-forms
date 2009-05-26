@@ -31,9 +31,9 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enableWidgetTitle(true,'title');
           $this->enableHack();
           $this->enableControl(true,500,570);
-          $this->setInternalName('1qcaptcha');
+          $this->setInternalName('text');
           $this->setDisplayName(__('Text','tdomf'));
-          $this->setOptionKey('tdomf_1qcaptcha_widget'); // index is appended
+          $this->setOptionKey('tdomf_text_widget'); // index is appended
           $this->enableMultipleInstances(true,__('Text %d','tdomf'),'tdomf_text_widget_count');
           $this->start();
       }
@@ -120,9 +120,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
              
 <br/><br/>
 
-<label for="text-text-<?php echo $index; ?>" ><?php _e("Text:","tdomf"); ?><br/>
+<label for="text-text-<?php echo $index; ?>" ><?php _e("Text:","tdomf"); ?></label><br/>
 <textarea cols="50" rows="6" id="text-text-<?php echo $index; ?>" name="text-text-<?php echo $index; ?>" ><?php echo htmlentities($options['text'],ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
-</label>
 
 </div>
 

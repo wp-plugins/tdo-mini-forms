@@ -168,6 +168,11 @@ if($_POST['tdomf_action'] == "post") {
             if($edit->state == 'approved') {
                 if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
                     die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                    // Hack: set your own URL here if you wish to redirect to a 
+                    // different URL (and comment out the 'die' line above) 
+                    // Future versions of TDOMF will provide this as an option.
+                    //
+                    #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
                 } else {
                     tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
                 }
@@ -181,6 +186,11 @@ if($_POST['tdomf_action'] == "post") {
             if(get_post_status($post_id) == 'publish') {
                 if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
                     die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                    // Hack: set your own URL here if you wish to redirect to a 
+                    // different URL (and comment out the 'die' line above) 
+                    // Future versions of TDOMF will provide this as an option.
+                    //
+                    #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
                 } else {
                     tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
                 }
@@ -190,6 +200,11 @@ if($_POST['tdomf_action'] == "post") {
               tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),true,false,$post_id);
             } else {
               tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_MOD,$form_id,false,$post_id),true,false,$post_id);
+              // Hack: set your own URL here if you wish to redirect to a 
+              // different URL (and comment out the 'die' line above) 
+              // Future versions of TDOMF will provide this as an option.
+              //
+              #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
             }
         }
       // If retVal is a string, something went wrong!

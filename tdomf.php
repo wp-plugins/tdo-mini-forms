@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.13
+Version: 0.13.1
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -52,25 +52,9 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
-    http://thedeadone.net/forum/?p=2224#comment-4315 (custom validation)
-    http://thedeadone.net/forum/?p=1905#comment-4093 (adding you're own inputs to the form)
-    http://thedeadone.net/forum/?p=1618#comment-3611 (figure the category (alphanumeric) from title of post and add it)
-    http://thedeadone.net/forum/?p=1332#comment-3889 (programatically limit size of uploaded imagE)
-	http://thedeadone.net/forum/?p=1700 (Getting the thumbnails from a post using Template tags)
-    http://thedeadone.net/forum/?p=1702#comment-3763 (Thumbnail to Custom Field)
-    http://thedeadone.net/forum/?p=1458#comment-3484 (dynamically displaying a form based on a checkbox)
-    http://thedeadone.net/forum/?p=334#comment-2637 (additional default categories)
-    http://thedeadone.net/forum/?p=1230#comment-2618 (potential solution for not saving hacked forms)
-    http://thedeadone.net/forum/?p=1230#comment-2680 (another custom title example)
-    http://thedeadone.net/forum/?p=1306#comment-2862 (appended the excerpt to the content)
-    http://thedeadone.net/forum/?p=1556#comment-3576 (styling the thumbnail using append)
-    - http://thedeadone.net/forum/?p=323#comment-3582 (how to format lightbox image)
-    http://thedeadone.net/forum/?p=1613#comment-3613 (overwriting the default category)
-
    - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
    - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
    - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
-   - auto-delete spam not working (must also delete edits)
    - http://thedeadone.net/forum/?p=2100#comment-4278 (alternative input?)
    - image capatcha must update after failed "submit"
    - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
@@ -248,9 +232,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "47");
+define("TDOMF_BUILD", "48");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13");
+define("TDOMF_VERSION", "0.13.1");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -723,6 +707,7 @@ function tdomf_new_features() {
   if($last_version < 47) {
       $features .= "<li>".__("<b>You can now created forms to edit posts and pages!</b>","tdomf")."</li>";
   }
+  // 48 = 0.13.1
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
