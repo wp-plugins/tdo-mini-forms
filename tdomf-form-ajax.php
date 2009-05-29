@@ -28,6 +28,7 @@ load_plugin_textdomain('tdomf',PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER);
 // way of non-seralized (so people don't have to modify their hacked forms)
 // - Note: "action" is still used in _POST
 //
+global $tdomf_args;
 if(isset($_POST['tdomf_args'])) {
     parse_str($_POST['tdomf_args'],$tdomf_args);
 } else {
@@ -70,7 +71,7 @@ function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false, $p
     #$message = str_replace("\n"," ",$message);
     $message = preg_replace('/\r\n|\n\r|\r/', '\n', str_replace('\'', '\\' . '\'', str_replace('\\', '\\\\', $message)));
     $message = str_replace("\n"," ",$message);
-    tdomf_log_message("sending '$message' via ajax (tdomfDisplayMessage$form_tag)...");
+    #tdomf_log_message("sending '$message' via ajax (tdomfDisplayMessage$form_tag)...");
     #$message = htmlentities($message,ENT_COMPAT);
     if($full) {
         die( "tdomfDisplayMessage$form_tag('$message','full');" );
@@ -123,6 +124,7 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
 }
 
 function tdomf_fixslashesargs() {
+    global $tdomf_args;
     #if (get_magic_quotes_gpc()) {
       tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes!");
       if(!function_exists('stripslashes_array')) {

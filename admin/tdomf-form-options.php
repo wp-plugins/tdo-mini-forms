@@ -1,6 +1,7 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+/*define('SCRIPT_DEBUG', true);*/
 
 function tdomf_load_form_options_admin_scripts() {
     /* for tabs */
@@ -11,7 +12,7 @@ add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_sh
 function tdomf_form_options_admin_head() {
     /* add style options and start tabs for options page */
     if(preg_match('/tdomf_show_form_options_menu/',$_SERVER[REQUEST_URI])) { ?>
-  
+           
            <style>
             .ui-tabs-nav {
                 /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
@@ -71,10 +72,13 @@ function tdomf_form_options_admin_head() {
             </style>
            
            <script>
-           jQuery(document).ready(function(){
+           function init_tdomf_tabs() {
+              jQuery(document).ready(function(){
                    jQuery("#form_options_tabs > ul").tabs();
                    jQuery("#options_access_tabs > ul").tabs();
-           });
+              });
+           }
+           init_tdomf_tabs();
            </script>
            
     <?php }

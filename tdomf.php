@@ -30,21 +30,15 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
+// v0.13.2
+// - Fixed extra slashes in AJAX preview of submit forms
+//
 // v0.13.1
 // - Fixed "Notify" and "Auto-Respond" widgets as theses were preventing 
 //   not logged in users from accessing forms
 // - Removed "public static" from class definitions as they are not part of 
 //   php4.
 // - Hacker replacements buggered - affected Upload Files widget
-//
-// v0.13
-// - Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
-// - Fixed '$' not working in preview
-// - Fixed characters getting eaten up in preview
-// - Fixed image capatcha not showing up (bad shorttag and path to wp-load.php)
-// - Added a message to the Form Creator to indicate if a the Form Hacker
-//    has been enabled and will prevent changes to form.
-// - Forms to edit posts and pages
 //
 ////////////////////////////////////////////////////////////////////////////////
 

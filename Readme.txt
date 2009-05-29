@@ -124,7 +124,7 @@ Here are some useful topics from the [Support Forms]( http://thedeadone.net/foru
 * [Hacking TDOMF to redirect to a custom URL]( http://thedeadone.net/forum/?p=3131#comment-4402 )
 * [Creating your own validation routine]( http://thedeadone.net/forum/?p=2224#comment-4315 )
 * [How to add and process you're own inputs on a form]( http://thedeadone.net/forum/?p=1905#comment-4093 )
-* [Figure the category (alphanumeric) from title of post and add it] ( http://thedeadone.net/forum/?p=1618#comment-3611 )
+* [Figure the category using alphanumeric categorizations from title of post and add it] ( http://thedeadone.net/forum/?p=1618#comment-3611 )
 * [Dynamically displaying a form based on a checkbox]( http://thedeadone.net/forum/?p=1458#comment-3484 )
 * [Additional Default Categories]( http://thedeadone.net/forum/?p=334#comment-2637 )
 * [Potential Solution to not Saving Hacked Forms]( http://thedeadone.net/forum/?p=1230#comment-2571 )
@@ -238,7 +238,7 @@ I have spent some time exploring the use of TinyMCE (and to a lesser degree FckE
 
 There is no direct integration support for these toolkits. However you can easily integrate TinyMCE without modifying any of TDO Mini Forms. 
 
-[I've written up a short tutorial on how you might integrate TinyMCE with the a TDO Mini Form's Form] ( http://thedeadone.net/how-to/tinymce-tdomf/ )
+[I've written up a short tutorial on how you might integrate TinyMCE with the a TDO Mini Form's Form]( http://thedeadone.net/how-to/tinymce-tdomf/ )
 
 = I want to add add tags to QuickTags such as embed video, etc.? =
 
