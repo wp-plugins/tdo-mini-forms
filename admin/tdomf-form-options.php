@@ -216,7 +216,8 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_def_cat").disabled = !flag;
             }
             document.getElementById("tdomf_queue_period").disabled = !flag;
-            
+            document.getElementById("tdomf_queue_on_all").disabled = !flag;
+
             // re-enable 'edit' options
             
             document.getElementById("tdomf_edit_tdomf_only").disabled = flag;
@@ -271,6 +272,7 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_def_cat").disabled = flag;
             }
             document.getElementById("tdomf_queue_period").disabled = flag;
+            document.getElementById("tdomf_queue_on_all").disabled = !flag;            
             
             // disable 'edit' options
             
