@@ -11,7 +11,7 @@ function tdomf_get_queued_posts($offset = 0, $limit = 0) {
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
     $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
-       $query .= "AND post_status = 'future' ";
+    $query .= "AND post_status = 'future' ";
  	$query .= "ORDER BY ID DESC ";
    if($limit > 0) {
       $query .= "LIMIT $limit ";
@@ -22,14 +22,16 @@ function tdomf_get_queued_posts($offset = 0, $limit = 0) {
 	return $wpdb->get_results( $query );
 }
 
-function tdomf_get_queued_posts_count($offset = 0, $limit = 0) {
+function tdomf_get_queued_posts_count() {
   global $wpdb;
-	$query = "SELECT ID, post_title, post_status ";
-	$query .= "FROM $wpdb->posts ";
-	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
-    $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
-       $query .= "AND post_status = 'future' ";
-	return intval($wpdb->get_var( $query ));
+  $query = "SELECT count(ID) ";
+  $query .= "FROM $wpdb->posts ";
+  $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+  $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
+  $query .= "AND post_status = 'future' ";
+  $query .= "ORDER BY ID DESC ";  
+  $result = $wpdb->get_var( $query );
+  return intval($result);
 }
 
 function tdomf_get_spam_posts($offset = 0, $limit = 0) {
@@ -72,29 +74,34 @@ function tdomf_unpublish_post($post_id) {
 //
 function tdomf_publish_post($post_ID,$use_queue=true) {
    $form_id = get_post_meta($post_ID,TDOMF_KEY_FORM_ID,true);
-   $current_ts = current_time( 'mysql' );
-   $ts = tdomf_queue_date($form_id,$current_ts);
-   if($current_ts == $ts || !$use_queue) {
-        $post = array (
-          "ID"             => $post_ID,
-          "post_status"    => 'publish',
-          );
-    } else {
-        tdomf_log_message("Future Post Date = $ts!");
-        $post = array (
-          "ID"             => $post_ID,
-          "post_status"    => 'future',
-          "post_date"      => $ts,
-          /* edit date required for wp 2.7 */
-          "edit_date"      => $ts,
-          );
-    }
-     // Use update post instead of publish post because in WP2.3, 
-     // update_post doesn't seem to add the date correctly! 
-     // Also when it updates a post, if comments aren't set, sets them to
-     // empty! (Not so in WP2.2!)
-    wp_update_post($post);
-    /*wp_publish_post($post_ID);*/
+   $post = &get_post($post_ID);
+   
+   if($post->post_status == 'future') {
+       // updating the post when the post is already queued wont' work
+       // we need to use the publish post option
+       wp_publish_post($post_ID);
+   } else {
+       $current_ts = current_time( 'mysql' );
+       $ts = tdomf_queue_date($form_id,$current_ts);
+       if($current_ts == $ts || !$use_queue) {
+            $post = array (
+              "ID"             => $post_ID,
+              "post_status"    => 'publish',
+              );
+        } else {
+            tdomf_log_message("Future Post Date = $ts!");
+            $post = array (
+              "ID"             => $post_ID,
+              "post_status"    => 'future',
+              "post_date"      => $ts,
+              /* edit date required for wp 2.7 */
+              "edit_date"      => $ts,
+              );
+        }
+        // use update_post as this was the most consistent function since
+        // wp2.2 for publishign the post correctly
+        wp_update_post($post);
+   }
 }
 
 // grab a list of all submitted posts
@@ -481,6 +488,7 @@ function tdomf_show_mod_posts_menu() {
 
         <?php $post = &get_post( $p->ID ); /* seems I need this later */ ?> 
         <?php $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1)); /* and need this earlier too */ ?>
+        <?php $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true); ?>
         <?php $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
               if($queue > 0) { $queue = true; } else { $queue = false; } ?>
         <?php $is_spam = get_post_meta($p->ID, TDOMF_KEY_SPAM); ?>
@@ -589,8 +597,7 @@ function tdomf_show_mod_posts_menu() {
                  } ?>
          / <?php echo get_post_meta($p->ID, TDOMF_KEY_IP, true); ?> </li>
         <li>
-        <?php $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true); 
-              if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
+        <?php if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
                  <?php _e("Unknown or deleted form","tdomf"); ?>
               <?php } else { 
                  $form_edit_url = "admin.php?page=tdomf_show_form_options_menu&form=$form_id";

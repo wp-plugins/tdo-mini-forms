@@ -672,8 +672,14 @@ function tdomf_show_form_options($form_id) {
     </p>
     
 	<p>
-	<?php _e('You can set submissions from this form that are published/approved to be queued before appearing on the site. Just set the period of time between each post and TDOMF will schedule approved submissions from this form. A value of 0 or -1 disables this option.',"tdomf"); ?>
+	<?php _e('You can set submissions from this form that are published/approved to be queued before appearing on the site. Just set the period of time between each post and TDOMF will schedule approved submissions from this form. A value of 0 or -1 disables this option. You can also choose to schedule posts after any post in the system or just TDOMF posts.',"tdomf"); ?>
 	</p>
+    
+    <?php $tdomf_queue_on_all = tdomf_get_option_form(TDOMF_OPTION_QUEUE_ON_ALL,$form_id); ?>
+        <input type="checkbox" name="tdomf_queue_on_all" id="tdomf_queue_on_all"  <?php if($tdomf_queue_on_all) echo "checked"; ?> >
+        <label for="tdomf_queue_on_all">
+            <?php _e("Queue after all posts (i.e. not just posts submitted to TDOMF)","tdomf"); ?>
+        </label>
     
     <?php $tdomf_queue_period = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id)); ?>
 	<p>
@@ -1425,6 +1431,11 @@ function tdomf_handle_form_options_actions() {
       //
       $tdomf_queue_period = intval($_POST['tdomf_queue_period']);
       tdomf_set_option_form(TDOMF_OPTION_QUEUE_PERIOD,$tdomf_queue_period,$form_id);
+      
+      // Queue on all 
+      //
+      $tdomf_queue_on_all = isset($_POST['tdomf_queue_on_all']);
+      tdomf_set_option_form(TDOMF_OPTION_QUEUE_ON_ALL,$tdomf_queue_on_all,$form_id);
       
       // ajax
       //

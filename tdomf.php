@@ -32,6 +32,11 @@ Author URI: http://thedeadone.net
 //
 // v0.13.2
 // - Fixed extra slashes in AJAX preview of submit forms
+// - Scheduled post count incorrect
+// - Shortcut links on moderation screen incorrect
+// - "Publish Now" when post was queued, now works
+// - Edit own posts was not actually working!
+// - Queue on all posts, not just tdomf
 //
 // v0.13.1
 // - Fixed "Notify" and "Auto-Respond" widgets as theses were preventing 
@@ -46,6 +51,9 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+   - widget class have functions to allow message customisation
+   - "delete all spam"
+   - "recheck for spam"
    - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
    - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
    - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
@@ -437,10 +445,6 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 /*
  * @todo
  *
- * @live server
- * First version only widgets that support editing: reCaptcha
- *
- * @postponed
  * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
  * Option to disable Spam/Unapproved Edit Locking (require temp locks)
  * Template Tags for editing (what is actually required?)
@@ -475,6 +479,11 @@ define('TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST',"tdomf_msg_unapproved_edit_on_
 define('TDOMF_OPTION_MSG_LOCKED_POST',"tdomf_msg_locked_post");
 define('TDOMF_KEY_SUBMISSION_DATE', "_tdomf_submission_date");
 define('TDOMF_KEY_SUBMISSION_DATE_GMT', "_tdomf_submission_date_gmt");
+
+//////////
+// 0.13.2
+
+define('TDOMF_OPTION_QUEUE_ON_ALL',"tdomf_queue_on_all");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

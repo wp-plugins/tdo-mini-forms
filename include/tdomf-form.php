@@ -235,11 +235,16 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
         //
         if($edit_form && tdomf_get_option_form(TDOMF_OPTION_ALLOW_AUTHOR,$form_id) && is_user_logged_in()) {
             $submitter_user_id = get_post_meta($post_id, TDOMF_KEY_USER_ID, true);
+            $current_user = wp_get_current_user();
             if(!empty($submitter_user_id) && $submitter_user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-                $current_user = wp_get_current_user();
                 if($current_user->ID == $submitter_user_id) {
                     return NULL;
                 }
+            } 
+            // allow author of post to edit, if permissible
+            //
+            if($current_user->ID == $post['post_author']) {
+                return NULL;
             }
         }
         
@@ -469,20 +474,27 @@ function tdomf_queue_date($form_id,$current_ts)  {
     tdomf_log_message("Current ts is $current_ts" );
     $queue_period = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
     if($queue_period > 0) {
-        tdomf_log_message("Queue period is $queue_period seconds");
-         global $wpdb;
-          /*$query = "SELECT ADDTIME(post_date, SEC_TO_TIME({$queue_period})) 
-            FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-            WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
-                AND $wpdb->postmeta.meta_value='$form_id'
-                AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
-            ORDER BY post_date DESC LIMIT 1 ";*/
-          $query = "SELECT DATE_ADD(post_date, INTERVAL $queue_period SECOND) as the_datetime
-            FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-            WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
-                AND $wpdb->postmeta.meta_value='$form_id'
-                AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
-            ORDER BY the_datetime DESC LIMIT 1 ";
+          tdomf_log_message("Queue period is $queue_period seconds");
+          global $wpdb;
+          if(tdomf_get_option_form(TDOMF_OPTION_QUEUE_ON_ALL,$form_id)) {
+              $query = "SELECT DATE_ADD(post_date, INTERVAL $queue_period SECOND) as the_datetime
+                FROM $wpdb->posts
+                WHERE $wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish'
+                ORDER BY the_datetime DESC LIMIT 1 ";
+          } else {
+              /*$query = "SELECT ADDTIME(post_date, SEC_TO_TIME({$queue_period})) 
+                FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+                WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
+                    AND $wpdb->postmeta.meta_value='$form_id'
+                    AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
+                ORDER BY post_date DESC LIMIT 1 ";*/
+              $query = "SELECT DATE_ADD(post_date, INTERVAL $queue_period SECOND) as the_datetime
+                FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+                WHERE $wpdb->postmeta.meta_key='".TDOMF_KEY_FORM_ID."'
+                    AND $wpdb->postmeta.meta_value='$form_id'
+                    AND ($wpdb->posts.post_status='future' OR $wpdb->posts.post_status='publish')
+                ORDER BY the_datetime DESC LIMIT 1 ";
+          }
           $next_ts = $wpdb->get_var( $query );
           if( null != $next_ts ) {
               tdomf_log_message("Sticking post in queue with ts of $next_ts");
