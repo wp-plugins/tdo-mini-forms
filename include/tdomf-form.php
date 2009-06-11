@@ -7,6 +7,62 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // TODO: Clear and/or reset button                                                    
 
+function tdomf_do_spam_check($form_id,$post_id=false,$edit_id=false) {
+  if(tdomf_get_option_form(TDOMF_OPTION_SPAM_OVERWRITE,$form_id)) {
+      tdomf_log_message("Form $form_id has spam specific options set");
+      $tdomf_spam = tdomf_get_option_form(TDOMF_OPTION_SPAM,$form_id);
+      $tdomf_nospam_user = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_USER,$form_id);
+      $tdomf_nospam_author = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_AUTHOR,$form_id);
+      $tdomf_nospam_trusted = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_TRUSTED,$form_id);
+      $tdomf_nospam_publish = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,$form_id);
+  } else {
+      $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
+      $tdomf_nospam_user = get_option(TDOMF_OPTION_NOSPAM_USER);
+      $tdomf_nospam_author = get_option(TDOMF_OPTION_NOSPAM_AUTHOR);
+      $tdomf_nospam_trusted = get_option(TDOMF_OPTION_NOSPAM_TRUSTED);
+      $tdomf_nospam_publish = get_option(TDOMF_OPTION_NOSPAM_PUBLISH);
+  }
+  if(!$tdomf_spam){ 
+    tdomf_log_message("Form $form_id : spam check disabled");
+    return false; 
+  }
+  if(is_user_logged_in()) {
+      if($tdomf_nospam_user) {
+          tdomf_log_message("Form $form_id : logged in users go spam-check free");
+          return false;
+      }
+      if($tdomf_nospam_publish && current_user_can("publish_posts")) {
+          tdomf_log_message("Form $form_id : users with publish rights go spam-check free");
+          return false;
+      }
+     if($tdomf_nospam_trusted && get_usermeta($current_user->ID,TDOMF_KEY_STATUS) == TDOMF_USER_STATUS_TRUSTED) {
+         tdomf_log_message("Form $form_id : trusted users go spam-check free");
+         return false;
+     }
+     if($tdomf_nospam_author && $post_id && $edit_id) {
+          $post = wp_get_single_post($post_id, ARRAY_A);
+          // a valid $edit_id would imply that this is an edit form!
+          if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_AUTHOR,$form_id)) {
+            $submitter_user_id = get_post_meta($post_id, TDOMF_KEY_USER_ID, true);
+            $current_user = wp_get_current_user();
+            if(!empty($submitter_user_id) && $submitter_user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+                if($current_user->ID == $submitter_user_id) {
+                    tdomf_log_message("Form $form_id : submitter of post $post_id go spam-check free");
+                    return false;
+                }
+            } 
+            // if the user is the *actual* author
+            if($current_user->ID == $post['post_author']) {
+                tdomf_log_message("Form $form_id : author of post $post_id go spam-check free");
+                return false;
+            }
+        }
+     }
+  }
+  tdomf_log_message("Form $form_id : do spam-check");
+  return true;
+}
+
 function tdomf_preg_prepare($message) {
     // prep form: the $ and \\ are special operators in preg_replace replacement string
      $message = str_replace('$','\\$',$message);
@@ -665,7 +721,12 @@ function tdomf_update_post($form_id,$mode,$args) {
    if(is_int($returnVal)) 
    {
        $send_moderator_email = true;
-       if(tdomf_check_edit_spam($edit_id,true)) {
+       
+       $not_spam = true; 
+       if(tdomf_do_spam_check($form_id,$post_id,$edit_id)) {
+           $not_spam = tdomf_check_edit_spam($edit_id,true);
+       }
+       if($not_spam) {
            
            // Edited count
            //
@@ -873,8 +934,11 @@ function tdomf_create_post($args) {
    //
    add_post_meta($post_ID, TDOMF_KEY_USER_AGENT, $_SERVER['HTTP_USER_AGENT'], true);
    add_post_meta($post_ID, TDOMF_KEY_REFERRER, $_SERVER['HTTP_REFERER'], true);
-   if(tdomf_check_submissions_spam($post_ID)) {
-     
+   $not_spam = true; 
+   if(tdomf_do_spam_check($form_id,$post_ID)) {
+       $not_spam = tdomf_check_submissions_spam($post_ID);
+   }
+   if($not_spam) {
        // Submitted post count!
        //
        $submitted_count = get_option(TDOMF_STAT_SUBMITTED);

@@ -1,6 +1,334 @@
 <?php
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
+function tdomf_load_options_admin_scripts() {
+    /* for tabs */
+    wp_enqueue_script( 'jquery-ui-tabs' );
+}
+add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_options_menu","tdomf_load_options_admin_scripts");
+
+function tdomf_options_admin_head() {
+    /* add style options and start tabs for options page */
+    if(preg_match('/tdomf_show_options_menu/',$_SERVER[REQUEST_URI])) { ?>
+           
+           <style>
+            .ui-tabs-nav {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                float: left;
+                position: relative;
+                z-index: 1;
+                border-right: 1px solid #d3d3d3;
+                bottom: -1px;
+            }
+            .ui-tabs-nav li {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                float: left;
+                border: 1px solid #d3d3d3;
+                border-right: none;
+            }
+            .ui-tabs-nav li a {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                float: left;
+                font-weight: bold;
+                text-decoration: none;
+                padding: .5em 1.7em;
+                color: #555555;
+                background: #e6e6e6;
+            }
+            .ui-tabs-nav li a:hover {
+                background: #dadada;
+                color: #212121;
+            }
+            .ui-tabs-nav li.ui-tabs-selected {
+                border-bottom-color: #ffffff;
+            }
+            .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs-nav li.ui-tabs-selected a:hover {
+                background: #ffffff;
+                color: #222222;
+            }
+            .ui-tabs-panel {
+                /*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+                clear:left;
+                border: 1px solid #d3d3d3;
+                background: #ffffff;
+                color: #222222;
+                padding: 1.5em 1.7em;	
+            }
+            .ui-tabs-hide {
+                display: none;
+            }
+            .ui-tabs-nav li.ui-tabs-disabled a, .ui-tabs-nav li.ui-tabs-disabled a:hover {
+                color: grey;
+                background: lightgrey;
+                text-decoration:line-through;
+            }
+            #access_caps_list {
+             overflow: scroll;
+             height: 200px;
+            }
+            
+            </style>
+           
+           <script>
+           function init_tdomf_tabs() {
+              jQuery(document).ready(function(){
+                   jQuery("#options_tabs > ul").tabs();
+              });
+           }
+           init_tdomf_tabs();
+           </script>
+           
+    <?php }
+}
+add_action( 'admin_head', 'tdomf_options_admin_head' );
+
+function tdomf_handle_spam_options_actions($form_id = false){
+    $message = '';
+    
+    if($form_id) {
+        
+        $tdomf_spam_overwrite = isset($_POST['tdomf_spam_overwrite']);
+        tdomf_set_option_form(TDOMF_OPTION_SPAM_OVERWRITE,$tdomf_spam_overwrite,$form_id);
+        
+        if($tdomf_spam_overwrite) {
+           
+            $tdomf_spam = isset($_POST['tdomf_spam']);
+            tdomf_set_option_form(TDOMF_OPTION_SPAM,$tdomf_spam);
+            
+            if($tdomf_spam) {
+                
+                $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
+                $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$form_id);
+                if(tdomf_get_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$form_id) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
+                    if(!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key)){
+                       tdomf_set_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key,$form_id);
+                       tdomf_set_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev,$form_id);
+                    } else {
+                      $message .= "<font color='red'>".sprintf(__("The key: %s has not been recognised by akismet. Spam protection has been disabled.","tdomf"),$tdomf_spam_akismet_key)."</font><br/>";
+                      tdomf_set_option_form(TDOMF_OPTION_SPAM,false,$form_id);
+                      // reset overwrite
+                      $tdomf_spam = false;
+                      tdomf_set_option_form(TDOMF_OPTION_SPAM_OVERWRITE,false,$form_id);
+                    }
+                }
+            }
+            
+            if($tdomf_spam) {
+                
+                $tdomf_spam_notify = $_POST['tdomf_spam_notify'];
+                tdomf_set_option_form(TDOMF_OPTION_SPAM_NOTIFY,$tdomf_spam_notify,$form_id);
+            
+                $tdomf_spam_auto_delete = $_POST['tdomf_spam_auto_delete'];
+                if($tdomf_spam_auto_delete == "month") {
+                    tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE,true,$form_id);
+                    tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,false,$form_id);
+                } else if($tdomf_spam_auto_delete == "now") {
+                    tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE,false,$form_id);
+                    tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,true,$form_id);
+                } else {
+                    tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE,false,$form_id);
+                    tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,false,$form_id);
+                }
+                
+                $tdomf_nospam_author = isset($_POST['tdomf_nospam_author']);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_AUTHOR,fals,$form_ide);
+                $tdomf_nospam_trusted = isset($_POST['tdomf_nospam_trusted']);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_TRUSTED,false,$form_id);
+                $tdomf_nospam_publish = isset($_POST['tdomf_nospam_publish']);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,false,$form_id);
+                $tdomf_nospam_user = isset($_POST['tdomf_nospam_user']);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,false,$form_id);
+            }
+        
+        }
+    } else {
+        $tdomf_spam = isset($_POST['tdomf_spam']);
+        update_option(TDOMF_OPTION_SPAM,$tdomf_spam);
+        
+        if($tdomf_spam) {
+            
+            $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
+            $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+            if(get_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
+                if(!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key)){
+                   update_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key);
+                   update_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev);
+                } else {
+                  $message .= "<font color='red'>".sprintf(__("The key: %s has not been recognised by akismet. Spam protection has been disabled.","tdomf"),$tdomf_spam_akismet_key)."</font><br/>";
+                  update_option(TDOMF_OPTION_SPAM,false);
+                  $tdomf_spam = false;
+                }
+            }
+        }
+        
+        if($tdomf_spam) {
+            
+            $tdomf_spam_notify = $_POST['tdomf_spam_notify'];
+            update_option(TDOMF_OPTION_SPAM_NOTIFY,$tdomf_spam_notify);
+        
+            $tdomf_spam_auto_delete = $_POST['tdomf_spam_auto_delete'];
+            if($tdomf_spam_auto_delete == "month") {
+                update_option(TDOMF_OPTION_SPAM_AUTO_DELETE,true);
+                update_option(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,false);
+            } else if($tdomf_spam_auto_delete == "now") {
+                update_option(TDOMF_OPTION_SPAM_AUTO_DELETE,false);
+                update_option(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,true);
+            } else {
+                update_option(TDOMF_OPTION_SPAM_AUTO_DELETE,false);
+                update_option(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,false);
+            }
+            
+            $tdomf_nospam_author = isset($_POST['tdomf_nospam_author']);
+            update_option(TDOMF_OPTION_NOSPAM_AUTHOR,false);
+            $tdomf_nospam_trusted = isset($_POST['tdomf_nospam_trusted']);
+            update_option(TDOMF_OPTION_NOSPAM_TRUSTED,false);
+            $tdomf_nospam_publish = isset($_POST['tdomf_nospam_publish']);
+            update_option(TDOMF_OPTION_NOSPAM_PUBLISH,false);
+            $tdomf_nospam_user = isset($_POST['tdomf_nospam_user']);
+            update_option(TDOMF_OPTION_NOSPAM_PUBLISH,false);
+        }
+    }
+    
+    return $message;
+}
+
+function tdomf_show_spam_options($form_id = false){
+  
+  $tdomf_spam_overwrite = false;
+  if($form_id != false && tdomf_get_option_form(TDOMF_OPTION_SPAM_OVERWRITE,$form_id)) {
+      $tdomf_spam_overwrite = true;
+  }
+  
+  if($tdomf_spam_overwrite) {
+      $tdomf_spam = tdomf_get_option_form(TDOMF_OPTION_SPAM,$form_id);
+      $tdomf_spam_akismet_key = tdomf_get_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY,$form_id);
+      if($tdomf_spam_akismet_key == false || empty($tdomf_spam_akismet_key)) {
+        $tdomf_spam_akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+        if($tdomf_spam_akismet_key == false || empty($tdomf_spam_akismet_key)) {
+            $tdomf_spam_akismet_key = get_option('wordpress_api_key');
+        }
+      }
+      $tdomf_spam_notify = tdomf_get_option_form(TDOMF_OPTION_SPAM_NOTIFY,$form_id);
+      $tdomf_spam_auto_delete = tdomf_get_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE,$form_id); 
+      $tdomf_spam_auto_delete_now = tdomf_get_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,$form_id);
+      $tdomf_nospam_user = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_USER,$form_id);
+      $tdomf_nospam_author = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_AUTHOR,$form_id);
+      $tdomf_nospam_trusted = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_TRUSTED,$form_id);
+      $tdomf_nospam_publish = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,$form_id);
+  } else {
+      $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
+      $tdomf_spam_akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+      if($tdomf_spam_akismet_key == false || empty($tdomf_spam_akismet_key)) {
+        $tdomf_spam_akismet_key = get_option('wordpress_api_key');
+      }
+      $tdomf_spam_notify = get_option(TDOMF_OPTION_SPAM_NOTIFY);
+      $tdomf_spam_auto_delete = get_option(TDOMF_OPTION_SPAM_AUTO_DELETE); 
+      $tdomf_spam_auto_delete_now = get_option(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW);
+      $tdomf_nospam_user = get_option(TDOMF_OPTION_NOSPAM_USER);
+      $tdomf_nospam_author = get_option(TDOMF_OPTION_NOSPAM_AUTHOR);
+      $tdomf_nospam_trusted = get_option(TDOMF_OPTION_NOSPAM_TRUSTED);
+      $tdomf_nospam_publish = get_option(TDOMF_OPTION_NOSPAM_PUBLISH);
+  }
+  
+  ?>
+
+  <script type="text/javascript">
+ //<![CDATA[      
+  function tdomf_enable_spam_options() {
+    var flag = document.getElementById("tdomf_spam").checked;
+    document.getElementById("tdomf_spam_akismet_key").disabled = !flag;
+    document.getElementById("tdomf_spam_notify_live").disabled = !flag;
+    document.getElementById("tdomf_spam_notify_none").disabled = !flag;
+    document.getElementById("tdomf_spam_auto_delete_manual").disabled = !flag;
+    document.getElementById("tdomf_spam_auto_delete_month").disabled = !flag;
+    document.getElementById("tdomf_spam_auto_delete_now").disabled = !flag;
+    document.getElementById("tdomf_nospam_author").disabled = !flag;
+    document.getElementById("tdomf_nospam_trusted").disabled = !flag;
+    document.getElementById("tdomf_nospam_publish").disabled = !flag;
+    document.getElementById("tdomf_nospam_user").disabled = !flag;
+  }
+ <?php if($form_id) { ?> 
+  function tdomf_enable_spam_overwrite() {
+    var flag = document.getElementById("tdomf_spam_overwrite").checked;
+    document.getElementById("tdomf_spam").disabled = !flag;
+    document.getElementById("tdomf_spam_akismet_key").disabled = !flag;
+    document.getElementById("tdomf_spam_notify_live").disabled = !flag;
+    document.getElementById("tdomf_spam_notify_none").disabled = !flag;
+    document.getElementById("tdomf_spam_auto_delete_manual").disabled = !flag;
+    document.getElementById("tdomf_spam_auto_delete_month").disabled = !flag;
+    document.getElementById("tdomf_spam_auto_delete_now").disabled = !flag;
+    document.getElementById("tdomf_nospam_author").disabled = !flag;
+    document.getElementById("tdomf_nospam_trusted").disabled = !flag;
+    document.getElementById("tdomf_nospam_publish").disabled = !flag;
+    document.getElementById("tdomf_nospam_user").disabled = !flag;
+    tdomf_enable_spam_options();
+  }
+  <?php } ?>
+  //-->
+  </script>
+  
+  <?php if($form_id) { ?>
+  <p>
+  <b><?php _e("Overwrite Global Spam Settings"); ?></b>
+    <input type="checkbox" name="tdomf_spam_overwrite" id="tdomf_spam_overwrite"  <?php if($tdomf_spam_overwrite) echo "checked"; ?> onChange="tdomf_enable_spam_overwrite();">
+  </p>
+  <?php } ?>
+  
+  <p>
+  <b><?php _e("Enable Spam Protection ","tdomf"); ?></b>
+    <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  <?php if($tdomf_spam) echo "checked"; ?> onChange="tdomf_enable_spam_options();">
+  </p>
+  
+  <p>
+  <b><?php _e("Your Akismet Key","tdomf"); ?></b>
+    <input type="text" name="tdomf_spam_akismet_key" id="tdomf_spam_akismet_key" size="8" value="<?php echo $tdomf_spam_akismet_key; ?>" />
+  </p>
+  
+  <p>
+  <input type="radio" name="tdomf_spam_notify" id="tdomf_spam_notify_live" value="live"<?php if($tdomf_spam_notify == "live"){ ?> checked <?php } ?>>
+  <?php _e("Recieve normal moderation emails for suspected spam submissions","tdomf"); ?>
+  <br/>
+  
+  <input type="radio" name="tdomf_spam_notify" id="tdomf_spam_notify_none" value="none"<?php if($tdomf_spam_notify == "none" || $tdomf_spam_notify == false){ ?> checked <?php } ?>>
+  <?php _e("Recieve no notification of spam submissions","tdomf"); ?>
+  <br/>
+  </p>
+ 
+  <p>
+  <input type="radio" name="tdomf_spam_auto_delete" id="tdomf_spam_auto_delete_manual" value="manual"<?php if(!$tdomf_spam_auto_delete_now && !$tdomf_spam_auto_delete) { ?> checked <?php } ?>>
+  <?php _e("Manually manage spam","tdomf"); ?>
+  <br/>         
+  <input type="radio" name="tdomf_spam_auto_delete" id="tdomf_spam_auto_delete_month" value="month"<?php if($tdomf_spam_auto_delete){ ?> checked <?php } ?>>
+  <?php _e("Automatically Delete Spam older than a month ","tdomf"); ?>
+  <br/>
+  <input type="radio" name="tdomf_spam_auto_delete" value="now" id="tdomf_spam_auto_delete_now" <?php if($tdomf_spam_auto_delete_now) { ?> checked <?php } ?>>
+  <?php _e("Automatically Delete Spam when found (very aggressive and will delete all false-positives)","tdomf"); ?>
+  </p>         
+  
+  <p>
+  <input type="checkbox" name="tdomf_nospam_user" id="tdomf_nospam_user" <?php if($tdomf_nospam_user) { ?> checked <?php } ?>>
+  <?php _e("Do not check for spam if contributer or submitter is a registered user","tdomf"); ?>
+  <br/>
+  <input type="checkbox" name="tdomf_nospam_author" id="tdomf_nospam_author" <?php if($tdomf_nospam_author) { ?> checked <?php } ?>>
+  <?php _e("Do not check for spam if contributer is author or submitter (registered users only)","tdomf"); ?>
+  <br/>
+  <input type="checkbox" name="tdomf_nospam_trusted" id="tdomf_nospam_trusted"<?php if($tdomf_nospam_trusted) { ?> checked <?php } ?>>
+  <?php _e("Do not check for spam if contributer or submitter is a trusted user","tdomf"); ?>
+  <br/>
+  <input type="checkbox" name="tdomf_nospam_publish" id="tdomf_nospam_publish"<?php if($tdomf_nospam_publish) { ?> checked <?php } ?>>
+  <?php _e("Do not check for spam if contributer or submitter is a user with publish capabilities","tdomf"); ?>
+  </p>
+      
+  <script type="text/javascript">
+ //<![CDATA[          
+  tdomf_enable_spam_options();
+  <?php if($form_id) { ?>
+  tdomf_enable_spam_overwrite();
+  <?php } ?>
+  //-->
+  </script>
+<?php }
+
 function tdomf_show_options_menu() {
     
   tdomf_handle_options_actions();
@@ -10,13 +338,21 @@ function tdomf_show_options_menu() {
     
     <h2><?php _e('General Options', 'tdomf') ?></h2>
 
-    <p><?php _e("Global options for this plugin and applies to all forms.","tdomf"); ?></p>
-    
     <form method="post" action="admin.php?page=tdomf_show_options_menu">
 
     <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-options-save'); } ?>
 
-  <h3><?php _e("Default Author","tdomf"); ?></h3>
+    <div id="options_tabs" class="tabs">
+    <ul>
+        <li><a href="#opt_general"><span><?php _e('General','tdomf'); ?></span></a></li>
+        <li><a href="#opt_new"><span><?php _e('Submissions','tdomf'); ?></span></a></li>
+        <li><a href="#opt_form"><span><?php _e('Form Session Management','tdomf'); ?></span></a></li>
+        <li><a href="#opt_spam"><span><?php _e('Spam Protection','tdomf'); ?></span></a></li>
+        <li><a href="#opt_ui"><span><?php _e('User Interface','tdomf'); ?></span></a></li>
+        <li><a href="#opt_debug"><span><?php _e('Debug','tdomf'); ?></span></a></li>
+    </ul>
+    
+    <div id="opt_general" class="tabs">
 
 	<p><?php _e("You <b>must</b> pick a default user to be used as the \"author\" of the post. This user cannot be able to publish or edit posts.","tdomf"); ?>
 	  <br/><br/>
@@ -63,8 +399,6 @@ function tdomf_show_options_menu() {
          <input type="text" name="tdomf_def_user" id="tdomf_def_user" size="20" value="<?php echo htmlentities($def_aut_username,ENT_QUOTES,get_bloginfo('charset')); ?>" />
      <?php } ?>
 
-    <br/><br/>
-
     <?php if($def_aut_bad || $cnt_users <= 0) { ?>
 
     <?php $create_user_link = "admin.php?page=tdomf_show_options_menu&action=create_dummy_user";
@@ -72,14 +406,39 @@ function tdomf_show_options_menu() {
 	          $create_user_link = wp_nonce_url($create_user_link, 'tdomf-create-dummy-user');
           } ?>
 
+    <br/><br/>          
+          
     <a href="<?php echo $create_user_link; ?>">Create a dummy user &raquo;</a>
     <?php } ?>
 
     </p>
 
-    <h3><?php _e("Author and Submitter fix","tdomf"); ?></h3>
+	<p>
+	<?php _e('You can have the user automatically changed to "trusted" after a configurable number of approved submissions and/or contributions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned. This only counts for submitters or contributors who register with your blog and submit using a user account.',"tdomf"); ?> <?php printf(__('You can change a users status (to/from trusted or banned) using the <a href="%s">Manage</a> menu',"tdomf"),"admin.php?page=tdomf_show_manage_menu"); ?>
+	</p>
 
 	<p>
+	<b><?php _e("Auto Trust Submitter Count","tdomf"); ?></b>
+	<input type="text" name="tdomf_trust_count" id="tdomf_trust_count" size="3" value="<?php echo htmlentities(get_option(TDOMF_OPTION_TRUST_COUNT),ENT_QUOTES,get_bloginfo('charset')); ?>" />
+	</p>
+
+    <p>
+    <?php _e('When a user logs into Wordpress, they can access a "Your Submissions" page which contains a copy of the form. You can disable this page by disabling this option.','tdomf'); ?>
+    </p>
+     
+    <?php $your_submissions = get_option(TDOMF_OPTION_YOUR_SUBMISSIONS); ?>
+
+	</p>
+	<b><?php _e("Enable 'Your Submissions' page ","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_your_submissions" id="tdomf_your_submissions"  <?php if($your_submissions) echo "checked"; ?> >
+	</p>
+    
+    
+    </div> <!-- /opt_general -->
+    
+    <div id="opt_new" class="tabs">
+    
+    <p>
 	<?php _e("If an entry is submitted by a subscriber and is published using the normal wordpress interface, the author can be changed to the person who published it, not submitted. Select this option if you want this to be automatically corrected. This problem only occurs on blogs that have more than one user who can publish.","tdomf"); ?>
 	<br/><br/>
 
@@ -88,20 +447,7 @@ function tdomf_show_options_menu() {
 	<b><?php _e("Auto-correct Author","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_autocorrect_author" id="tdomf_autocorrect_author"  	<?php if($fix_aut) echo "checked"; ?> >
 	</p>
-
-	<h3><?php _e('Auto Trust Submitter Count',"tdomf"); ?></h3>
-
-	<p>
-	<?php _e('This only counts for submitters or contributors who register with your blog and submit using a user account. You can have the user automatically changed to "trusted" after a configurable number of approved submissions and/or contributions. Setting it the value to 0, means that a registered user is automatically trusted. Setting it to -1, disables the feature. A trusted user can still be banned.',"tdomf"); ?> <?php printf(__('You can change a users status (to/from trusted or banned) using the <a href="%s">Manage</a> menu',"tdomf"),"admin.php?page=tdomf_show_manage_menu"); ?>
-	</p>
-
-	<p>
-	<b><?php _e("Auto Trust Submitter Count","tdomf"); ?></b>
-	<input type="text" name="tdomf_trust_count" id="tdomf_trust_count" size="3" value="<?php echo htmlentities(get_option(TDOMF_OPTION_TRUST_COUNT),ENT_QUOTES,get_bloginfo('charset')); ?>" />
-	</p>
-
-    <h3><?php _e('Change author to submitter automatically',"tdomf"); ?> </h3>
-
+    
 	<p>
 	<?php _e('If your theme displays the author of a post, you can automatically have it display the submitter info instead, if avaliable. It is recommended to use the "Who Am I" widget to get the full benefit of this option. The default and classic themes in Wordpress do not display the author of a post.',"tdomf"); ?>
     </p>
@@ -111,10 +457,8 @@ function tdomf_show_options_menu() {
 	</p>
 	<b><?php _e("Use submitter info for author in your theme","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_author_theme_hack" id="tdomf_author_theme_hack"  <?php if($on_author_theme_hack) echo "checked"; ?> >
-	</p>
-
-    <h3><?php _e('Add submitter link automatically to post',"tdomf"); ?> </h3>
-
+	</p>    
+    
 	<p>
 	<?php _e('You can automatically add submitter info to the end of a post. This works on all themes.',"tdomf"); ?>
     </p>
@@ -125,68 +469,12 @@ function tdomf_show_options_menu() {
 	<b><?php _e("Add submitter to end of post","tdomf"); ?></b>
 	<input type="checkbox" name="tdomf_add_submitter" id="tdomf_add_submitter"  <?php if($on_add_submitter) echo "checked"; ?> >
 	</p>
-
-  <h3><?php _e('Disable Error Messages','tdomf'); ?></h3>
-  
-  <p>
-  <?php _e('You can disable the display of errors to the user when they use this form. This does not stop errors being reported to the log or enable forms to be submitted with "Bad Data"','tdomf'); ?>
-  </p>
-  
-  <?php $disable_errors = get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES); ?>
-
-	</p>
-	<b><?php _e("Disable error messages being show to user","tdomf"); ?></b>
-	<input type="checkbox" name="tdomf_disable_errors" id="tdomf_disable_errors"  <?php if($disable_errors) echo "checked"; ?> >
-	</p>
-  
-  <h3><?php _e('Extra Debug Messages','tdomf'); ?></h3>
-  
-  <p>
-  <?php _e('You can enable extra debugs messages to aid in debugging problems. If you enable "Error Messages" this will also turn on extra PHP error checking.','tdomf'); ?>
-  </p>
-  
-  <?php $extra_log = get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES); ?>
-
-	</p>
-	<b><?php _e("Enable extra log messages ","tdomf"); ?></b>
-	<input type="checkbox" name="tdomf_extra_log" id="tdomf_extra_log"  <?php if($extra_log) echo "checked"; ?> >
-	</p>
-  
-  
-  <h3><?php _e('"Your Submissions" Page','tdomf'); ?></h3>
-  
-  <p>
-  <?php _e('When a user logs into Wordpress, they can access a "Your Submissions" page which contains a copy of the form. You can disable this page by disabling this option.','tdomf'); ?>
-  </p>
-  
-  <?php $your_submissions = get_option(TDOMF_OPTION_YOUR_SUBMISSIONS); ?>
-
-	</p>
-	<b><?php _e("Enable 'Your Submissions' page ","tdomf"); ?></b>
-	<input type="checkbox" name="tdomf_your_submissions" id="tdomf_your_submissions"  <?php if($your_submissions) echo "checked"; ?> >
-	</p>
-
-  <?php if(tdomf_wp25()) { ?>
-  
-  <h3><?php _e('Max Widget Control Size',"tdomf"); ?></h3>
-
-	<p>
-	<?php _e('You can limit or increase the max size of the control form of a widget in the Form Widget screen. A value of 0 disables this feature.',"tdomf"); ?>
-	</p>
-
-	<p>
-	<b><?php _e("Max Widget Width","tdomf"); ?></b>
-	<input type="text" name="widget_max_width" id="widget_max_width" size="3" value="<?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH)); ?>" />
-	</p>
-
-  <p>
-	<b><?php _e("Max Widget Height","tdomf"); ?></b>
-	<input type="text" name="widget_max_height" id="widget_max_height" size="3" value="<?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)); ?>" />
-	</p>
-      
-  <?php } ?>
-  
-  <h3><?php _e('Form Verification Options',"tdomf"); ?></h3>
+    
+    </div><!-- /opt_new -->
+    
+    <div id="opt_form" class="tabs">
+    
+    <h3><?php _e('Form Verification Options',"tdomf"); ?></h3>
     
   <?php $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD); ?>
   
@@ -232,48 +520,74 @@ function tdomf_show_options_menu() {
   
   </p>
     
-    <h3 id="spam"><?php _e('Spam Protection',"tdomf"); ?></h3>
+    </div> <!-- /opt_form -->
+    
+    <div id="opt_spam" class="tabs">
     
     <p>
-    <?php printf(__('You can now enable spam protection for new submissions. The online service Akismet is used to identify if a submission is spam or not. Submissions marked as spam cab be deleted automatically after a month. You can moderate spam from the <a href="%s">Moderation</a> screen.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu&f=3"); ?>
+    <?php printf(__('You can enable spam protection for new submissions and edits. 
+                     The online service Akismet is used to identify if a submission or contribution is spam or not. 
+                     You can moderate spam from the <a href="%s">Moderation</a> screen.
+                     These options can be overwritten on a per-form basis.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu&show=spam&mode=list"); ?>
     </p>
     
-    <?php $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
-          $tdomf_spam_akismet_key = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
-          if($tdomf_spam_akismet_key == false) {
-            $tdomf_spam_akismet_key = get_option('wordpress_api_key');
-          }
-          $tdomf_spam_notify = get_option(TDOMF_OPTION_SPAM_NOTIFY);
-          $tdomf_spam_auto_delete = get_option(TDOMF_OPTION_SPAM_AUTO_DELETE); ?>
+    <?php tdomf_show_spam_options(); ?>
           
-          <p>
-          <b><?php _e("Enable Spam Protection ","tdomf"); ?></b>
-	        <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  <?php if($tdomf_spam) echo "checked"; ?> >
-          </p>
-          
-          <p>
-          <b><?php _e("Your Akismet Key","tdomf"); ?></b>
-	        <input type="text" name="tdomf_spam_akismet_key" id="tdomf_spam_akismet_key" size="8" value="<?php echo $tdomf_spam_akismet_key; ?>" />
-          </p>
-          
-          <p>
-          <input type="radio" name="tdomf_spam_notify" value="live"<?php if($tdomf_spam_notify == "live"){ ?> checked <?php } ?>>
-          <?php _e("Recieve normal moderation emails for suspected spam submissions","tdomf"); ?>
-          <br/>
-          
-          <input type="radio" name="tdomf_spam_notify" value="none"<?php if($tdomf_spam_notify == "none" || $tdomf_spam_notify == false){ ?> checked <?php } ?>>
-          <?php _e("Recieve no notification of spam submissions","tdomf"); ?>
-          <br/>
-          </p>
-
-          <p>
-          <b><?php _e("Automatically Delete Spam older than a month ","tdomf"); ?></b>
-	        <input type="checkbox" name="tdomf_spam_auto_delete" id="tdomf_spam_auto_delete"  <?php if($tdomf_spam_auto_delete) echo "checked"; ?> >
-          </p>
-          
+    </div> <!-- /opt_spam -->
     
-    <h3><?php _e('Max Log Size',"tdomf"); ?></h3>
+    <div id="opt_ui" class="tabs">
+    
+        <?php if(tdomf_wp25()) { ?>
+  
+	<p>
+	<?php _e('You can limit or increase the max size of the control form of a widget in the Form Widget screen. A value of 0 disables this feature.',"tdomf"); ?>
+	</p>
 
+	<p>
+	<b><?php _e("Max Widget Width","tdomf"); ?></b>
+	<input type="text" name="widget_max_width" id="widget_max_width" size="3" value="<?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_WIDTH)); ?>" />
+	</p>
+
+  <p>
+	<b><?php _e("Max Widget Height","tdomf"); ?></b>
+	<input type="text" name="widget_max_height" id="widget_max_height" size="3" value="<?php echo intval(get_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT)); ?>" />
+	</p>
+      
+  <?php } ?>
+    
+    <?php $tdomf_mod_show_links = get_option(TDOMF_OPTION_MOD_SHOW_LINKS); ?>
+  
+    <b><?php _e("Do not 'auto-hide' links on moderation screen","tdomf"); ?></b>
+	        <input type="checkbox" name="tdomf_mod_show_links" id="tdomf_mod_show_links" <?php if($tdomf_mod_show_links) echo "checked"; ?> >
+          </p>
+  
+    </div> <!-- /opt_ui -->
+    
+    <div id="opt_debug" class="tabs">
+    
+  <p>
+  <?php _e('You can disable the display of errors to the user when they use this form. This does not stop errors being reported to the log or enable forms to be submitted with "Bad Data"','tdomf'); ?>
+  </p>
+  
+  <?php $disable_errors = get_option(TDOMF_OPTION_DISABLE_ERROR_MESSAGES); ?>
+
+	</p>
+	<b><?php _e("Disable error messages being show to user","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_disable_errors" id="tdomf_disable_errors"  <?php if($disable_errors) echo "checked"; ?> >
+	</p>
+  
+  <p>
+  <?php _e('You can enable extra debugs messages to aid in debugging problems. If you enable "Error Messages" this will also turn on extra PHP error checking.','tdomf'); ?>
+  </p>
+  
+  <?php $extra_log = get_option(TDOMF_OPTION_EXTRA_LOG_MESSAGES); ?>
+
+	</p>
+	<b><?php _e("Enable extra log messages ","tdomf"); ?></b>
+	<input type="checkbox" name="tdomf_extra_log" id="tdomf_extra_log"  <?php if($extra_log) echo "checked"; ?> >
+	</p>
+    
+        
 	<p>
 	<?php _e('Limit the number of lines in your tdomf log. A value of 0 disables the stored log.',"tdomf"); ?>
 	</p>
@@ -283,6 +597,10 @@ function tdomf_show_options_menu() {
 	<input type="text" name="tdomf_log_max_size" id="tdomf_log_max_size" size="4" value="<?php echo htmlentities(get_option(TDOMF_OPTION_LOG_MAX_SIZE),ENT_QUOTES,get_bloginfo('charset')); ?>" />
 	</p>
     
+    </div> <!-- /opt_debug -->
+    
+    </div> <!-- /tabs -->
+ 
     <br/><br/>
     
     <table border="0"><tr>
@@ -450,30 +768,18 @@ function tdomf_handle_options_actions() {
       $tdomf_form_data = $_POST['tdomf_form_data'];
       update_option(TDOMF_OPTION_FORM_DATA_METHOD,$tdomf_form_data);
       
+      // Show links on moderation screen
+      
+      $tdomf_mod_show_links = isset($_POST['tdomf_mod_show_links']);
+      update_option(TDOMF_OPTION_MOD_SHOW_LINKS,$tdomf_mod_show_links);
+      
+      
       // spam options
       
-      $tdomf_spam = isset($_POST['tdomf_spam']);
-      update_option(TDOMF_OPTION_SPAM,$tdomf_spam);
-      
-      if($tdomf_spam) {
-        $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
-        $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
-        if(get_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
-            if(!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key)){
-               update_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key);
-               update_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev);
-            } else {
-              $message .= "<font color='red'>".sprintf(__("The key: %s has not been recognised by akismet. Spam protection has been disabled.","tdomf"),$tdomf_spam_akismet_key)."</font><br/>";
-              update_option(TDOMF_OPTION_SPAM,false);
-            }
-        }
-      }
-      
-      $tdomf_spam_notify = $_POST['tdomf_spam_notify'];
-      update_option(TDOMF_OPTION_SPAM_NOTIFY,$tdomf_spam_notify);
-      
-      $tdomf_spam_auto_delete = $_POST['tdomf_spam_auto_delete'];
-      update_option(TDOMF_OPTION_SPAM_AUTO_DELETE,$tdomf_spam_auto_delete);
+      $message .= tdomf_handle_spam_options_actions();
+           
+
+      // log options
       
       $tdomf_log_max_size = intval($_POST['tdomf_log_max_size']);
       update_option(TDOMF_OPTION_LOG_MAX_SIZE,$tdomf_log_max_size);
