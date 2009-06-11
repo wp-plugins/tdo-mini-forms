@@ -93,14 +93,14 @@ function tdomf_handle_spam_options_actions($form_id = false){
         if($tdomf_spam_overwrite) {
            
             $tdomf_spam = isset($_POST['tdomf_spam']);
-            tdomf_set_option_form(TDOMF_OPTION_SPAM,$tdomf_spam);
+            tdomf_set_option_form(TDOMF_OPTION_SPAM,$tdomf_spam,$form_id);
             
+            /*
             if($tdomf_spam) {
-                
                 $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
                 $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$form_id);
                 if(tdomf_get_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$form_id) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
-                    if(!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key)){
+                    if(TDOMF_DEBUG_FAKE_SPAM || (!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key))){
                        tdomf_set_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key,$form_id);
                        tdomf_set_option_form(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev,$form_id);
                     } else {
@@ -112,9 +112,11 @@ function tdomf_handle_spam_options_actions($form_id = false){
                     }
                 }
             }
+            */
             
             if($tdomf_spam) {
                 
+                /*
                 $tdomf_spam_notify = $_POST['tdomf_spam_notify'];
                 tdomf_set_option_form(TDOMF_OPTION_SPAM_NOTIFY,$tdomf_spam_notify,$form_id);
             
@@ -129,15 +131,16 @@ function tdomf_handle_spam_options_actions($form_id = false){
                     tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE,false,$form_id);
                     tdomf_set_option_form(TDOMF_OPTION_SPAM_AUTO_DELETE_NOW,false,$form_id);
                 }
+                */
                 
                 $tdomf_nospam_author = isset($_POST['tdomf_nospam_author']);
-                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_AUTHOR,fals,$form_ide);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_AUTHOR,$tdomf_nospam_author,$form_id);
                 $tdomf_nospam_trusted = isset($_POST['tdomf_nospam_trusted']);
-                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_TRUSTED,false,$form_id);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_TRUSTED,$tdomf_nospam_trusted,$form_id);
                 $tdomf_nospam_publish = isset($_POST['tdomf_nospam_publish']);
-                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,false,$form_id);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,$tdomf_nospam_publish,$form_id);
                 $tdomf_nospam_user = isset($_POST['tdomf_nospam_user']);
-                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,false,$form_id);
+                tdomf_set_option_form(TDOMF_OPTION_NOSPAM_USER,$tdomf_nospam_user,$form_id);
             }
         
         }
@@ -150,7 +153,7 @@ function tdomf_handle_spam_options_actions($form_id = false){
             $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
             $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
             if(get_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
-                if(!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key)){
+                if(TDOMF_DEBUG_FAKE_SPAM || (!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key))){
                    update_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key);
                    update_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev);
                 } else {
@@ -179,13 +182,13 @@ function tdomf_handle_spam_options_actions($form_id = false){
             }
             
             $tdomf_nospam_author = isset($_POST['tdomf_nospam_author']);
-            update_option(TDOMF_OPTION_NOSPAM_AUTHOR,false);
+            update_option(TDOMF_OPTION_NOSPAM_AUTHOR,$tdomf_nospam_author);
             $tdomf_nospam_trusted = isset($_POST['tdomf_nospam_trusted']);
-            update_option(TDOMF_OPTION_NOSPAM_TRUSTED,false);
+            update_option(TDOMF_OPTION_NOSPAM_TRUSTED,$tdomf_nospam_trusted );
             $tdomf_nospam_publish = isset($_POST['tdomf_nospam_publish']);
-            update_option(TDOMF_OPTION_NOSPAM_PUBLISH,false);
+            update_option(TDOMF_OPTION_NOSPAM_PUBLISH,$tdomf_nospam_publish);
             $tdomf_nospam_user = isset($_POST['tdomf_nospam_user']);
-            update_option(TDOMF_OPTION_NOSPAM_PUBLISH,false);
+            update_option(TDOMF_OPTION_NOSPAM_USER,$tdomf_nospam_user);
         }
     }
     
@@ -194,6 +197,13 @@ function tdomf_handle_spam_options_actions($form_id = false){
 
 function tdomf_show_spam_options($form_id = false){
   
+  $spam_enabled = true;
+  $tdomf_spam_global = get_option(TDOMF_OPTION_SPAM);
+  $tdomf_spam_akismet_key_global = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+  if(!$tdomf_spam_global || !$tdomf_spam_akismet_key_global || empty($tdomf_spam_akismet_key_global)) {
+      $spam_enabled = false;
+  }
+
   $tdomf_spam_overwrite = false;
   if($form_id != false && tdomf_get_option_form(TDOMF_OPTION_SPAM_OVERWRITE,$form_id)) {
       $tdomf_spam_overwrite = true;
@@ -231,17 +241,25 @@ function tdomf_show_spam_options($form_id = false){
   }
   
   ?>
+  
+  <?php if($form_id && !$tdomf_spam_global) { ?>
+      <p><?php _e('Spam protection has been disabled. It can be re-enabled on the general options page','tdomf'); ?></p>
+  <?php } else if ($form_id && (!$tdomf_spam_akismet_key_global || empty($tdomf_spam_akismet_key_global))) { ?>
+      <p><?php _e('There is no valid Akismet key set. You must set a valid Akismet key on the general options page','tdomf'); ?></p>
+  <?php } ?>
 
   <script type="text/javascript">
  //<![CDATA[      
   function tdomf_enable_spam_options() {
     var flag = document.getElementById("tdomf_spam").checked;
+    <?php if(!$form_id) { ?>
     document.getElementById("tdomf_spam_akismet_key").disabled = !flag;
     document.getElementById("tdomf_spam_notify_live").disabled = !flag;
     document.getElementById("tdomf_spam_notify_none").disabled = !flag;
     document.getElementById("tdomf_spam_auto_delete_manual").disabled = !flag;
     document.getElementById("tdomf_spam_auto_delete_month").disabled = !flag;
-    document.getElementById("tdomf_spam_auto_delete_now").disabled = !flag;
+    /*document.getElementById("tdomf_spam_auto_delete_now").disabled = !flag;*/
+    <?php } ?>
     document.getElementById("tdomf_nospam_author").disabled = !flag;
     document.getElementById("tdomf_nospam_trusted").disabled = !flag;
     document.getElementById("tdomf_nospam_publish").disabled = !flag;
@@ -251,17 +269,14 @@ function tdomf_show_spam_options($form_id = false){
   function tdomf_enable_spam_overwrite() {
     var flag = document.getElementById("tdomf_spam_overwrite").checked;
     document.getElementById("tdomf_spam").disabled = !flag;
-    document.getElementById("tdomf_spam_akismet_key").disabled = !flag;
-    document.getElementById("tdomf_spam_notify_live").disabled = !flag;
-    document.getElementById("tdomf_spam_notify_none").disabled = !flag;
-    document.getElementById("tdomf_spam_auto_delete_manual").disabled = !flag;
-    document.getElementById("tdomf_spam_auto_delete_month").disabled = !flag;
-    document.getElementById("tdomf_spam_auto_delete_now").disabled = !flag;
-    document.getElementById("tdomf_nospam_author").disabled = !flag;
-    document.getElementById("tdomf_nospam_trusted").disabled = !flag;
-    document.getElementById("tdomf_nospam_publish").disabled = !flag;
-    document.getElementById("tdomf_nospam_user").disabled = !flag;
-    tdomf_enable_spam_options();
+    if(flag) {
+        tdomf_enable_spam_options();
+    } else {
+        document.getElementById("tdomf_nospam_author").disabled = !flag;
+        document.getElementById("tdomf_nospam_trusted").disabled = !flag;
+        document.getElementById("tdomf_nospam_publish").disabled = !flag;
+        document.getElementById("tdomf_nospam_user").disabled = !flag;
+    }
   }
   <?php } ?>
   //-->
@@ -270,14 +285,22 @@ function tdomf_show_spam_options($form_id = false){
   <?php if($form_id) { ?>
   <p>
   <b><?php _e("Overwrite Global Spam Settings"); ?></b>
-    <input type="checkbox" name="tdomf_spam_overwrite" id="tdomf_spam_overwrite"  <?php if($tdomf_spam_overwrite) echo "checked"; ?> onChange="tdomf_enable_spam_overwrite();">
+    <input type="checkbox" name="tdomf_spam_overwrite" id="tdomf_spam_overwrite"  
+           <?php if($tdomf_spam_overwrite) echo "checked"; ?> 
+           <?php if(!$spam_enabled) { echo "disabled"; } else { ?>
+           onChange="tdomf_enable_spam_overwrite();" <?php } ?> >
   </p>
   <?php } ?>
   
   <p>
   <b><?php _e("Enable Spam Protection ","tdomf"); ?></b>
-    <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  <?php if($tdomf_spam) echo "checked"; ?> onChange="tdomf_enable_spam_options();">
+    <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  
+        <?php if($tdomf_spam) echo "checked"; ?>
+        <?php if(!$spam_enabled) { echo "disabled"; } else { ?>
+        onChange="tdomf_enable_spam_options();" <?php } ?> >
   </p>
+  
+  <?php if(!$form_id) { ?>
   
   <p>
   <b><?php _e("Your Akismet Key","tdomf"); ?></b>
@@ -300,25 +323,36 @@ function tdomf_show_spam_options($form_id = false){
   <br/>         
   <input type="radio" name="tdomf_spam_auto_delete" id="tdomf_spam_auto_delete_month" value="month"<?php if($tdomf_spam_auto_delete){ ?> checked <?php } ?>>
   <?php _e("Automatically Delete Spam older than a month ","tdomf"); ?>
-  <br/>
+  <!-- <br/>
   <input type="radio" name="tdomf_spam_auto_delete" value="now" id="tdomf_spam_auto_delete_now" <?php if($tdomf_spam_auto_delete_now) { ?> checked <?php } ?>>
-  <?php _e("Automatically Delete Spam when found (very aggressive and will delete all false-positives)","tdomf"); ?>
+  <?php _e("Automatically Delete Spam when found","tdomf"); ?> --> 
   </p>         
   
+  <?php } ?>
+  
   <p>
-  <input type="checkbox" name="tdomf_nospam_user" id="tdomf_nospam_user" <?php if($tdomf_nospam_user) { ?> checked <?php } ?>>
+  <input type="checkbox" name="tdomf_nospam_user" id="tdomf_nospam_user" 
+        <?php if($tdomf_nospam_user) { ?> checked <?php } ?>
+        <?php if(!$spam_enabled) { ?> disabled <?php } ?>>
   <?php _e("Do not check for spam if contributer or submitter is a registered user","tdomf"); ?>
   <br/>
-  <input type="checkbox" name="tdomf_nospam_author" id="tdomf_nospam_author" <?php if($tdomf_nospam_author) { ?> checked <?php } ?>>
+  <input type="checkbox" name="tdomf_nospam_author" id="tdomf_nospam_author" 
+        <?php if($tdomf_nospam_author) { ?> checked <?php } ?>
+        <?php if(!$spam_enabled) { ?> disabled <?php } ?>>
   <?php _e("Do not check for spam if contributer is author or submitter (registered users only)","tdomf"); ?>
   <br/>
-  <input type="checkbox" name="tdomf_nospam_trusted" id="tdomf_nospam_trusted"<?php if($tdomf_nospam_trusted) { ?> checked <?php } ?>>
+  <input type="checkbox" name="tdomf_nospam_trusted" id="tdomf_nospam_trusted"
+        <?php if($tdomf_nospam_trusted) { ?> checked <?php } ?>
+        <?php if(!$spam_enabled) { ?> disabled <?php } ?>>
   <?php _e("Do not check for spam if contributer or submitter is a trusted user","tdomf"); ?>
   <br/>
-  <input type="checkbox" name="tdomf_nospam_publish" id="tdomf_nospam_publish"<?php if($tdomf_nospam_publish) { ?> checked <?php } ?>>
+  <input type="checkbox" name="tdomf_nospam_publish" id="tdomf_nospam_publish"
+        <?php if($tdomf_nospam_publish) { ?> checked <?php } ?>
+        <?php if(!$spam_enabled) { ?> disabled <?php } ?>>
   <?php _e("Do not check for spam if contributer or submitter is a user with publish capabilities","tdomf"); ?>
   </p>
-      
+
+  <?php if($spam_enabled) { ?>
   <script type="text/javascript">
  //<![CDATA[          
   tdomf_enable_spam_options();
@@ -327,6 +361,7 @@ function tdomf_show_spam_options($form_id = false){
   <?php } ?>
   //-->
   </script>
+  <?php } ?>
 <?php }
 
 function tdomf_show_options_menu() {
@@ -528,7 +563,7 @@ function tdomf_show_options_menu() {
     <?php printf(__('You can enable spam protection for new submissions and edits. 
                      The online service Akismet is used to identify if a submission or contribution is spam or not. 
                      You can moderate spam from the <a href="%s">Moderation</a> screen.
-                     These options can be overwritten on a per-form basis.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu&show=spam&mode=list"); ?>
+                     Some of these options can be overwritten on a per-form basis.',"tdomf"),"admin.php?page=tdomf_show_mod_posts_menu&show=spam&mode=list"); ?>
     </p>
     
     <?php tdomf_show_spam_options(); ?>

@@ -19,6 +19,12 @@ function tdomf_is_id_spam($id) {
 
 function tdomf_check_edit_spam($edit_id,$live=true) {
     
+  // for debugging purposes
+  if(TDOMF_DEBUG_FAKE_SPAM) {
+    tdomf_set_state_edit('spam',$edit_id);
+    return false;
+  }
+    
   if(!get_option(TDOMF_OPTION_SPAM)) {
     return true;
   }
@@ -69,8 +75,10 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
     }
   }
   
-  # test - should trigger spam response
-  #$query_data['comment_author'] = 'viagra-test-123';
+  if(TDOMF_DEBUG_AKISMET_FAKE_SPAM) {
+    # test - should trigger spam response
+    $query_data['comment_author'] = 'viagra-test-123';
+  }  
   
   if($edit->revision_id == 0) {
      $post_data = wp_get_single_post($edit->post_id, ARRAY_A);
@@ -114,6 +122,12 @@ function tdomf_check_edit_spam($edit_id,$live=true) {
 
 function tdomf_check_submissions_spam($post_id,$live=true) {
 
+  // for debugging purposes
+  if(TDOMF_DEBUG_FAKE_SPAM) {
+    add_post_meta($post_id, TDOMF_KEY_SPAM, true, true);
+    return false;
+  }
+    
   if(!get_option(TDOMF_OPTION_SPAM)) {
     return true;
   }
@@ -163,8 +177,10 @@ function tdomf_check_submissions_spam($post_id,$live=true) {
     }
   }
 
-  # test - should trigger spam response
-  #$query_data['comment_author'] = 'viagra-test-123';
+  if(TDOMF_DEBUG_AKISMET_FAKE_SPAM) {
+    # test - should trigger spam response
+    $query_data['comment_author'] = 'viagra-test-123';
+  }
 
   $post_data = wp_get_single_post($post_id, ARRAY_A);
   $query_data['comment_content'] = $post_data['post_content'];

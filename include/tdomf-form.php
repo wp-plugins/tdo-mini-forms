@@ -8,7 +8,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // TODO: Clear and/or reset button                                                    
 
 function tdomf_do_spam_check($form_id,$post_id=false,$edit_id=false) {
-  if(tdomf_get_option_form(TDOMF_OPTION_SPAM_OVERWRITE,$form_id)) {
+  $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
+  if($tdomf_spam && tdomf_get_option_form(TDOMF_OPTION_SPAM_OVERWRITE,$form_id)) {
       tdomf_log_message("Form $form_id has spam specific options set");
       $tdomf_spam = tdomf_get_option_form(TDOMF_OPTION_SPAM,$form_id);
       $tdomf_nospam_user = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_USER,$form_id);
@@ -16,7 +17,6 @@ function tdomf_do_spam_check($form_id,$post_id=false,$edit_id=false) {
       $tdomf_nospam_trusted = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_TRUSTED,$form_id);
       $tdomf_nospam_publish = tdomf_get_option_form(TDOMF_OPTION_NOSPAM_PUBLISH,$form_id);
   } else {
-      $tdomf_spam = get_option(TDOMF_OPTION_SPAM);
       $tdomf_nospam_user = get_option(TDOMF_OPTION_NOSPAM_USER);
       $tdomf_nospam_author = get_option(TDOMF_OPTION_NOSPAM_AUTHOR);
       $tdomf_nospam_trusted = get_option(TDOMF_OPTION_NOSPAM_TRUSTED);
@@ -27,6 +27,7 @@ function tdomf_do_spam_check($form_id,$post_id=false,$edit_id=false) {
     return false; 
   }
   if(is_user_logged_in()) {
+      $current_user = wp_get_current_user();
       if($tdomf_nospam_user) {
           tdomf_log_message("Form $form_id : logged in users go spam-check free");
           return false;
@@ -44,7 +45,6 @@ function tdomf_do_spam_check($form_id,$post_id=false,$edit_id=false) {
           // a valid $edit_id would imply that this is an edit form!
           if(tdomf_get_option_form(TDOMF_OPTION_ALLOW_AUTHOR,$form_id)) {
             $submitter_user_id = get_post_meta($post_id, TDOMF_KEY_USER_ID, true);
-            $current_user = wp_get_current_user();
             if(!empty($submitter_user_id) && $submitter_user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
                 if($current_user->ID == $submitter_user_id) {
                     tdomf_log_message("Form $form_id : submitter of post $post_id go spam-check free");

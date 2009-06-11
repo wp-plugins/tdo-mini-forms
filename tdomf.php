@@ -39,6 +39,9 @@ Author URI: http://thedeadone.net
 // - Queue on all posts, not just tdomf
 // - Tabbed General Options
 // - New option to always show "moderation" links (no auto-hiding)
+// - Spam checked exclusion rules added/tested
+// - Some debug options added
+// - Per Form Spam check exclusion rules added/tested
 //
 // v0.13.1
 // - Fixed "Notify" and "Auto-Respond" widgets as theses were preventing 
@@ -55,6 +58,7 @@ Work Queue:
 
    -- Code to add a email hook on publish - http://thedeadone.net/forum/?p=3195#comment-4519
 
+   - delete spam straight away (TDOMF_OPTION_SPAM_AUTO_DELETE_NOW already setup, just not implemented)
    - parent category - http://thedeadone.net/forum/?p=3205#comment-4524
    - option to not hide links, display less information and perhaps some sort of funky JS to order columns - http://thedeadone.net/forum/?p=3526#comment-4514
    - category names instead of ids - http://thedeadone.net/forum/?p=3171#topic-3171
@@ -449,7 +453,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
  * @todo
  *
  * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
- * Option to disable Spam/Unapproved Edit Locking (require temp locks)
+ * Option to disable Unapproved Edit Locking (require temp locks?)
  * Template Tags for editing (what is actually required?)
  * Moderation screen: implement filters: form, user, ip, username, email, page/post, un/locked
  * Moderation screen: search
@@ -494,6 +498,8 @@ define('TDOMF_OPTION_NOSPAM_AUTHOR', "tdomf_nospam_author");
 define('TDOMF_OPTION_NOSPAM_TRUSTED', "tdomf_nospam_trusted");
 define('TDOMF_OPTION_NOSPAM_PUBLISH', "tdomf_nospam_publish");
 define('TDOMF_OPTION_SPAM_OVERWRITE', "tdomf_spam_overwrite");
+define('TDOMF_DEBUG_AKISMET_FAKE_SPAM', false); // set to true to get Akismet to flag everything as spam
+define('TDOMF_DEBUG_FAKE_SPAM', false); // set to true to ignore akismet and treat everything as spam
 
 //////////////////////////////////////////////////
 // loading text domain for language translation
