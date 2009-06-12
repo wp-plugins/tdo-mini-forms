@@ -8,6 +8,7 @@ function tdomf_load_options_admin_scripts() {
 add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_options_menu","tdomf_load_options_admin_scripts");
 
 function tdomf_options_admin_head() {
+    global $wp_version;
     /* add style options and start tabs for options page */
     if(preg_match('/tdomf_show_options_menu/',$_SERVER[REQUEST_URI])) { ?>
            
@@ -72,7 +73,11 @@ function tdomf_options_admin_head() {
            <script>
            function init_tdomf_tabs() {
               jQuery(document).ready(function(){
-                   jQuery("#options_tabs > ul").tabs();
+                   <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
+                      jQuery("#options_tabs").tabs();
+                   <?php } else { ?>   
+                      jQuery("#options_tabs > ul").tabs();
+                   <?php } ?>                      
               });
            }
            init_tdomf_tabs();
@@ -373,6 +378,8 @@ function tdomf_show_options_menu() {
     
     <h2><?php _e('General Options', 'tdomf') ?></h2>
 
+    <br/>
+    
     <form method="post" action="admin.php?page=tdomf_show_options_menu">
 
     <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-options-save'); } ?>
@@ -635,8 +642,8 @@ function tdomf_show_options_menu() {
     </div> <!-- /opt_debug -->
     
     </div> <!-- /tabs -->
- 
-    <br/><br/>
+
+    <br/>
     
     <table border="0"><tr>
 

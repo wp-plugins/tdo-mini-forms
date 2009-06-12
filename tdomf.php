@@ -42,13 +42,7 @@ Author URI: http://thedeadone.net
 // - Spam checked exclusion rules added/tested
 // - Some debug options added
 // - Per Form Spam check exclusion rules added/tested
-//
-// v0.13.1
-// - Fixed "Notify" and "Auto-Respond" widgets as theses were preventing 
-//   not logged in users from accessing forms
-// - Removed "public static" from class definitions as they are not part of 
-//   php4.
-// - Hacker replacements buggered - affected Upload Files widget
+// - Wordpress 2.8 compatibility
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -241,9 +235,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "48");
+define("TDOMF_BUILD", "49");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13.1");
+define("TDOMF_VERSION", "0.13.2");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -727,6 +721,11 @@ function tdomf_new_features() {
       $features .= "<li>".__("<b>You can now created forms to edit posts and pages!</b>","tdomf")."</li>";
   }
   // 48 = 0.13.1
+  // 49 = 0.13.2
+  if($last_version < 49) {
+      $features .= "<li>".__("<b>More Spam Checking options added. Can now be configured per form!</b>","tdomf")."</li>";
+  }
+  
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

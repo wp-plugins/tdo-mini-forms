@@ -10,6 +10,7 @@ function tdomf_load_form_options_admin_scripts() {
 add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_form_options_menu","tdomf_load_form_options_admin_scripts");
 
 function tdomf_form_options_admin_head() {
+    global $wp_version;
     /* add style options and start tabs for options page */
     if(preg_match('/tdomf_show_form_options_menu/',$_SERVER[REQUEST_URI])) { ?>
            
@@ -59,7 +60,7 @@ function tdomf_form_options_admin_head() {
             .ui-tabs-hide {
                 display: none;
             }
-            .ui-tabs-nav li.ui-tabs-disabled a, .ui-tabs-nav li.ui-tabs-disabled a:hover {
+            .ui-tabs-nav li.ui-tabs-disabled a, .ui-tabs-nav li.ui-tabs-disabled a:hover, li.ui-state-disabled {
                 color: grey;
                 background: lightgrey;
                 text-decoration:line-through;
@@ -72,13 +73,15 @@ function tdomf_form_options_admin_head() {
             </style>
            
            <script>
-           function init_tdomf_tabs() {
-              jQuery(document).ready(function(){
+           jQuery(document).ready(function(){
+               <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
+                   jQuery("#form_options_tabs").tabs();
+                   jQuery("#options_access_tabs").tabs();
+               <?php } else { ?>
                    jQuery("#form_options_tabs > ul").tabs();
                    jQuery("#options_access_tabs > ul").tabs();
-              });
-           }
-           init_tdomf_tabs();
+               <?php } ?>
+           });
            </script>
            
     <?php }
@@ -131,6 +134,7 @@ function tdomf_get_all_caps() {
   }
 
 function tdomf_show_form_options($form_id) {
+  global $wp_version;
   if(!tdomf_form_exists($form_id)) { ?>
     <div class="wrap"><font color="red"><?php printf(__("Form id %d does not exist!","tdomf"),$form_id); ?></font></div>
   <?php } else { ?>
@@ -167,6 +171,8 @@ function tdomf_show_form_options($form_id) {
     <?php if(tdomf_wp23()) { ?>
           <p><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets for Form %d &raquo;","tdomf"),$form_id); ?></a></p>
     <?php } ?>
+    
+    <br/>
     
     <form method="post" action="admin.php?page=tdomf_show_form_options_menu&form=<?php echo $form_id; ?>">
 
@@ -259,7 +265,23 @@ function tdomf_show_form_options($form_id) {
 
             // enable / disable tabs
             
-            var selected = jQuery("#form_options_tabs > ul").data('selected.tabs');
+            <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
+            var selected = jQuery("#form_options_tabs").data('selected.tabs');
+            if(!flag) {
+                jQuery("#form_options_tabs").tabs("enable",3);
+                if(selected == 1) {
+                    jQuery("#form_options_tabs").tabs("select",3);
+                }
+                jQuery("#form_options_tabs").tabs("disable",2);
+            } else {
+                jQuery("#form_options_tabs").tabs("enable",2);
+                if(selected == 2) {
+                    jQuery("#form_options_tabs").tabs("select",2);
+                }
+                jQuery("#form_options_tabs").tabs("disable",3);
+            }
+            <?php } else { ?>
+            var selected = jQuery("#form_options_tabs > ul").data('selected.tabs');                
             if(!flag) {
                 jQuery("#form_options_tabs > ul").tabs("enable",3);
                 if(selected == 1) {
@@ -273,6 +295,7 @@ function tdomf_show_form_options($form_id) {
                 }
                 jQuery("#form_options_tabs > ul").tabs("disable",3);
             }
+            <?php } ?>
           }
           
           function tdomf_enable_new() {
@@ -315,6 +338,22 @@ function tdomf_show_form_options($form_id) {
             
             // enable / disable tabs
             
+            <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
+            var selected = jQuery("#form_options_tabs").data('selected.tabs');
+            if(!flag) {
+                jQuery("#form_options_tabs").tabs("enable",2);
+                if(selected == 2) {
+                    jQuery("#form_options_tabs").tabs("select",2);
+                }
+                jQuery("#form_options_tabs").tabs("disable",3);
+            } else {
+                jQuery("#form_options_tabs").tabs("enable",3);
+                if(selected == 1) {
+                    jQuery("#form_options_tabs").tabs("select",3);
+                }
+                jQuery("#form_options_tabs").tabs("disable",2);
+            }                
+            <?php } else { ?>
             var selected = jQuery("#form_options_tabs > ul").data('selected.tabs');
             if(!flag) {
                 jQuery("#form_options_tabs > ul").tabs("enable",2);
@@ -329,6 +368,7 @@ function tdomf_show_form_options($form_id) {
                 }
                 jQuery("#form_options_tabs > ul").tabs("disable",2);
             }
+            <?php } ?>
           }
     //-->
     </script>
@@ -341,9 +381,17 @@ function tdomf_show_form_options($form_id) {
          //<![CDATA[
          jQuery(document).ready(function(){
          <?php if(!$edit_form) { ?>
+           <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
+           jQuery("#form_options_tabs").tabs("disable",3);               
+           <?php } else { ?>
            jQuery("#form_options_tabs > ul").tabs("disable",3);
+           <?php } ?>
          <?php } else { ?>
+           <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
+           jQuery("#form_options_tabs").tabs("disable",2);               
+           <?php } else { ?>
            jQuery("#form_options_tabs > ul").tabs("disable",2);
+           <?php } ?>
          <?php } ?>
          });
     //-->
@@ -923,6 +971,8 @@ function tdomf_show_form_options($form_id) {
     <?php tdomf_show_spam_options($form_id); ?>
     
     </div> <!-- form_spam -->
+    
+    <br/>
     
   <table border="0"><tr>
 

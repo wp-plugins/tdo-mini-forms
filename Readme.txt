@@ -3,7 +3,7 @@ Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.7.1
-Tested up to: 2.7.1
+Tested up to: 2.8
 Stable Tag: 0.13.1
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
@@ -11,6 +11,8 @@ This plugin can add themed custom posting and editing forms to your website that
 == Description ==
 
 This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
+
+**Version 0.13.2 continues with the bug fixes but also includes a few new features: queuing on all posts, not just posts managed by TDOMF, tabbed the general options UI, more spam checking options (can be modified per form now), always show the moderation links on the moderation screen and of course Wordpress 2.8 compatibility.**
 
 **Version 0.13.1 includes a number of bugs fixes. The plugin wuold not work on PHP4 and for some users the forms would not appear to non-registered users**
 
@@ -49,7 +51,7 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Can automatically modified author template tag with info about submitter.
 * Can, optionally, automatically allow submissions to be published.
 * Throttle number of submissions by user and/or IP
-* Optionally Queue published posts 
+* Optionally queue publishing of posts 
 * Numerous widgets for your theme, including a list of the top submitters
 * And many more...
 
@@ -402,6 +404,21 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 
 == Version History ==
+
+= v0.13.2: 12th June 2009 =
+
+* Fixed extra slashes in AJAX preview of submit forms
+* Scheduled post count incorrect
+* Shortcut links on moderation screen incorrect
+* "Publish Now" when post was queued, now works
+* Edit own posts was not actually working!
+* Queue on all posts, not just tdomf
+* Tabbed General Options
+* New option to always show "moderation" links (no auto-hiding)
+* Spam checked exclusion rules added/tested
+* Some debug options added
+* Per Form Spam check exclusion rules added/tested
+* Wordpress 2.8 compatibility
 
 = v0.13.1: 26th May 2009 =
 
