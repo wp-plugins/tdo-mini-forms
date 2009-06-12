@@ -337,7 +337,7 @@ This is outside the scope of TDOMF as TDOMF only enables people to submit posts.
 
 = Getting TDO Mini Forms to work with WordpressMU =
 
-[Installing TDOMF plugin on WordPress MU](http://www.newlife.com.ua/blog/2008/04/29/installing-tdomf-plugin-on-wordpress-mu/)
+[Installing TDOMF plugin on WordPress MU](http://www.injoit.com/blog/2008/07/25/tdomf-plugin-hack-for-wordpress-mu/)
 
 = Credits =
 

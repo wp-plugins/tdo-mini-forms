@@ -37,6 +37,11 @@ Author URI: http://thedeadone.net
 // - "Publish Now" when post was queued, now works
 // - Edit own posts was not actually working!
 // - Queue on all posts, not just tdomf
+// - Tabbed General Options
+// - New option to always show "moderation" links (no auto-hiding)
+// - Spam checked exclusion rules added/tested
+// - Some debug options added
+// - Per Form Spam check exclusion rules added/tested
 //
 // v0.13.1
 // - Fixed "Notify" and "Auto-Respond" widgets as theses were preventing 
@@ -51,6 +56,12 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
+   -- Code to add a email hook on publish - http://thedeadone.net/forum/?p=3195#comment-4519
+
+   - delete spam straight away (TDOMF_OPTION_SPAM_AUTO_DELETE_NOW already setup, just not implemented)
+   - parent category - http://thedeadone.net/forum/?p=3205#comment-4524
+   - option to not hide links, display less information and perhaps some sort of funky JS to order columns - http://thedeadone.net/forum/?p=3526#comment-4514
+   - category names instead of ids - http://thedeadone.net/forum/?p=3171#topic-3171
    - widget class have functions to allow message customisation
    - "delete all spam"
    - "recheck for spam"
@@ -86,11 +97,7 @@ Work Queue:
    - Investigate: upload-link error:
        http://wordpress.org/support/topic/186919#post-838957
    - Study: Replace diff with wordpress diff or add wordpress diff to options?
-   - Investigate: In IE, can't select copy/paste text in text widget
-   - Option: Schedule after latest post in queue, not just TDOMF
-   - Add info/image of how to bring up the widget conf panel
    - Investigate: Auto bring up the conf panel for widgets on the "fix" links
-   - Investigate: Bug with post times - http://thedeadone.net/forum/?p=1269
    - Some simple javascript to track number of chars/words typed so far in textarea: http://thedeadone.net/forum/?p=1321
    - Study: http://wordpress.org/extend/plugins/download-monitor/ integration
 */
@@ -446,7 +453,7 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
  * @todo
  *
  * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
- * Option to disable Spam/Unapproved Edit Locking (require temp locks)
+ * Option to disable Unapproved Edit Locking (require temp locks?)
  * Template Tags for editing (what is actually required?)
  * Moderation screen: implement filters: form, user, ip, username, email, page/post, un/locked
  * Moderation screen: search
@@ -484,6 +491,15 @@ define('TDOMF_KEY_SUBMISSION_DATE_GMT', "_tdomf_submission_date_gmt");
 // 0.13.2
 
 define('TDOMF_OPTION_QUEUE_ON_ALL',"tdomf_queue_on_all");
+define('TDOMF_OPTION_MOD_SHOW_LINKS',"tdomf_mod_show_links");
+define('TDOMF_OPTION_SPAM_AUTO_DELETE_NOW', "tdomf_spam_auto_delete_now");
+define('TDOMF_OPTION_NOSPAM_USER', "tdomf_nospam_user");
+define('TDOMF_OPTION_NOSPAM_AUTHOR', "tdomf_nospam_author");
+define('TDOMF_OPTION_NOSPAM_TRUSTED', "tdomf_nospam_trusted");
+define('TDOMF_OPTION_NOSPAM_PUBLISH', "tdomf_nospam_publish");
+define('TDOMF_OPTION_SPAM_OVERWRITE', "tdomf_spam_overwrite");
+define('TDOMF_DEBUG_AKISMET_FAKE_SPAM', false); // set to true to get Akismet to flag everything as spam
+define('TDOMF_DEBUG_FAKE_SPAM', false); // set to true to ignore akismet and treat everything as spam
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

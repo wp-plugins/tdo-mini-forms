@@ -172,12 +172,27 @@ function tdomf_show_form_options($form_id) {
           <p><a href="admin.php?page=tdomf_show_form_menu&form=<?php echo $form_id; ?>"><?php printf(__("Widgets for Form %d &raquo;","tdomf"),$form_id); ?></a></p>
     <?php } ?>
     
+    <br/>
+    
     <form method="post" action="admin.php?page=tdomf_show_form_options_menu&form=<?php echo $form_id; ?>">
 
     <input type="hidden" id="tdomf_form_id" name="tdomf_form_id" value="<?php echo $form_id; ?>" />
     <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-options-save'); } ?>
     
-    <?php $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id); ?>
+    <div id="form_options_tabs" class="tabs">
+    <ul>
+        <li><a href="#form_gen"><span><?php _e('General','tdomf'); ?></span></a></li>
+        <li><a href="#form_access"><span><?php _e('Access Control','tdomf'); ?></span></a></li>
+        <li><a href="#form_new"><span><?php _e('Submitting','tdomf'); ?></span></a></li>
+        <li><a href="#form_edit"><span><?php _e('Editing','tdomf'); ?></span></a></li>
+        <li><a href="#form_moderation"><span><?php _e('Moderation','tdomf'); ?></span></a></li>
+        <li><a href="#form_throttling"><span><?php _e('Throttling','tdomf'); ?></span></a></li>
+        <li><a href="#form_spam"><span><?php _e('Spam Protection','tdomf'); ?></span></a></li>
+    </ul>
+
+    <div id="form_gen">
+
+<?php $form_name = tdomf_get_option_form(TDOMF_OPTION_NAME,$form_id); ?>
     <p>
         <label for="tdomf_form_name">
             <?php _e("Form Name:","tdomf"); ?>
@@ -220,7 +235,8 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_def_cat").disabled = !flag;
             }
             document.getElementById("tdomf_queue_period").disabled = !flag;
-            
+            document.getElementById("tdomf_queue_on_all").disabled = !flag;
+
             // re-enable 'edit' options
             
             document.getElementById("tdomf_edit_tdomf_only").disabled = flag;
@@ -252,32 +268,32 @@ function tdomf_show_form_options($form_id) {
             <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
             var selected = jQuery("#form_options_tabs").data('selected.tabs');
             if(!flag) {
-                jQuery("#form_options_tabs").tabs("enable",2);
+                jQuery("#form_options_tabs").tabs("enable",3);
                 if(selected == 1) {
-                    jQuery("#form_options_tabs").tabs("select",2);
-                }
-                jQuery("#form_options_tabs").tabs("disable",1);
-            } else {
-                jQuery("#form_options_tabs").tabs("enable",1);
-                if(selected == 2) {
-                    jQuery("#form_options_tabs").tabs("select",1);
+                    jQuery("#form_options_tabs").tabs("select",3);
                 }
                 jQuery("#form_options_tabs").tabs("disable",2);
+            } else {
+                jQuery("#form_options_tabs").tabs("enable",2);
+                if(selected == 2) {
+                    jQuery("#form_options_tabs").tabs("select",2);
+                }
+                jQuery("#form_options_tabs").tabs("disable",3);
             }
             <?php } else { ?>
             var selected = jQuery("#form_options_tabs > ul").data('selected.tabs');                
             if(!flag) {
-                jQuery("#form_options_tabs > ul").tabs("enable",2);
+                jQuery("#form_options_tabs > ul").tabs("enable",3);
                 if(selected == 1) {
-                    jQuery("#form_options_tabs > ul").tabs("select",2);
-                }
-                jQuery("#form_options_tabs > ul").tabs("disable",1);
-            } else {
-                jQuery("#form_options_tabs > ul").tabs("enable",1);
-                if(selected == 2) {
-                    jQuery("#form_options_tabs > ul").tabs("select",1);
+                    jQuery("#form_options_tabs > ul").tabs("select",3);
                 }
                 jQuery("#form_options_tabs > ul").tabs("disable",2);
+            } else {
+                jQuery("#form_options_tabs > ul").tabs("enable",2);
+                if(selected == 2) {
+                    jQuery("#form_options_tabs > ul").tabs("select",2);
+                }
+                jQuery("#form_options_tabs > ul").tabs("disable",3);
             }
             <?php } ?>
           }
@@ -292,6 +308,7 @@ function tdomf_show_form_options($form_id) {
                 document.getElementById("tdomf_def_cat").disabled = flag;
             }
             document.getElementById("tdomf_queue_period").disabled = flag;
+            document.getElementById("tdomf_queue_on_all").disabled = flag;            
             
             // disable 'edit' options
             
@@ -324,32 +341,32 @@ function tdomf_show_form_options($form_id) {
             <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
             var selected = jQuery("#form_options_tabs").data('selected.tabs');
             if(!flag) {
-                jQuery("#form_options_tabs").tabs("enable",1);
-                if(selected == 2) {
-                    jQuery("#form_options_tabs").tabs("select",1);
-                }
-                jQuery("#form_options_tabs").tabs("disable",2);
-            } else {
                 jQuery("#form_options_tabs").tabs("enable",2);
-                if(selected == 1) {
+                if(selected == 2) {
                     jQuery("#form_options_tabs").tabs("select",2);
                 }
-                jQuery("#form_options_tabs").tabs("disable",1);
+                jQuery("#form_options_tabs").tabs("disable",3);
+            } else {
+                jQuery("#form_options_tabs").tabs("enable",3);
+                if(selected == 1) {
+                    jQuery("#form_options_tabs").tabs("select",3);
+                }
+                jQuery("#form_options_tabs").tabs("disable",2);
             }                
             <?php } else { ?>
             var selected = jQuery("#form_options_tabs > ul").data('selected.tabs');
             if(!flag) {
-                jQuery("#form_options_tabs > ul").tabs("enable",1);
-                if(selected == 2) {
-                    jQuery("#form_options_tabs > ul").tabs("select",1);
-                }
-                jQuery("#form_options_tabs > ul").tabs("disable",2);
-            } else {
                 jQuery("#form_options_tabs > ul").tabs("enable",2);
-                if(selected == 1) {
+                if(selected == 2) {
                     jQuery("#form_options_tabs > ul").tabs("select",2);
                 }
-                jQuery("#form_options_tabs > ul").tabs("disable",1);
+                jQuery("#form_options_tabs > ul").tabs("disable",3);
+            } else {
+                jQuery("#form_options_tabs > ul").tabs("enable",3);
+                if(selected == 1) {
+                    jQuery("#form_options_tabs > ul").tabs("select",3);
+                }
+                jQuery("#form_options_tabs > ul").tabs("disable",2);
             }
             <?php } ?>
           }
@@ -365,15 +382,15 @@ function tdomf_show_form_options($form_id) {
          jQuery(document).ready(function(){
          <?php if(!$edit_form) { ?>
            <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
-           jQuery("#form_options_tabs").tabs("disable",2);               
+           jQuery("#form_options_tabs").tabs("disable",3);               
            <?php } else { ?>
-           jQuery("#form_options_tabs > ul").tabs("disable",2);
+           jQuery("#form_options_tabs > ul").tabs("disable",3);
            <?php } ?>
          <?php } else { ?>
            <?php if(version_compare($wp_version,"2.8-beta2",">=")) { ?>
-           jQuery("#form_options_tabs").tabs("disable",1);               
+           jQuery("#form_options_tabs").tabs("disable",2);               
            <?php } else { ?>
-           jQuery("#form_options_tabs > ul").tabs("disable",1);
+           jQuery("#form_options_tabs > ul").tabs("disable",2);
            <?php } ?>
          <?php } ?>
          });
@@ -431,16 +448,9 @@ function tdomf_show_form_options($form_id) {
         </label>
         <input type="text" name="tdomf_widget_count" id="tdomf_widget_count" size="3" value="<?php echo htmlentities(strval($widget_count),ENT_QUOTES,get_bloginfo('charset')); ?>" />
 	</p>
-
-    <div id="form_options_tabs" class="tabs">
-    <ul>
-        <li><a href="#form_access"><span><?php _e('Access Control','tdomf'); ?></span></a></li>
-        <li><a href="#form_new"><span><?php _e('Submitting','tdomf'); ?></span></a></li>
-        <li><a href="#form_edit"><span><?php _e('Editing','tdomf'); ?></span></a></li>
-        <li><a href="#form_moderation"><span><?php _e('Moderation','tdomf'); ?></span></a></li>
-        <li><a href="#form_throttling"><span><?php _e('Throttling','tdomf'); ?></span></a></li>
-    </ul>
-
+    
+    </div><!-- /form_gen -->
+    
     <div id="form_access">
     
     <p><?php _e("You can control access to the form based on user roles, capabilities or by specific users. You can chose \"Unregistered Users\" if you want anyone to be able to access the form, including visitors to your site that do not have user accounts. The old behaviour of TDO Mini Forms allowed any user with the ability to publish posts automatic access to the form. This behaviour can now be turned off or on as required.","tdomf"); ?></p>
@@ -955,7 +965,15 @@ function tdomf_show_form_options($form_id) {
           <?php } ?>
         
     </div> <!-- form_throttling -->
-          
+    
+    <div id="form_spam">
+    
+    <?php tdomf_show_spam_options($form_id); ?>
+    
+    </div> <!-- form_spam -->
+    
+    <br/>
+    
   <table border="0"><tr>
 
     <td>
@@ -1497,6 +1515,10 @@ function tdomf_handle_form_options_actions() {
       //
       $tdomf_publish_no_mod = isset($_POST['tdomf_user_publish_auto']);
       tdomf_set_option_form(TDOMF_OPTION_PUBLISH_NO_MOD,$tdomf_publish_no_mod,$form_id);
+      
+      // Spam
+      //
+      $message .= tdomf_handle_spam_options_actions($form_id);
       
       tdomf_log_message("Options Saved for Form ID $form_id");
        

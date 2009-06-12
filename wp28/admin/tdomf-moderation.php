@@ -484,7 +484,7 @@ function tdomf_show_mod_posts_menu() {
 	</tfoot>
     
     <tbody>
-    <?php foreach($posts as $p) { $count++; ?>
+    <?php if(!empty($posts)) { foreach($posts as $p) { $count++; ?>
 
         <?php $post = &get_post( $p->ID ); /* seems I need this later */ ?> 
         <?php $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1)); /* and need this earlier too */ ?>
@@ -533,7 +533,11 @@ function tdomf_show_mod_posts_menu() {
                  echo '<blockquote>'.$excerpt.'</blockquote>';
         } ?>
         
+        <?php if(get_option(TDOMF_OPTION_MOD_SHOW_LINKS)) { ?>
+        <div>
+        <?php } else { ?>
         <div class="row-actions">
+        <?php } ?>
            <?php if($post->post_status == 'future') { 
                $bulk_sub_publish_now = true; ?>
                <span class="publish"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'publish_now', 'post_id' => $p->ID, 'nonce' => 'tdomf-publish_' . $p->ID)) ?>" title="<?php echo htmlentities(__('Publish this submission now','tdomf')); ?>"><?php _e('Publish Now','tdomf'); ?></a> |</span>
@@ -736,7 +740,7 @@ function tdomf_show_mod_posts_menu() {
                        if($locked) { _e(' [Locked]','tdomf'); }
                    } ?>
          </td>
-    <?php } ?>
+    <?php } } ?>
     
     </tbody>
     
