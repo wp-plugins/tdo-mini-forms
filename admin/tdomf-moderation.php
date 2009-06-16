@@ -6,7 +6,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 /////////////////////////
 
 function tdomf_get_queued_posts($offset = 0, $limit = 0) {
-  global $wpdb;
+/*  global $wpdb;
 	$query = "SELECT ID, post_title, post_status ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -19,11 +19,14 @@ function tdomf_get_queued_posts($offset = 0, $limit = 0) {
    if($offset > 0) {
       $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('limit' => $limit,
+                                 'offset' => $offset,
+                                 'post_status' => array('future')));
 }
 
 function tdomf_get_queued_posts_count() {
-  global $wpdb;
+/*  global $wpdb;
   $query = "SELECT count(ID) ";
   $query .= "FROM $wpdb->posts ";
   $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -31,11 +34,14 @@ function tdomf_get_queued_posts_count() {
   $query .= "AND post_status = 'future' ";
   $query .= "ORDER BY ID DESC ";  
   $result = $wpdb->get_var( $query );
-  return intval($result);
+  return intval($result);*/
+      return tdomf_get_posts(array('count' => true,
+                                 'post_status' => array('future')));
+
 }
 
 function tdomf_get_spam_posts($offset = 0, $limit = 0) {
-   global $wpdb;
+   /*global $wpdb;
    $query = "SELECT ID, post_title, meta_value, post_status ";
    $query .= "FROM $wpdb->posts ";
    $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -47,16 +53,21 @@ function tdomf_get_spam_posts($offset = 0, $limit = 0) {
    if($offset > 0) {
       $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('offset' => $offset,
+                                 'limit' => $limit,
+                                 'spam' => true));    
 }
 
 function tdomf_get_spam_posts_count() {
-   global $wpdb;
+   /*global $wpdb;
    $query = "SELECT count(ID) ";
    $query .= "FROM $wpdb->posts ";
    $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
    $query .= "WHERE meta_key = '".TDOMF_KEY_SPAM."' ";
-   return intval($wpdb->get_var( $query ));
+   return intval($wpdb->get_var( $query ));*/
+    return tdomf_get_posts(array('count' => true,
+                                 'spam' => true));
 }
 
 
@@ -107,7 +118,7 @@ function tdomf_publish_post($post_ID,$use_queue=true) {
 // grab a list of all submitted posts
 //
 function tdomf_get_submitted_posts($offset = 0, $limit = 0) {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT ID, post_title, meta_value, post_status ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -119,18 +130,22 @@ function tdomf_get_submitted_posts($offset = 0, $limit = 0) {
    if($offset > 0) {
       $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('limit' => $limit,
+                                 'offset' => $offset));
 }
 
 // Return count of submitted posts
 //
 function tdomf_get_submitted_posts_count() {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT count(ID) ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
    $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
-	return intval($wpdb->get_var( $query ));
+	return intval($wpdb->get_var( $query ));*/
+    return tdomf_get_posts(array('count' => true));
+    
 }
 
 // Grab a list of unmoderated posts
@@ -138,17 +153,18 @@ function tdomf_get_submitted_posts_count() {
 function tdomf_get_unmoderated_posts($offset = 0, $limit = 0) {
   global $wpdb;
   
-   /* Using subqueries... only works on newer SQL version, not the minmum 
-      supported by WP. Use the second method below */
+   /*
+   // Using subqueries... only works on newer SQL version, not the minmum 
+   //   supported by WP. Use the second method below
       
-   /*$query = "SELECT ID, post_title, meta_value, post_status  ";
-   $query .= "FROM $wpdb->posts ";
-   $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
-   $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
-   $query .= "AND post_status = 'draft' ";
-     $query .= "AND $wpdb->posts.ID NOT IN (SELECT post_id FROM $wpdb->postmeta ";
-     $query .=  "WHERE meta_key = '".TDOMF_KEY_SPAM."' ) "; 
-   $query .= "ORDER BY ID DESC "; */
+   #$query = "SELECT ID, post_title, meta_value, post_status  ";
+   #$query .= "FROM $wpdb->posts ";
+   #$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+   #$query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
+   #$query .= "AND post_status = 'draft' ";
+   #$query .= "AND $wpdb->posts.ID NOT IN (SELECT post_id FROM $wpdb->postmeta ";
+   #$query .=  "WHERE meta_key = '".TDOMF_KEY_SPAM."' ) "; 
+   #$query .= "ORDER BY ID DESC "; 
   
    $query = "SELECT $wpdb->posts.ID, $wpdb->posts.post_title, $wpdb->postmeta.meta_value, $wpdb->posts.post_status
              FROM $wpdb->posts 
@@ -158,39 +174,40 @@ function tdomf_get_unmoderated_posts($offset = 0, $limit = 0) {
              WHERE tdopm.post_id IS NULL AND post_status = 'draft' AND $wpdb->postmeta.meta_key='".TDOMF_KEY_FLAG."'
              ORDER BY $wpdb->posts.ID DESC ";
 
-   if($limit > 0) {
+  if($limit > 0) {
       $query .= "LIMIT $limit ";
-   }
+  }
    if($offset > 0) {
       $query .= "OFFSET $offset ";
-   } 
-             
-  /*$wpdb->show_errors();*/
-  $result = $wpdb->get_results( $query );
+  } 
+  return $wpdb->get_results( $query );*/
   
-  /*$query = "SELECT version() ";
-  var_dump($wpdb->get_results( $query ));*/
-  
-  return $result;
+  return tdomf_get_posts(array('limit' => $limit,
+                               'offset' => $offset,
+                               'post_status' => array('draft'),
+                               'nospam' => true));
 }
 
 // Return a count of unmoderated posts
 //
 function tdomf_get_unmoderated_posts_count() {
-    global $wpdb;
+    /*global $wpdb;
     $query = "SELECT count($wpdb->posts.ID)
              FROM $wpdb->posts 
              LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) 
              LEFT JOIN $wpdb->postmeta tdopm ON $wpdb->posts.id =
                        tdopm.post_id AND tdopm.meta_key ='_tdomf_spam_flag' 
              WHERE tdopm.post_id IS NULL AND post_status = 'draft' AND $wpdb->postmeta.meta_key='_tdomf_flag' ";
-	return intval($wpdb->get_var( $query ));
+	return intval($wpdb->get_var( $query ));*/
+    return tdomf_get_posts(array('count' => true,
+                                 'post_status' => array('draft'),
+                                 'nospam' => true));
 }
 
 // Grab a list of published submitted posts
 //
 function tdomf_get_published_posts($offset = 0, $limit = 0) {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT ID, post_title, meta_value, post_status  ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -203,37 +220,47 @@ function tdomf_get_published_posts($offset = 0, $limit = 0) {
       if($offset > 0) {
          $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('limit' => $limit,
+                                 'offset' => $offset,
+                                 'post_status' => array('publish')));
 }
 
 // Return a count of pubilshed posts
 //
 function tdomf_get_published_posts_count() {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT count(ID)  ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
    $query .= "WHERE meta_key = '".TDOMF_KEY_FLAG."' ";
    $query .= "AND post_status = 'publish' ";
-	return intval($wpdb->get_var( $query ));
+	return intval($wpdb->get_var( $query ));*/
+    return tdomf_get_posts(array('count' => true,
+                                 'post_status' => array('publish')));
 }
 
 function tdomf_get_mod_posts_url($args) {
     
     $defaults = array('echo' => false,
                       'show' => 'all',
-                      'filter' => false,
                       'action' => false,
                       'post_id' => false,
                       'mode' => 'list',
                       'nonce' => false,
                       'revision_id' => false,
                       'edit_id' => false,
-                      'limit' => false );
+                      'limit' => false,
+                      'form_id' => false,
+                      'user_id' => false,
+                      'ip' => false);
     if(isset($_REQUEST['show'])) { $defaults['show'] = $_REQUEST['show']; }
     if(isset($_REQUEST['mode'])) { $defaults['mode'] = $_REQUEST['mode']; }
-    if(isset($_REQUEST['filter'])) { $defaults['filter'] = $_REQUEST['filter']; }
+    if(isset($_REQUEST['form_id'])) { $defaults['form_id'] = intval($_REQUEST['form_id']); }
+    if(isset($_REQUEST['user_id'])) { $defaults['user_id'] = intval($_REQUEST['user_id']); }
+    if(isset($_REQUEST['ip'])) { $defaults['ip'] = $_REQUEST['form_id']; }
     if(isset($_REQUEST['limit'])) { $defaults['limit'] = intval($_REQUEST['limit']); }
+    
     $args = wp_parse_args($args, $defaults);
     extract($args);
     
@@ -242,8 +269,14 @@ function tdomf_get_mod_posts_url($args) {
         $url .= '&show=' . $show;
     }
     $url .= '&mode=' . $mode;
-    if($filter) {
-        $url .= '&filter=' . $filter;
+    if($form_id && $form_id > 0) {
+        $url .= '&form_id=' . $form_id;
+    }
+    if($user_id && $user_id > 0) {
+        $url .= '&user_id=' . $user_id;
+    }
+    if($ip && $ip > 0) {
+        $url .= '&ip=' . $ip;
     }
     if($action) {
         $url .= '&action=' . $action;
@@ -276,18 +309,26 @@ function tdomf_get_mod_posts_url($args) {
 function tdomf_show_mod_posts_menu() {
     
    tdomf_moderation_handler();
-
-   $filter = 0;
-   if(isset($_REQUEST['filter'])) { $filter = intval($_REQUEST['filter']); }
    
-   $pending_count = tdomf_get_unmoderated_posts_count();
-   $scheduled_count = tdomf_get_queued_posts_count();
-   $published_count = tdomf_get_published_posts_count();
-   $spam_count = tdomf_get_spam_posts_count();
-   $all_count = tdomf_get_submitted_posts_count();
+   $user_id = false;
+   if(isset($_REQUEST['user_id'])) { $user_id = intval($_REQUEST['user_id']); }
+   $ip = false;
+   if(isset($_REQUEST['ip'])) { $ip = $_REQUEST['ip']; }
+   $form_id = false;
+   if(isset($_REQUEST['form_id'])) { 
+    $form_id = intval($_REQUEST['form_id']);
+    if($form_id <= 0) { $form_id = false; }
+   }
+   
+   $pending_count = tdomf_get_posts(array('count' => true, 'post_status' => array('draft'), 'nospam' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
+   $scheduled_count = tdomf_get_posts(array('count' => true, 'post_status' => array('future'), 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
+   $published_count = tdomf_get_posts(array('count' => true, 'post_status' => array('publish'), 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
+   $spam_count = tdomf_get_posts(array('count' => true, 'spam' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
+   $all_count = tdomf_get_posts(array('count' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip ));
    $form_ids = tdomf_get_form_ids();
-   $pending_edits_count = tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true));
-   $spam_edits_count = tdomf_get_edits(array('state' => 'spam', 'count' => true, 'unique_post_ids' => true)); 
+   $pending_edits_count = tdomf_get_edits(array('state' => 'unapproved', 'count' => true, 'unique_post_ids' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
+   $spam_edits_count = tdomf_get_edits(array('state' => 'spam', 'count' => true, 'unique_post_ids' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip)); 
+   $approved_edits_count = tdomf_get_edits(array('state' => 'approved', 'count' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
    
    $limit = 10; # fixed
    if(isset($_REQUEST['limit'])) { $limit = intval($_REQUEST['limit']); }
@@ -301,27 +342,27 @@ function tdomf_show_mod_posts_menu() {
    $max_pages = 0;
    $max_items = 0;
    if($show == 'all') {
-       $posts = tdomf_get_submitted_posts($offset,$limit);
+       $posts = tdomf_get_posts(array('offset' => $offset, 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
        $max_pages = ceil($all_count / $limit);
        $max_items = $all_count;
    } else if($show == 'pending_submissions') {
-       $posts = tdomf_get_unmoderated_posts($offset,$limit);
+       $posts = tdomf_get_posts(array('offset' => $offset, 'limit' => $limit, 'post_status' => array('draft'), 'nospam' => true, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
        $max_pages = ceil($pending_count / $limit);
        $max_items = $pending_count;
    } else if($show == 'scheduled') {
-       $posts = tdomf_get_queued_posts($offset,$limit);
+       $posts = tdomf_get_posts(array('offset' => $offset, 'post_status' => array('future'), 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
        $max_pages = ceil($scheduled_count / $limit);
        $max_items = $scheduled_count;
    } else if($show == 'published') {
-       $posts = tdomf_get_published_posts($offset,$limit);
+       $posts = tdomf_get_posts(array('offset' => $offset, 'post_status' => array('publish'), 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
        $max_pages = ceil($published_count / $limit);
        $max_items = $published_count;
    } else if($show == 'spam_submissions') {
-       $posts = tdomf_get_spam_posts($offset,$limit);
+       $posts = tdomf_get_posts(array('offset' => $offset, 'spam' => true, 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip));
        $max_pages = ceil($spam_count / $limit);
        $max_items = $spam_count;
    } else if($show == 'pending_edits') {
-       $edits = tdomf_get_edits(array('state' => 'unapproved', 'unique_post_ids' => true, 'offset' => $offset, 'limit' => $limit)); 
+       $edits = tdomf_get_edits(array('state' => 'unapproved', 'unique_post_ids' => true, 'offset' => $offset, 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip)); 
        $max_pages = ceil($pending_edits_count / $limit);
        $posts = array();
        # a little hacky magic
@@ -330,7 +371,7 @@ function tdomf_show_mod_posts_menu() {
        }
        $max_items = $pending_edits_count;
    } else if($show == 'spam_edits') {
-       $edits = tdomf_get_edits(array('state' => 'spam', 'unique_post_ids' => true, 'offset' => $offset, 'limit' => $limit)); 
+       $edits = tdomf_get_edits(array('state' => 'spam', 'unique_post_ids' => true, 'offset' => $offset, 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip)); 
        $max_pages = ceil($spam_edits_count / $limit);
        $posts = array();
        # a little hacky magic
@@ -338,6 +379,15 @@ function tdomf_show_mod_posts_menu() {
            $posts[] = (OBJECT) array( 'ID' => $e->post_id );
        }
        $max_items = $spam_edits_count;
+   } else if($show == 'approved_edits') {
+       $edits = tdomf_get_edits(array('state' => 'approved', 'offset' => $offset, 'limit' => $limit, 'form_id' => $form_id, 'user_id' => $user_id, 'ip' => $ip)); 
+       $max_pages = ceil($approved_edits_count / $limit);
+       $posts = array();
+       # a little hacky magic
+       foreach($edits as $e) {
+           $posts[] = (OBJECT) array( 'ID' => $e->post_id );
+       }
+       $max_items = $approved_edits_count;
    }
    # max is incorrect... doesn't account for form filter...
    
@@ -365,10 +415,20 @@ function tdomf_show_mod_posts_menu() {
    
    <div class="wrap">
    
-   <?php screen_icon(); ?>
-   <h2><?php _e('Moderation', 'tdomf'); ?>
+   <?php /* screen_icon(); */ ?>
+   <h2>
+   <?php if($user_id || $ip) {
+            if($user_id) {
+                $u = get_userdata($user_id);
+                printf(__('Posts submitted by user %s','tdomf'),$u->user_login);
+            } else if($ip) {
+                printf(__('Posts submitted from IP %s','tdomf'),$ip);
+            }
+         } else { ?>
+   <?php _e('Moderation', 'tdomf'); ?>
+   <?php } ?>
    </h2>
-
+   
    <?php /*if(count($posts) <= 0) { ?>
       <div class="clear"></div>
       <p><?php _e('No submissions found','tdomf') ?></p>
@@ -380,7 +440,9 @@ function tdomf_show_mod_posts_menu() {
    <!-- hidden vars -->
    
    <ul class="subsubsub">
-   <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'all')); ?>"<?php if($show == 'all') { ?> class="current"<?php } ?>><?php printf(__('All (%s)','tdomf'),$all_count); ?></a> | </li>
+   <?php if($all_count > 0) { ?>
+       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'all')); ?>"<?php if($show == 'all') { ?> class="current"<?php } ?>><?php printf(__('All Submissions (%s)','tdomf'),$all_count); ?></a> | </li>
+   <?php } ?>       
    <?php if($pending_count > 0) { ?>
       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'pending_submissions')); ?>"<?php if($show == 'pending_submissions') { ?> class="current"<?php } ?>><?php printf(__('Pending Submissions (%s)','tdomf'),$pending_count); ?></a> | </li>
    <?php } ?>
@@ -393,19 +455,22 @@ function tdomf_show_mod_posts_menu() {
    <?php if($spam_count > 0) { ?>
        <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'spam_submissions')); ?>"<?php if($show == 'spam_submissions') { ?> class="current"<?php } ?>><?php printf(__('Spam Submissions (%s)','tdomf'),$spam_count); ?></a> | </li>
    <?php } ?>
+   <?php if($approved_edits_count > 0) { ?>
+       <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'approved_edits')); ?>"<?php if($show == 'approved_edits') { ?> class="current"<?php } ?>><?php printf(__('Approved Edits (%s)','tdomf'),$approved_edits_count); ?></a> | </li>
+   <?php } ?>    
    <?php if($pending_edits_count > 0) { ?>
        <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'pending_edits')); ?>"<?php if($show == 'pending_edits') { ?> class="current"<?php } ?>><?php printf(__('Pending Edits (%s)','tdomf'),$pending_edits_count); ?></a> | </li>
    <?php } ?>
    <?php if($spam_edits_count > 0) { ?>
        <li><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'show' => 'spam_edits')); ?>"<?php if($show == 'spam_edits') { ?> class="current"<?php } ?>><?php printf(__('Spam Edits (%s)','tdomf'),$spam_edits_count); ?></a> | </li>
-   <?php } ?>
+   <?php } ?> 
    </ul>
 
    <div class="tablenav">
    
    <?php
     $page_links = paginate_links( array(
-        'base' => add_query_arg( 'paged', '%#%' ),
+        'base' => add_query_arg( 'paged', '%#%', tdomf_get_mod_posts_url(array()) ),
         'format' => '',
         'prev_text' => __('&laquo;'),
         'next_text' => __('&raquo;'),
@@ -413,34 +478,7 @@ function tdomf_show_mod_posts_menu() {
         'current' => $paged
      ));
     ?>
-
-    <?php /* Hide bulk actions (from top of page) and fitlers for the time being
     
-    <div class="alignleft actions">
-    
-    
-    
-    
-    <select name="action">
-    <option value="-1" selected="selected"><?php _e('Bulk Actions'); ?></option>
-    <option value="edit"><?php _e('Publish'); ?></option>
-    <option value="delete"><?php _e('Delete'); ?></option>
-    </select>
-    <input type="submit" value="<?php _e('Apply'); ?>" name="doaction" id="doaction" class="button-secondary action" />
-    <?php wp_nonce_field('tdomf-moderate-bulk'); ?>
-    
-    <select name='form'>
-    <option value="-1" selected="selected"><?php _e('Show All Forms','tdomf'); ?></option>
-    <?php foreach($form_ids as $form) { ?>
-       <option value="<?php echo $form->form_id; ?>"><?php printf(__('Form #%d','tdomf'),$form->form_id); ?></option>
-    <?php } ?>
-    </select>
-    <input type="submit" id="post-query-submit" value="<?php _e('Filter'); ?>" class="button-secondary" />
-    
-    </div>
-    
-        */ ?>
-
 <?php if ( $page_links ) { ?>
 <div class="tablenav-pages"><?php $page_links_text = sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>%s',
 	number_format_i18n( $offset ),
@@ -454,7 +492,28 @@ function tdomf_show_mod_posts_menu() {
 	<a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'mode' => 'list')); ?>"><img <?php if ( 'list' == $mode ) echo 'class="current"'; ?> id="view-switch-list" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('List View') ?>" alt="<?php _e('List View') ?>" /></a>
 	<a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'mode' => 'excerpt')); ?>"><img <?php if ( 'excerpt' == $mode ) echo 'class="current"'; ?> id="view-switch-excerpt" src="../wp-includes/images/blank.gif" width="20" height="20" title="<?php _e('Excerpt View') ?>" alt="<?php _e('Excerpt View') ?>" /></a>
 </div>
-
+    
+    <?php $form_ids_check = array();
+           foreach($form_ids as $form) { 
+               if(TDOMF_Widget::isSubmitForm(false,$form->form_id)) {
+                   $count = tdomf_get_posts(array('count' => true, 'form_id' => $form->form_id));
+               } else {
+                   $count = tdomf_get_edits(array('count' => true, 'form_id' => $form->form_id));
+               }
+                   if($count > 0) {
+                       $form_ids_check[] = $form->form_id;
+                   }
+           } 
+           if(!empty($form_ids_check)) { ?>
+              <select name='form_id'>
+                 <option value="-1" selected="selected"><?php _e('Show All','tdomf'); ?></option>
+                 <?php foreach($form_ids_check as $form) { ?> 
+                        <option value="<?php echo $form; ?>" <?php if($form_id == $form) { ?> selected="selected" <?php } ?>><?php printf(__('Form #%d','tdomf'),$form); ?></option>
+                <?php } ?>
+              </select>
+              <input type="submit" id="post-query-submit" value="<?php _e('Filter'); ?>" class="button-secondary" />
+     <?php } ?>
+    
 <div class="clear"></div>
 
 </div> <!-- tablenav -->
@@ -466,20 +525,28 @@ function tdomf_show_mod_posts_menu() {
 	<thead>
 	<tr>
 	<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
-	<th scope="col" id="title" class="manage-column column-title" style="">Post</th>
-	<th scope="col" id="submitted" class="manage-column column-submitted" style="">Submitted</th>
-	<th scope="col" id="edited" class="manage-column column-edited" style="">Most Recent Edit</th>
-	<th scope="col" id="status" class="manage-column column-status" style="">Status</th>
+	<th scope="col" id="title" class="manage-column column-title" style=""><?php _e('Post','tdomf'); ?></th>
+	<th scope="col" id="submitted" class="manage-column column-submitted" style=""><?php _e('Submitted','tdomf'); ?></th>
+	<th scope="col" id="edited" class="manage-column column-edited" style="">
+    <?php if($show == 'approved_edits') { _e('Edit','tdomf'); }
+          else if($show == 'pending_edits') { _e('Pending Edit','tdomf'); }
+          else if($show == 'spam_edits') { _e('Spam Edit','tdomf'); }
+          else { _e('Most Recent Edit','tdomf'); } ?></th>
+	<th scope="col" id="status" class="manage-column column-status" style=""><?php _e('Status','tdomf'); ?></th>
 	</tr>
 	</thead>
 
 	<tfoot>
 	<tr>
 	<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
-	<th scope="col" id="title" class="manage-column column-title" style="">Post</th>
-	<th scope="col" id="submitted" class="manage-column column-submitted" style="">Submitted</th>
-	<th scope="col" id="edited" class="manage-column column-edited" style="">Most Recent Edit</th>
-	<th scope="col" id="status" class="manage-column column-status" style="">Status</th>
+	<th scope="col" id="title" class="manage-column column-title" style=""><?php _e('Post','tdomf'); ?></th>
+	<th scope="col" id="submitted" class="manage-column column-submitted" style=""><?php _e('Submitted','tdomf'); ?></th>
+	<th scope="col" id="edited" class="manage-column column-edited" style="">
+    <?php if($show == 'approved_edits') { _e('Edit','tdomf'); }
+          else if($show == 'pending_edits') { _e('Pending Edit','tdomf'); }
+          else if($show == 'spam_edits') { _e('Spam Edit','tdomf'); }
+          else { _e('Most Recent Edit','tdomf'); } ?></th>
+	<th scope="col" id="status" class="manage-column column-status" style=""><?php _e('Status','tdomf'); ?></th>
 	</tr>
 	</tfoot>
     
@@ -587,7 +654,8 @@ function tdomf_show_mod_posts_menu() {
               $email = get_post_meta($p->ID, TDOMF_KEY_EMAIL, true);
               $user_id = get_post_meta($p->ID, TDOMF_KEY_USER_ID, true);
               if($user_id != false) { ?>
-                 <a href="user-edit.php?user_id=<?php echo $user_id;?>" class="edit">
+                 <!-- <a href="user-edit.php?user_id=<?php echo $user_id;?>" class="edit"> -->
+                 <a href="<?php tdomf_get_mod_posts_url(array('echo' => true, 'user_id' => $user_id, 'ip' => false, 'form_id' => false)); ?>">
                  <?php $u = get_userdata($user_id);
                        echo $u->user_login; ?></a>
                  <?php } else if(!empty($name) && !empty($email)) {
@@ -599,7 +667,10 @@ function tdomf_show_mod_posts_menu() {
                  } else {
                    _e("N/A","tdomf");
                  } ?>
-         / <?php echo get_post_meta($p->ID, TDOMF_KEY_IP, true); ?> </li>
+                 / <?php $ip = get_post_meta($p->ID, TDOMF_KEY_IP, true); if(!empty($ip)) { ?>
+           <a href="<?php tdomf_get_mod_posts_url(array('echo' => true, 'ip' => $ip, 'user_id' => false, 'form_id' => false)); ?>">
+                 <?php } ?> <?php echo $ip; ?> <?php if(!empty($ip)) { ?> </a> <?php } ?>
+         </li>
         <li>
         <?php if($form_id == false || tdomf_form_exists($form_id) == false) { ?>
                  <?php _e("Unknown or deleted form","tdomf"); ?>

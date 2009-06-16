@@ -91,7 +91,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           // Store settings for this widget
           //
           if ( $_POST[$this->internalName.$index.'-submit'] ) {
-                 $newoptions['text'] = $_POST['text-text-'.$index];
+                 $newoptions['text'] = $_POST['text_text_'.$index];
                  $options = wp_parse_args($newoptions, $options);
                  $this->updateOptions($options,$form_id,$index);
           }
@@ -120,8 +120,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
              
 <br/><br/>
 
-<label for="text-text-<?php echo $index; ?>" ><?php _e("Text:","tdomf"); ?></label><br/>
-<textarea cols="50" rows="6" id="text-text-<?php echo $index; ?>" name="text-text-<?php echo $index; ?>" ><?php echo htmlentities($options['text'],ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+<label for="text_text_<?php echo $index; ?>" ><?php _e("Text:","tdomf"); ?></label><br/>
+<textarea cols="50" rows="6" id="text_text_<?php echo $index; ?>" name="text_text_<?php echo $index; ?>"><?php echo htmlentities($options['text'],ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
 
 </div>
 

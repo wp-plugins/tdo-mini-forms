@@ -248,7 +248,55 @@ function tdomf_form_hacker_actions($form_id) {
   }
 }
 
+function tdomf_load_form_hacker_admin_scripts() {
+   /* code editing */
+   wp_enqueue_script( 'codepress' );
+   add_action( 'admin_print_footer_scripts', 'tdomf_form_hacker_codepress_footer_js' );
+}
+add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_form_hacker","tdomf_load_form_hacker_admin_scripts");
+function tdomf_form_hacker_codepress_footer_js() {
+    global $wp_version;
+    if(version_compare($wp_version,"2.8-beta2",">=")) {
+    // According to Wordpress 2.8...
+    // Script-loader breaks CP's automatic path-detection, thus CodePress.path
+    // CP edits in an iframe, so we need to grab content back into normal form
+    //
+    if(isset($_REQUEST['text'])) { 
+        // for messages, but only if enabled!
+        if(isset($_REQUEST['code'])) { ?>
+        <script type="text/javascript">
+        /* <![CDATA[ */
+        var codepress_path = '<?php echo includes_url('js/codepress/'); ?>';
+        jQuery('#formhackermsgs').submit(function(){
+            var elems = jQuery('.codepress');
+            for(i=0;i<elems.length;i++) {
+                /* there is probably a much better way to do this! */
+                var name = '#' + elems[i].name + "_cp";
+                if (jQuery(name).length)
+                    /* not sure why I have to do "eval" here to get it to work 
+                     * guess I should actually learn how codepress works! */
+                    jQuery(name).val(eval(elems[i].name + ".getCode()")).removeAttr('disabled');
+            }
+        });
+        /* ]]> */
+        </script>
+    <?php } } else { ?>
+        <script type="text/javascript">
+        /* <![CDATA[ */
+        var codepress_path = '<?php echo includes_url('js/codepress/'); ?>';
+        jQuery('#formhacker').submit(function(){
+                if (jQuery('#tdomf_form_hack_cp').length)
+                    jQuery('#tdomf_form_hack_cp').val(tdomf_form_hack.getCode()).removeAttr('disabled');
+                if (jQuery('#tdomf_form_preview_hack_cp').length)
+                    jQuery('#tdomf_form_preview_hack_cp').val(tdomf_form_preview_hack.getCode()).removeAttr('disabled');
+        });
+        /* ]]> */
+        </script>
+<?php } } }
+
+
 function tdomf_show_form_hacker() {
+  global $wp_version;
   
   $form_id = false;
   if(isset($_REQUEST['form'])) {
@@ -314,8 +362,16 @@ function tdomf_show_form_hacker() {
            
           <!-- <div id="tdomf_help" class='hidden'> -->
           
+          <?php $code_on = false; if(isset($_REQUEST['code'])) { $code_on = true; } ?>
+          
           <p><?php _e("You can use this page to modify any messages outputed from TDOMF for your form. From here you can change the post published messages, post held in moderation, etc. etc.","tdomf"); ?></p>
             
+          <?php  if(version_compare($wp_version,"2.8-beta2",">=")) { if(!$code_on) { ?>
+              <p><a href="admin.php?page=tdomf_show_form_hacker&text&code&form=<?php echo $form_id; ?>"><?php _e("Enable Code Syntax Highlighting...",'tdomf'); ?></a></p>
+          <?php } else { ?>
+              <p><a href="admin.php?page=tdomf_show_form_hacker&text&form=<?php echo $form_id; ?>"><?php _e("Disable Code Syntax Highlighting...",'tdomf'); ?></a></p>
+          <?php } } ?>
+          
           <?php $form_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id); ?> 
           
           <p><?php _e("PHP code can be included in the hacked messages. Also TDOMF will automatically expand these macro strings:","tdomf"); ?>
@@ -342,7 +398,7 @@ function tdomf_show_form_hacker() {
           
           <!-- </div> -->
           
-          <form method="post">
+          <form method="post" name="formhackermsgs" id="formhackermsgs">
           <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-form-hacker'); } ?>
           
           <p class="submit">
@@ -352,56 +408,56 @@ function tdomf_show_form_hacker() {
           
           <?php if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id) && !tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)){ ?>
               <h3><?php if($form_edit) { _e('Contribution Approved','tdomf'); } else { _e('Submission Published','tdomf'); } ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_publish" id="tdomf_msg_sub_publish" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_publish" id="tdomf_msg_sub_publish" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
                     
           <?php if(intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id)) > 0 && !tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)) { ?>
               <h3><?php _e('Submission Queued','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_future" id="tdomf_msg_sub_future" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_future" id="tdomf_msg_sub_future" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_FUTURE,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
           <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
               <h3><?php if($form_edit) { _e('Contribution is Spam','tdomf'); } else { _e('Submission is Spam','tdomf'); } ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_spam" id="tdomf_msg_sub_spam" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_spam" id="tdomf_msg_sub_spam" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_SPAM,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
           <?php if(tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)){ ?>
               <h3><?php if($form_edit) { _e('Contribution awaiting Moderation','tdomf'); } else { _e('Submission awaiting Moderation','tdomf'); } ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_mod" id="tdomf_msg_sub_mod" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_MOD,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_mod" id="tdomf_msg_sub_mod" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_MOD,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
           <h3><?php if($form_edit) { _e('Contribution contains Errors','tdomf'); } else { _e('Submission contains Errors','tdomf'); } ?></h3>
-          <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_error" id="tdomf_msg_sub_error" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_ERROR,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+          <textarea title="true" rows="5" cols="70" name="tdomf_msg_sub_error" id="tdomf_msg_sub_error" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SUB_ERROR,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
           <br/><br/>
           
           <h3><?php _e('Banned User','tdomf'); ?></h3>
-          <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_banned_user" id="tdomf_msg_perm_banned_user" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_BANNED_USER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+          <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_banned_user" id="tdomf_msg_perm_banned_user" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_BANNED_USER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
           <br/><br/>
 
           <h3><?php _e('Banned IP','tdomf'); ?></h3>          
-          <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_banned_ip" id="tdomf_msg_perm_banned_ip" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+          <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_banned_ip" id="tdomf_msg_perm_banned_ip" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
           <br/><br/>
           
           <?php $throttle_rules = tdomf_get_option_form(TDOMF_OPTION_THROTTLE_RULES,$form_id); 
           if(is_array($throttle_rules) && !empty($throttle_rules)) { ?>
               <h3><?php _e('Throttled Submission','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_throttle" id="tdomf_msg_perm_throttle" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_throttle" id="tdomf_msg_perm_throttle" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_THROTTLE,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
           <?php if(!tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id)) { ?>
               <h3><?php _e('Denied User','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_invalid_user" id="tdomf_msg_perm_invalid_user" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_INVALID_USER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_invalid_user" id="tdomf_msg_perm_invalid_user" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_INVALID_USER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
           
           <?php if(!tdomf_get_option_form(TDOMF_OPTION_ALLOW_EVERYONE,$form_id)) { ?>
               <h3><?php _e('Banned Unregistered User','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_invalid_nouser" id="tdomf_msg_perm_invalid_nouser" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_perm_invalid_nouser" id="tdomf_msg_perm_invalid_nouser" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_PERM_INVALID_NOUSER,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
           <?php } ?>
 
@@ -410,33 +466,33 @@ function tdomf_show_form_hacker() {
               <?php if(tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id)) { ?>
               
                  <h3><?php _e('\'Edit Post\' Link Text','tdomf'); ?></h3>
-                 <textarea title="true" rows="5" cols="70" name="tdomf_msg_edit_post_link" id="tdomf_msg_edit_post_link" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+                 <textarea title="true" rows="5" cols="70" name="tdomf_msg_edit_post_link" id="tdomf_msg_edit_post_link" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
                  <br/><br/>
              
               <?php } ?>
               
               <h3><?php _e('Invalid Post for Form','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_post" id="tdomf_msg_invalid_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_post" id="tdomf_msg_invalid_post" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
               
               <h3><?php _e('Invalid Form for Post','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_form" id="tdomf_msg_invalid_form" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_FORM,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_form" id="tdomf_msg_invalid_form" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_FORM,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
               
               <h3><?php _e('Locked Post','tdomf'); ?></h3>
-              <textarea title="true" rows="5" cols="70" name="tdomf_msg_locked_post" id="tdomf_msg_locked_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_LOCKED_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="5" cols="70" name="tdomf_msg_locked_post" id="tdomf_msg_locked_post" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_LOCKED_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
               <br/><br/>
               
               <?php if(get_option(TDOMF_OPTION_SPAM)) { ?>
 
                  <h3><?php _e('Spam Edit on Post','tdomf'); ?></h3>
-                 <textarea title="true" rows="5" cols="70" name="tdomf_msg_spam_edit_on_post" id="tdomf_msg_spam_edit_on_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+                 <textarea title="true" rows="5" cols="70" name="tdomf_msg_spam_edit_on_post" id="tdomf_msg_spam_edit_on_post" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_SPAM_EDIT_ON_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
                  <br/><br/>
                   
               <?php } ?>
               
              <h3><?php _e('Unapproved Edit on Post','tdomf'); ?></h3>
-             <textarea title="true" rows="5" cols="70" name="tdomf_msg_unapproved_edit_on_post" id="tdomf_msg_unapproved_edit_on_post" ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+             <textarea title="true" rows="5" cols="70" name="tdomf_msg_unapproved_edit_on_post" id="tdomf_msg_unapproved_edit_on_post" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
              <br/><br/>
 
           <?php } ?>
@@ -476,7 +532,7 @@ function tdomf_show_form_hacker() {
           
           <!-- </div> -->
  
-          <form method="post">
+          <form method="post" name="formhacker" id="formhacker">
           <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-form-hacker'); } ?>
       
           <p class="submit">
@@ -507,7 +563,7 @@ function tdomf_show_form_hacker() {
               </ul>
             <?php }?>
                   
-            <textarea title="true" rows="30" cols="100" name="tdomf_form_hack" id="tdomf_form_hack" ><?php echo htmlentities($form,ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+            <textarea title="true" rows="30" cols="100" name="tdomf_form_hack" id="tdomf_form_hack" class="codepress .php" ><?php echo htmlentities($form,ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
             
           <br/><br/>
           
@@ -532,7 +588,7 @@ function tdomf_show_form_hacker() {
               </ul>
             <?php }?>                    
                     
-              <textarea title="true" rows="15" cols="100" name="tdomf_form_preview_hack" id="tdomf_form_preview_hack" ><?php echo htmlentities($preview,ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
+              <textarea title="true" rows="15" cols="100" name="tdomf_form_preview_hack" id="tdomf_form_preview_hack" class="codepress .php"><?php echo htmlentities($preview,ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
                 
               <br/><br/>
                 

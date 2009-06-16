@@ -8,26 +8,31 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Return count of submitted posts from specific user
 //
 function tdomf_get_users_submitted_posts_count($user_id = 0) {
-  global $wpdb;
-	$query = "SELECT count(ID) ";
-	$query .= "FROM $wpdb->posts ";
-	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
-   $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
-   $query .= "AND meta_value = '$user_id' ";
-	return intval($wpdb->get_var( $query ));
+  /*global $wpdb;
+  $query = "SELECT count(ID) ";
+  $query .= "FROM $wpdb->posts ";
+  $query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+  $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
+  $query .= "AND meta_value = '$user_id' ";
+  return intval($wpdb->get_var( $query ));*/
+  return tdomf_get_posts(array('count' => true,
+                               'user_id' => $user_id));
 }
 
 // Return count of published posts from specific user
 //
 function tdomf_get_users_published_posts_count($user_id = 0) {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT count(ID) ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
     $query .= "WHERE meta_key = '".TDOMF_KEY_USER_ID."' ";
     $query .= "AND meta_value = '$user_id' ";
      $query .= "AND post_status = 'publish' ";
-	return intval($wpdb->get_var( $query ));
+	return intval($wpdb->get_var( $query ));*/
+    return tdomf_get_posts(array('count' => true,
+                                 'post_status' => array('publish','future'),
+                                 'user_id' => $user_id));
 }
 
 
@@ -321,7 +326,11 @@ function getNumChecked(form)
 		             } else { _e(get_usermeta($u->ID,TDOMF_KEY_STATUS),"tdomf"); } ?>
 		       </td>
 
-             <td><?php echo tdomf_get_users_published_posts_count($u->ID); ?>/<?php echo tdomf_get_users_submitted_posts_count($u->ID); ?></td>
+             <td>
+             <a href="<?php tdomf_get_mod_posts_url(array('echo' => true, 'user_id' => $u->ID)); ?>">
+             <?php echo tdomf_get_users_published_posts_count($u->ID); ?>/<?php echo tdomf_get_users_submitted_posts_count($u->ID); ?>
+             </a>
+             </td>
 
              <td><?php echo tdomf_get_edits(array('user_id' => $u->ID, 'count' => true, 'state' => 'approved')); ?>/<?php echo tdomf_get_edits(array('user_id' => $u->ID, 'count' => true)); ?></td>
                  
@@ -496,7 +505,12 @@ function getNumChecked(form)
          <?php } ?>
 
                <td><input type="checkbox" name="moderateips[]" value="<?php echo $ip; ?>" /></td>
-               <th scope="row"><?php echo $ip; ?></th>
+               
+               <th scope="row">
+               <a href="<?php tdomf_get_mod_posts_url(array('echo' => true, 'ip' => $ip)); ?>">
+               <?php echo $ip; ?>
+               </a>
+               </th>
                
 		       <td><?php if(in_array($ip,$banned_ips)) { _e("Banned","tdomf"); } else { _e("Normal","tdomf"); } ?></td>
 

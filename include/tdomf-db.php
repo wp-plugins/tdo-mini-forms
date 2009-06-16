@@ -584,7 +584,8 @@ function tdomf_get_edits($args) {
                       'user_id' => false,
                       'and_cond' => true,
                       'time_diff' => false,
-                      'older_than' => false);
+                      'older_than' => false,
+                      'form_id' => false);
     $args = wp_parse_args($args, $defaults);
     extract($args);
     
@@ -652,6 +653,17 @@ function tdomf_get_edits($args) {
             }
         }
         $where_conditions .= "user_id = '".$wpdb->escape($user_id)."' ";
+    }
+    
+    if($form_id != false && !empty($form_id)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "form_id = '".intval($form_id)."' ";
     }
     
     if($time_diff != false && !empty($time_diff)) {
@@ -1042,6 +1054,122 @@ function tdomf_is_submission_in_use() {
       }
   }
   return $retValue;
+}
+
+function tdomf_get_posts($args) {
+    global $wpdb;
+    $defaults = array('count' => false,
+                      'limit' => false,
+                      'offset' => false,
+                      'count' => false,
+                      'form_id' => false,
+                      'user_id' => false,
+                      'post_status' => array(),
+                      'spam' => false, 
+                      'query' => false,
+                      'nospam' => false,
+                      'ip' => false);
+    $args = wp_parse_args($args, $defaults);
+    extract($args);
+    
+    // everything gets a little complex if we want to ignore/filter "spam" posts 
+    // because they must have the tdomf flag and the spam flag in their Custom Fields.
+    
+    $special_conditions = false;
+    if($spam || $nospam || $form_id || $user_id || $ip) {
+        $special_conditions = true;
+    }
+    
+    if($count) {
+        if($special_conditions) {
+            $sql_query = "SELECT count($wpdb->posts.ID) ";
+        } else {
+            $sql_query = 'SELECT count(ID) ';
+        }
+    } else {
+        if($special_conditions) {
+            $sql_query = "SELECT $wpdb->posts.ID, $wpdb->posts.post_title, $wpdb->postmeta.meta_value, $wpdb->posts.post_status ";
+        } else {
+            $sql_query = 'SELECT ID, post_title, post_status ';
+        }
+    }           
+
+    $sql_query .= "FROM $wpdb->posts ";
+    
+    $sql_query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
+    $sql_query_where = "WHERE ";
+    if($special_conditions) {
+        $andit = false;
+        if($nospam || $spam) {
+            $sql_query .= "LEFT JOIN $wpdb->postmeta tdopm ON $wpdb->posts.id =
+                           tdopm.post_id AND tdopm.meta_key ='".TDOMF_KEY_SPAM."' ";
+            if($nospam) {
+               $sql_query_where .= "tdopm.post_id IS NULL ";
+            } else {
+               $sql_query_where .= "tdopm.post_id IS NOT NULL ";
+            }
+            $andit = true;
+        }
+        if($form_id) {
+            $sql_query .= "LEFT JOIN $wpdb->postmeta tdopmf ON $wpdb->posts.id =
+                           tdopmf.post_id AND tdopmf.meta_key ='".TDOMF_KEY_FORM_ID."' ";
+            if($andit) { $sql_query_where .= "AND "; }
+            $sql_query_where .= "tdopmf.post_id IS NOT NULL AND tdopmf.meta_value ='" . intval($form_id)."' ";
+            $andit = true;
+        }     
+        if($user_id) {
+            $sql_query .= "LEFT JOIN $wpdb->postmeta tdopmu ON $wpdb->posts.id =
+                           tdopmu.post_id AND tdopmu.meta_key ='".TDOMF_KEY_USER_ID."' ";
+            if($andit) { $sql_query_where .= "AND "; }
+            $sql_query_where .= "tdopmu.post_id IS NOT NULL AND tdopmu.meta_value ='" . intval($user_id)."' ";
+            $andit = true;
+        }
+        if($ip) {
+            $sql_query .= "LEFT JOIN $wpdb->postmeta tdopmp ON $wpdb->posts.id =
+                           tdopmp.post_id AND tdopmp.meta_key ='".TDOMF_KEY_IP."' ";
+            if($andit) { $sql_query_where .= "AND "; }
+            $sql_query_where .= "tdopmp.post_id IS NOT NULL AND tdopmp.meta_value ='$ip' ";
+            $andit = true;
+        }
+        $sql_query_where .= "AND $wpdb->postmeta.meta_key='".TDOMF_KEY_FLAG."' ";
+    } else {
+        $sql_query_where .= "meta_key = '".TDOMF_KEY_FLAG."' ";
+    }
+    
+    if(is_array($post_status) && !empty($post_status)) {
+        $sql_query_where .= "AND ( ";
+        $sql_query_status = array();
+        foreach($post_status as $status) {
+            $sql_query_status[] = " post_status = '$status' ";
+        }
+        $sql_query_where .= implode("OR", $sql_query_status);
+        $sql_query_where .= ") ";
+    }
+    
+    // now join the where conditions to the query
+    
+    $sql_query .= $sql_query_where;
+    
+    if($nospam) {
+        $sql_query .= "ORDER BY $wpdb->posts.ID DESC ";
+    } else {
+        $sql_query .= "ORDER BY ID DESC ";
+    }
+    
+    if($limit && $limit > 0) {
+        $sql_query .= 'LIMIT ' . intval($limit) . ' ';
+    }
+    if($offset && $offset > 0) {
+        $sql_query .= 'OFFSET ' . intval($offset) . ' ';
+    }
+
+    /*echo $sql_query."<br/>";*/  
+    if($query) {
+        return $sql_query;
+    } else if($count) {
+        return intval($wpdb->get_var($sql_query));
+    }
+    return $wpdb->get_results($sql_query);
 }
 
 ?>

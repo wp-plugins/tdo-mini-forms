@@ -30,6 +30,11 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
+// v0.13.3
+// - Added filtering to the moderation screen. Can filter by user or ip and/or 
+//    by form
+// - Enabled the syntax code highlighting on Form Hacker (and messages)
+//
 // v0.13.2
 // - Fixed extra slashes in AJAX preview of submit forms
 // - Scheduled post count incorrect
@@ -54,7 +59,7 @@ Work Queue:
 
    - delete spam straight away (TDOMF_OPTION_SPAM_AUTO_DELETE_NOW already setup, just not implemented)
    - parent category - http://thedeadone.net/forum/?p=3205#comment-4524
-   - option to not hide links, display less information and perhaps some sort of funky JS to order columns - http://thedeadone.net/forum/?p=3526#comment-4514
+   - display less information and perhaps some sort of funky JS to order columns - http://thedeadone.net/forum/?p=3526#comment-4514
    - category names instead of ids - http://thedeadone.net/forum/?p=3171#topic-3171
    - widget class have functions to allow message customisation
    - "delete all spam"
