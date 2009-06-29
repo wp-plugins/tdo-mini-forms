@@ -52,6 +52,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->setDisplayName(__('Permalink','tdomf'));
           $this->setOptionKey('tdomf_permalink_widget');
           $this->setModes(array('new'));
+          $this->setCustomFields(array(TDOMF_KEY_CUSTOM_PERMALINK => __('Permalink','tdomf')));
           $this->start();
       }
 

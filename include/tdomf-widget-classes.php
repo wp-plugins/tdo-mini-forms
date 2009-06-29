@@ -599,6 +599,54 @@ class TDOMF_Widget {
     }   
     
     /** 
+     * List of fields that are modified by this widget 
+     * 
+     * @var mixed
+     * @access public 
+     * @see setFields() 
+     */    
+    var $fields = false;
+    
+    /** 
+     * Set list of fields that are modified by this widget
+     * 
+     * @return Boolean 
+     * @access public 
+     */     
+    function setFields($fields = false) {
+        $retVal = false;
+        if(is_array($fields) || $fields == false) {
+            $this->fields = $fields;
+            $retVal = true;
+        }
+        return $retVal;
+    }
+    
+    /** 
+     * List of custom fields that are modified by this widget 
+     * 
+     * @var mixed
+     * @access public 
+     * @see setFields() 
+     */    
+    var $customFields = false;
+    
+    /** 
+     * Set list of custom fields that are modified by this widget
+     * 
+     * @return Boolean 
+     * @access public 
+     */     
+    function setCustomFields($customFields = false) {
+        $retVal = false;
+        if(is_array($customFields) || $customFields == false) {
+            $this->customFields = $customFields;
+            $retVal = true;
+        }
+        return $retVal;
+    }
+    
+    /** 
      * Flags if the widget has been started yet
      * 
      * @return Boolean 
@@ -704,6 +752,7 @@ class TDOMF_Widget {
         extract($args);
         $postfix = $this->getPostfixFromParams($params);
         $options = $this->getOptions($tdomf_form_id,$postfix);
+        $this->updateFields($args);
         return $this->post($args,$options,$postfix);
     }
     
@@ -1060,6 +1109,67 @@ class TDOMF_Widget {
             }
         }
         return $postfix;
+    }
+    
+    /** 
+     * Updates fields and custom fields used by this widget
+     * 
+     * @return Boolean
+     * @access private 
+     */  
+    function updateFields($args) {
+        extract($args);
+        if(is_array($this->fields) || is_array($this->customFields)) {
+            
+            if(TDOMF_Widget::isEditForm($mode)) {
+                $edit = tdomf_get_edit($edit_id);
+                
+                if(is_array($this->fields)) {
+                    if(!isset($edit->data[TDOMF_KEY_FIELDS]) || !is_array($edit->data[TDOMF_KEY_FIELDS])) {
+                        $edit->data[TDOMF_KEY_FIELDS] = $this->fields;
+                    } else {
+                        $currentFields = array_merge($edit->data[TDOMF_KEY_FIELDS],$this->fields);
+                        $edit->data[TDOMF_KEY_FIELDS] = $currentFields;
+                    }
+                }
+                if(is_array($this->customFields)) {
+                    if(!isset($edit->data[TDOMF_KEY_CUSTOM_FIELDS]) || !is_array($edit->data[TDOMF_KEY_CUSTOM_FIELDS])) {
+                        $edit->data[TDOMF_KEY_CUSTOM_FIELDS] = $this->customFields;
+                    } else {
+                        $currentFields = array_merge($edit->data[TDOMF_KEY_CUSTOM_FIELDS],$this->customFields);
+                        $edit->data[TDOMF_KEY_CUSTOM_FIELDS] = $currentFields;
+                    }
+                }
+                // do update once
+                tdomf_set_data_edit($edit->data,$edit_id);
+                        
+                // update the post id and not revision's list
+                $id = $edit->post_id;
+            } else {
+                // submit form, so just update the post
+                $id = $post_ID;
+            }
+             
+            if(is_array($this->fields)) {
+                    $currentFields = get_post_meta($id, TDOMF_KEY_FIELDS, true);
+                    if(!is_array($currentFields)) {
+                        add_post_meta($id, TDOMF_KEY_FIELDS, $this->fields, true);
+                    } else {
+                        $currentFields = array_merge($currentFields,$this->fields);
+                        update_post_meta($id, TDOMF_KEY_FIELDS, $currentFields );
+                    }
+            }
+            if(is_array($this->customFields)) {
+                $currentFields = get_post_meta($id, TDOMF_KEY_CUSTOM_FIELDS, true);
+                if(!is_array($currentFields)) {
+                    add_post_meta($id, TDOMF_KEY_CUSTOM_FIELDS, $this->customFields, true);
+                } else {
+                    $currentFields = array_merge($currentFields,$this->customFields);
+                    update_post_meta($id, TDOMF_KEY_CUSTOM_FIELDS, $currentFields );
+                }
+            }
+        }
+        return true;
     }
 }
 

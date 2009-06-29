@@ -31,7 +31,7 @@ function tdomf_get_the_form($form_id = 1,$post_id = false) {
 // Display the Form
 //
 function tdomf_the_form($form_id = 1,$post_id = false) {
-  echo tdomf_get_the_form($form_id);
+  echo tdomf_get_the_form($form_id,$post_id);
 }
 
 //////////////////////////////////////

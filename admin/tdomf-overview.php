@@ -291,8 +291,9 @@ function tdomf_dashboard_status() {
 
     $num = number_format_i18n($approved_edits_count);
     $text = __ngettext( 'Approved Contribution', 'Approved Contributions', $approved_edits_count );
-    echo '<td class="b b_approved">' . $num . '</td>';
-    echo '<td class="first t posts">' . $text . '</td>';
+    $url = tdomf_get_mod_posts_url(array('show' => 'approved_edits'));
+    echo '<td class="b b_approved"><a href="' . $url .'">' . $num . '</a></td>';
+    echo '<td class="first t posts"><a class="approved" href="' . $url .'">' . $text . '</a></td>';
     
     echo '</tr><tr>';
    

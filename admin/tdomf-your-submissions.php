@@ -8,7 +8,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Grab a list of published submitted posts for user
 //
 function tdomf_get_user_published_posts($user_id = 0, $offset = 0, $limit = 0) {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT ID, post_title, meta_value, post_status, post_modified_gmt, post_modified, post_date, post_date_gmt ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -22,11 +22,15 @@ function tdomf_get_user_published_posts($user_id = 0, $offset = 0, $limit = 0) {
       if($offset > 0) {
          $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('limit' => $limit,
+                                 'offset' => $offset,
+                                 'user_id' => $user_id,
+                                 'post_status' => array('publish')));
 }
 
 function tdomf_get_user_scheduled_posts($user_id = 0, $offset = 0, $limit = 0) {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT ID, post_title, meta_value, post_status, post_modified_gmt, post_modified, post_date, post_date_gmt ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -40,13 +44,17 @@ function tdomf_get_user_scheduled_posts($user_id = 0, $offset = 0, $limit = 0) {
       if($offset > 0) {
          $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('limit' => $limit,
+                                 'offset' => $offset,
+                                 'post_status' => array('future'),
+                                 'user_id' => $user_id ));
 }
 
 // Grab a list of unmoderated submitted posts for user
 //
 function tdomf_get_user_draft_posts($user_id = 0, $offset = 0, $limit = 0) {
-  global $wpdb;
+  /*global $wpdb;
 	$query = "SELECT ID, post_title, meta_value, post_status  ";
 	$query .= "FROM $wpdb->posts ";
 	$query .= "LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
@@ -60,7 +68,11 @@ function tdomf_get_user_draft_posts($user_id = 0, $offset = 0, $limit = 0) {
       if($offset > 0) {
          $query .= "OFFSET $offset ";
    }
-	return $wpdb->get_results( $query );
+	return $wpdb->get_results( $query );*/
+    return tdomf_get_posts(array('limit' => $limit,
+                                 'offset' => $offset,
+                                 'user_id' => $user_id,
+                                 'post_status' => array('draft')));
 }
 
 function tdomf_get_post_time( $d = 'U', $gmt = false, $post ) { // returns timestamp

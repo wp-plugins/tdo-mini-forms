@@ -84,7 +84,8 @@ function tdomf_show_edit_post_revision_panel() {
                 
                 // actual revision
                 if($edit->revision_id != 0) {
-                    echo '<a href="'.get_bloginfo('wpurl').'/wp-admin/revision.php?revision='.$edit->revision_id.'">';
+                    #echo '<a href="'.get_bloginfo('wpurl').'/wp-admin/revision.php?revision='.$edit->revision_id.'">';
+                    echo '<a href="admin.php?page='.TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR.'tdomf-revision.php&edit='.$edit->edit_id.'">';
                 }
                 echo mysql2date(__('d F, Y @ H:i'), $edit->date_gmt);
                 if($edit->revision_id != 0) {

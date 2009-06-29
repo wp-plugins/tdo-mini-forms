@@ -585,7 +585,8 @@ function tdomf_get_edits($args) {
                       'and_cond' => true,
                       'time_diff' => false,
                       'older_than' => false,
-                      'form_id' => false);
+                      'form_id' => false,
+                      'revision_id' => false);
     $args = wp_parse_args($args, $defaults);
     extract($args);
     
@@ -666,6 +667,17 @@ function tdomf_get_edits($args) {
         $where_conditions .= "form_id = '".intval($form_id)."' ";
     }
     
+    if($revision_id != false && !empty($revision_id)) {
+        if(!empty($where_conditions)) {
+            if($and_cond) {
+                $where_conditions .= ' AND ';
+            } else {
+                $where_conditions .= ' OR ';
+            }
+        }
+        $where_conditions .= "revision_id = '".intval($revision_id)."' ";
+    }
+    
     if($time_diff != false && !empty($time_diff)) {
          if(!empty($where_conditions)) {
             if($and_cond) {
@@ -740,7 +752,8 @@ function tdomf_get_edit($edit_id) {
                 WHERE edit_id = '" .$wpdb->escape($edit_id)."'";
       $edit = $wpdb->get_row( $query );
       if($edit != NULL) {
-         $edit_cache = array( "post_id" => $edit->post_id,
+         $edit_cache = array( "edit_id" => $edit->edit_id,
+                              "post_id" => $edit->post_id,
                               "form_id" => $edit->form_id,
                               "date" => $edit->date,
                               "date_gmt" => $edit->date_gmt,

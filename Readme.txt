@@ -403,10 +403,9 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Investigate: Bug with post times
 
 
-== Version History ==
+== Changelog ==
 
-= v0.13.2: 12th June 2009 =
-
+= 0.13.2 =
 * Fixed extra slashes in AJAX preview of submit forms
 * Scheduled post count incorrect
 * Shortcut links on moderation screen incorrect
@@ -420,14 +419,12 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Per Form Spam check exclusion rules added/tested
 * Wordpress 2.8 compatibility
 
-= v0.13.1: 26th May 2009 =
-
+= 0.13.1 =
 * Fixed "Notify" and "Auto-Respond" widgets as theses were preventing not logged in users from accessing forms
 * Removed "public static" from class definitions as they are not part of php4.
 * Hacker replacements buggered - affected Upload Files widget
 
-= v0.13: 22nd May 2009 =
-
+= 0.13 =
 * Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
 * Fixed '$' not working in preview
 * Fixed characters getting eaten up in preview
@@ -435,16 +432,14 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Added a message to the Form Creator to indicate if a the Form Hacker has been enabled and will prevent changes to form.
 * Forms to edit posts and pages
 
-= v0.12.7: 13th Feb 2009 = 
-
+= 0.12.7 = 
 * Form Hacker did not use FORMID so when you copied a form, it would break
 * Updated widget classes (may "break" existing forms)
 * Added a "link" to the Auto Respond Email widget that allows users to set a custom field on a post. Can be used to verify if the user email is valid.
 * Fixed critical Windows host bug that would attempt to delete root drive. The add_post_meta Wordpress function would strip back slashes out of input and basically feck up the Windows path. Now the path name is "protected" before being passed to add_post_meta.
-*Fixed post queuing. This was broken in two ways. The date/time calculation was wrong and now has been updated based on generousily donated code from [Adam Selvidge]( http://www.myconfinedspace.com/ ). Second a change in Wordpress 2.7 meant that setting the future status was being ignored when the post was being published.
+* Fixed post queuing. This was broken in two ways. The date/time calculation was wrong and now has been updated based on generousily donated code from [Adam Selvidge]( http://www.myconfinedspace.com/ ). Second a change in Wordpress 2.7 meant that setting the future status was being ignored when the post was being published.
 
-= v0.12.6: 17th Decemeber 2008 =
-
+= 0.12.6 =
 * Hopefully, finally fixed additionally slashes being added to the content.
 * Bug with 2.5 and breaking wp-comments.php file
 * Bug with file uploads and accidentially displaying an error when no error exists and therefore causing the form to break.
@@ -461,8 +456,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * New GeoMasup integration widget
 * Initial Widget Class 
 
-= v0.12.5: 20th October 2008 =
-
+= 0.12.5 =
 * A "link" to the thumbnail is stored on the post using TDOMF_KEY_DOWNLOAD_THUMBURI key.
 * Excerpt Widget
 * Comments Management Widget
@@ -475,8 +469,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Instead of notifying specific roles that a submission is requiring moderation, you can now specify an email list
 * Tags Widget now has options for default tags, required and to disable user adding tags
 
-= v0.12.4: 26th September 2008 =
-
+= 0.12.4 =
 * Solved "$post_ID == 0" problem. See ( http://thedeadone.net/forum/?p=325#comment-1446 )
 * Added some error checking around cookie session info
 * Stopped multiple revisions from being created on post submit
@@ -498,7 +491,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Queue time calculation correction code imported. Code donated by Adam Selvidge
 * Fixed a small bug in the widgets page, where if the page was localised fully, drag and drop would not work.
 
-=  v0.12.3: 4th July 2008 = 
+=  0.12.3 = 
 * Bug in tdomf-msgs.php that would occur for unregistered users only
 * Auto Respond Email widget
 * Small mistake in whoami widget hack, "email" title used for webpage field
@@ -510,17 +503,17 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Moderation emails to admins can now be turned on if moderation is turned off
 * Custom Field summary was not appearing in admin emails
 
-= v0.12.2: 19th June 2008 =
+= 0.12.2 =
 * Broken code got into v0.12.1 in the rush to get the patch for the security risk out.
 
-= v0.12.1: 19th June 2008 =
+= 0.12.1 =
 * Hacked messages could only be saved for Form ID 1.
 * Gravatars in Top Submitters
 * Fixed Category Widget radio button for Checkboxes doesn't work in Firefox
 * get_memory_usage not supported on many user-installed versions of PHP
 * Security risk with Custom Fields fixed.
 
-= v0.12: 13th June 2008 =
+= 0.12 =
 * AJAX (with fallback support)
 * Small bug in that validation widgets were not being called properly if they use the action "tdomf_validate_form_start" (such as any multiple instant widgets like 1 Question Capatcha and the Image Capatcha. Same also for preview.
 * Redirect to published post option
@@ -533,8 +526,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Upgrade notice
 * New Template Tags: tdomf_get_the_submitter_email and tdomf_the_submitter_email
 
-= v0.11.1: 23rd May 2008 =
-
+= 0.11.1 =
 * Using a dollar sign plus a value in a input field would cause the first two digits to disappear - now fixed.
 * Fixed a mistake in the post scheduling, GMT offset would kick in if time greater than an hour
 * Added times and list of scheduled posts to Your Submissions

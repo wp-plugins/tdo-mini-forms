@@ -5,14 +5,12 @@ function tdomf_form_hacker_diff($form_id) {
   $mode = $_REQUEST['mode'];
   $form1_type = $_REQUEST['form1'];
   $form2_type = $_REQUEST['form2'];
-  $render = 'default';
+  $render = 'wp';
   if(isset($_REQUEST['render'])) {
       $render = $_REQUEST['render'];
   }
   $type = $_REQUEST['type'];
-  
-  // @TODO add preview
-  
+    
   $form1_name = "";
   $form2_name = "";
 
@@ -61,27 +59,10 @@ function tdomf_form_hacker_diff($form_id) {
         $form2 = trim(tdomf_get_option_form(TDOMF_OPTION_FORM_HACK,$form_id));
       }
   }
-  
-  echo "<h3>".sprintf(__('%s versus %s','tdomf'),$form1_name,$form2_name)."</h3>";
-
-  if($form1 == $form2) {
-      echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
-      return;
-  }
-  
-  
-  set_include_path(get_include_path() . PATH_SEPARATOR . ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'include' );
-  include_once "Text/Diff.php";
-    
-  $form1 = explode("\n",$form1);
-  $form2 = explode("\n",$form2);
-  
-  $diff = &new Text_Diff('auto',array($form1, $form2));
-  
-  if($diff->isEmpty()) {
-      echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
-      return;
-  }
+ 
+  ?> 
+  <h2><?php printf(__('Form Diff: %s versus %s', 'tdomf'),$form1_name, $form2_name); ?></h2>
+  <?php 
   
   echo "<form>";
   
@@ -93,8 +74,14 @@ function tdomf_form_hacker_diff($form_id) {
   echo "<input type='hidden' id='form1' name='form1' value='$form1_type' />";
   echo "<input type='hidden' id='type' name='type' value='$type' />";  
   
-  echo '<label for="render">'.__('Render Type','tdomf').' </label>';
+   echo '<label for="render">'.__('Render Type','tdomf').' </label>';
+   
   echo '<select id="render" name="render">';
+  
+  echo '<option value="wp" ';
+  if($render == 'wp') { echo 'selected'; }
+  echo ' >'.__('Wordpress','tdomf')."\n<br/>";
+    
   echo '<option value="default" ';
   if($render == 'default') { echo 'selected'; }
   echo ' >'.__('Default','tdomf')."\n<br/>";
@@ -111,24 +98,50 @@ function tdomf_form_hacker_diff($form_id) {
   if($render == 'context') { echo 'selected'; }
   echo ' >'.__('Context','tdomf')."\n<br/>";
   echo '</select>';
-  echo '<input type="submit" value="'.__('Go','tdomf').'" /></form>';
   
-  if($render == 'unified') {
-     include_once "Text/Diff/Renderer/unified.php";
-     $renderer = &new Text_Diff_Renderer_unified();
-     echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
-  } else if($render == 'inline') {
-     include_once "Text/Diff/Renderer/inline.php";
-     $renderer = &new Text_Diff_Renderer_inline();
-     echo "<pre>".$renderer->render($diff)."</pre>";
-  } else if($render == 'context') {
-     include_once "Text/Diff/Renderer/context.php";
-     $renderer = &new Text_Diff_Renderer_context();
-     echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+  echo '<input type="submit" value="'.__('Go','tdomf').'" /></form><br/><br/>';
+  
+  if($render == 'wp') {
+      $args = array('title_left' => $form1_name,
+                    'title_right' => $form2_name);
+      if ( !$content = wp_text_diff( $form1, $form2, $args ) ) {
+          echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
+          return;
+      } else { ?>
+          <p><i><?php _e('Form code may contain lines that cannot be wrapped in a browser, so you may need to scroll a lot left to see the other form','tdomf'); ?></i></p>
+          <?php echo $content;
+      }
   } else {
-     include_once "Text/Diff/Renderer.php";
-     $renderer = &new Text_Diff_Renderer();
-     echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+      set_include_path(get_include_path() . PATH_SEPARATOR . ABSPATH.PLUGINDIR.DIRECTORY_SEPARATOR.TDOMF_FOLDER.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'include' );
+      include_once "Text/Diff.php";
+      
+      $form1 = explode("\n",$form1);
+      $form2 = explode("\n",$form2);
+      
+      $diff = &new Text_Diff('auto',array($form1, $form2));
+  
+      if($diff->isEmpty()) {
+          echo "<p>".sprintf(__('%s is the same as %s!','tdomf'),$form1_name,$form2_name)."</p>";
+          return;
+      }
+      
+      if($render == 'unified') {
+          include_once "Text/Diff/Renderer/unified.php";
+          $renderer = &new Text_Diff_Renderer_unified();
+          echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+      } else if($render == 'inline') {
+          include_once "Text/Diff/Renderer/inline.php";
+          $renderer = &new Text_Diff_Renderer_inline();
+          echo "<pre>".$renderer->render($diff)."</pre>";
+      } else if($render == 'context') {
+          include_once "Text/Diff/Renderer/context.php";
+          $renderer = &new Text_Diff_Renderer_context();
+          echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+      } else {
+          include_once "Text/Diff/Renderer.php";
+          $renderer = &new Text_Diff_Renderer();
+          echo "<pre>".htmlentities($renderer->render($diff),ENT_NOQUOTES,get_bloginfo('charset'))."</pre>";
+      }
   }
 }
 
@@ -317,9 +330,8 @@ function tdomf_show_form_hacker() {
     </div>
   <?php } else if(isset($_REQUEST['diff'])) { ?>
     <div class="wrap">
-          <h2><?php _e('Form Diff', 'tdomf') ?></h2>
           <?php tdomf_form_hacker_diff($form_id); ?>
-    </div>
+    </div> <!-- wrap -->
   <?php } else {
 
     $mode = tdomf_generate_default_form_mode($form_id);

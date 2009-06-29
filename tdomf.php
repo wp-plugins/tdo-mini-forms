@@ -34,20 +34,10 @@ Author URI: http://thedeadone.net
 // - Added filtering to the moderation screen. Can filter by user or ip and/or 
 //    by form
 // - Enabled the syntax code highlighting on Form Hacker (and messages)
-//
-// v0.13.2
-// - Fixed extra slashes in AJAX preview of submit forms
-// - Scheduled post count incorrect
-// - Shortcut links on moderation screen incorrect
-// - "Publish Now" when post was queued, now works
-// - Edit own posts was not actually working!
-// - Queue on all posts, not just tdomf
-// - Tabbed General Options
-// - New option to always show "moderation" links (no auto-hiding)
-// - Spam checked exclusion rules added/tested
-// - Some debug options added
-// - Per Form Spam check exclusion rules added/tested
-// - Wordpress 2.8 compatibility
+// - Added new built in wordpress diff as a diff render for form diffs
+// - Updated tdomf_the_form (it was dropping $post_id arg when calling
+//    tdomf_get_the_form)
+// - TDOMF Revision page (supports fields and custom fields)
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -451,10 +441,9 @@ define('TDOMF_MAX_USERS_TO_DISPLAY',60);
 /*
  * @todo
  *
- * TDOMF only Diff screen (for Form Hacker and Edit-Revisions)
  * Option to disable Unapproved Edit Locking (require temp locks?)
  * Template Tags for editing (what is actually required?)
- * Moderation screen: implement filters: form, user, ip, username, email, page/post, un/locked
+ * Moderation screen: implement filters: email, page/post, un/locked
  * Moderation screen: search
  * Moderation screen: bulk buttons at top of list too
  * 'Back' Button for Ajax inline editing
@@ -499,6 +488,8 @@ define('TDOMF_OPTION_NOSPAM_PUBLISH', "tdomf_nospam_publish");
 define('TDOMF_OPTION_SPAM_OVERWRITE', "tdomf_spam_overwrite");
 define('TDOMF_DEBUG_AKISMET_FAKE_SPAM', false); // set to true to get Akismet to flag everything as spam
 define('TDOMF_DEBUG_FAKE_SPAM', false); // set to true to ignore akismet and treat everything as spam
+define('TDOMF_KEY_FIELDS', "_tdomf_fields");
+define('TDOMF_KEY_CUSTOM_FIELDS', "_tdomf_custom_fields");
 
 //////////////////////////////////////////////////
 // loading text domain for language translation
@@ -729,6 +720,12 @@ function tdomf_new_features() {
   // 49 = 0.13.2
   if($last_version < 49) {
       $features .= "<li>".__("<b>More Spam Checking options added. Can now be configured per form!</b>","tdomf")."</li>";
+  }
+  // 50 = 0.13.3
+  if($last_version < 50) {
+      $features .= "<li>".__("<b>Filter by user, ip and form on moderations screen</b>","tdomf")."</li>";
+      $features .= "<li>".__("<b>Enable syntax code highlighting on Form Hacker and messages</b>","tdomf")."</li>";
+      $features .= "<li>".__("<b>Special revision page for comparing revisions created by TDOMF</b>","tdomf")."</li>";
   }
   
   

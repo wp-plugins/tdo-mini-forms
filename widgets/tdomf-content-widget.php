@@ -41,6 +41,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->setDisplayName(__('Content','tdomf'));
           $this->setOptionKey('tdomf_content_widget');
           $this->setModes(array('new','edit'));
+          $this->setFields(array('post_content' => __('Post Content','tdomf'),
+                                 'post_title' => __('Post Title','tdomf')));
           $this->start();
       }
       

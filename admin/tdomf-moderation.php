@@ -258,7 +258,7 @@ function tdomf_get_mod_posts_url($args) {
     if(isset($_REQUEST['mode'])) { $defaults['mode'] = $_REQUEST['mode']; }
     if(isset($_REQUEST['form_id'])) { $defaults['form_id'] = intval($_REQUEST['form_id']); }
     if(isset($_REQUEST['user_id'])) { $defaults['user_id'] = intval($_REQUEST['user_id']); }
-    if(isset($_REQUEST['ip'])) { $defaults['ip'] = $_REQUEST['form_id']; }
+    if(isset($_REQUEST['ip'])) { $defaults['ip'] = $_REQUEST['ip']; }
     if(isset($_REQUEST['limit'])) { $defaults['limit'] = intval($_REQUEST['limit']); }
     
     $args = wp_parse_args($args, $defaults);
@@ -385,7 +385,7 @@ function tdomf_show_mod_posts_menu() {
        $posts = array();
        # a little hacky magic
        foreach($edits as $e) {
-           $posts[] = (OBJECT) array( 'ID' => $e->post_id );
+           $posts[] = (OBJECT) array( 'ID' => $e->post_id, 'edit_id' => $e->edit_id );
        }
        $max_items = $approved_edits_count;
    }
@@ -554,7 +554,12 @@ function tdomf_show_mod_posts_menu() {
     <?php if(!empty($posts)) { foreach($posts as $p) { $count++; ?>
 
         <?php $post = &get_post( $p->ID ); /* seems I need this later */ ?> 
-        <?php $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1)); /* and need this earlier too */ ?>
+        <?php if($show == 'approved_edits') {
+                  // not really the "last" edit but lest pretend
+                  $last_edit = array( tdomf_get_edit($p->edit_id) );
+              } else {
+                  $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 2)); /* and need this earlier too */ 
+              } ?>
         <?php $form_id = get_post_meta($p->ID, TDOMF_KEY_FORM_ID, true); ?>
         <?php $queue = intval(tdomf_get_option_form(TDOMF_OPTION_QUEUE_PERIOD,$form_id));
               if($queue > 0) { $queue = true; } else { $queue = false; } ?>
@@ -696,10 +701,14 @@ function tdomf_show_mod_posts_menu() {
         </td>
 
         <td class="column-edited">
-        <?php $last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1));
-              if($last_edit == false || empty($last_edit)) { ?>
-                      <!-- no edits -->
+        <?php /*$last_edit = tdomf_get_edits(array('post_id' => $p->ID, 'limit' => 1));*/
+              if($last_edit == false || empty($last_edit) || $last_edit == NULL) { ?>
+                        <!-- no edits -->
         <?php } else { 
+              $previous_edit = false;
+              if(count($last_edit) == 2){
+                  $previous_edit = $last_edit[1];
+              };
               $last_edit = $last_edit[0]; # only care about the first entry
               $last_edit_data = maybe_unserialize($last_edit->data); ?>
         <ul style="font-size: 11px;">
@@ -763,7 +772,8 @@ function tdomf_show_mod_posts_menu() {
                if($last_edit->revision_id != 0) { ?>
         
            <?php if($last_edit->state != 'approved') { ?>
-              <span class='view'><a href="revision.php?revision=<?php echo $last_edit->revision_id; ?>"><?php _e('View','tdomf'); ?></a> |<span>
+              <span class='view'><a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR.'tdomf-revision.php&edit='.$last_edit->edit_id; ?>"><?php _e('View','tdomf'); ?></a> |<span>
+              <!-- <span class='view'><a href="revision.php?revision=<?php echo $last_edit->revision_id; ?>"><?php _e('View','tdomf'); ?></a> |<span> -->
            <?php }?> 
            <?php if($last_edit->state == 'approved') { $bulk_edit_revert = true; ?>
               <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'revert_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-revert_edit_' . $last_edit->edit_id)) ?>"><?php _e('Revert','tdomf'); ?></a> | </span>
@@ -771,7 +781,12 @@ function tdomf_show_mod_posts_menu() {
                <span class="delete"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'delete_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-delete_edit_' . $last_edit->edit_id)) ?>"><?php _e('Delete','tdomf'); ?></a> | </span>
                <span class="edit"><a href="<?php tdomf_get_mod_posts_url(array('echo'=> true, 'action' => 'approve_edit', 'edit_id' => $last_edit->edit_id, 'nonce' => 'tdomf-approve_edit_' . $last_edit->edit_id)) ?>"><?php _e('Approve','tdomf'); ?></a> | </span>
            <?php } ?>
-        <span class="edit"><a href="revision.php?action=diff&right=<?php echo $last_edit->revision_id; ?>&left=<?php echo $last_edit->current_revision_id; ?>"><?php _e('Compare','tdomf'); ?></a>
+           <?php if($previous_edit) { ?>
+               <span class="edit"><a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR.'tdomf-revision.php&edit='.$last_edit->edit_id; ?>&right=<?php echo $last_edit->edit_id; ?>&left=<?php echo $previous_edit->edit_id; ?>"><?php _e('Compare','tdomf'); ?></a>
+           <?php } else { ?>
+               <!-- <span class="edit"><a href="revision.php?action=diff&right=<?php echo $last_edit->revision_id; ?>&left=<?php echo $last_edit->current_revision_id; ?>"><?php _e('Compare','tdomf'); ?></a> -->
+               <span class="edit"><a href="admin.php?page=<?php echo TDOMF_FOLDER.DIRECTORY_SEPARATOR."admin".DIRECTORY_SEPARATOR.'tdomf-revision.php&edit='.$last_edit->edit_id; ?>&right=<?php echo $last_edit->edit_id; ?>&left=previous"><?php _e('Compare','tdomf'); ?></a>
+           <?php } ?>
         <?php if(get_option(TDOMF_OPTION_SPAM)) { ?> |<?php } ?></span>           
         <?php if(get_option(TDOMF_OPTION_SPAM)) { 
                  if($last_edit->state == 'spam') {  $bulk_edit_hamit = true; ?>
