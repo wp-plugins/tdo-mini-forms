@@ -12,11 +12,7 @@ This plugin can add themed custom posting and editing forms to your website that
 
 This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
-**Version 0.13.2 continues with the bug fixes but also includes a few new features: queuing on all posts, not just posts managed by TDOMF, tabbed the general options UI, more spam checking options (can be modified per form now), always show the moderation links on the moderation screen and of course Wordpress 2.8 compatibility.**
-
-**Version 0.13.1 includes a number of bugs fixes. The plugin wuold not work on PHP4 and for some users the forms would not appear to non-registered users**
-
-**Version 0.13 is a major update. You may need to double check you're Form widgets have the correct settings. This update adds forms that can be used for Editing. The admin backend is also, partly, updated to take advantage of Wordpress' 2.7 features. Only a few bugs are fixed in this release. The following release will contain mostly bug fixes. This update will only work on 2.7+ versions of Wordpress. **
+**Version 0.13.3 includes updated to the moderation screen, a plugin specific revision page and syntax highlighting for the form hacker and messages. **
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/), [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -54,10 +50,6 @@ Registered users have access to a "Your Submissions" page which lists their curr
 * Optionally queue publishing of posts 
 * Numerous widgets for your theme, including a list of the top submitters
 * And many more...
-
-**Version 0.12.7 fixes [a critical bug on windows hosts.](http://thedeadone.net/blog/warning-about-using-tdo-mini-forms-on-windows-hosts/) Please upgrade asap if using a Windows host.**
-
-**Version 0.12.7 includes support for GeoMashup plugin latest beta, improvements to the widget class (you may need to modify you forms after upgrade), Auto Respond Email can now send a link that users can click and flag the post as verified and a few more bug fixes, such as queuing publishing of approved submissions.**
 
 == Installation ==
 
