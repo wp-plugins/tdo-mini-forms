@@ -3,8 +3,8 @@ Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.7.1
-Tested up to: 2.8
-Stable Tag: 0.13.2
+Tested up to: 2.8.1
+Stable Tag: 0.13.3
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
@@ -405,6 +405,13 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 == Changelog ==
 
+= 0.13.3 =
+* Added filtering to the moderation screen. Can filter by user or ip and/or by form
+* Enabled the syntax code highlighting on Form Hacker (and messages)
+* Added new built in wordpress diff as a diff render for form diffs
+* Updated tdomf_the_form (it was dropping $post_id arg when calling tdomf_get_the_form)
+* TDOMF Revision page (supports fields and custom fields)
+
 = 0.13.2 =
 * Fixed extra slashes in AJAX preview of submit forms
 * Scheduled post count incorrect
@@ -533,8 +540,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Corrected some formatting mistakes on the options page
 * Added a pot file and removed the po file.
 
-= v0.11: 22nd May 2008 = 
-
+= 0.11 = 
 * Fixed a small behaviour issue in generate form where it would keep the preview, even after reloading the page!
 * Integreted with Akismet for Spam protection
 * Fixed an issue with "get category" widget where it would forget it's settings occasionally
@@ -546,34 +552,29 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Import and Export individual Form settings
 * Top Submitter Theme Widget
 
-= v0.10.4: 17th April 2008 =
-
+= 0.10.4 =
 * Fixed a bug that made TDOMF incompatible with PHP5 (see uniqid)
 * Fixed a bug where some widgets were not making it to the form when the form is generated. This was a mistake in the "modes" support added in v0.10.3.
 
-= v0.10.3: 16th April 2008 =
-
+= 0.10.3 =
 * Fixed a bug in the random_string generator: it did not validate input and I've been using a value that's too big (which meant it could return 0)
 * Widgets now support "modes" which means widgets can be filtered per form type. Right now that means widgets that don't support pages will not appear, if the form is for submitting pages. 
 * Can now choose how to verify an input form: original, wordpress nonce or none at all
 * Implemented a workaround for register_global and unavaliablity of $_SESSION on some hosts
 * Fixed double thumbnail issue in WP2.5
 
-= v0.10.2: 2nd April 2008 =
-
+= 0.10.2 =
 * Fixed a bug if you reload the image capatcha, it would not longer verify
 * Added a flag `TDOMF_HIDE_REGISTER_GLOBAL_ERROR` in `tdomf.php` that can be set to true to hide the `register_globals` errors that get displayed.
 * WP2.5 only: Can now set a max width or height for widgets control on the Form Widgets screen.
 * Compatibily with Wordpress 2.5
 
-= v0.10.1: 13th March 2008 =
-
+= 0.10.1 =
 * Fixed a bug when if you inserted an upload as an attachment it would overwrite the contents of the post.
 * Fix to categories widget where widget on other forms than the default  would forget it's settings at post time.
 * Custom Field widget was ignoring append format for multi-forms 
 
-= v0.10: 12th Feburary 2008 =
-
+= 0.10 =
 * Suppressed errors for is_dir and other file functions just in case of open_basedir settings!
 * Use "get_bloginfo('charset')" in htmlentities in widget control. Hopefully this will finally resolve the issues with foreign lanaguage characters
 * Multiple Form Support
@@ -583,8 +584,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Fixed a bug where customfield textfield would submit empty values for the custom field if you had magic quotes turned off.
 * Update the "Freecap" Image Captcha so that the files get included in the release zip Wordpress creates.
 
-= v0.9.4: 7th January 2008 = 
-
+= 0.9.4 = 
 * Added "Set Category from get variables" widget
 * If moderation turned off, when post published, redirect to published post page.
 * Fixed Custom Field widget javascript. Now works properly in Firefox (why does Firefox break on code that works in Opera and IE all the time?)
@@ -596,8 +596,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Added a "Read More..." `<!--more-->` tag to the quick tags
 * Fixed Bug when multiple notifications to submitter when post is edited after approval
 
-= v0.9.3: 1st December 2007 = 
-
+= 0.9.3 = 
 * Fixed customfield textfield control radio group in Firefox
 * Fixed customfield textfield ignoring size option
 * Fixed customfield textarea putting magic quotes on HTML
@@ -623,8 +622,7 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Customfield now supports select and checkbox options
 * Added po file for translation
 
-= v0.9.2: 9th November 2007 =
-
+= 0.9.2 =
 * Potential fix for the never-ending "session_start" problem. Using template_redirect instead of get_header. 
 * New Suppress Error Messages (works to a point)
 * Warnings about register_globals added
@@ -633,15 +631,13 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Two widgets for your theme!
 * Fixed 1-q captcha widget not accepting quotes (")
 
-= v0.9.1: 5th November 2007 =
-
+= 0.9.1 =
 * Fixed a javascript error in Quicktags that blocked it from working on Mozilla
 * Fixed the admin notification email as the Wordpress cache for the custom fields for posts was being forgotten so the admin email did not contain information about IP and uploaded files.
 * A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
 * Spelling mistake fixed in "Your Submissions"
 
-= v0.9: 2nd November 2007 =
-
+= 0.9 =
 * Updated Upload Files: if a file is added as attachment, Wordpress will generate a thumbnail if the file is an image.
 * New Upload File Options: You can now automatically have a link added to your post that goes to the attachment page (can even use the thumbnail if it exists). Additionally, if the thumbnail exists, can insert a direct link to file using the thumbnail).
 * Uploads added as attachments will inherit the categories of the post (but remember the order of widgets is important so if the categories get modified after the upload widget has done it's biz, these changes won't be affected to the attachments)
@@ -655,15 +651,13 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Added a "Text" widget
 * Fixed a bug when deleting a post with uploaded files on PHP4 or less
 
-= v0.8: 12th October 2007 =
-
+= 0.8 =
 * Upload Feature added
 * Widgets can now append information to the email sent to moderators
 * Tag Widget: allow submitters to add tags to their submissions
 * Categories Widget: First run of the categories widget.
 
-= v0.72: 2 October 2007 = 
-
+= 0.72 = 
 * Date is not set when post is published. This was okay in WP2.2.
 * Comments are getting automatically closed (even if default is open). This was okay in WP2.2.
 * widget.css in admin menu has moved in WP2.3. This is no longer compatible with WP2.2.
@@ -672,12 +666,10 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Fixed Widget page to work in WP2.3. WP2.3 now uses jQuery for a lot of its javascript needs
 * If you happen to use as your database prefix "tdomf_", and then if you uninstall on WP2.3, it would delete critical options and bugger up your wordpress install.
 
-= v0.71: 28 September 2007 =
-
+= 0.71 =
 * Two small mistakes seemed to have wiggled into the files before 0.7 was released. Still getting the hang of SVN I guess.
 
-= v0.7: 26 September 2007 =
-
+= 0.7 =
 * New "Overview" page
 * Move the various admin pages to it's own submenu
 * Updated Edit Post Panel (uses built in AJAX-SACK)
@@ -702,40 +694,33 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Simple question-captcha widget: user must answer a simple question before post will be accepted.
 * "I agree" widget: user must check a checkbox before post will be accepted.
 
-= v0.6: 20 March 2007 =
-
+= 0.6 =
 * Options Menu: Control access to form based on roles
 * Options Menu: Control who gets notified to approve posts by role.
 * Options Menu: Default author is now chosen by login name instead of username
 * Javascript code only included as necessary (i.e. not in every header)
 
-= v0.5: 15 March 2007 =
-
+= 0.5 =
 * Tested on Windows based host
 * Chinese text does not get mangled
 * Post Edit Panel now works properly on Firefox (and does not prevent posting).
 
-= v0.4: 9 March 2007 =
-
+= 0.4 =
 * New template tags: tdomf_get_submitter and tdomf_the_submitter.
 * The plugin should work on Windows based servers
 * A TDOMF panel on the edit post page
 * Posts can now be very long (no 250 word limit)
 
-= v0.3: 6 March 2007 =
-
+= 0.3 =
 * Ported to Wordpress 2.1.2.
 
-= v0.2: 29 November 2006 =
-
+= 0.2 =
 * Fixed bug: If default author had rights to post, anon posts would be automatically published.
 * Replaced the word "download" used in messages to the user.
 * Added a "webpage" field when posting anonymously.
 
-= v0.1: 22 November 2006 = 
-
+= 0.1 =
 * Initial Release with basic features
 
 = Preview: 21 November 2006 =
-
 * Preview Release, only on wordpress.org/support forums.
