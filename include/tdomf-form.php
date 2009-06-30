@@ -1598,9 +1598,10 @@ function tdomf_post_delete_cleanup($post_id) {
 }
 add_action('delete_post', 'tdomf_post_delete_cleanup');
 
-function tdomf_form_revision_fields($fields){
+/*function tdomf_form_revision_fields($fields){
     // eh? how do I check what post this is?
+    return $fields;
 }
-add_filter('_wp_post_revision_fields', 'tdomf_form_revision_fields');
+add_filter('_wp_post_revision_fields', 'tdomf_form_revision_fields');*/
 
 ?>

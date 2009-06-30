@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.13.3
+Version: 0.13.4
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -30,14 +30,9 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
-// v0.13.3
-// - Added filtering to the moderation screen. Can filter by user or ip and/or 
-//    by form
-// - Enabled the syntax code highlighting on Form Hacker (and messages)
-// - Added new built in wordpress diff as a diff render for form diffs
-// - Updated tdomf_the_form (it was dropping $post_id arg when calling
-//    tdomf_get_the_form)
-// - TDOMF Revision page (supports fields and custom fields)
+// v0.13.4
+// - "Warnings on post", errors appear about "post.php". I left some unfinished
+//     code in an action which was breaking one of the wordpress functions. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -85,7 +80,6 @@ Work Queue:
    - Investigate: tinymce conflict with AJAX form
    - Investigate: upload-link error:
        http://wordpress.org/support/topic/186919#post-838957
-   - Study: Replace diff with wordpress diff or add wordpress diff to options?
    - Investigate: Auto bring up the conf panel for widgets on the "fix" links
    - Some simple javascript to track number of chars/words typed so far in textarea: http://thedeadone.net/forum/?p=1321
    - Study: http://wordpress.org/extend/plugins/download-monitor/ integration
@@ -230,9 +224,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "50");
+define("TDOMF_BUILD", "51");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13.3");
+define("TDOMF_VERSION", "0.13.4");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -727,7 +721,7 @@ function tdomf_new_features() {
       $features .= "<li>".__("<b>Enable syntax code highlighting on Form Hacker and messages</b>","tdomf")."</li>";
       $features .= "<li>".__("<b>Special revision page for comparing revisions created by TDOMF</b>","tdomf")."</li>";
   }
-  
+  // 51 = 0.13.4
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

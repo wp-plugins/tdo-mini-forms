@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.7.1
 Tested up to: 2.8.1
-Stable Tag: 0.13.3
+Stable Tag: 0.13.4
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
@@ -396,6 +396,9 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 
 == Changelog ==
+
+= 0.13.4 =
+* "Warnings on post": errors appear about "post.php". I left some unfinished code in an action which was breaking one of the wordpress functions. 
 
 = 0.13.3 =
 * Added filtering to the moderation screen. Can filter by user or ip and/or by form
