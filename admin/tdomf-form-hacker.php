@@ -154,16 +154,16 @@ function tdomf_form_hacker_actions($form_id) {
     
     #@session_start();
     $message = "";
-    if(isset($_REQUEST['tdomf_form_hack_save'])) {
+    if(isset($_POST['tdomf_form_hack_save'])) {
        check_admin_referer('tdomf-form-hacker');
-       if(isset($_REQUEST['tdomf_form_hack'])) {
-          $form_new = $_REQUEST['tdomf_form_hack'];
-          $preview_new = $_REQUEST['tdomf_form_preview_hack'];
+       if(isset($_POST['tdomf_form_hack'])) {
+          $form_new = $_POST['tdomf_form_hack'];
+          $preview_new = $_POST['tdomf_form_preview_hack'];
           
-          if (get_magic_quotes_gpc()) {
+          #if (get_magic_quotes_gpc()) { 
              $form_new = stripslashes($form_new);
              $preview_new = stripslashes($preview_new);
-          }
+          #}
           if(strpos($form_new,TDOMF_MACRO_FORMKEY) !== false) {
             $form_cur = trim(tdomf_generate_form($form_id,$mode));
             $preview_cur = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
@@ -178,23 +178,23 @@ function tdomf_form_hacker_actions($form_id) {
        if(empty($message)) {
          $message = __("Hacked Form Saved.","tdomf");
        }
-     } else if(isset($_REQUEST['tdomf_form_hack_reset'])){
+     } else if(isset($_POST['tdomf_form_hack_reset'])){
        check_admin_referer('tdomf-form-hacker');
        tdomf_set_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,false,$form_id);
        tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,false,$form_id);
        tdomf_set_option_form(TDOMF_OPTION_FORM_HACK,false,$form_id);
        tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,false,$form_id);
        $message = __("Reset Hacked Forms.","tdomf");
-     } else if(isset($_REQUEST['tdomf_hack_messages_save'])) {
+     } else if(isset($_POST['tdomf_hack_messages_save'])) {
          check_admin_referer('tdomf-form-hacker');
          
          if(!function_exists('tdomf_set_form_message')) {
              function tdomf_set_form_message($form_id,$name,$opt) {
-                 if(isset($_REQUEST[$name])) {
-                     $msg = $_REQUEST[$name];
-                     if (get_magic_quotes_gpc()) {
-                         $msg = stripslashes($_REQUEST[$name]);
-                     }
+                 if(isset($_POST[$name])) {
+                     $msg = $_POST[$name];
+                     #if (get_magic_quotes_gpc()) {
+                         $msg = stripslashes($_POST[$name]);
+                     #}
                  }
                  tdomf_set_option_form($opt,$msg,$form_id);
              }
@@ -218,7 +218,7 @@ function tdomf_form_hacker_actions($form_id) {
          tdomf_set_form_message($form_id, 'tdomf_msg_locked_post', TDOMF_OPTION_MSG_LOCKED_POST);
          
          $message = __("Messages Updated.","tdomf");
-     } else if(isset($_REQUEST['tdomf_hack_messages_reset'])) {
+     } else if(isset($_POST['tdomf_hack_messages_reset'])) {
          check_admin_referer('tdomf-form-hacker');
          tdomf_set_option_form(TDOMF_OPTION_MSG_SUB_PUBLISH,false,$form_id);
          tdomf_set_option_form(TDOMF_OPTION_MSG_SUB_FUTURE,false,$form_id);
@@ -237,13 +237,13 @@ function tdomf_form_hacker_actions($form_id) {
          tdomf_set_option_form(TDOMF_OPTION_MSG_UNAPPROVED_EDIT_ON_POST,false,$form_id);
          tdomf_set_option_form(TDOMF_OPTION_MSG_LOCKED_POST,false,$form_id);
          $message = __("Messages Reset.","tdomf");         
-    } else if(isset($_REQUEST['dismiss'])) {
+    } else if(isset($_POST['dismiss'])) {
          check_admin_referer('tdomf-form-hacker');
          
          $mode = tdomf_generate_default_form_mode($form_id);
          $mode .= '-hack';
          
-         if(isset($_REQUEST['type']) && $_REQUEST['type'] == 'preview')
+         if(isset($_POST['type']) && $_POST['type'] == 'preview')
          {
              $curr = tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode);
              tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK_ORIGINAL,$curr,$form_id);

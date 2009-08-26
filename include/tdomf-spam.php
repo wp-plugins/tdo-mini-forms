@@ -591,10 +591,15 @@ function tdomf_akismet_key_verify($key) {
 function tdomf_akismet_send($request, $host, $path, $port = 80, $proxy = false) {
   global $wp_version;
 
+ $proxy = false;
+  
   // adding proxy support here because my host uses a proxy!
-  //$proxy = 'proxy.dcu.ie';
-  //$port = 3128;
-  $proxy = false;
+  if ( defined('WP_PROXY_HOST')  && defined('WP_PROXY_PORT') ) {
+     $proxy = WP_PROXY_HOST;
+     $port = WP_PROXY_PORT;
+  }
+  
+
 
   $ksd_user_agent = "WordPress/$wp_version | TDO-Mini-Forms/".TDOMF_VERSION;
 
