@@ -207,6 +207,46 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           return $options;
       }   
       
+      /** 
+       * Wordpress 2.8.x: 'the_content' filter adds slashes to ' and " but not 
+       * to other slashes. Major pain when your doing you're best to keep 
+       * it unnecessary slash clean!
+       *
+       * @access public
+       * @return String
+       */
+      function the_content_preview_post($content) {
+            if(get_magic_quotes_gpc()) {
+               tdomf_log_message( "the_content_preview start: $content" );
+               # this should catch most of all the extra slashes used by wptexturize
+               $content = preg_replace('/\\\&\#(\d*)\;/','&#$1;',$content);
+               # but sometimes it donesn't convert one or two (but still adds slashes)
+               $content = str_replace("\\'","'",$content);
+               # I've also seen it "steal" some but not all stand alone backslashes - nothing I can do about it!
+               tdomf_log_message( "the_content_preview end: $content" );
+            }
+            return $content;
+      }
+      
+      /**
+       * Wordpress 2.8.x: 'the_content' adds slashes to ' and " but not to 
+       * other back slashes. Passing the protected content to post update
+       * works fine then for ' and " but not for slashes. Need to protect
+       * slashes before passing it through 'the_content'
+       *
+       * @access public
+       * @return String
+       */
+      function the_content_post_pre($content) {
+            # Assuming all magic-quote like slashes are removed first...
+            if(get_magic_quotes_gpc()) {
+               tdomf_log_message( "the_content_post_pre start: $content" );
+               $content = str_replace('\\','\\\\',$content);
+               tdomf_log_message( "the_content_post_pre end: $content" );
+            }
+            return $content;
+      }
+      
       /**
        * Generate preview of widget
        * 
@@ -232,10 +272,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
              $content_content = wp_filter_post_kses($content_content);
             }
             if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-              $output .= apply_filters('the_content', strip_tags($content_content,$options['allowable-tags']));
+                $ready_content = apply_filters('the_content', strip_tags($content_content,$options['allowable-tags']));
             } else {
-              $output .= apply_filters('the_content', $content_content);
+                $ready_content = apply_filters('the_content', $content_content);
             }
+            $output .= $this->the_content_preview_post($ready_content);
           }
           return $output;
       }
@@ -294,22 +335,22 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
               if(!empty($post['post_content'])) {
                 $post = add_magic_quotes($post);
               }
-
+              
               // Append
               $post_content = $post['post_content'];
               if($options['allowable-tags'] != "" && $options['restrict-tags']) {
                 tdomf_log_message("Content Widget: Stripping tags from post!");
-                $post_content .= strip_tags($content_content,$options['allowable-tags']);
+                $post_content .= apply_filters('the_content', $this->the_content_post_pre(strip_tags($content_content,$options['allowable-tags'])));
               } else {
-                $post_content .= $content_content;
+                $post_content .= apply_filters('the_content', $this->the_content_post_pre($content_content));
               }
           } else { // $mode startswith "edit-"
               // Overwrite 
               if($options['allowable-tags'] != "" && $options['restrict-tags']) {
                 tdomf_log_message("Content Widget: Stripping tags from post!");
-                $post_content = strip_tags($content_content,$options['allowable-tags']);
+                $post_content = apply_filters('the_content', $this->the_content_post_pre(strip_tags($content_content,$options['allowable-tags'])));
               } else {
-                $post_content = $content_content;
+                $post_content = apply_filters('the_content', $this->the_content_post_pre($content_content));
               }
           }
 

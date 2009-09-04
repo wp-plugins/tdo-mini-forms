@@ -108,6 +108,73 @@ Other
 */
 
 /*
+Magic Quotes for 0.13.4:
+
+Wordpress 2.8.2
++++++++++++++++
+
+Magic Quotes: ON
+================
+                  Title | Content
+AJAX: On
+--------          
+New-Post-Preview: FAIL  | FAIL
+New-Post-Submit : FAIL  | FAIL   
+
+AJAX: Off
+---------
+New-Post-Preview: OK    | FAIL
+New-Post-Submit : OK    | OK
+
+Magic Quotes: OFF
+=================
+
+AJAX: On
+--------
+New-Post-Preview: OK    | FAIL
+New-Post-Submit : OK    | OK
+
+AJAX: Off
+---------
+New-Post-Preview: OK    | FAIL
+New-Post-Submit : OK    | OK
+
+Magic Quotes for 0.13.5:
+
+Wordpress 2.8.2
++++++++++++++++
+
+Magic Quotes: ON
+================
+                  Title | Content | Excerpt | CF: Textarea | CF: Text
+AJAX: On
+--------          
+New-Post-Preview: OK    | OK*     | OK      | OK           | OK
+New-Post-Submit : FAIL  | OK*     | FAIL    | FAIL         | FAIL
+
+* Some occasional slashes are lost
+
+AJAX: Off
+---------
+New-Post-Preview: OK    | FAIL
+New-Post-Submit : OK    | OK
+
+Magic Quotes: OFF
+=================
+
+AJAX: On
+--------
+New-Post-Preview: OK    | FAIL
+New-Post-Submit : OK    | OK
+
+AJAX: Off
+---------
+New-Post-Preview: OK    | FAIL
+New-Post-Submit : OK    | OK
+
+*/
+
+/*
 ////////////////////////////////////////////////////////////////////////////////
 Notes:
  - Potential nice hack: query.php @ line 1479

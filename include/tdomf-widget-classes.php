@@ -2,6 +2,61 @@
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
 /** 
+* Utility class for any widget using TextAreas
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0
+* @since 0.13.5
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/ 
+
+class TDOMF_TextArea {
+
+    var $title = "";
+    var $cols = 40;
+    var $rows = 10;
+    var $restrict_tags = true;
+    var $allowable_tags = "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
+    var $quicktags = false;
+    var $char_limit = 0;
+    var $word_limit = 0;
+    var $use_filter = true;
+    var $filter = 'the_content';
+    var $kses = false;
+   
+    function TDOMF_TextArea()
+    {
+    }
+    
+    function display()
+    {
+    }
+    
+    function displayHack()
+    {
+    }
+    
+    function preview()
+    {
+    }
+    
+    function previewHack()
+    {
+    }
+    
+    function control($opts)
+    {
+        return array();
+    }
+    
+    function getText()
+    {
+    }
+}
+
+/** 
 * Super class for widget classes. Supports validation, preview, hacking, admin
 * email, admin error and multiple instances. Common features can be added to
 * all widgets via this class.
