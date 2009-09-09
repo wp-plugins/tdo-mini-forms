@@ -2,61 +2,6 @@
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOMF: You are not allowed to call this page directly.'); }
 
 /** 
-* Utility class for any widget using TextAreas
-* 
-* @author Mark Cunningham <tdomf@thedeadone.net> 
-* @version 1.0
-* @since 0.13.5
-* @access public 
-* @copyright Mark Cunningham
-* 
-*/ 
-
-class TDOMF_TextArea {
-
-    var $title = "";
-    var $cols = 40;
-    var $rows = 10;
-    var $restrict_tags = true;
-    var $allowable_tags = "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
-    var $quicktags = false;
-    var $char_limit = 0;
-    var $word_limit = 0;
-    var $use_filter = true;
-    var $filter = 'the_content';
-    var $kses = false;
-   
-    function TDOMF_TextArea()
-    {
-    }
-    
-    function display()
-    {
-    }
-    
-    function displayHack()
-    {
-    }
-    
-    function preview()
-    {
-    }
-    
-    function previewHack()
-    {
-    }
-    
-    function control($opts)
-    {
-        return array();
-    }
-    
-    function getText()
-    {
-    }
-}
-
-/** 
 * Super class for widget classes. Supports validation, preview, hacking, admin
 * email, admin error and multiple instances. Common features can be added to
 * all widgets via this class.
@@ -1225,6 +1170,558 @@ class TDOMF_Widget {
             }
         }
         return true;
+    }
+}
+
+/** 
+* Super class for widget field classes. Defines basic layout of class with some
+* common utitly functions
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0 
+* @since 0.13.5
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/
+class TDOMF_WidgetField {
+
+    var $prefix = "tdomf_field_";
+    
+    function TDOMF_WidgetField($prefix)
+    {
+        $this->prefix = $prefix;
+    }
+    
+    function getOptions($opts) {
+        return array();
+    }
+   
+    function form($args,$opts)
+    {
+        return "";
+    }
+    
+    function formHack($args,$options)
+    {
+        return "";
+    }
+    
+    function preview($args,$opts)
+    {
+        return "";
+    }
+    
+    function previewHack($args,$opts)
+    {
+       return "";
+    }
+    
+    function control($options,$form_id,$show=false,$hide=false)
+    {
+        return array();
+    }
+    
+    function validate($args,$opts,$preview=false) 
+    {
+        return NULL;
+    }
+    
+    function post($args,$opts,$original_field_name=false)
+    {
+        return false;
+    }
+    
+    /** 
+     * 
+     * 
+     * @var Boolean
+     * @access private
+     * @see control()
+     */ 
+    function useOpts($name,$show,$hide)
+    {
+        if((is_array($show) && in_array($name,$show)) ||
+           (is_array($hide) && !in_array($name,$hide)) ||
+           (!is_array($show) && !is_array($hide))) {
+            return true;
+        }
+        return false;
+    }
+    
+    /** 
+     *
+     * 
+     * @var Array 
+     * @access private
+     * @see control()
+     */ 
+    function updateOpts($options,$name,$show,$hide)
+    {
+        if($this->useOpts($name,$show,$hide) && isset($_POST[$name])) {
+            $options[$name] = $_POST[$name];
+        }
+        return $options;
+    }
+    
+    /** 
+     * Converts a string into something that can be used as a Javascript
+     * variable
+     * 
+     * @var String 
+     * @access public 
+     */     
+    function prepJSCode($code)
+    {
+        $code = esc_js($code);
+        $code = str_replace('-','_',$code);
+        return $code;
+    }
+}
+
+/** 
+* Utility class for any widget using TextField
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0
+* @since 0.13.5
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/ 
+class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
+    
+    function TDOMF_WidgetFieldTextField($prefix)
+    {
+        parent::TDOMF_WidgetField($prefix);
+    }
+    
+    function getOptions($opts) {
+        $defs = array( $this->prefix.'size' => 30,
+                       $this->prefix.'restrict-type' => 'text', #email, url, @todo date, future-date, past-date, html
+                       $this->prefix.'restrict-tags' => true,
+                       $this->prefix.'char-limit' => 0,
+                       $this->prefix.'word-limit' => 0,                      
+                       $this->prefix.'allowable-tags' => "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>",
+                       $this->prefix.'required' => false, 
+                       $this->prefix.'use-filter' => false,
+                       $this->prefix.'filter' => 'post_title',
+                       $this->prefix.'default-text' => "",
+                       $this->prefix.'title' => "Text");
+        $opts = wp_parse_args($opts, $defs);
+        return $opts;
+    }
+   
+    function form($args,$opts)
+    {
+        return "";
+    }
+    
+    function formHack($args,$options)
+    {
+        return "";
+    }
+    
+    function preview($args,$opts)
+    {
+        return "";
+    }
+    
+    function previewHack($args,$opts)
+    {
+       return "";
+    }
+    
+    function control($options,$form_id,$show=false,$hide=false)
+    {
+        return array();
+    }
+    
+    function validate($args,$opts,$preview=false) 
+    {
+        return NULL;
+    }
+    
+    function post($args,$opts,$original_field_name=false)
+    {
+        return false;
+    }
+}
+
+/** 
+* Utility class for any widget using TextAreas
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0
+* @since 0.13.5
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/ 
+class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
+
+    function TDOMF_WidgetFieldTextArea($prefix)
+    {
+        parent::TDOMF_WidgetField($prefix);
+    }
+    
+    function getOptions($opts) {
+        $defs = array( $this->prefix.'cols' => 40,
+                       $this->prefix.'rows' => 10, 
+                       $this->prefix.'quicktags' => false,
+                       $this->prefix.'restrict-tags' => true,
+                       $this->prefix.'allowable-tags' => "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>",
+                       $this->prefix.'char-limit' => 0,
+                       $this->prefix.'word-limit' => 0,
+                       $this->prefix.'required' => true,
+                       $this->prefix.'use-filter' => false,
+                       $this->prefix.'filter' => 'the_content',
+                       $this->prefix.'kses' => false,
+                       $this->prefix.'default-text' => "",
+                       $this->prefix.'title' => "Text");
+        $opts = wp_parse_args($opts, $defs);
+        return $opts;
+    }
+   
+    function form($args,$opts)
+    {
+        // contents of textarea
+        $text = $opts[$this->prefix.'default-text'];
+        if(isset($args[$this->prefix.'ta'])) { 
+            $text = $args[$this->prefix.'ta'];
+        }
+        
+        // pre
+        if(!empty($opts[$this->prefix.'title'])) {
+            if($opts[$this->prefix.'required']) {
+                $output = '<label for="'.$this->prefix.'ta" class="required">'.sprintf(__("%s (Required):","tdomf"),$opts[$this->prefix.'title']);
+            } else {
+                $output = '<label for="'.$this->prefix.'ta" >'.sprintf(__("%s:","tdomf"),$opts[$this->prefix.'title']);
+            }
+            $output .= "</label>\n<br/>\n";
+        }
+        
+        if(!empty($opts[$this->prefix.'allowable-tags']) && $opts[$this->prefix.'restrict-tags']) {
+            $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($opts[$this->prefix.'allowable-tags']))."<br/>";
+        }
+        if($opts[$this->prefix.'word-limit'] > 0) {
+            $output .= sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$opts[$this->prefix.'word-limit'])."<br/>";
+        }
+        if($opts[$this->prefix.'char-limit'] > 0) {
+            $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$opts[$this->prefix.'char-limit'])."<br/>";
+        }
+        if($opts[$this->prefix.'quicktags']) {
+            $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=".$this->prepJSCode($this->prefix).'ta';
+            if(!empty($opts[$this->prefix.'allowable-tags']) && $opts[$this->prefix.'restrict-tags']) {
+                $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=".$this->prepJSCode($this->prefix)."ta&allowed_tags=".urlencode($opts[$this->prefix.'allowable-tags']);
+            }
+            $output .= "\n<script src='$qt_path' type='text/javascript'></script>\n";
+            $output .= "\n<script type='text/javascript'>edToolbar".$this->prepJSCode($this->prefix)."ta();</script>\n";
+        }
+        
+        // the text area
+        $output .= '<textarea title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$opts[$this->prefix.'rows'].'" cols="'.$opts[$this->prefix.'cols'].'" name="'.$this->prefix.'ta" id="'.$this->prefix.'ta" >'.$text.'</textarea>';
+        
+        // post
+        if($opts['quicktags']) {
+            $output .= "\n<script type='text/javascript'>var edCanvas".$this->prepJSCode($this->prefix)." = document.getElementById(".$this->prefix."ta);</script>\n";
+        }
+        return $output;
+    }
+    
+    function formHack($args,$options)
+    {
+        $output = "";
+        
+        if(!empty($opts[$this->prefix.'title'])) {
+            if($options[$this->prefix.'required']) {
+              $output .= "\t\t".'<label for="'.$this->prefix.'ta" class="required">'.sprintf(__("%s (Required):","tdomf"),$opts[$this->prefix.'title'])."\n\t\t\t<br/>\n";      
+            } else {
+              $output .= "\t\t".'<label for="'.$this->prefix.'ta">'.sprintf(__("%s:","tdomf"),$opts[$this->prefix.'title'])."\n\t\t\t<br/>\n";
+            }
+            $output .= "\t\t</label>\n";    
+        }
+        if($options[$this->prefix.'allowable-tags'] != "" && $options[$this->prefix.'restrict-tags']) {
+          $output .= "\t\t".sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options[$this->prefix.'allowable-tags']))."\n\t\t<br/>\n";
+        }
+        if($options[$this->prefix.'word-limit'] > 0) {
+          $output .= "\t\t".sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options[$this->prefix.'word-limit'])."\n\t\t<br/>\n";
+        }
+        if($options[$this->prefix.'char-limit'] > 0) {
+          $output .= "\t\t".sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options[$this->prefix.'char-limit'])."\n\t\t<br/>\n";
+        }
+        if($options[$this->prefix.'quicktags'] == true) {
+          $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=".$this->prepJSCode($this->prefix).'ta';
+          if($options[$this->prefix.'allowable-tags'] != "" && $options[$this->prefix.'restrict-tags']) {
+            $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=".$this->prepJSCode($this->prefix)."ta&allowed_tags=".urlencode($options[$this->prefix.'allowable-tags']);
+          }
+          $output .= "\t\t<script src='$qt_path' type='text/javascript'></script>\n";
+          $output .= "\t\t<script type='text/javascript'>edToolbar".$this->prepJSCode($this->prefix)."ta();</script>\n";
+        }
+        $output .= "\t\t".'<textarea title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$options[$this->prefix.'rows'].'" cols="'.$options[$this->prefix.'cols'].'" name="'.$this->prefix.'ta" id="'.$this->prefix.'ta" >';
+        $output .= '<?php if(isset($post_args["'.$this->prefix.'ta"])) {'."\n";
+           $output .= "\t\t\t\t".'echo $post_args["'.$this->prefix.'ta"];'."\n";
+        $output .= "\t\t\t".'} else { ?>';
+            $output .= $options[$this->prefix.'default-text'];
+        $output .= '<?php } ?></textarea>'."\n";
+        if($options[$this->prefix.'quicktags'] == true) {
+          $output .= "\t\t<script type='text/javascript'>var edCanvas".$this->prepJSCode($this->prefix)."ta = document.getElementById('".$this->prefix."ta');</script>";
+        }
+
+        return $output;
+    }
+    
+    function preview($args,$opts)
+    {
+        $output = $args[$this->prefix.'ta'];
+        
+        #if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+            $output = preg_replace('|\<!--tdomf_form.*-->|', '', $output);
+            $output = preg_replace('|\[tdomf_form.*\]|', '', $output);
+        #}
+        
+        if($opts[$this->prefix.'kses'] && !tdomf_get_option_form(TDOMF_OPTION_MODERATION,$args['tdomf_form_id'])){
+         // if moderation is enabled, we don't do kses filtering, might as well
+         // give full picture to user!
+         $output = wp_filter_post_kses($output);
+        }
+        
+        if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
+            $output = strip_tags($output,$opts[$this->prefix.'allowable-tags']);
+        }
+        
+        if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+            
+            $output = apply_filters($opts[$this->prefix.'filter'], $output);
+            
+            if($opts[$this->prefix.'filter'] == 'the_content' ) {
+                if(get_magic_quotes_gpc()) {
+                    /* Wordpress 2.8.x: 'the_content' filter adds slashes to ' and " but not 
+                     * to other slashes. Major pain when your doing you're best to keep 
+                     * it unnecessary slash clean! */
+                    # this should catch most of all the extra slashes used by wptexturize
+                    $output = preg_replace('/\\\&\#(\d*)\;/','&#$1;',$output);
+                    # but sometimes it donesn't convert one or two (but still adds slashes)
+                    $output = str_replace("\\'","'",$output);
+                    # I've also seen it "steal" some but not all stand alone backslashes - nothing I can do about it!
+                }
+            }
+        }
+        
+        if(!empty($opts[$this->prefix.'title'])) {
+            $output = "<b>".sprintf(__("%s:","tdomf"),$opts[$this->prefix.'title'])."</b><br/>".$output;
+        } 
+        
+        return $output; 
+    }
+    
+    function previewHack($args,$opts)
+    {
+        $output .= "\t<?php \$temp_text = \$post_args['".$this->prefix."ta'];\n";
+        $output .= "\t".'$temp_text = preg_replace(\'|\<!--tdomf_form.*-->|\', \'\', $temp_text);'."\n";
+        $output .= "\t".'$temp_text = preg_replace(\'|\\[tdomf_form.*\\]|\', \'\', $temp_text);'."\n";
+        if($opts[$this->prefix.'kses'] && !tdomf_get_option_form(TDOMF_OPTION_MODERATION,$args['tdomf_form_id'])){
+          $output .= "\t".'$temp_text = wp_filter_post_kses($temp_text);'."\n";
+        }
+        if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
+          $output .= "\t".'$temp_text = strip_tags($temp_text,\''.$opts[$this->prefix.'allowable-tags'].'\');'."\n";
+        }
+        if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+          $output .= "\t".'$temp_text = apply_filters(\''.$opts[$this->prefix.'filter'].'\',$temp_text);'."\n";
+        }
+        if($opts[$this->prefix.'filter'] == 'the_content' ) {
+           if(get_magic_quotes_gpc()) {
+              $output .= "\t".'$temp_text = preg_replace(\'/\\\\\\&\\#(\\d*)\\;/\',\'&#$1;\',$temp_text);'."\n";
+              $output .= "\t".'$temp_text = str_replace("\\\\\'","\'",$temp_text);'."\n";
+           }
+        }
+        $output .= "\t?>\n";
+        if(!empty($opts[$this->prefix.'title'])) {
+            $output .= "\t<b>".__("Text: ","tdomf")."</b>\n\t<br/>\n";
+        }
+        $output .= "\t<?php echo \$temp_text; ?>";
+        return $output; 
+    }
+    
+    function control($options,$form_id,$show=false,$hide=false)
+    {
+        if((is_array($show) && empty($show))) {
+            # nothing to do if show list is empty
+            return array();
+        }
+
+        // prepare options!
+        
+        $retOptions = array();
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'cols',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'rows',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'quicktags',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'restrict-tags',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'allowable-tags',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'char-limit',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'word-limit',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'required',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'use-filter',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'kses',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'default-text',$show,$hide);
+        $retOptions = $this->updateOpts($retOptions,$this->prefix.'title',$show,$hide);
+                 
+        $options = wp_parse_args($retOptions, $options);
+        
+        // Display control panel for this textarea
+        
+        if($this->useOpts($this->prefix.'required',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="<?php echo $this->prefix; ?>required" id="<?php echo $this->prefix; ?>required" <?php if($options[$this->prefix.'required']) echo "checked"; ?> ></label>
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'quicktags',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>quicktags" style="line-height:35px;"><?php _e("Use Quicktags","tdomf"); ?> <input type="checkbox" name="<?php echo $this->prefix; ?>quicktags" id="<?php echo $this->prefix; ?>quicktags" <?php if($options[$this->prefix.'quicktags']) echo "checked"; ?> ></label>
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'char-limit',$show,$hide)) { ?> 
+<label for="<?php echo $this->prefix; ?>char-limit" style="line-height:35px;"><?php _e("Character Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="<?php echo $this->prefix; ?>char-limit" id="<?php echo $this->prefix; ?>char-limit" value="<?php echo htmlentities($options[$this->prefix.'char-limit'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
+<br/>
+  <?php }
+        if($this->useOpts($this->prefix.'word-limit',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>word-limit" style="line-height:35px;"><?php _e("Word Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="<?php echo $this->prefix; ?>word-limit" id="<?php echo $this->prefix; ?>word-limit" value="<?php echo htmlentities($options[$this->prefix.'word-limit'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
+<br/>
+  <?php }
+        if($this->useOpts($this->prefix.'cols',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="<?php echo $this->prefix; ?>cols" id="<?php echo $this->prefix; ?>text-cols" value="<?php echo htmlentities($options[$this->prefix.'cols'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
+  <?php }
+        if($this->useOpts($this->prefix.'rows',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="<?php echo $this->prefix; ?>rows" id="<?php echo $this->prefix; ?>text-rows" value="<?php echo htmlentities($options[$this->prefix.'rows'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
+  <?php } 
+        if($this->useOpts($this->prefix.'cols',$show,$hide) || $this->useOpts($this->prefix.'rows',$show,$hide)) { ?>
+<br/>
+  <?php }
+        if($this->useOpts($this->prefix.'restrict-tags',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>restrict-tags" style="line-height:35px;"><?php _e("Restrict Tags","tdomf"); ?> <input type="checkbox" name="<?php echo $this->prefix; ?>restrict-tags" id="<?php echo $this->prefix; ?>restrict-tags" <?php if($options[$this->prefix.'restrict-tags']) echo "checked"; ?> ></label>
+<br/>
+<label for="<?php echo $this->prefix; ?>allowable-tags" style="line-height:35px;"><?php _e("Allowable Tags","tdomf"); ?>
+<br/>
+<textarea title="true" cols="30" name="<?php echo $this->prefix; ?>allowable-tags" id="<?php echo $this->prefix; ?>allowable-tags" ><?php echo $options[$this->prefix.'allowable-tags']; ?></textarea></label>
+<br/>
+  <?php }
+        if($this->useOpts($this->prefix.'use-filter',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>use-filter" style="line-height:35px;"><?php _e("Pass input through a Wordpress filter","tdomf"); ?> <input type="checkbox" name="<?php echo $this->prefix; ?>use-filter" id="<?php echo $this->prefix; ?>use-filter" <?php if($options[$this->prefix.'use-filter']) echo "checked"; ?> ></label>
+<br/>
+<label for="<?php echo $this->prefix; ?>filter" style="line-height:35px;"><?php _e("Filter:","tdomf"); ?>
+<input type="textfield" name="<?php echo $this->prefix; ?>filter" id="<?php echo $this->prefix; ?>filter" value="<?php echo htmlentities($options[$this->prefix.'filter'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
+<br/>
+  <?php }
+        if($this->useOpts($this->prefix.'title',$show,$hide)) { ?>
+            <label for="<?php echo $this->prefix; ?>title" style="line-height:35px;"><?php _e("Title:","tdomf"); ?>
+<input type="textfield" name="<?php echo $this->prefix; ?>title" id="<?php echo $this->prefix; ?>title" value="<?php echo htmlentities($options[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>
+<br/>
+  <?php }
+        if($this->useOpts($this->prefix.'default-text',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>default-text" style="line-height:35px;"><?php _e("Default Text","tdomf"); ?>
+<br/>
+<textarea title="true" cols="30" name="<?php echo $this->prefix; ?>default-text" id="<?php echo $this->prefix; ?>default-text" ><?php echo $options[$this->prefix.'default-text']; ?></textarea></label>
+<br/>
+  <?php }
+  
+        // return latest version of options
+        return $options;
+    }
+    
+    function validate($args,$opts,$preview=false) {
+        
+        $output = "";
+        if($opts[$this->prefix.'required'] && (!isset($args[$this->prefix.'ta']) || empty($args[$this->prefix.'ta']) || trim($args[$this->prefix.'ta']) == "")) {
+            if(!empty($opts[$this->prefix.'title'])) {
+                $output .= sprintf(__("You must specify some %s.","tdomf"),$opts[$this->prefix.'title']);
+            } else {
+                $output .= __("You must specify some text.","tdomf");
+            }
+        } else {
+          
+            if($opts[$this->prefix.'word-limit'] > 0 || $opts[$this->prefix.'char-limit'] > 0) {
+              
+              $text = $args[$this->prefix.'ta'];
+               
+              // prefitler the text so it's as close to the end result as possible
+
+              #if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+                  $text = preg_replace('|\<!--tdomf_form.*-->|', '', $text);
+                  $text = preg_replace('|\[tdomf_form.*\]|', '', $text);
+              #}
+              
+              if($opts[$this->prefix.'kses'] && !tdomf_get_option_form(TDOMF_OPTION_MODERATION,$args['tdomf_form_id'])){
+                  // if moderation is enabled, we don't do kses filtering, might as well
+                  // give full picture to user!
+                  $text = wp_filter_post_kses($text);
+              }
+        
+              if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
+                  $text = strip_tags($text,$opts[$this->prefix.'allowable-tags']);
+              }
+              
+              $len = strlen($text);
+              if($opts[$this->prefix.'char-limit'] > 0 && $len > $opts[$this->prefix.'char-limit']) {
+                if(!empty($opts[$this->prefix.'title'])) {
+                    $output .= sprintf(__("You have exceeded the max character length by %d characters for %s.","tdomf"),($len - $opts[$this->prefix.'char-limit']),$opts[$this->prefix.'title']);
+                } else {
+                    $output .= sprintf(__("You have exceeded the max character length by %d characters.","tdomf"),($len - $opts[$this->prefix.'char-limit']));
+                }
+              } else if($opts[$this->prefix.'word-limit'] > 0) {
+                // Remove all HTML tags as they do not count as "words"!
+                $text = trim(strip_tags($text));
+                // Replace newlines with spaces
+                $text = preg_replace("/\r?\n/", " ", $text);
+                // Remove excess whitespace
+                $text = preg_replace('/\s\s+/', ' ', $text);
+                // count the words!
+                $word_count = count(explode(" ", $text));
+                if($word_count > $opts[$this->prefix.'word-limit']) {
+                  if(!empty($opts[$this->prefix.'title'])) {
+                      $output .= sprintf(__("You have exceeded the max word count by %d words for %s.","tdomf"),($word_count - $opts[$this->prefix.'word-limit']),$opts[$this->prefix.'title']);
+                  } else {
+                      $output .= sprintf(__("You have exceeded the max word count by %d words.","tdomf"),($word_count - $opts[$this->prefix.'word-limit']));
+                  }
+                }
+              }
+          }
+        }
+        return $output;
+    }
+    
+    function post($args,$opts,$original_field_name=false)
+    {
+        $output = false;
+        $text = false;
+        
+        if(isset($args[$this->prefix.'ta']))
+        {
+            $text = $args[$this->prefix.'ta'];
+        } else if($original_field_name != false && isset($args[$original_field_name])) {
+            $text = $args[$original_field_name];
+        }
+        
+        if($text != false) {
+            $output = $text;
+            
+            if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
+                $output = strip_tags($output,$options['allowable-tags']);
+            } 
+            
+            if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+
+                if($opts[$this->prefix.'filter'] == 'the_content' ) {
+                    if(get_magic_quotes_gpc()) {
+                        /* Wordpress 2.8.x: 'the_content' adds slashes to ' and " but not to 
+                         * other back slashes. Passing the protected content to post update
+                         * works fine then for ' and " but not for slashes. Need to protect
+                         * slashes before passing it through 'the_content' */
+                        $output = str_replace('\\','\\\\',$output);
+                    }
+                }
+                
+                $output = apply_filters($opts[$this->prefix.'filter'], $output);
+            }
+        }
+        return $output;
     }
 }
 

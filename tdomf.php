@@ -146,13 +146,11 @@ Wordpress 2.8.2
 
 Magic Quotes: ON
 ================
-                  Title | Content | Excerpt | CF: Textarea | CF: Text
+                  Title | Content | Excerpt | CF: TextArea | CF: TextField
 AJAX: On
 --------          
-New-Post-Preview: OK    | OK*     | OK      | OK           | OK
-New-Post-Submit : FAIL  | OK*     | FAIL    | FAIL         | FAIL
-
-* Some occasional slashes are lost
+New-Post-Preview: OK    | OK      | OK      | OK           | OK
+New-Post-Submit : OK    | OK      | OK      | OK           | OK
 
 AJAX: Off
 ---------

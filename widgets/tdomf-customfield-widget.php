@@ -483,7 +483,7 @@ function tdomf_widget_customfields_init($form_id,$mode){
     
     for($i = 1; $i <= $count; $i++) {
       tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields', array('new'), $i);
-      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 820, array('new'), $i);
+      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 960, array('new'), $i);
       tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', array('new'), $i);
       tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', array('new'), $i);
       tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array('new'), $i);
@@ -692,106 +692,164 @@ function tdomf_widget_customfields_hidden_control($number,$options){
 //                                                 Custom Field as a Textarea //
 ////////////////////////////////////////////////////////////////////////////////
 
-function tdomf_widget_customfields_textarea_control_handler($number,$options) {
-  $options['required'] = isset($_POST["customfields-ta-required-$number"]);
-  $options['defval'] = $_POST["customfields-ta-defval-$number"];
-  $options['ta-quicktags'] = isset($_POST["customfields-ta-quicktags-$number"]);
-  $options['ta-restrict-tags'] = isset($_POST["customfields-ta-restrict-tags-$number"]);
-  $options['ta-allowable-tags'] = $_POST["customfields-ta-allowable-tags-$number"];
-  $options['ta-content-filter'] = isset($_POST["customfields-ta-content-filter-$number"]);
-  $options['ta-char-limit'] = intval($_POST["customfields-ta-content-char-limit-$number"]);
-  $options['ta-word-limit'] = intval($_POST["customfields-ta-content-word-limit-$number"]);  
+function tdomf_widget_customfields_textarea_default_options($number,$options) 
+{
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
+
+  # title, cols, rows, required and defval (aka default-text) are common to all
+  
+    
+  if(isset($options['title'])) {
+      $options[$prefix.'title'] = $options['title'];
+  }
+  
+  if(isset($options['required'])) {
+      $options[$prefix.'required'] = $options['required'];
+  }
+  
+  if(isset($options["defval"])) {
+      $options[$prefix.'default-text'] = $options["defval"];
+  }
+  
+  if(isset($options['cols'])) {
+      $options[$prefix.'cols'] = $options['cols'];
+  }
+  
+  if(isset($options['rows'])) {
+      $options[$prefix.'rows'] = $options['rows'];
+  }
+  
+  if(isset($options['ta-quicktags'])) {
+      $options[$prefix.'quicktags'] = $options['ta-quicktags'];
+      unset($options['quicktags']);
+  }
+  
+  if(isset($options['ta-restrict-tags'])) {
+      $options[$prefix.'restrict-tags'] = $options['ta-restrict-tags'];
+      unset($options['ta-restrict-tags']);
+  }
+  
+  if(isset($options['ta-allowable-tags'])) {
+      $options[$prefix.'allowable-tags'] = $options['ta-allowable-tags'];
+      unset($options['allowable-tags']);
+  }
+  
+  if(isset($options['ta-char-limit'])) {
+      $options[$prefix.'char-limit'] = $options['ta-char-limit'];
+      unset($options['ta-char-limit']);
+  }
+  
+  if(isset($options['ta-word-limit'])) {
+      $options[$prefix.'word-limit'] = $options['ta-word-limit'];
+      unset($options['ta-word-limit']);
+  }
+  
+  if(isset($options['ta-content-filter'])) {
+      $options[$prefix.'use-filter'] = $options['ta-content-filter'];
+      $options[$prefix.'filter'] = 'the_content';
+      unset($options['ta-content-filter']);
+  }
+  
+  # grab default widget field options
+  
+  $options = $textarea->getOptions($options);
+  
   return $options;
 }
+
+function tdomf_widget_customfields_textarea_control_handler($number,$options) {
+  
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
+
+  # specific to this widget/textarea
+
+  if(isset($_POST["customfields-ta-content-filter-$number"])) {
+      $options[$prefix.'use-filter'] = true;
+      $options[$prefix.'filter'] = 'the_content';
+  } else {
+      $options[$prefix.'use-filter'] = false;
+  }  
+  
+  # textarea ones
+  
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
+
+  # now update
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $textarea->control($options,false);
+  ob_end_clean();
+  
+  # make sure to copy 'common' ones back
+  
+  if(isset($options[$prefix."required"])) {
+      $options['required'] = $options[$prefix.'required'];
+  }
+  
+  if(isset($options[$prefix.'default-text'])) {
+      $options["defval"] = $options[$prefix.'default-text'];
+  }
+  
+  if(isset($options[$prefix.'cols'])) {
+      $options['cols'] = $options[$prefix.'cols'];
+  }
+
+  if(isset($options[$prefix.'rows'])) {
+      $options['rows'] = $options[$prefix.'rows'];
+  }
+  
+  return $options;
+}                                                      
 
 
 function tdomf_widget_customfields_textarea_control($number,$options){ 
   
   $output  = "<h3>".__("Text Area","tdomf")."</h3>";
 
-  $output .= "<label for=\"customfields-ta-required-$number\">";
-  $output .= "<input type=\"checkbox\" name=\"customfields-ta-required-$number\" id=\"customfields-ta-required-$number\"";
-  if($options['required']) { $output .= " checked "; }
-  $output .= "/>".__("Required","tdomf")."</label><br/><Br/>";
-
-  $output .= "<label for=\"customfields-ta-defval-$number\">";
-  $output .= __("Default Value:","tdomf")."<br/>";
-  $output .= "<textarea title='true' cols=\"30\" rows=\"3\" id=\"customfields-ta-defval-$number\" name=\"customfields-ta-defval-$number\">".$options['defval']."</textarea>";
-  $output .= "</label><br/><br/>";
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
   
-  $output .= "<label for=\"customfields-ta-quicktags-$number\">";
-  $output .=  __("Use Quicktags","tdomf"); 
-  $output .= " <input type=\"checkbox\" name=\"customfields-ta-quicktags-$number\" id=\"customfields-ta-quicktags-$number\"";
-  if($options['ta-quicktags']){ $output .= " checked "; }
-  $output .= "></label><br/><br/>";
+  # update options
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
+  
+  $tashow = array($prefix.'cols',
+                  $prefix.'rows',
+                  $prefix.'quicktags',
+                  $prefix.'restrict-tags',
+                  $prefix.'allowable-tags',
+                  $prefix.'char-limit',
+                  $prefix.'word-limit',
+                  $prefix.'required',
+                  $prefix.'default-text');
+  # a bit of a hack but works
+  ob_start();
+  $options = $textarea->control($options,false,$tashow);
+  $output .= ob_get_contents();
+  ob_end_clean();
+
+  # @todo ta-content-filter, Format like Post Content (convert new lines to paragraphs, etc.)
   
   $output .= "<label for=\"customfields-ta-content-filter-$number\">";
-  $output .=  __("Format like Post Content <i>(convert new lines to paragraphs, etc.)</i>","tdomf"); 
-  $output .= " <input type=\"checkbox\" name=\"customfields-ta-content-filter-$number\" id=\"customfields-ta-content-filter-$number\"";
-  if($options['ta-content-filter']){ $output .= " checked "; }
-  $output .= "></label><br/><br/>";
-
-  $output .= "<label for=\"customfields-ta-content-char-limit-".$number."\" >".__("Character Limit <i>(0 indicates no limit)</i>","tdomf")." <input type=\"text\" name=\"customfields-ta-content-char-limit-".$number."\" id=\"customfields-ta-content-char-limit-".$number."\" value=\"".$options['ta-char-limit']."\" size=\"3\" /></label><br/>";
-  $output .= "<label for=\"customfields-ta-content-word-limit-".$number."\" >".__("Word Limit <i>(0 indicates no limit)</i>","tdomf")." <input type=\"text\" name=\"customfields-ta-content-word-limit-".$number."\" id=\"customfields-ta-content-word-limit-".$number."\" value=\"".$options['ta-word-limit']."\" size=\"3\" /></label><br/><br/>";
+  $output .= "<input type=\"checkbox\" name=\"customfields-ta-content-filter-$number\" id=\"customfields-ta-content-filter-$number\"";
+  if($options[$prefix.'use-filter']) { $output .= " checked "; }
+  $output .= "/> ".__("Format like Post Content <i>(convert new lines to paragraphs, etc.)</i>","tdomf")."</label><br/><Br/>";
   
-  $output .= "<label for=\"customfields-cols-$number\" >";
-  $output .= __("Cols","tdomf");
-  $output .= " <input type=\"text\" name=\"customfields-cols-$number\" id=\"customfields-cols-$number\" value=\"";
-  $output .= htmlentities($options['cols'],ENT_QUOTES,get_bloginfo('charset'))."\" size=\"3\" /></label>";
-  $output .= " <label for=\"customfields-rows-$number\" >";
-  $output .= __("Rows","tdomf");
-  $output .= " <input type=\"text\" name=\"customfields-rows-$number\" id=\"customfields-rows-$number\" value=\"";
-  $output .= htmlentities($options['rows'],ENT_QUOTES,get_bloginfo('charset'))."\" size=\"3\" /></label><br/><br/>";
-
-  $output .= "<label for=\"customfields-restrict-tags-$number\">";
-  $output .= __("Restrict Tags","tdomf");
-  $output .= " <input type=\"checkbox\" name=\"customfields-ta-restrict-tags-$number\" id=\"customfields-ta-restrict-tags-$number\"";
-  if($options['ta-restrict-tags']){ $output .= " checked "; }
-  $output .= "></label><br/><br/>";
-  
-  $output .= "<label for=\"customfields-allowable-tags-$number\">";
-  $output .= __("Allowable Tags","tdomf");
-  $output .= "<br/><textarea title=\"true\" cols=\"30\" name=\"customfields-ta-allowable-tags-$number\" id=\"customfields-ta-allowable-tags-$number\" >".$options['ta-allowable-tags']."</textarea></label>";
-
   return $output;
 }
 
 function tdomf_widget_customfields_textarea($args,$number,$options) {
   extract($args);
   
-  $value = $options['defval'];
-  if(isset($args["customfields-textarea-$number"])){
-    $value = $args["customfields-textarea-$number"];
-  }
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
   
-  if($options['required']) {
-    $output = "<label for=\"customfields-textarea-$number\" class=\"required\">".$options['title']." ".__("(Required)","tdomf")."<br/>\n";
-  } else {
-    $output = "<label for=\"customfields-textarea-$number\">".$options['title']."<br/>\n";
-  }
-  $output .= "</label>\n";
-    
-  if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-    $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags'],ENT_NOQUOTES,get_bloginfo('charset')))."<br/>";
-  }
-  if($options['ta-word-limit'] > 0) {
-      $output .= sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['ta-word-limit'])."<br/>";
-  }
-  if($options['ta-char-limit'] > 0) {
-      $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['ta-char-limit'])."<br/>";
-  }
-  if($options['ta-quicktags']) {
-    $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number";
-    if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-      $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number&allowed_tags=".urlencode($options['ta-allowable-tags']);
-    }
-    $output .= "\n<script src='$qt_path' type='text/javascript'></script>";
-    $output .= "\n<script type='text/javascript'>edToolbarcfta$number();</script>\n";
-  }
-  $output .= "<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >".htmlentities($value,ENT_NOQUOTES,get_bloginfo('charset'))."</textarea>";
-  if($options['ta-quicktags']) {
-    $output .= "\n<script type='text/javascript'>var edCanvascfta$number = document.getElementById('customfields-textarea-$number');</script>\n";
-  }
+  # update options
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
+  
+  $output = $textarea->form($args,$options);
   
   return $before_widget.$output.$after_widget;
 }
@@ -799,77 +857,28 @@ function tdomf_widget_customfields_textarea($args,$number,$options) {
 function tdomf_widget_customfields_textarea_hack($args,$number,$options) {
   extract($args);
   
-  $defval = str_replace("\"","\\\"",$options['defval']);
-  $output = "\t\t<?php \$value = \"$defval\";\n\t\tif(isset(\$post_args['customfields-textarea-$number'])) { \$value = \$post_args['customfields-textarea-$number']; } ?>\n";
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
   
-  if($options['required']) {
-    $output .= "\t\t<label for=\"customfields-textarea-$number\" class=\"required\">".$options['title']." ".__("(Required)","tdomf")."\n\t\t<br/>\n";
-  } else {
-    $output .= "\t\t<label for=\"customfields-textarea-$number\">".$options['title']."\n\t\t<br/>\n";
-  }
-  $output .= "\t\t</label>\n";
-    
-  if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-    $output .= "\t\t".sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['ta-allowable-tags'],ENT_NOQUOTES,get_bloginfo('charset')))."\n\t\t<br/>\n";
-  }
-  if($options['ta-word-limit'] > 0) {
-      $output .= "\t\t".sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['ta-word-limit'])."\n\t\t<br/>\n";
-  }
-  if($options['ta-char-limit'] > 0) {
-      $output .= "\t\t".sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['ta-char-limit'])."\n\t\t<br/>\n";
-  }
-  if($options['ta-quicktags']) {
-    $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number";
-    if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-      $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=cfta$number&allowed_tags=".urlencode($options['ta-allowable-tags']);
-    }
-    $output .= "\t\t<script src='$qt_path' type='text/javascript'></script>\n";
-    $output .= "\t\t<script type='text/javascript'>edToolbarcfta$number();</script>\n";
-  }
-  $output .= "\t\t<textarea title=\"true\" rows=\"".$options['rows']."\" cols=\"".$options['cols']."\" name=\"customfields-textarea-$number\" id=\"customfields-textarea-$number\" >";
-  $output .= "<?php echo htmlentities(\$value,ENT_NOQUOTES,get_bloginfo('charset')); ?>";
-  $output .= "</textarea>\n";
-  if($options['ta-quicktags']) {
-    $output .= "\t\t<script type='text/javascript'>var edCanvascfta$number = document.getElementById('customfields-textarea-$number');</script>\n";
-  }
+  # update options
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
+  
+  $output = $textarea->formHack($args,$options);
   
   return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
   extract($args);
-  $output = "";
-  if($options['required'] && trim($args["customfields-textarea-$number"]) == "") {
-    if(!empty($options['title'])) {
-      $output .= sprintf(__("You must specify some text for \"%s\".","tdomf"),$options['title']);
-    } else {
-      $output .= __("You are missing some text!","tdomf");
-    }
-  }
-  if($options['ta-word-limit'] > 0 || $options['ta-char-limit'] > 0) {
-      
-      // prefitler the content of ta so it's as close to the end result as possible
-      //
-      $ta_prefiltered = $args["customfields-textarea-$number"];
-      if($options['ta-allowable-tags'] != "" && $options['ta-restrict-tags']) {
-         $ta_prefiltered = strip_tags($ta_prefiltered,$options['allowable-tags']);
-      } 
-      // don't apply content filters!
-      
-      if($options['ta-char-limit'] > 0 && strlen($ta_prefiltered) > $options['ta-char-limit']) {
-        $output .= sprintf(__("You have exceeded the max character length by %d characters","tdomf"),(strlen($ta_prefiltered) - $options['ta-char-limit'])); 
-      } else if($options['ta-word-limit'] > 0) {
-        // Remove all HTML tags as they do not count as "words"!
-        $ta_prefiltered = trim(strip_tags($ta_prefiltered));
-        // Remove excess whitespace
-        $ta_prefiltered = preg_replace('/\s\s+/', ' ', $ta_prefiltered);
-        // count the words!
-        $word_count = count(explode(" ", $ta_prefiltered));
-        if($word_count > $options['ta-word-limit']) {
-          $output .= sprintf(__("You have exceeded the max word count by %d words","tdomf"),($word_count - $options['ta-word-limit']));
-        }
-      }
-  }
+    
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
+  
+  $output = $textarea->validate($args,$options);
+  
   // return output if any
   if($output != "") {
     return $before_widget.$output.$after_widget;
@@ -880,18 +889,17 @@ function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
 
 function tdomf_widget_customfields_textarea_post($args,$number,$options) {
   extract($args);
-  $text = $args["customfields-textarea-$number"];
-  // remove magic quotes
-  #if (get_magic_quotes_gpc()) {
-     $text = stripslashes($text);
-  #}
-  if($options['ta-restrict-tags']) {
-    $text = strip_tags($text,$options['ta-allowable-tags']);
-  }
-  if($options['ta-content-filter']) {
-    $text = apply_filters('the_content', $text);
-  }
+  
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options,"customfields-textarea-$number");
+  
+  $text = $textarea->post($args,$options);
+   
   add_post_meta($post_ID,$options['key'],$text);
+  
   return NULL;
 }
 
@@ -910,30 +918,17 @@ function tdomf_widget_customfields_textarea_adminemail($args,$number,$options) {
 }
 
 function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
-  $text = trim($args["customfields-textarea-$number"]);
-  if($text == "") {
-    return "";
-  }
   extract($args);
-  $output = $before_widget;
-  if($options['ta-restrict-tags']) {
-    $text = strip_tags($text,$options['ta-allowable-tags']);
-  }
-  if($options['ta-content-filter']) {
-    $text = apply_filters('the_content', $text);
-  }
   
-  if($options['append'] && trim($options['format']) != "") {
-    $fmt = tdomf_widget_customfields_gen_fmt($number,$text,$options);
-    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
-  } else {
-    if($options['title'] != "") {
-      $output .= $before_title.$options['title'].$after_title;
-    }
-    $output .= $text;
-  }
-  $output .= $after_widget;
-  return $output;
+  $prefix = 'customfields-ta-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextArea($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
+  
+  $output = $textarea->preview($args,$options);
+  
+  return $before_widget.$output.$after_widget;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
