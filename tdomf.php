@@ -146,29 +146,41 @@ Wordpress 2.8.2
 
 Magic Quotes: ON
 ================
-                  Title | Content | Excerpt | CF: TextArea | CF: TextField
-AJAX: On
---------          
-New-Post-Preview: OK    | OK      | OK      | OK           | OK
-New-Post-Submit : OK    | OK      | OK      | OK           | OK
+Widget Screen    :
+Form Hacker      :
 
-AJAX: Off
----------
-New-Post-Preview: OK    | FAIL
-New-Post-Submit : OK    | OK
+[AJAX: On]         Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------          
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview:
+Edit-Post-Submit :
+
+[AJAX: Off]        Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: 
+Edit-Post-Submit :
 
 Magic Quotes: OFF
 =================
+Widget Screen    :
+Form Hacker      :
 
-AJAX: On
---------
-New-Post-Preview: OK    | FAIL
-New-Post-Submit : OK    | OK
+[AJAX: On]         Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------          
+New-Post-Preview : 
+New-Post-Submit  : 
+Edit-Post-Preview: 
+Edit-Post-Submit :
 
-AJAX: Off
----------
-New-Post-Preview: OK    | FAIL
-New-Post-Submit : OK    | OK
+[AJAX: Off]        Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------
+New-Post-Preview : 
+New-Post-Submit  :
+Edit-Post-Preview: 
+Edit-Post-Submit :
 
 */
 

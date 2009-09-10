@@ -29,6 +29,14 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
      * @access private
      */       
       var $textarea;
+    
+      /** 
+     * Utility class for text area   
+     * 
+     * @var TDOMF_WidgetFieldField
+     * @access private
+     */       
+      var $textfield;
       
       /** 
        * Initilise and start widget
@@ -37,6 +45,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        */ 
       function TDOMF_WidgetContent() {
           $this->textarea = new TDOMF_WidgetFieldTextArea('content-text-');
+          $this->textfield = new TDOMF_WidgetFieldTextfield('content-title-');
           $this->enableHack();
           $this->enablePreview();
           $this->enablePreviewHack();
@@ -45,7 +54,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enablePost();
           $this->enableAdminEmail();
           $this->enableWidgetTitle();
-          $this->enableControl(true,450,720);
+          $this->enableControl(true,450,750);
           $this->setInternalName('content');
           $this->setDisplayName(__('Content','tdomf'));
           $this->setOptionKey('tdomf_content_widget');
@@ -69,20 +78,13 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
          if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
              $post = get_post($tdomf_post_id);
              if($post) {
-                 if(!isset($args['content_title'])) {
-                     $content_title = $post->post_title;
-                 }
+                 $options['content-title-default-text'] = $post->post_title; 
                  $options['content-text-default-text'] = $post->post_content;
              }
          }
          
          if($options['title-enable']) {
-              if($options['title-required']) {
-                  $output .= '<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."<br/></label>\n";
-              } else {
-                  $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/></label>\n";
-              }
-              $output .= '<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES,get_bloginfo('charset')).'" />';
+              $output .= $this->textfield->form($args,$options);
               if($options['text-enable']) {
                   $output .= "<br/><br/>";
               }
@@ -107,27 +109,21 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $output = "";
           
           if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
+              // @todo
               $output .= "\t\t".'<?php $post = get_post($post_id); if($post) {'."\n";
               if($options['title-enable']) {
-                  $output .= "\t\t\t".'if(!isset($content_title)) { $content_title = $post->post_title; }'."\n";
+                  $output .= "\t\t\t".'if(!isset($post_args[\'content-title-tf\'])) { $post_args[\'content-title-tf\'] = $post->post_title; }'."\n";
               }
               if($options['text-enable']) {
-                  $output .= "\t\t\t".'if(!isset($content_content)) { $content_ta = $post->post_content; }'."\n";
+                  $output .= "\t\t\t".'if(!isset($post_args[\'content-text-ta\'])) { $post_args[\'content-text-ta\'] = $post->post_content; }'."\n";
               }
               $output .= "\t\t".'} ?>'."\n";
           }
           
           if($options['title-enable']) {
-            if($options['title-required']) {
-              $output .= "\t\t".'<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."\n\t\t\t<br/>\n";
-            } else {
-              $output .= "\t\t".'<label for="content_title">'.__("Post Title: ","tdomf")."\n\t\t\t<br/>\n";
-            }
-            $output .= "\t\t</label>\n";            
-            $output .= "\t\t\t".'<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="';
-            $output .= '<?php echo htmlentities($content_title,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />'."\n";
+            $output .= $this->textfield->formHack($args,$options);
             if($options['text-enable']) {
-              $output .= "\t\t<br/>\n\t\t<br/>\n";
+                $output .= "\n\t\t".'<br/><br/>'."\n";
             }
           }
           
@@ -145,10 +141,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        */
       function getOptions($form_id) {
           $defaults = array(   'title-enable' => true,
-                               'title-required' => false,
-                               'title-size' => 30,
                                'text-enable' => true,
-                                # non-user configurable options for textarea
+                                # default options for textfield
+                               'content-title-title' => __('Post Title','tdomf'),
+                               'content-title-default_text' => "",
+                                # defaults options for textarea
                                'content-text-title' => __('Post Text','tdomf'),
                                'content-text-use-filter' => true,
                                'content-text-filter' => 'the_content',
@@ -157,6 +154,18 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                                );
           $options = TDOMF_Widget::getOptions($form_id); 
           $options = wp_parse_args($options, $defaults);
+          
+          # convert previous textfield options to new utility textfield options
+          
+          if(isset($options['title-required'])) {
+              $options['content-title-required'] = $options['title-required'];
+              unset($options['title-required']);
+          }
+          
+          if(isset($options['title-size'])) {
+              $options['content-title-size'] = $options['title-size'];
+              unset($options['title-size']);
+          }
           
           # convert previous textarea options to new utility textarea options
           
@@ -200,9 +209,10 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
               unset($options['word-limit']);
           }
           
-          # now grab defaults for textarea
+          # now grab defaults for textarea and textfield
           
           $options = $this->textarea->getOptions($options);
+          $options = $this->textfield->getOptions($options);
           
           return $options;
       }   
@@ -218,12 +228,14 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($args);
           $output = "";
           if($options['title-enable']) {
-            $output .= "<b>".__("Title: ","tdomf")."</b>";
-            $output .= $content_title;
+            $output .= $this->textfield->preview($args,$options,'content_title');
             $output .= "<br/>";
+            if($options['text-enable']) {
+                $output .= "<br/>";
+            }
           }
           if($options['text-enable']) {
-            $output .= $this->textarea->preview($args,$options);
+            $output .= $this->textarea->preview($args,$options,'content_content');
           }
           return $output;
       }
@@ -239,9 +251,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($args);          
           $output = "";
           if($options['title-enable']) {
-            $output .= "\t<b>".__("Title: ","tdomf")."</b>";
-            $output .= "<?php echo \$content_title; ?>\n";
-            $output .= "\t<br/>\n";
+            $output .= $this->textfield->previewHack($args,$options);
+            $output .= "<br/>";
+            if($options['text-enable']) {
+                $output .= "<br/>";
+            }
           }
           if($options['text-enable']) {
             $output .= $this->textarea->previewHack($args,$options);
@@ -280,8 +294,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
           // Title
 
-          if($options['title-enable'] && !isset($content_title)) {
-            $content_title = tdomf_protect_input($post['post_title']);
+          if($options['title-enable']) {
+            $content_title = tdomf_protect_input($this->textfield->post($args,$options,'content_title'));
           }
           
           // Update actual post
@@ -309,10 +323,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           // Store settings for this widget
           //
           if ( $_POST[$this->internalName.'-submit'] ) {
-                 $newoptions['title'] = strip_tags(stripslashes($_POST['content-title']));
                  $newoptions['title-enable'] = isset($_POST['content-title-enable']);
-                 $newoptions['title-required'] = isset($_POST['content-title-required']);
-                 $newoptions['title-size'] = intval($_POST['content-title-size']); 
                  $newoptions['text-enable'] = isset($_POST['content-text-enable']);
                  $options = wp_parse_args($newoptions, $options);
                  $this->updateOptions($options,$form_id);
@@ -323,17 +334,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($options);
           ?>
 <div>          
-          <?php $this->controlCommon($options); ?>
-     
-<h4><?php _e("Title of Post","tdomf"); ?></h4>
-<label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> ></label>
-<label for="content-title-required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="content-title-required" id="content-title-required" <?php if($options['title-required']) echo "checked"; ?> ></label>
-<label for="content-title-size" style="line-height:35px;"><?php _e("Size","tdomf"); ?> <input type="textfield" name="content-title-size" id="content-title-size" value="<?php echo htmlentities($options['title-size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
-
-<h4><?php _e("Content of Post","tdomf"); ?></h4>
-<label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> ></label>
-
-          <?php 
+          <?php $this->controlCommon($options); 
+          
           if(TDOMF_Widget::isSubmitForm($mode,$form_id)) {
               $tashow = array('content-text-cols',
                               'content-text-rows',
@@ -345,6 +347,10 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                               'content-text-required',
                               'content-text-title',
                               'content-text-default-text');
+              $tfshow = array('content-title-size',
+                              'content-title-required',
+                              'content-title-title',
+                              'content-title-default-text');
           } else {
               $tashow = array('content-text-cols',
                               'content-text-rows',
@@ -355,8 +361,26 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                               'content-text-word-limit',
                               'content-text-required',
                               'content-text-title');
-          }
-          $taoptions = $this->textarea->control($options, $form_id, $tashow); 
+              $tfshow = array('content-title-size',
+                              'content-title-required',
+                              'content-title-title');              
+          } ?>
+
+<h4><?php _e("Title of Post","tdomf"); ?></h4>
+<label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?></label>
+<input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> >
+
+          <?php $tfoptions = $this->textfield->control($options, $form_id, $tfshow); 
+          if( $_POST[$this->internalName.'-submit'] ) {
+              $options = wp_parse_args($tfoptions, $options);
+              $this->updateOptions($options,$form_id);
+          } ?>   
+          
+<h4><?php _e("Content of Post","tdomf"); ?></h4>
+<label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?><label>
+<input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> >
+          
+          <?php $taoptions = $this->textarea->control($options, $form_id, $tashow); 
           if( $_POST[$this->internalName.'-submit'] ) {
               $options = wp_parse_args($taoptions, $options);
               $this->updateOptions($options,$form_id);
@@ -380,12 +404,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
           if($options['title-enable'] && $options['title-required']
                && (empty($content_title) || trim($content_title) == "")) {
-              if($output != "") { $output .= "<br/>"; }
-              $output .= __("You must specify a post title.","tdomf");
+              $tf_output = $this->textfield->validate($args,$options,$preview,'content_title');
+              if(!empty($tf_output)) {
+                  if($output != "") { $output .= "<br/>"; }
+                  $output .= $tf_output;
+              }
           }
 
           if($options['text-enable']) {
-              $ta_output = $this->textarea->validate($args,$options,$preview);
+              $ta_output = $this->textarea->validate($args,$options,$preview,'content_content');
               if(!empty($ta_output)) {
                   if($output != "") { $output .= "<br/>"; }
                   $output .= $ta_output;
@@ -402,14 +429,15 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
               // for post content, this is probably not the most exact way to do it
               //
               if($options['text-enable'] && $options['content-text-required']) {
-                  $post_content = $this->textarea->post($args,$options,$preview);
+                  $post_content = $this->textarea->post($args,$options,$preview,'content_content');
                   if(trim($post->post_content) == trim($post_content)) {
                       if($output != "") { $output .= "<br/>"; }
                       $output .= __("You must modify the post text.","tdomf");
                   }
               }              
-              if($options['title-enable'] && $options['title-required']) {
-                  if(trim($post->post_title) == trim($content_title)) {
+              if($options['title-enable'] && $options['content-title-required']) {
+                  $post_title = $this->textfield->post($args,$options,$preview,'content_title');
+                  if(trim($post->post_title) == trim($post_title)) {
                       if($output != "") { $output .= "<br/>"; }
                       $output .= __("You must modify the post title.","tdomf");
                   }

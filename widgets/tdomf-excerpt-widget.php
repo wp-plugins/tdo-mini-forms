@@ -45,7 +45,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enablePost();
           #$this->enableAdminEmail();
           $this->enableWidgetTitle();
-          $this->enableControl(true,340,580);
+          $this->enableControl(true,340,620);
           $this->setInternalName('excerpt');
           $this->setDisplayName(__('Excerpt','tdomf'));
           $this->setOptionKey('tdomf_excerpt_widget');

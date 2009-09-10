@@ -507,145 +507,167 @@ add_action('tdomf_control_form_start','tdomf_widget_customfields_init', 10, 2);
 function tdomf_widget_customfields_textfield($args,$number,$options) {
   extract($args);
   
-  $value = $options['defval'];
-  if(isset($args["customfields-textfield-$number"])){
-    $value = $args["customfields-textfield-$number"];
-  }
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextField($prefix);
   
-  $output  = $before_widget;
+  # update options
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
   
-  if($options['required']) {
-    $output .= "<label for=\"customfields-textfield-$number\" class=\"required\">".$options['title']." ".__("(Required)","tdomf")."<br/>\n";
-  } else {
-    $output .= "<label for=\"customfields-textfield-$number\">".$options['title']."<br/>\n";
-  }
-  if($options['tf-subtype'] == 'email') {
-    $output .= __("Email:","tdomf")." "; 
-  } else if($options['tf-subtype'] == 'url') {
-    $output .= __("URL:","tdomf")." ";
-  }
-  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" />";
-  $output .= "</label>\n";
+  $output = $textarea->form($args,$options);
   
-  $output .= $after_widget;
-  return $output;
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_textfield_hack($args,$number,$options) {
   extract($args);
   
-  $defval = str_replace("\"","\\\"",$options['defval']);
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextField($prefix);
   
-  $output  = $before_widget;
-
-  $output .= "\t\t<?php \$value = \"$defval\";\n\t\tif(isset(\$post_args['customfields-textfield-$number'])) { \$value = \$post_args['customfields-textfield-$number']; } ?>\n";
+  # update options
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
   
-  if($options['required']) {
-    $output .= "\t\t<label for=\"customfields-textfield-$number\" class=\"required\">".$options['title']." ".__("(Required)","tdomf")."\n\t\t<br/>\n";
-  } else {
-    $output .= "\t\t<label for=\"customfields-textfield-$number\">".$options['title']."\n\t\t\t<br/>\n";
-  }
-  if($options['tf-subtype'] == 'email') {
-    $output .= "\t\t\t".__("Email:","tdomf")." "; 
-  } else if($options['tf-subtype'] == 'url') {
-    $output .= "\t\t\t".__("URL:","tdomf")." ";
-  } else {
-    $output .= "\t\t\t";
-  }
-  $output .= "<input type=\"text\" name=\"customfields-textfield-$number\" id=\"customfields-textfield-$number\" size=\"".$options['size']."\" value=\"";
-  $output .= "<?php echo htmlentities(\$value,ENT_QUOTES,get_bloginfo('charset')); ?>";
-  $output .=  "\" />\n";
-  $output .= "\t\t</label>\n";
+  $output = $textarea->formHack($args,$options);
   
-  $output .= $after_widget;
-  return $output;
+  return $before_widget.$output.$after_widget;
 }
 
-function tdomf_widget_customfields_textfield_control_handler($number,$options) {
-  $options['required'] = isset($_POST["customfields-tf-required-$number"]);
-  $options['defval'] = $_POST["customfields-tf-defval-$number"];
-  $options['tf-subtype'] = $_POST["customfields-tf-subtype-$number"];
+function tdomf_widget_customfields_textfield_default_options($number,$options) 
+{
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textfield = new TDOMF_WidgetFieldTextField($prefix);
+
+  # append, size, title, required and defval (aka default-text) are common to all
+    
+  if(isset($options['title'])) {
+      $options[$prefix.'title'] = $options['title'];
+  }
+  
+  if(isset($options['required'])) {
+      $options[$prefix.'required'] = $options['required'];
+  }
+  
+  if(isset($options['defval'])) {
+      $options[$prefix.'default-text'] = $options['defval'];
+  }
+  
+  if(isset($options['size'])) {
+      $options[$prefix.'size'] = $options['size'];
+  }  
+  
+  if(isset($options['tf-subtype'])) {
+      $options[$prefix.'restrict-type'] = $options['tf-subtype'];
+      unset($options['tf-subtype']);
+  }
+  
+  # grab default widget field options
+  
+  $options = $textfield->getOptions($options);
+  
   return $options;
 }
 
+
+function tdomf_widget_customfields_textfield_control_handler($number,$options) {
+  
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textfield = new TDOMF_WidgetFieldTextField($prefix);
+  
+  # textarea ones
+  
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
+
+  # now update
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $textfield->control($options,false);
+  ob_end_clean();
+  
+  # make sure to copy 'common' ones back
+  
+  if(isset($options[$prefix."required"])) {
+      $options['required'] = $options[$prefix.'required'];
+  }
+  
+  if(isset($options[$prefix.'default-text'])) {
+      $options["defval"] = $options[$prefix.'default-text'];
+  }
+  
+  if(isset($options[$prefix.'size'])) {
+      $options['size'] = $options[$prefix.'size'];
+  }
+
+  return $options;
+}                                                     
+
 function tdomf_widget_customfields_textfield_control($number,$options){ 
+  
   $output  = "<h3>".__("Text Field","tdomf")."</h3>";
 
-  $output .= "<label for=\"customfields-tf-required-$number\">";
-  $output .= "<input type=\"checkbox\" name=\"customfields-tf-required-$number\" id=\"customfields-tf-required-$number\"";
-  if($options['required']) { $output .= " checked "; }
-  $output .= "/>".__("Required","tdomf")."</label><br/><Br/>";
-
-  $output .= "<label for=\"customfields-size-$number\">";
-  $output .= __("Size:","tdomf");;
-  $output .= "<input type=\"text\" name=\"customfields-size-$number\" id=\"customfields-size-$number\" value=\"".htmlentities($options['size'],ENT_QUOTES,get_bloginfo('charset'))."\" size=\"3\" />";
-  $output .= "</label><br/><br/>";
-
-  $output .= "<label for=\"customfields-tf-defval-$number\">";
-  $output .= __("Default Value:","tdomf")."<br/>";
-  $output .= "<input type=\"text\" size=\"40\" id=\"customfields-tf-defval-$number\" name=\"customfields-tf-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES,get_bloginfo('charset'))."\" />";
-  $output .= "</label><br/><br/>";
-
-  #$output .= "<label for \"customfields-tf-subtype-$number\">";
-  $output .= "<input type=\"radio\" name=\"customfields-tf-subtype-$number\" id=\"customfields-tf-subtype-$number\" value=\"text\"";
-  if($options['tf-subtype'] == "text") { $output .= " checked "; }
-  $output .= "/>".__("Text","tdomf")."<br>";
-  $output .= "<input type=\"radio\" name=\"customfields-tf-subtype-$number\" id=\"customfields-tf-subtype-$number\" value=\"email\"";
-  if($options['tf-subtype'] == "email") { $output .= " checked "; }
-  $output .= "/>".__("Email (only valid email addresses will be accepted)","tdomf")."<br>";
-  $output .= "<input type=\"radio\" name=\"customfields-tf-subtype-$number\" id=\"customfields-tf-subtype-$number\" value=\"url\"";
-  if($options['tf-subtype'] == "url") { $output .= " checked "; }
-  $output .= "/>".__("URL (only valid URLs will be accepted)","tdomf")."<br>";
-  #$output .= "</label>";
-
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textfield = new TDOMF_WidgetFieldTextField($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
+  
+   $tfhide = array($prefix.'title');
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $textfield->control($options,false,false,$tfhide);
+  $output .= ob_get_contents();
+  ob_end_clean();
+  
   return $output;
 }
 
 function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
-  $value = trim($args["customfields-textfield-$number"]);
-  if($value == "") {
-    return "";
-  }
-  extract($args);  
-  $output = $before_widget;  
-  if($options['append'] && trim($options['format']) != "") {
-    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
-    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
-  } else {
-    if($options['title'] != "") {
-      $output .= $before_title.$options['title'].$after_title;
-    }
-    $output .= $value;
-  }
-  $output .= $after_widget;
-  return $output;
+  extract($args);
+  
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textarea = new TDOMF_WidgetFieldTextField($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
+  
+  $output = $textarea->preview($args,$options);
+  
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_textfield_validate($args,$number,$options) {
   extract($args);
+    
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textfield = new TDOMF_WidgetFieldTextField($prefix);
   
-  if($options['required'] && trim($args["customfields-textfield-$number"]) == '') {
-    return $before_widget.sprintf(__("You must enter a value for %s!","tdomf"),$options['title']).$after_widget;
+  # update options
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
+  
+  $output = $textfield->validate($args,$options);
+  
+  // return output if any
+  if($output != "") {
+    return $before_widget.$output.$after_widget;
+  } else {
+    return NULL;
   }
-  
-  if($options['tf-subtype'] == 'url' && $args["customfields-textfield-$number"] != $options['defval'] && !tdomf_check_url($args["customfields-textfield-$number"])) {
-    return $before_widget.sprintf(__("The URL \"%s\" does not look correct.","tdomf"),$args["customfields-textfield-$number"]).$after_widget;
-  }
-  
-  if($options['tf-subtype'] == 'email' && $args["customfields-textfield-$number"] != $options['defval'] && !tdomf_check_email_address($args["customfields-textfield-$number"])) {
-     return $before_widget.sprintf(__("The email address \"%s\" does not look correct.","tdomf"),$args["customfields-textfield-$number"]).$after_widget;
-  }
-  
-  return NULL;
 }
 
 function tdomf_widget_customfields_textfield_post($args,$number,$options) {
   extract($args);
-  $value = $args["customfields-textfield-$number"];
-  #if (get_magic_quotes_gpc()) {
-     $value = stripslashes($args["customfields-textfield-$number"]);
-  #}
-  add_post_meta($post_ID,$options['key'],$value);
+  
+  $prefix = 'customfields-tf-'.$number.'-';
+  $textfield = new TDOMF_WidgetFieldTextField($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_textfield_default_options($number,$options);
+  
+  $text = $textfield->post($args,$options,"customfields-textfield-$number");
+   
+  add_post_meta($post_ID,$options['key'],$text);
+  
   return NULL;
 }
 
@@ -660,6 +682,7 @@ function tdomf_widget_customfields_textfield_adminemail($args,$number,$options) 
   $output .= $after_title;
   $output .= get_post_meta($post_ID,$options['key'],true);
   $output .= $after_widget;
+   
   return $output;
 }
 
@@ -894,9 +917,9 @@ function tdomf_widget_customfields_textarea_post($args,$number,$options) {
   $textarea = new TDOMF_WidgetFieldTextArea($prefix);
   
   # update options
-  $options = tdomf_widget_customfields_textarea_default_options($number,$options,"customfields-textarea-$number");
+  $options = tdomf_widget_customfields_textarea_default_options($number,$options);
   
-  $text = $textarea->post($args,$options);
+  $text = $textarea->post($args,$options,"customfields-textarea-$number");
    
   add_post_meta($post_ID,$options['key'],$text);
   

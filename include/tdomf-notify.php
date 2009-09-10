@@ -10,30 +10,39 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Validate email address
 // Taken from http://www.ilovejackdaniels.com/php/email-address-validation/
 //
-function tdomf_check_email_address($email) {
-  // First, we check that there's one @ symbol, and that the lengths are right
-  if (!ereg("^[^@]{1,64}@[^@]{1,255}$", $email)) {
-    // Email invalid because wrong number of characters in one section, or wrong number of @ symbols.
-    return false;
-  }
-  // Split it into sections to make life easier
-  $email_array = explode("@", $email);
-  $local_array = explode(".", $email_array[0]);
-  for ($i = 0; $i < sizeof($local_array); $i++) {
-     if (!ereg("^(([A-Za-z0-9!#$%&'*+/=?^_`{|}~-][A-Za-z0-9!#$%&'*+/=?^_`{|}~\.-]{0,63})|(\"[^(\\|\")]{0,62}\"))$", $local_array[$i])) {
-      return false;
-    }
-  }  
-  if (!ereg("^\[?[0-9\.]+\]?$", $email_array[1])) { // Check if domain is IP. If not, it should be valid domain name
-    $domain_array = explode(".", $email_array[1]);
-    if (sizeof($domain_array) < 2) {
-        return false; // Not enough parts to domain
-    }
-    for ($i = 0; $i < sizeof($domain_array); $i++) {
-      if (!ereg("^(([A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9])|([A-Za-z0-9]+))$", $domain_array[$i])) {
+function tdomf_check_email_address($email,$check_dns = false) {
+    
+  if(function_exists("is_email")) {
+      tdomf_log_message("Using Wordpress function: is_email to check $email instead of TDOMF regex!"); 
+      // if the Wordpress function exists, use it
+      if(is_email($email,$check_dns) == false) {
+          return false;
+      }
+  } else {
+      // First, we check that there's one @ symbol, and that the lengths are right
+      if (!ereg("^[^@]{1,64}@[^@]{1,255}$", $email)) {
+        // Email invalid because wrong number of characters in one section, or wrong number of @ symbols.
         return false;
       }
-    }
+      // Split it into sections to make life easier
+      $email_array = explode("@", $email);
+      $local_array = explode(".", $email_array[0]);
+      for ($i = 0; $i < sizeof($local_array); $i++) {
+         if (!ereg("^(([A-Za-z0-9!#$%&'*+/=?^_`{|}~-][A-Za-z0-9!#$%&'*+/=?^_`{|}~\.-]{0,63})|(\"[^(\\|\")]{0,62}\"))$", $local_array[$i])) {
+          return false;
+        }
+      }  
+      if (!ereg("^\[?[0-9\.]+\]?$", $email_array[1])) { // Check if domain is IP. If not, it should be valid domain name
+        $domain_array = explode(".", $email_array[1]);
+        if (sizeof($domain_array) < 2) {
+            return false; // Not enough parts to domain
+        }
+        for ($i = 0; $i < sizeof($domain_array); $i++) {
+          if (!ereg("^(([A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9])|([A-Za-z0-9]+))$", $domain_array[$i])) {
+            return false;
+          }
+        }
+      }
   }
   return true;
 }
