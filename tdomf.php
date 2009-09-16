@@ -146,22 +146,22 @@ Wordpress 2.8.2
 
 Magic Quotes: ON
 ================
-Widget Screen    :
-Form Hacker      :
+Widget Screen    : OK
+Form Hacker      : OK
 
 [AJAX: On]         Title | Content | Excerpt | CF: TextArea | CF: TextField
 --------------------------------------------------------------------------          
 New-Post-Preview : OK    | OK      | OK      | OK           | OK
 New-Post-Submit  : OK    | OK      | OK      | OK           | OK
-Edit-Post-Preview:
-Edit-Post-Submit :
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
 
 [AJAX: Off]        Title | Content | Excerpt | CF: TextArea | CF: TextField
 --------------------------------------------------------------------------
 New-Post-Preview : OK    | OK      | OK      | OK           | OK
 New-Post-Submit  : OK    | OK      | OK      | OK           | OK
-Edit-Post-Preview: 
-Edit-Post-Submit :
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
 
 Magic Quotes: OFF
 =================

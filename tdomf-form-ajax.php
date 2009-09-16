@@ -176,6 +176,15 @@ if(!isset($_POST['tdomf_action'])) {
 // Remove magic quote slashes and additionally ones Wordpress "cleverly" adds
 tdomf_fixslashesargs();
 
+// calculate form_tag
+//
+$is_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
+if($is_edit) {
+    $form_tag = $form_id.'_'.$post_id;
+} else {
+    $form_tag = $form_id;
+}
+
 // Now either generate a preview or create a post
 //
 if($_POST['tdomf_action'] == "post") {
@@ -194,12 +203,12 @@ if($_POST['tdomf_action'] == "post") {
             $post_id = $edit->post_id;
             if($edit->state == 'approved') {
                 if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
-                    die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                    die( "tdomfRedirect$form_tag('".get_permalink($post_id)."');" );
                     // Hack: set your own URL here if you wish to redirect to a 
                     // different URL (and comment out the 'die' line above) 
                     // Future versions of TDOMF will provide this as an option.
                     //
-                    #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
+                    #die( "tdomfRedirect$form_tag('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
                 } else {
                     tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
                 }
@@ -212,12 +221,12 @@ if($_POST['tdomf_action'] == "post") {
             $post_id = $retVal;
             if(get_post_status($post_id) == 'publish') {
                 if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
-                    die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                    die( "tdomfRedirect$form_tag('".get_permalink($post_id)."');" );
                     // Hack: set your own URL here if you wish to redirect to a 
                     // different URL (and comment out the 'die' line above) 
                     // Future versions of TDOMF will provide this as an option.
                     //
-                    #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
+                    #die( "tdomfRedirect$form_tag('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
                 } else {
                     tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
                 }
@@ -231,7 +240,7 @@ if($_POST['tdomf_action'] == "post") {
               // different URL (and comment out the 'die' line above) 
               // Future versions of TDOMF will provide this as an option.
               //
-              #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
+              #die( "tdomfRedirect$form_tag('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
             }
         }
       // If retVal is a string, something went wrong!

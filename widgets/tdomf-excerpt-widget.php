@@ -82,7 +82,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        */
       function getOptions($form_id) {
           $defaults = array(   'excerpt-title' => __('Excerpt Text','tdomf'),
-                               'excerpt-use-filter' => true,
+                               'excerpt-use-filter' => 'preview',
                                'excerpt-filter' => 'the_excerpt',
                                'excerpt-kses' => false,
                                'excerpt-default_text' => "",

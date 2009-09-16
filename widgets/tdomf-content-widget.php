@@ -145,9 +145,11 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                                 # default options for textfield
                                'content-title-title' => __('Post Title','tdomf'),
                                'content-title-default_text' => "",
+                               'content-title-use-filter' => 'preview',
+                               'content-title-filter' => 'the_title',
                                 # defaults options for textarea
                                'content-text-title' => __('Post Text','tdomf'),
-                               'content-text-use-filter' => true,
+                               'content-text-use-filter' => 'preview',
                                'content-text-filter' => 'the_content',
                                'content-text-kses' => true,
                                'content-text-default_text' => "",
@@ -213,6 +215,14 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           
           $options = $this->textarea->getOptions($options);
           $options = $this->textfield->getOptions($options);
+          
+          # unconfigurable by user
+          
+          $options['content-text-use-filter'] = 'preview';
+          $options['content-text-filter'] = 'the_content';
+          $options['content-text-kses'] = true;
+          $options['content-title-use-filter'] = 'preview';
+          $options['content-title-filter'] = 'the_title';
           
           return $options;
       }   
@@ -402,8 +412,20 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($args);
           $output = "";
 
-          if($options['title-enable'] && $options['title-required']
-               && (empty($content_title) || trim($content_title) == "")) {
+          if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
+
+               // when it goes to validation, the tdomf_post_id will be the 
+               // real post id
+
+              $post = &get_post( $tdomf_post_id );
+          
+              // set default texts to the original post contents
+
+              $options['content-text-default-text'] = $post->post_content;
+              $options['content-title-default-text'] = $post->post_title;
+          }
+          
+          if($options['title-enable']) {
               $tf_output = $this->textfield->validate($args,$options,$preview,'content_title');
               if(!empty($tf_output)) {
                   if($output != "") { $output .= "<br/>"; }
@@ -418,32 +440,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                   $output .= $ta_output;
               }
           }
-          
-          if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
 
-               // when it goes to validation, the tdomf_post_id will be the 
-               // real post id
-
-              $post = &get_post( $tdomf_post_id );
-              
-              // for post content, this is probably not the most exact way to do it
-              //
-              if($options['text-enable'] && $options['content-text-required']) {
-                  $post_content = $this->textarea->post($args,$options,$preview,'content_content');
-                  if(trim($post->post_content) == trim($post_content)) {
-                      if($output != "") { $output .= "<br/>"; }
-                      $output .= __("You must modify the post text.","tdomf");
-                  }
-              }              
-              if($options['title-enable'] && $options['content-title-required']) {
-                  $post_title = $this->textfield->post($args,$options,$preview,'content_title');
-                  if(trim($post->post_title) == trim($post_title)) {
-                      if($output != "") { $output .= "<br/>"; }
-                      $output .= __("You must modify the post title.","tdomf");
-                  }
-              }
-          }
-          
           // return output if any
           if($output != "") {
               return $output;

@@ -475,13 +475,13 @@ function tdomf_show_form_hacker() {
 
           <?php if($form_edit) { ?>
 
-              <?php if(tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id)) { ?>
+              <?php /*if(tdomf_get_option_form(TDOMF_OPTION_AJAX_EDIT,$form_id)) {*/ ?>
               
                  <h3><?php _e('\'Edit Post\' Link Text','tdomf'); ?></h3>
                  <textarea title="true" rows="5" cols="70" name="tdomf_msg_edit_post_link" id="tdomf_msg_edit_post_link" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_ADD_EDIT_LINK_TEXT,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>
                  <br/><br/>
              
-              <?php } ?>
+              <?php /*}*/ ?>
               
               <h3><?php _e('Invalid Post for Form','tdomf'); ?></h3>
               <textarea title="true" rows="5" cols="70" name="tdomf_msg_invalid_post" id="tdomf_msg_invalid_post" <?php if($code_on) { ?>class="codepress .php"<?php } ?> ><?php echo htmlentities(tdomf_get_message(TDOMF_OPTION_MSG_INVALID_POST,$form_id),ENT_NOQUOTES,get_bloginfo('charset')); ?></textarea>

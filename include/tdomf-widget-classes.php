@@ -1337,8 +1337,9 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
                        $this->prefix.'allowable-tags' => "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>",
                        $this->prefix.'char-limit' => 0,
                        $this->prefix.'word-limit' => 0,                      
-                       $this->prefix.'use-filter' => false,
-                       $this->prefix.'filter' => 'post_title',
+                       $this->prefix.'use-filter' => false, #true, 'preview', 'post'
+                       $this->prefix.'filter' => 'the_title',
+                       $this->prefix.'protect-magic-quotes' => true,
                        $this->prefix.'default-text' => "");        
         $opts = wp_parse_args($opts, $defs);
         return $opts;
@@ -1438,7 +1439,7 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         
         // textfield
         
-        $output .= "\t\t".'<input type="text" title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" size="'.$opts[$this->prefix.'size'].'" name="'.$this->prefix.'tf" id="'.$this->prefix.'tf" value="<?php echo $temp_text; ?>" />';
+        $output .= "\t\t".'<input type="text" title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" size="'.$opts[$this->prefix.'size'].'" name="'.$this->prefix.'tf" id="'.$this->prefix.'tf" value="<?php echo htmlentities($temp_text,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />';
 
         // post: nothing
         
@@ -1463,7 +1464,8 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         
         }
         
-        if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+        if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'preview') 
+            && !empty($opts[$this->prefix.'filter'])) {
             $output = apply_filters($opts[$this->prefix.'filter'], $output);
         }
         
@@ -1480,7 +1482,8 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         if($opts[$this->prefix.'restrict-type'] == 'text' && $opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
           $output .= "\t".'$temp_text = strip_tags($temp_text,\''.$opts[$this->prefix.'allowable-tags'].'\');'."\n";
         }
-        if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+        if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'preview') 
+            && !empty($opts[$this->prefix.'filter'])) {
           $output .= "\t".'$temp_text = apply_filters(\''.$opts[$this->prefix.'filter'].'\',$temp_text);'."\n";
         }
         $output .= "\t?>\n";
@@ -1509,8 +1512,8 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         $retOptions = $this->updateOptsString($retOptions,$this->prefix.'allowable-tags',$show,$hide);
         $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'char-limit',$show,$hide);
         $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'word-limit',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'filter',$show,$hide);
+        /*$retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
+        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'filter',$show,$hide);*/
         $retOptions = $this->updateOptsString($retOptions,$this->prefix.'restrict-type',$show,$hide);
         $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-url',$show,$hide);
         $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-email',$show,$hide);
@@ -1560,14 +1563,14 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
 <textarea title="true" cols="30" name="<?php echo $this->prefix; ?>allowable-tags" id="<?php echo $this->prefix; ?>allowable-tags" ><?php echo $options[$this->prefix.'allowable-tags']; ?></textarea>
 <br/>
   <?php }
-        if($this->useOpts($this->prefix.'use-filter',$show,$hide)) { ?>
+        /*if($this->useOpts($this->prefix.'use-filter',$show,$hide)) { ?>
 <label for="<?php echo $this->prefix; ?>use-filter" style="line-height:35px;"><?php _e("Pass input through a Wordpress filter","tdomf"); ?></label>
 <input type="checkbox" name="<?php echo $this->prefix; ?>use-filter" id="<?php echo $this->prefix; ?>use-filter" <?php if($options[$this->prefix.'use-filter']) echo "checked"; ?> >
 <br/>
 <label for="<?php echo $this->prefix; ?>filter" style="line-height:35px;"><?php _e("Filter:","tdomf"); ?></label>
 <input type="textfield" name="<?php echo $this->prefix; ?>filter" id="<?php echo $this->prefix; ?>filter" value="<?php echo htmlentities($options[$this->prefix.'filter'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/>
-  <?php }
+  <?php }*/
   if($this->useOpts($this->prefix.'restrict-type',$show,$hide)) { ?>
       
 <input type="radio" name="<?php echo $this->prefix; ?>restrict-type" id="<?php echo $this->prefix; ?>restrict-type" value="text"
@@ -1733,16 +1736,21 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
                 }
             }
             
-            if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+            if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'post') 
+                && !empty($opts[$this->prefix.'filter'])) {
+               tdomf_log_message("textfield: <pre>" . htmlentities(var_export($opts,true)) . "</pre>");
+               tdomf_log_message("textfield: applying " . $opts[$this->prefix.'filter'] . " to input for " . $this->prefix);
                 $output = apply_filters($opts[$this->prefix.'filter'], $output);
             }
             
-            if(get_magic_quotes_gpc()) {
-                /* Wordpress 2.8.x: 'the_content' adds slashes to ' and " but not to 
-                 * other back slashes. Passing the protected content to post update
-                 * works fine then for ' and " but not for slashes. Need to protect
-                 * slashes before passing it through 'the_content' */
-                $output = str_replace('\\','\\\\',$output);
+            if($opts[$this->prefix.'protect-magic-quotes']) {
+                if(get_magic_quotes_gpc()) {
+                    /* Wordpress 2.8.x adds slashes to ' and " but not to 
+                     * other back slashes. Passing the protected content to post update
+                     * works fine then for ' and " but not for slashes. Need to protect
+                     * slashes before passing it through 'the_content' */
+                    $output = str_replace('\\','\\\\',$output);
+                }
             }
         }
         
@@ -1776,10 +1784,11 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
                        $this->prefix.'char-limit' => 0,
                        $this->prefix.'word-limit' => 0,
                        $this->prefix.'required' => true,
-                       $this->prefix.'use-filter' => false,
+                       $this->prefix.'use-filter' => false, # @todo all/true, preview, post, disabled/false
                        $this->prefix.'filter' => 'the_content',
                        $this->prefix.'kses' => false,
                        $this->prefix.'default-text' => "",
+                       $this->prefix.'protect-magic-quotes' => true,
                        $this->prefix.'title' => "Text");
         $opts = wp_parse_args($opts, $defs);
         return $opts;
@@ -1825,8 +1834,8 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         $output .= '<textarea title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$opts[$this->prefix.'rows'].'" cols="'.$opts[$this->prefix.'cols'].'" name="'.$this->prefix.'ta" id="'.$this->prefix.'ta" >'.$text.'</textarea>';
         
         // post
-        if($opts['quicktags']) {
-            $output .= "\n<script type='text/javascript'>var edCanvas".$this->prepJSCode($this->prefix)." = document.getElementById(".$this->prefix."ta);</script>\n";
+        if($opts[$this->prefix.'quicktags']) {
+            $output .= "\n<script type='text/javascript'>var edCanvas".$this->prepJSCode($this->prefix)."ta = document.getElementById('".$this->prefix."ta');</script>\n";
         }
         return $output;
     }
@@ -1898,20 +1907,23 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
             $output = strip_tags($output,$opts[$this->prefix.'allowable-tags']);
         }
         
-        if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+        if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'preview') 
+            && !empty($opts[$this->prefix.'filter'])) {
             
             $output = apply_filters($opts[$this->prefix.'filter'], $output);
             
             if($opts[$this->prefix.'filter'] == 'the_content' ) {
-                if(get_magic_quotes_gpc()) {
-                    /* Wordpress 2.8.x: 'the_content' filter adds slashes to ' and " but not 
-                     * to other slashes. Major pain when your doing you're best to keep 
-                     * it unnecessary slash clean! */
-                    # this should catch most of all the extra slashes used by wptexturize
-                    $output = preg_replace('/\\\&\#(\d*)\;/','&#$1;',$output);
-                    # but sometimes it donesn't convert one or two (but still adds slashes)
-                    $output = str_replace("\\'","'",$output);
-                    # I've also seen it "steal" some but not all stand alone backslashes - nothing I can do about it!
+                if($opts[$this->prefix.'protect-magic-quotes']) {
+                    if(get_magic_quotes_gpc()) {
+                        /* Wordpress 2.8.x: 'the_content' filter adds slashes to ' and " but not 
+                         * to other slashes. Major pain when your doing you're best to keep 
+                         * it unnecessary slash clean! */
+                        # this should catch most of all the extra slashes used by wptexturize
+                        $output = preg_replace('/\\\&\#(\d*)\;/','&#$1;',$output);
+                        # but sometimes it donesn't convert one or two (but still adds slashes)
+                        $output = str_replace("\\'","'",$output);
+                        # I've also seen it "steal" some but not all stand alone backslashes - nothing I can do about it!
+                    }
                 }
             }
         }
@@ -1934,13 +1946,16 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
           $output .= "\t".'$temp_text = strip_tags($temp_text,\''.$opts[$this->prefix.'allowable-tags'].'\');'."\n";
         }
-        if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
+         if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'preview') 
+            && !empty($opts[$this->prefix.'filter'])) {
           $output .= "\t".'$temp_text = apply_filters(\''.$opts[$this->prefix.'filter'].'\',$temp_text);'."\n";
         }
         if($opts[$this->prefix.'filter'] == 'the_content' ) {
-           if(get_magic_quotes_gpc()) {
-              $output .= "\t".'$temp_text = preg_replace(\'/\\\\\\&\\#(\\d*)\\;/\',\'&#$1;\',$temp_text);'."\n";
-              $output .= "\t".'$temp_text = str_replace("\\\\\'","\'",$temp_text);'."\n";
+           if($opts[$this->prefix.'protect-magic-quotes']) {
+               if(get_magic_quotes_gpc()) {
+                  $output .= "\t".'$temp_text = preg_replace(\'/\\\\\\&\\#(\\d*)\\;/\',\'&#$1;\',$temp_text);'."\n";
+                  $output .= "\t".'$temp_text = str_replace("\\\\\'","\'",$temp_text);'."\n";
+               }
            }
         }
         $output .= "\t?>\n";
@@ -1969,8 +1984,8 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'char-limit',$show,$hide);
         $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'word-limit',$show,$hide);
         $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'filter',$show,$hide);        
+        /*$retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'filter',$show,$hide);*/        
         $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'kses',$show,$hide);
         $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-text',$show,$hide);
         $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
@@ -1982,7 +1997,7 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         if($this->useOpts($this->prefix.'required',$show,$hide)) { ?>
 <label for="<?php echo $this->prefix; ?>required" style="line-height:35px;"><?php _e("Required","tdomf"); ?></label>
 <input type="checkbox" name="<?php echo $this->prefix; ?>required" id="<?php echo $this->prefix; ?>required" <?php if($options[$this->prefix.'required']) echo "checked"; ?> >
-            <?php if($this->useOpts($this->prefix.'quicktags',$show,$hide)) { ?>
+            <?php if(!$this->useOpts($this->prefix.'quicktags',$show,$hide)) { ?>
                 <br/>
             <?php } ?>
   <?php } 
@@ -2021,14 +2036,14 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
 <textarea title="true" cols="30" name="<?php echo $this->prefix; ?>allowable-tags" id="<?php echo $this->prefix; ?>allowable-tags" ><?php echo $options[$this->prefix.'allowable-tags']; ?></textarea>
 <br/>
   <?php }
-        if($this->useOpts($this->prefix.'use-filter',$show,$hide)) { ?>
+        /*if($this->useOpts($this->prefix.'use-filter',$show,$hide)) { ?>
 <label for="<?php echo $this->prefix; ?>use-filter" style="line-height:35px;"><?php _e("Pass input through a Wordpress filter","tdomf"); ?></label>
 <input type="checkbox" name="<?php echo $this->prefix; ?>use-filter" id="<?php echo $this->prefix; ?>use-filter" <?php if($options[$this->prefix.'use-filter']) echo "checked"; ?> >
 <br/>
 <label for="<?php echo $this->prefix; ?>filter" style="line-height:35px;"><?php _e("Filter:","tdomf"); ?></label>
 <input type="textfield" name="<?php echo $this->prefix; ?>filter" id="<?php echo $this->prefix; ?>filter" value="<?php echo htmlentities($options[$this->prefix.'filter'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 <br/>
-  <?php }
+  <?php }*/
         if($this->useOpts($this->prefix.'title',$show,$hide)) { ?>
             <label for="<?php echo $this->prefix; ?>title" style="line-height:35px;"><?php _e("Title:","tdomf"); ?></label>
 <input type="textfield" name="<?php echo $this->prefix; ?>title" id="<?php echo $this->prefix; ?>title" value="<?php echo htmlentities($options[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
@@ -2072,7 +2087,7 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
                 } else {
                     $output .= __("You must specify some text.","tdomf");
                 }
-            }
+            } 
         }
         
         // does it fit the counts?
@@ -2095,6 +2110,8 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
           if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
               $text = strip_tags($text,$opts[$this->prefix.'allowable-tags']);
           }
+          
+          /*$output .= "Stripped output: <pre>".htmlentities($text)."</pre><br/>";*/
           
           $len = strlen($text);
           if($opts[$this->prefix.'char-limit'] > 0 && $len > $opts[$this->prefix.'char-limit']) {
@@ -2140,21 +2157,21 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
             $output = $text;
             
             if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
-                $output = strip_tags($output,$options['allowable-tags']);
+                $output = strip_tags($output,$opts[$this->prefix.'allowable-tags']);
             } 
-            
-            if($opts[$this->prefix.'use-filter'] && !empty($opts[$this->prefix.'filter'])) {
 
-                if($opts[$this->prefix.'filter'] == 'the_content' ) {
-                    if(get_magic_quotes_gpc()) {
-                        /* Wordpress 2.8.x: 'the_content' adds slashes to ' and " but not to 
-                         * other back slashes. Passing the protected content to post update
-                         * works fine then for ' and " but not for slashes. Need to protect
-                         * slashes before passing it through 'the_content' */
-                        $output = str_replace('\\','\\\\',$output);
-                    }
+            if($opts[$this->prefix.'protect-magic-quotes']) {
+                if(get_magic_quotes_gpc()) {
+                    /* Wordpress 2.8.x adds slashes to ' and " but not to 
+                     * other back slashes. Passing the protected content to post update
+                     * works fine then for ' and " but not for slashes. Need to protect
+                     * slashes before passing it through 'the_content' */
+                    $output = str_replace('\\','\\\\',$output);
                 }
-                
+            }
+            
+            if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'post') 
+                && !empty($opts[$this->prefix.'filter'])) {
                 $output = apply_filters($opts[$this->prefix.'filter'], $output);
             }
         }

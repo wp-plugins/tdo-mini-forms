@@ -769,7 +769,11 @@ function tdomf_widget_customfields_textarea_default_options($number,$options)
   }
   
   if(isset($options['ta-content-filter'])) {
-      $options[$prefix.'use-filter'] = $options['ta-content-filter'];
+      if($options['ta-content-filter']) {
+          $options[$prefix.'use-filter'] = 'preview';
+      } else {
+          $options[$prefix.'use-filter'] = false;
+      }
       $options[$prefix.'filter'] = 'the_content';
       unset($options['ta-content-filter']);
   }
@@ -786,15 +790,6 @@ function tdomf_widget_customfields_textarea_control_handler($number,$options) {
   $prefix = 'customfields-ta-'.$number.'-';
   $textarea = new TDOMF_WidgetFieldTextArea($prefix);
 
-  # specific to this widget/textarea
-
-  if(isset($_POST["customfields-ta-content-filter-$number"])) {
-      $options[$prefix.'use-filter'] = true;
-      $options[$prefix.'filter'] = 'the_content';
-  } else {
-      $options[$prefix.'use-filter'] = false;
-  }  
-  
   # textarea ones
   
   $options = tdomf_widget_customfields_textarea_default_options($number,$options);
@@ -805,6 +800,15 @@ function tdomf_widget_customfields_textarea_control_handler($number,$options) {
   ob_start();
   $options = $textarea->control($options,false);
   ob_end_clean();
+
+  # specific to this widget/textarea
+
+  if(/*isset($_POST["customfields-ta-content-filter-$number"]) ||*/ isset($_POST["customfields-append-$number"])) {
+      $options[$prefix.'use-filter'] = /*true*/ 'preview';
+      $options[$prefix.'filter'] = 'the_content';
+  } else {
+      $options[$prefix.'use-filter'] = false;
+  }  
   
   # make sure to copy 'common' ones back
   
@@ -853,12 +857,10 @@ function tdomf_widget_customfields_textarea_control($number,$options){
   $output .= ob_get_contents();
   ob_end_clean();
 
-  # @todo ta-content-filter, Format like Post Content (convert new lines to paragraphs, etc.)
-  
-  $output .= "<label for=\"customfields-ta-content-filter-$number\">";
+  /*$output .= "<label for=\"customfields-ta-content-filter-$number\">";
   $output .= "<input type=\"checkbox\" name=\"customfields-ta-content-filter-$number\" id=\"customfields-ta-content-filter-$number\"";
   if($options[$prefix.'use-filter']) { $output .= " checked "; }
-  $output .= "/> ".__("Format like Post Content <i>(convert new lines to paragraphs, etc.)</i>","tdomf")."</label><br/><Br/>";
+  $output .= "/> ".__("Format like Post Content <i>(convert new lines to paragraphs, etc.)</i>","tdomf")."</label><br/><Br/>";*/
   
   return $output;
 }
