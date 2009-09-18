@@ -89,25 +89,37 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
   }
 }
 
-function tdomf_fixslashesargs() {
-    #if (get_magic_quotes_gpc()) {
-      tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes!");
-      if(!function_exists('stripslashes_array')) {
-        function stripslashes_array($array) {
-            return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
+function tdomf_stripslashes_deep($array) {
+    #if (get_magic_quotes_gpc()) { <- requried in wp 2.8.x even with magic quotes off
+        if(is_array($array)) {
+            return array_map('tdomf_stripslashes_deep', $array);
+        } else {
+            // check if the string has new lines!
+            if(strpos($array,"\n") !== false) {
+                $array = split("\n",$array);
+                $array = tdomf_stripslashes_deep($array);
+                $array = join("\n",$array);
+            } else {
+                $array = stripslashes($array);
+                return str_replace("\\'","'",$array);
+            }
         }
-      }
-      $_COOKIE = stripslashes_array($_COOKIE);
-      #$_FILES = stripslashes_array($_FILES);
-      #$_GET = stripslashes_array($_GET);
-      $_POST = stripslashes_array($_POST);
-      $_REQUEST = stripslashes_array($_REQUEST);
     #}
+    return $array;
+}
+
+function tdomf_fixslashesargs() {
+   $_COOKIE = stripslashes_deep($_COOKIE);
+   $_POST = tdomf_stripslashes_deep($_POST);
+   $_REQUEST = tdomf_stripslashes_deep($_REQUEST);
 }
 
 // Double check user permissions
 //
 $message = tdomf_check_permissions_form($form_id,$post_id);
+
+// Remove magic quote slashes and additionally ones Wordpress "cleverly" adds
+tdomf_fixslashesargs();
 
 // Now either generate a preview or create a post
 //
@@ -165,20 +177,17 @@ if($message == NULL) {
         $message .= tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_ERROR,$form_id,false,false,$retVal);
         $save_post_info = TRUE;
         $hide_form = FALSE;
-        tdomf_fixslashesargs();
+        #tdomf_fixslashesargs();
       }
       $message .= "</div>";
     } else {
       $message =  "<div class=\"tdomf_form_message\" id=\"tdomf_form".$form_tag."_message\" name=\"tdomf_form".$form_tag."_message\">".$message."</div>";
       $save_post_info = TRUE;
       $hide_form = false;
-      tdomf_fixslashesargs();
+      #tdomf_fixslashesargs();
     }
   } else if(isset($_POST['tdomf_form'.$form_tag.'_preview'])) {
-
-    // For preview, remove magic quote slashes!
-    tdomf_fixslashesargs();
-
+       #tdomf_fixslashesargs();
        $save_post_info = TRUE;
        $hide_form = false;
 	   $message = tdomf_validate_form($_POST,true);

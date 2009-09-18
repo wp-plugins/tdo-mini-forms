@@ -57,6 +57,16 @@ $is_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
 //
 $form_data = tdomf_get_form_data($form_id);
 
+// hacked our own js_secapse as the default Wordpress one converts all
+// html tags into html entities!
+function tdomf_js_escape($text) {
+    $safe_text = addslashes($text);
+    $safe_text = preg_replace('/&#(x)?0*(?(1)27|39);?/i', "'", stripslashes($safe_text));
+    $safe_text = preg_replace("/\r?\n/", "\\n", addslashes($safe_text));
+    $safe_text = str_replace('\\\n', '\n', $safe_text);
+    return apply_filters('js_escape', $safe_text, $text);
+}
+
 function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false, $post_id = false) {
     global $form_id;
     
@@ -67,12 +77,9 @@ function tdomf_ajax_exit($form_id, $message, $full = false, $preview = false, $p
         $form_tag = $form_id;
     }
     
-    #$message = str_replace("'","\\'",$message);
-    #$message = str_replace("\n"," ",$message);
-    $message = preg_replace('/\r\n|\n\r|\r/', '\n', str_replace('\'', '\\' . '\'', str_replace('\\', '\\\\', $message)));
-    $message = str_replace("\n"," ",$message);
+    $message = tdomf_js_escape($message);
     #tdomf_log_message("sending '$message' via ajax (tdomfDisplayMessage$form_tag)...");
-    #$message = htmlentities($message,ENT_COMPAT);
+    
     if($full) {
         die( "tdomfDisplayMessage$form_tag('$message','full');" );
     } else if ($preview) {
@@ -123,22 +130,44 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
   }
 }
 
+function tdomf_stripslashes_deep($array) {
+    #if (get_magic_quotes_gpc()) { <- requried in wp 2.8.x even with magic quotes off
+        if(is_array($array)) {
+            return array_map('tdomf_stripslashes_deep', $array);
+        } else {
+            // check if the string has new lines!
+            if(strpos($array,"\n") !== false) {
+                $array = split("\n",$array);
+                $array = tdomf_stripslashes_deep($array);
+                $array = join("\n",$array);
+            } else {
+                if (get_magic_quotes_gpc()) {
+                  $array = stripslashes($array);
+                  return str_replace("\\'","'",$array);
+                } else {
+                  // when magic quotes is off, wordpress 2.8.x adds slashes
+                  // to ' and " but not to \
+                  $array = str_replace("\\'","'",$array);
+                  $array = str_replace('\\"','"',$array);
+                }
+            }
+        }
+    #}
+    return $array;
+}
+
 function tdomf_fixslashesargs() {
     global $tdomf_args;
-    #if (get_magic_quotes_gpc()) {
-      tdomf_log_message_extra("Magic quotes is enabled. Stripping slashes!");
-      if(!function_exists('stripslashes_array')) {
-        function stripslashes_array($array) {
-            return is_array($array) ? array_map('stripslashes_array', $array) : stripslashes($array);
-        }
-      }
-      $_COOKIE = stripslashes_array($_COOKIE);
-      #$_FILES = stripslashes_array($_FILES);
-      #$_GET = stripslashes_array($_GET);
-      $tdomf_args = stripslashes_array($tdomf_args);
-      $_REQUEST = stripslashes_array($_REQUEST);
-    #}
+    #$_GET = stripslashes_deep($_GET);
+    #$_POST = stripslashes_deep($_POST);
+    #$_COOKE = stripslashes_deep($_COOKIE);
+    #$_REQUEST = stripslashes_deep($_REQUEST);
+    #$_FILES = stripslashes_deep($_FILES);
+    #tdomf_log_message("#1:<pre>".var_export($tdomf_args,true)."</pre>");
+    $tdomf_args = tdomf_stripslashes_deep($tdomf_args);
+    #tdomf_log_message("#2:<pre>".var_export($tdomf_args,true)."</pre>");
 }
+
 
 // Double check user permissions
 //
@@ -149,6 +178,18 @@ if($message != NULL) {
 
 if(!isset($_POST['tdomf_action'])) {
     tdomf_ajax_exit($form_id,__("TDOMF (AJAX) ERROR: no action set!","tdomf"),true,false,$post_id);
+}
+
+// Remove magic quote slashes and additionally ones Wordpress "cleverly" adds
+tdomf_fixslashesargs();
+
+// calculate form_tag
+//
+$is_edit = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id);
+if($is_edit) {
+    $form_tag = $form_id.'_'.$post_id;
+} else {
+    $form_tag = $form_id;
 }
 
 // Now either generate a preview or create a post
@@ -169,12 +210,12 @@ if($_POST['tdomf_action'] == "post") {
             $post_id = $edit->post_id;
             if($edit->state == 'approved') {
                 if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
-                    die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                    die( "tdomfRedirect$form_tag('".get_permalink($post_id)."');" );
                     // Hack: set your own URL here if you wish to redirect to a 
                     // different URL (and comment out the 'die' line above) 
                     // Future versions of TDOMF will provide this as an option.
                     //
-                    #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
+                    #die( "tdomfRedirect$form_tag('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
                 } else {
                     tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
                 }
@@ -187,12 +228,12 @@ if($_POST['tdomf_action'] == "post") {
             $post_id = $retVal;
             if(get_post_status($post_id) == 'publish') {
                 if(tdomf_get_option_form(TDOMF_OPTION_REDIRECT,$form_id)) {
-                    die( "tdomfRedirect$form_id('".get_permalink($post_id)."');" );
+                    die( "tdomfRedirect$form_tag('".get_permalink($post_id)."');" );
                     // Hack: set your own URL here if you wish to redirect to a 
                     // different URL (and comment out the 'die' line above) 
                     // Future versions of TDOMF will provide this as an option.
                     //
-                    #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
+                    #die( "tdomfRedirect$form_tag('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
                 } else {
                     tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_PUBLISH,$form_id,false,$post_id),true,false,$post_id);
                 }
@@ -206,7 +247,7 @@ if($_POST['tdomf_action'] == "post") {
               // different URL (and comment out the 'die' line above) 
               // Future versions of TDOMF will provide this as an option.
               //
-              #die( "tdomfRedirect$form_id('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
+              #die( "tdomfRedirect$form_tag('http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/');" );
             }
         }
       // If retVal is a string, something went wrong!
@@ -217,11 +258,12 @@ if($_POST['tdomf_action'] == "post") {
         tdomf_ajax_exit($form_id,tdomf_get_message_instance(TDOMF_OPTION_MSG_SUB_ERROR,$form_id,false,false,$message),false,false,$post_id);    
     }
 } else if($_POST['tdomf_action'] == "preview") {
-   // For preview, remove magic quote slashes!
-   tdomf_fixslashesargs();
+   tdomf_log_message("Someone is attempting to preview something");
    $message = tdomf_validate_form($tdomf_args,true);
    if($message == NULL) {
+      tdomf_log_message("Submission validated. Generating preview...");
       $message = tdomf_preview_form($tdomf_args);
+      tdomf_log_message("Now sending back to form using AJAX!");
       tdomf_ajax_exit($form_id,$message,false,true,$post_id);
    } else {
        tdomf_ajax_exit($form_id,sprintf(__("Your submission contained errors:<br/><br/>%s<br/><br/>Please correct and resubmit.","tdomf"),$message),false,false,$post_id);

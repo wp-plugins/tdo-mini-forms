@@ -14,7 +14,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
    * Content Widget. This widget allows users to modify the content and title
    * 
    * @author Mark Cunningham <tdomf@thedeadone.net> 
-   * @version 1.0 
+   * @version 2.0 
    * @since 0.13.0
    * @access public 
    * @copyright Mark Cunningham
@@ -22,12 +22,30 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
    */ 
   class TDOMF_WidgetContent extends TDOMF_Widget
   {
+    /** 
+     * Utility class for text area   
+     * 
+     * @var TDOMF_WidgetFieldTextArea 
+     * @access private
+     */       
+      var $textarea;
+    
+      /** 
+     * Utility class for text area   
+     * 
+     * @var TDOMF_WidgetFieldField
+     * @access private
+     */       
+      var $textfield;
+      
       /** 
        * Initilise and start widget
        * 
        * @access public
        */ 
       function TDOMF_WidgetContent() {
+          $this->textarea = new TDOMF_WidgetFieldTextArea('content-text-');
+          $this->textfield = new TDOMF_WidgetFieldTextfield('content-title-');
           $this->enableHack();
           $this->enablePreview();
           $this->enablePreviewHack();
@@ -36,7 +54,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enablePost();
           $this->enableAdminEmail();
           $this->enableWidgetTitle();
-          $this->enableControl(true,450,600);
+          $this->enableControl(true,450,750);
           $this->setInternalName('content');
           $this->setDisplayName(__('Content','tdomf'));
           $this->setOptionKey('tdomf_content_widget');
@@ -60,54 +78,20 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
          if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
              $post = get_post($tdomf_post_id);
              if($post) {
-                 if(!isset($args['content_title'])) {
-                     $content_title = $post->post_title;
-                 }
-                 if(!isset($args['content_content'])) {
-                     $content_content = $post->post_content;
-                 }
+                 $options['content-title-default-text'] = $post->post_title; 
+                 $options['content-text-default-text'] = $post->post_content;
              }
          }
          
          if($options['title-enable']) {
-              if($options['title-required']) {
-                  $output .= '<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."<br/></label>\n";
-              } else {
-                  $output .= '<label for="content_title">'.__("Post Title: ","tdomf")."<br/></label>\n";
-              }
-              $output .= '<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="'.htmlentities($content_title,ENT_QUOTES,get_bloginfo('charset')).'" />';
+              $output .= $this->textfield->form($args,$options);
               if($options['text-enable']) {
                   $output .= "<br/><br/>";
               }
           }
+          
           if($options['text-enable']) {
-            if($options['text-required']) {
-                $output .= '<label for="content_content" class="required">'.__("Post Text (Required): ","tdomf")."<br/>\n";      
-            } else {
-                $output .= '<label for="content_content">'.__("Post Text: ","tdomf")."<br/>\n";
-            }
-            $output .= "</label>\n";    
-            if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-                $output .= sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['allowable-tags']))."<br/>";
-            }
-            if($options['word-limit'] > 0) {
-                $output .= sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['word-limit'])."<br/>";
-            }
-            if($options['char-limit'] > 0) {
-                $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['char-limit'])."<br/>";
-            }
-            if($options['quicktags'] == true) {
-                $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget";
-                if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-                    $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
-                }
-                $output .= "\n<script src='$qt_path' type='text/javascript'></script>\n";
-                $output .= "\n<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
-            }
-            $output .= '<textarea title="'.htmlentities(__('Post Content','tdomf'),ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >'.$content_content.'</textarea>';
-            if($options['quicktags'] == true) {
-                $output .= "\n<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>\n";
-            }
+            $output .= $this->textarea->form($args,$options);
           }
           return $output;
       }
@@ -125,60 +109,26 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $output = "";
           
           if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
+              // @todo
               $output .= "\t\t".'<?php $post = get_post($post_id); if($post) {'."\n";
               if($options['title-enable']) {
-                  $output .= "\t\t\t".'if(!isset($content_title)) { $content_title = $post->post_title; }'."\n";
+                  $output .= "\t\t\t".'if(!isset($post_args[\'content-title-tf\'])) { $post_args[\'content-title-tf\'] = $post->post_title; }'."\n";
               }
               if($options['text-enable']) {
-                  $output .= "\t\t\t".'if(!isset($content_content)) { $content_content = $post->post_content; }'."\n";
+                  $output .= "\t\t\t".'if(!isset($post_args[\'content-text-ta\'])) { $post_args[\'content-text-ta\'] = $post->post_content; }'."\n";
               }
               $output .= "\t\t".'} ?>'."\n";
           }
           
           if($options['title-enable']) {
-            if($options['title-required']) {
-              $output .= "\t\t".'<label for="content_title" class="required">'.__("Post Title (Required): ","tdomf")."\n\t\t\t<br/>\n";
-            } else {
-              $output .= "\t\t".'<label for="content_title">'.__("Post Title: ","tdomf")."\n\t\t\t<br/>\n";
-            }
-            $output .= "\t\t</label>\n";            
-            $output .= "\t\t\t".'<input type="text" name="content_title" id="content_title" size="'.$options['title-size'].'" value="';
-            $output .= '<?php echo htmlentities($content_title,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />'."\n";
+            $output .= $this->textfield->formHack($args,$options);
             if($options['text-enable']) {
-              $output .= "\t\t<br/>\n\t\t<br/>\n";
+                $output .= "\n\t\t".'<br/><br/>'."\n";
             }
           }
           
           if($options['text-enable']) {
-            if($options['text-required']) {
-              $output .= "\t\t".'<label for="content_content" class="required">'.__("Post Text (Required): ","tdomf")."\n\t\t\t<br/>\n";      
-            } else {
-              $output .= "\t\t".'<label for="content_content">'.__("Post Text: ","tdomf")."\n\t\t\t<br/>\n";
-            }
-            $output .= "\t\t</label>\n";    
-            if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-              $output .= "\t\t".sprintf(__("<small>Allowable Tags: %s</small>","tdomf"),htmlentities($options['allowable-tags']))."\n\t\t<br/>\n";
-            }
-            if($options['word-limit'] > 0) {
-              $output .= "\t\t".sprintf(__("<small>Max Word Limit: %d</small>","tdomf"),$options['word-limit'])."\n\t\t<br/>\n";
-            }
-            if($options['char-limit'] > 0) {
-              $output .= "\t\t".sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$options['char-limit'])."\n\t\t<br/>\n";
-            }
-            if($options['quicktags'] == true) {
-              $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget";
-              if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-                $qt_path = TDOMF_URLPATH."tdomf-quicktags.js.php?postfix=content_widget&allowed_tags=".urlencode($options['allowable-tags']);
-              }
-              $output .= "\t\t<script src='$qt_path' type='text/javascript'></script>\n";
-              $output .= "\t\t<script type='text/javascript'>edToolbarcontent_widget();</script>\n";
-            }
-            $output .= "\t\t".'<textarea title="'.htmlentities(__('Post Content','tdomf'),ENT_QUOTES,get_bloginfo('charset')).'" rows="'.$options['text-rows'].'" cols="'.$options['text-cols'].'" name="content_content" id="content_content" >';
-            $output .= '<?php echo $content_content; ?></textarea>'."\n"; 
-            if($options['quicktags'] == true) {
-              $output .= "\t\t<script type='text/javascript'>var edCanvascontent_widget = document.getElementById('content_content');</script>";
-            }
-            
+            $output .= $this->textarea->formHack($args,$options);
           }
           return $output;
       }
@@ -191,19 +141,89 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
        */
       function getOptions($form_id) {
           $defaults = array(   'title-enable' => true,
-                               'title-required' => false,
-                               'title-size' => 30,
                                'text-enable' => true,
-                               'text-required' => true,
-                               'text-cols' => 40,
-                               'text-rows' => 10, 
-                               'quicktags' => false,
-                               'restrict-tags' => true,
-                               'allowable-tags' => "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>",
-                               'char-limit' => 0,
-                               'word-limit' => 0 );
+                                # default options for textfield
+                               'content-title-title' => __('Post Title','tdomf'),
+                               'content-title-default_text' => "",
+                               'content-title-use-filter' => 'preview',
+                               'content-title-filter' => 'the_title',
+                                # defaults options for textarea
+                               'content-text-title' => __('Post Text','tdomf'),
+                               'content-text-use-filter' => 'preview',
+                               'content-text-filter' => 'the_content',
+                               'content-text-kses' => true,
+                               'content-text-default_text' => "",
+                               );
           $options = TDOMF_Widget::getOptions($form_id); 
           $options = wp_parse_args($options, $defaults);
+          
+          # convert previous textfield options to new utility textfield options
+          
+          if(isset($options['title-required'])) {
+              $options['content-title-required'] = $options['title-required'];
+              unset($options['title-required']);
+          }
+          
+          if(isset($options['title-size'])) {
+              $options['content-title-size'] = $options['title-size'];
+              unset($options['title-size']);
+          }
+          
+          # convert previous textarea options to new utility textarea options
+          
+          if(isset($options['text-required'])) {
+              $options['content-text-required'] = $options['text-required'];
+              unset($options['text-required']);
+          }
+          
+          if(isset($options['text-cols'])) {
+              $options['content-text-cols'] = $options['text-cols'];
+              unset($options['text-cols']);
+          }
+          
+          if(isset($options['text-rows'])) {
+              $options['content-text-rows'] = $options['text-rows'];
+              unset($options['text-rows']);
+          }
+          
+          if(isset($options['quicktags'])) {
+              $options['content-text-quicktags'] = $options['quicktags'];
+              unset($options['quicktags']);
+          }
+          
+          if(isset($options['restrict-tags'])) {
+              $options['content-text-restrict-tags'] = $options['restrict-tags'];
+              unset($options['restrict-tags']);
+          }
+          
+          if(isset($options['allowable-tags'])) {
+              $options['content-text-allowable-tags'] = $options['allowable-tags'];
+              unset($options['allowable-tags']);
+          }
+          
+          if(isset($options['char-limit'])) {
+              $options['content-text-char-limit'] = $options['char-limit'];
+              unset($options['char-limit']);
+          }
+          
+          if(isset($options['word-limit'])) {
+              $options['content-text-word-limit'] = $options['word-limit'];
+              unset($options['word-limit']);
+          }
+          
+          # now grab defaults for textarea and textfield
+          
+          $options = $this->textarea->getOptions($options);
+          $options = $this->textfield->getOptions($options);
+          
+          # unconfigurable by user
+          
+          $options['content-text-use-filter'] = 'preview';
+          $options['content-text-filter'] = 'the_content';
+          $options['content-text-kses'] = true;
+          $options['content-title-use-filter'] = 'preview';
+          $options['content-title-filter'] = 'the_title';
+          
           return $options;
       }   
       
@@ -218,24 +238,14 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($args);
           $output = "";
           if($options['title-enable']) {
-            $output .= "<b>".__("Title: ","tdomf")."</b>";
-            $output .= $content_title;
+            $output .= $this->textfield->preview($args,$options,'content_title');
             $output .= "<br/>";
+            if($options['text-enable']) {
+                $output .= "<br/>";
+            }
           }
           if($options['text-enable']) {
-            $content_content = preg_replace('|\<!--tdomf_form.*-->|', '', $content_content);
-            $content_content = preg_replace('|\[tdomf_form.*\]|', '', $content_content);
-            $output .= "<b>".__("Text: ","tdomf")."</b><br/>";
-            if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
-             // if moderation is enabled, we don't do kses filtering, might as well
-             // give full picture to user!
-             $content_content = wp_filter_post_kses($content_content);
-            }
-            if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-              $output .= apply_filters('the_content', strip_tags($content_content,$options['allowable-tags']));
-            } else {
-              $output .= apply_filters('the_content', $content_content);
-            }
+            $output .= $this->textarea->preview($args,$options,'content_content');
           }
           return $output;
       }
@@ -251,26 +261,14 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($args);          
           $output = "";
           if($options['title-enable']) {
-            $output .= "\t<b>".__("Title: ","tdomf")."</b>";
-            $output .= "<?php echo \$content_title; ?>\n";
-            $output .= "\t<br/>\n";
+            $output .= $this->textfield->previewHack($args,$options);
+            $output .= "<br/>";
+            if($options['text-enable']) {
+                $output .= "<br/>";
+            }
           }
           if($options['text-enable']) {
-            // prep output
-            $output .= "\t<?php ";
-            $output .= '$content_content = preg_replace(\'|\<!--tdomf_form.*-->|\', \'\', $content_content);'."\n";
-            $output .= "\t".'$content_content = preg_replace(\'|\\[tdomf_form.*\\]|\', \'\', $content_content);'."\n";
-            if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
-              $output .= "\t".'$content_content = wp_filter_post_kses($content_content);'."\n";
-            }
-             if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-              $output .= "\t".'$content_content = apply_filters(\'the_content\', strip_tags($content_content,\''.$options['allowable-tags'].'\'));';
-            } else {
-              $output .= "\t".'$content_content = apply_filters(\'the_content\', $content_content);';
-            }
-            $output .= " ?>\n";
-            $output .= "\t<b>".__("Text: ","tdomf")."</b>\n\t<br/>\n";
-            $output .= "\t<?php echo \$content_content; ?>";
+            $output .= $this->textarea->previewHack($args,$options);
           }
           return $output;
       }
@@ -294,29 +292,20 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
               if(!empty($post['post_content'])) {
                 $post = add_magic_quotes($post);
               }
-
+              
               // Append
               $post_content = $post['post_content'];
-              if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-                tdomf_log_message("Content Widget: Stripping tags from post!");
-                $post_content .= strip_tags($content_content,$options['allowable-tags']);
-              } else {
-                $post_content .= $content_content;
-              }
+              $post_content .= $this->textarea->post($args,$options,'content_content');
+              
           } else { // $mode startswith "edit-"
               // Overwrite 
-              if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-                tdomf_log_message("Content Widget: Stripping tags from post!");
-                $post_content = strip_tags($content_content,$options['allowable-tags']);
-              } else {
-                $post_content = $content_content;
-              }
+              $post_content = $this->textarea->post($args,$options,'content_content');
           }
 
           // Title
 
-          if($options['title-enable'] && !isset($content_title)) {
-            $content_title = tdomf_protect_input($post['post_title']);
+          if($options['title-enable']) {
+            $content_title = tdomf_protect_input($this->textfield->post($args,$options,'content_title'));
           }
           
           // Update actual post
@@ -344,19 +333,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           // Store settings for this widget
           //
           if ( $_POST[$this->internalName.'-submit'] ) {
-                 $newoptions['title'] = strip_tags(stripslashes($_POST['content-title']));
                  $newoptions['title-enable'] = isset($_POST['content-title-enable']);
-                 $newoptions['title-required'] = isset($_POST['content-title-required']);
-                 $newoptions['title-size'] = intval($_POST['content-title-size']); 
                  $newoptions['text-enable'] = isset($_POST['content-text-enable']);
-                 $newoptions['text-required'] = isset($_POST['content-text-required']);
-                 $newoptions['text-cols'] = intval($_POST['content-text-cols']);
-                 $newoptions['text-rows'] = intval($_POST['content-text-rows']); 
-                 $newoptions['restrict-tags'] = isset($_POST['content-restrict-tags']);
-                 $newoptions['allowable-tags'] = $_POST['content-allowable-tags'];
-                 $newoptions['quicktags'] = $_POST['content-quicktags'];
-                 $newoptions['char-limit'] = intval($_POST['content-char-limit']);
-                 $newoptions['word-limit'] = intval($_POST['content-word-limit']);
                  $options = wp_parse_args($newoptions, $options);
                  $this->updateOptions($options,$form_id);
           }
@@ -366,29 +344,59 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($options);
           ?>
 <div>          
-          <?php $this->controlCommon($options); ?>
-     
-<h4><?php _e("Title of Post","tdomf"); ?></h4>
-<label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> ></label>
-<label for="content-title-required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="content-title-required" id="content-title-required" <?php if($options['title-required']) echo "checked"; ?> ></label>
-<label for="content-title-size" style="line-height:35px;"><?php _e("Size","tdomf"); ?> <input type="textfield" name="content-title-size" id="content-title-size" value="<?php echo htmlentities($options['title-size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
+          <?php $this->controlCommon($options); 
+          
+          if(TDOMF_Widget::isSubmitForm($mode,$form_id)) {
+              $tashow = array('content-text-cols',
+                              'content-text-rows',
+                              'content-text-quicktags',
+                              'content-text-restrict-tags',
+                              'content-text-allowable-tags',
+                              'content-text-char-limit',
+                              'content-text-word-limit',
+                              'content-text-required',
+                              'content-text-title',
+                              'content-text-default-text');
+              $tfshow = array('content-title-size',
+                              'content-title-required',
+                              'content-title-title',
+                              'content-title-default-text');
+          } else {
+              $tashow = array('content-text-cols',
+                              'content-text-rows',
+                              'content-text-quicktags',
+                              'content-text-restrict-tags',
+                              'content-text-allowable-tags',
+                              'content-text-char-limit',
+                              'content-text-word-limit',
+                              'content-text-required',
+                              'content-text-title');
+              $tfshow = array('content-title-size',
+                              'content-title-required',
+                              'content-title-title');              
+          } ?>
 
+<h4><?php _e("Title of Post","tdomf"); ?></h4>
+<label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?></label>
+<input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> >
+
+          <?php $tfoptions = $this->textfield->control($options, $form_id, $tfshow); 
+          if( $_POST[$this->internalName.'-submit'] ) {
+              $options = wp_parse_args($tfoptions, $options);
+              $this->updateOptions($options,$form_id);
+          } ?>   
+          
 <h4><?php _e("Content of Post","tdomf"); ?></h4>
-<label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?> <input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> ></label>
-<label for="content-text-required" style="line-height:35px;"><?php _e("Required","tdomf"); ?> <input type="checkbox" name="content-text-required" id="content-text-required" <?php if($options['text-required']) echo "checked"; ?> ></label>
-<br/>
-<label for="content-quicktags" style="line-height:35px;"><?php _e("Use Quicktags","tdomf"); ?> <input type="checkbox" name="content-quicktags" id="content-quicktags" <?php if($options['quicktags']) echo "checked"; ?> ></label>
-<br/>
-<label for="content-char-limit" style="line-height:35px;"><?php _e("Character Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-char-limit" id="content-char-limit" value="<?php echo htmlentities($options['char-limit'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
-<br/>
-<label for="content-word-limit" style="line-height:35px;"><?php _e("Word Limit <i>(0 indicates no limit)</i>","tdomf"); ?> <input type="textfield" name="content-word-limit" id="content-word-limit" value="<?php echo htmlentities($options['word-limit'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
-<br/>
-<label for="content-text-cols" style="line-height:35px;"><?php _e("Cols","tdomf"); ?> <input type="textfield" name="content-text-cols" id="content-text-cols" value="<?php echo htmlentities($options['text-cols'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
-<label for="content-text-rows" style="line-height:35px;"><?php _e("Rows","tdomf"); ?> <input type="textfield" name="content-text-rows" id="content-text-rows" value="<?php echo htmlentities($options['text-rows'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" /></label>
-<br/>
-<label for="content-restrict-tags" style="line-height:35px;"><?php _e("Restrict Tags","tdomf"); ?> <input type="checkbox" name="content-restrict-tags" id="content-restrict-tags" <?php if($options['restrict-tags']) echo "checked"; ?> ></label>
-<br/>
-<label for="content-allowable-tags" style="line-height:35px;"><?php _e("Allowable Tags","tdomf"); ?> <textarea title="true" cols="30" name="content-allowable-tags" id="content-allowable-tags" ><?php echo $options['allowable-tags']; ?></textarea></label>
+<label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?><label>
+<input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> >
+          
+          <?php $taoptions = $this->textarea->control($options, $form_id, $tashow); 
+          if( $_POST[$this->internalName.'-submit'] ) {
+              $options = wp_parse_args($taoptions, $options);
+              $this->updateOptions($options,$form_id);
+          }
+          
+          ?>
 </div>
         <?php
       }
@@ -404,74 +412,35 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           extract($args);
           $output = "";
 
-          if($options['title-enable'] && $options['title-required']
-               && (empty($content_title) || trim($content_title) == "")) {
-              if($output != "") { $output .= "<br/>"; }
-              $output .= __("You must specify a post title.","tdomf");
-          }
-
-          if($options['text-enable'] && $options['text-required']
-               && (empty($content_content) || trim($content_content) == "")) {
-              if($output != "") { $output .= "<br/>"; }
-              $output .= __("You must specify some post text.","tdomf");
-          }
-          
           if(TDOMF_Widget::isEditForm($mode,$tdomf_form_id)) {
 
                // when it goes to validation, the tdomf_post_id will be the 
                // real post id
 
               $post = &get_post( $tdomf_post_id );
-              
-              // for post content, this is probably not the most exact way to do it
-              //
-              if($options['text-enable'] && $options['text-required']) {
-                  if(trim($post->post_content) == trim($content_content)) {
-                      if($output != "") { $output .= "<br/>"; }
-                      $output .= __("You must modify the post text.","tdomf");
-                  }
-              }
-              
-              if($options['title-enable'] && $options['title-required']) {
-                  if(trim($post->post_title) == trim($content_title)) {
-                      if($output != "") { $output .= "<br/>"; }
-                      $output .= __("You must modify the post title.","tdomf");
-                  }
+          
+              // set default texts to the original post contents
+
+              $options['content-text-default-text'] = $post->post_content;
+              $options['content-title-default-text'] = $post->post_title;
+          }
+          
+          if($options['title-enable']) {
+              $tf_output = $this->textfield->validate($args,$options,$preview,'content_title');
+              if(!empty($tf_output)) {
+                  if($output != "") { $output .= "<br/>"; }
+                  $output .= $tf_output;
               }
           }
-                    
-          if($options['word-limit'] > 0 || $options['char-limit'] > 0) {
-              
-              // prefitler the content so it's as close to the end result as possible
-              //
-              $content_prefiltered = preg_replace('|\[tdomf_form.*\]|', '', $content_content);
-              $content_prefiltered = preg_replace('|<!--tdomf_form.*-->|', '', $content_prefiltered);
-              if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$tdomf_form_id)){
-                 // if moderation is enabled, we don't do kses filtering, might as well
-                 // give full picture to user!
-                 $content_prefiltered = wp_filter_post_kses($content_prefiltered);
-              }
-              if($options['allowable-tags'] != "" && $options['restrict-tags']) {
-                 $content_prefiltered = strip_tags($content_prefiltered,$options['allowable-tags']);
-              } 
-        
-              // don't apply content filters!
-              //$content_prefiltered = apply_filters('the_content', $content_prefiltered);
-              
-              if($options['char-limit'] > 0 && strlen($content_prefiltered) > $options['char-limit']) {
-                $output .= sprintf(__("You have exceeded the max character length by %d characters","tdomf"),(strlen($content_prefiltered) - $options['char-limit'])); 
-              } else if($options['word-limit'] > 0) {
-                // Remove all HTML tags as they do not count as "words"!
-                $content_prefiltered = trim(strip_tags($content_prefiltered));
-                // Remove excess whitespace
-                $content_prefiltered = preg_replace('/\s\s+/', ' ', $content_prefiltered);
-                // count the words!
-                $word_count = count(explode(" ", $content_prefiltered));
-                if($word_count > $options['word-limit']) {
-                  $output .= sprintf(__("You have exceeded the max word count by %d words","tdomf"),($word_count - $options['word-limit']));
-                }
+
+          if($options['text-enable']) {
+              $ta_output = $this->textarea->validate($args,$options,$preview,'content_content');
+              if(!empty($ta_output)) {
+                  if($output != "") { $output .= "<br/>"; }
+                  $output .= $ta_output;
               }
           }
+
           // return output if any
           if($output != "") {
               return $output;

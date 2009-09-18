@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.13.4
+Version: 0.13.5
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -30,9 +30,18 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
-// v0.13.4
-// - "Warnings on post", errors appear about "post.php". I left some unfinished
-//     code in an action which was breaking one of the wordpress functions. 
+// v0.13.5
+// - Previous recent versions prevented people from enabling spam. The code was
+//     written in such a way that the spam protection had to be enabled before
+//     spam protection could be enabled!
+// - Replaced the usage of $_REQUEST with $_POST in form hacker. Not sure if
+//     it'll have any impact on the form-hacker-reset problem but it should
+//     be safer
+// - Have tested and fixed extra slashes being added on WP 2.8.x builds with and
+//     without magic quotes turned on. 
+// - Refactored Custom Field, Content, Excerpt widgets and created a common
+//     textfield and textarea (as part of the fix for magic quotes). This allows
+//     me to add new features to multiple widgets at a time. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,8 +49,38 @@ Author URI: http://thedeadone.net
 ////////////////////////////////////////////////////////////////////////////////
 Work Queue:
 
-   -- Code to add a email hook on publish - http://thedeadone.net/forum/?p=3195#comment-4519
+Bugs
+====
+   - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
+   - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
+   - image capatcha must update after failed "submit"
+   - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
+   - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
+   - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
+   - Sanatized file upload filenames/paths - http://thedeadone.net/blog/v0127-of-tdo-mini-forms-just-released/comment-page-1/#comment-181601
+   - diacritc marks reset form hacker: http://thedeadone.net/forum/?p=1888#topic-1888
+   - Bug: Illegal characters in file names: http://thedeadone.net/forum/?p=1544#topic-1544
+   - Bug: Weird "From" email for post moderation emails: http://thedeadone.net/forum/?p=71
+   - Bug: No image preview when using attachment options: http://thedeadone.net/forum/?p=1498#comment-3485
+   - Bug: slashes: http://thedeadone.net/forum/?p=1444#comment-3331 (but it might be related to AJAX!)
+   - Bug: Widget configuration panels not showing up: http://thedeadone.net/forum/?p=1379
+   - Investigate: no sidebars in widget configuration in IE.7
+   - Investigate: tinymce conflict with AJAX form
+   - Investigate: upload-link error:
+       http://wordpress.org/support/topic/186919#post-838957
 
+TODO
+====
+   - Allow options to format the "submitted by" text and also disabling for registered users
+   - Quicktag like options for form hacker
+   - Investigate: Copy widgets to other forms
+   - Allow Error, StyleSheet and Validation Form Hacking
+   - Allow only the Form or the Preview to be "hacked" in the Form Hacker
+   - Add Error Warning for custom field widgets when non-unique keys used
+   - Investigate: Auto bring up the conf panel for widgets on the "fix" links
+
+Feature Requests
+================
    - delete spam straight away (TDOMF_OPTION_SPAM_AUTO_DELETE_NOW already setup, just not implemented)
    - parent category - http://thedeadone.net/forum/?p=3205#comment-4524
    - display less information and perhaps some sort of funky JS to order columns - http://thedeadone.net/forum/?p=3526#comment-4514
@@ -49,40 +88,68 @@ Work Queue:
    - widget class have functions to allow message customisation
    - "delete all spam"
    - "recheck for spam"
-   - 'gmt_offset' not calcualted in %%SUBMISSIONDATE%%
    - Most pages private... - http://thedeadone.net/forum/?p=224#comment-4221
-   - not working with vbbridge - http://thedeadone.net/forum/?p=2805#comment-4296
-   - http://thedeadone.net/forum/?p=2100#comment-4278 (alternative input?)
-   - image capatcha must update after failed "submit"
-   - Possible incompatibility with Google XML Sitemaps plugin - http://thedeadone.net/forum/?p=1923
-   - Bug in GeoMashup - http://thedeadone.net/forum/?p=2062#comment-4070
-   - Bug TwitterTools not working with TDOMF publish - http://thedeadone.net/forum/?p=1916#comment-3972
    - Requred option in category field
-   - Sanatized file upload filenames/paths http://thedeadone.net/blog/v0127-of-tdo-mini-forms-just-released/comment-page-1/#comment-181601
    - Related posts! http://thedeadone.net/forum/?p=1904#comment-3937
-   - diacritc marks reset form hacker: http://thedeadone.net/forum/?p=1888#topic-1888
    - Entry in FAQ: Widget Changes not showing up
-   - Bug: Illegal characters in file names: http://thedeadone.net/forum/?p=1544#topic-1544
-   - Allow options to format the "submitted by" text and also disabling for registered users
    - Investigate: Integeration with NextGen
-   - Bug: Weird "From" email for post moderation emails: http://thedeadone.net/forum/?p=71
-   - Bug: No image preview when using attachment options: http://thedeadone.net/forum/?p=1498#comment-3485
-   - Quicktag like options for form hacker
-   - Bug: slashes: http://thedeadone.net/forum/?p=1444#comment-3331 (but it might be related to AJAX!)
    - Template: List of submitters
-   - Investigate: Copy widgets to other forms
-   - Bug: Widget configuration panels not showing up: http://thedeadone.net/forum/?p=1379
    - Code: Tags as checkboxes - http://thedeadone.net/forum/?p=1377
-   - Allow Error, StyleSheet and Validation Form Hacking
-   - Allow only the Form or the Preview to be "hacked" in the Form Hacker
-   - Add Error Warning for custom field widgets when non-unique keys used
-   - Investigate: no sidebars in widget configuration in IE.7
-   - Investigate: tinymce conflict with AJAX form
-   - Investigate: upload-link error:
-       http://wordpress.org/support/topic/186919#post-838957
-   - Investigate: Auto bring up the conf panel for widgets on the "fix" links
    - Some simple javascript to track number of chars/words typed so far in textarea: http://thedeadone.net/forum/?p=1321
    - Study: http://wordpress.org/extend/plugins/download-monitor/ integration
+
+Other
+=====
+   - Code to add a email hook on publish - http://thedeadone.net/forum/?p=3195#comment-4519
+   - http://thedeadone.net/forum/?p=2100#comment-4278 (alternative input?)   
+
+
+*/
+
+/*
+Magic Quotes for 0.13.5:
+
+Wordpress 2.8.2
++++++++++++++++
+
+Magic Quotes: ON
+================
+Widget Screen    : OK
+Form Hacker      : OK
+
+[AJAX: On]         Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------          
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
+
+[AJAX: Off]        Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
+
+Magic Quotes: OFF
+=================
+Widget Screen    : OK
+Form Hacker      : OK
+
+[AJAX: On]         Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------          
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
+
+[AJAX: Off]        Title | Content | Excerpt | CF: TextArea | CF: TextField
+--------------------------------------------------------------------------
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
+
 */
 
 /*

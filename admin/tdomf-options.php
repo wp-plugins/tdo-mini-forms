@@ -153,19 +153,19 @@ function tdomf_handle_spam_options_actions($form_id = false){
         $tdomf_spam = isset($_POST['tdomf_spam']);
         update_option(TDOMF_OPTION_SPAM,$tdomf_spam);
         
-        if($tdomf_spam) {
-            
-            $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
-            $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
-            if(get_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
-                if(TDOMF_DEBUG_FAKE_SPAM || (!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key))){
-                   update_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key);
-                   update_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev);
-                } else {
-                  $message .= "<font color='red'>".sprintf(__("The key: %s has not been recognised by akismet. Spam protection has been disabled.","tdomf"),$tdomf_spam_akismet_key)."</font><br/>";
-                  update_option(TDOMF_OPTION_SPAM,false);
-                  $tdomf_spam = false;
-                }
+        // allow the akismet key to be set independantly of the tdomf_spam option
+        // because tdomf_spam is disabled if you don't have a key
+        
+        $tdomf_spam_akismet_key = $_POST['tdomf_spam_akismet_key'];
+        $tdomf_spam_akismet_key_prev = get_option(TDOMF_OPTION_SPAM_AKISMET_KEY);
+        if(get_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV) == false || $tdomf_spam_akismet_key_prev != $tdomf_spam_akismet_key) {
+            if(TDOMF_DEBUG_FAKE_SPAM || (!empty($tdomf_spam_akismet_key) && tdomf_akismet_key_verify($tdomf_spam_akismet_key))){
+               update_option(TDOMF_OPTION_SPAM_AKISMET_KEY,$tdomf_spam_akismet_key);
+               update_option(TDOMF_OPTION_SPAM_AKISMET_KEY_PREV,$tdomf_spam_akismet_key_prev);
+            } else {
+              $message .= "<font color='red'>".sprintf(__("The key: %s has not been recognised by akismet. Spam protection has been disabled.","tdomf"),$tdomf_spam_akismet_key)."</font><br/>";
+              update_option(TDOMF_OPTION_SPAM,false);
+              $tdomf_spam = false;
             }
         }
         
@@ -258,7 +258,7 @@ function tdomf_show_spam_options($form_id = false){
   function tdomf_enable_spam_options() {
     var flag = document.getElementById("tdomf_spam").checked;
     <?php if(!$form_id) { ?>
-    document.getElementById("tdomf_spam_akismet_key").disabled = !flag;
+    /*document.getElementById("tdomf_spam_akismet_key").disabled = !flag;*/
     document.getElementById("tdomf_spam_notify_live").disabled = !flag;
     document.getElementById("tdomf_spam_notify_none").disabled = !flag;
     document.getElementById("tdomf_spam_auto_delete_manual").disabled = !flag;
@@ -295,18 +295,27 @@ function tdomf_show_spam_options($form_id = false){
            <?php if(!$spam_enabled) { echo "disabled"; } else { ?>
            onChange="tdomf_enable_spam_overwrite();" <?php } ?> >
   </p>
-  <?php } ?>
   
   <p>
+  
   <b><?php _e("Enable Spam Protection ","tdomf"); ?></b>
     <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  
         <?php if($tdomf_spam) echo "checked"; ?>
         <?php if(!$spam_enabled) { echo "disabled"; } else { ?>
         onChange="tdomf_enable_spam_options();" <?php } ?> >
   </p>
+ 
+  <?php } ?>
   
   <?php if(!$form_id) { ?>
-  
+
+  <b><?php _e("Enable Spam Protection ","tdomf"); ?></b>
+    <input type="checkbox" name="tdomf_spam" id="tdomf_spam"  
+        <?php if($tdomf_spam) echo "checked"; ?>
+        <?php if(empty($tdomf_spam_akismet_key)) { echo "disabled"; } else { ?>
+        onChange="tdomf_enable_spam_options();" <?php } ?> >
+  </p>
+      
   <p>
   <b><?php _e("Your Akismet Key","tdomf"); ?></b>
     <input type="text" name="tdomf_spam_akismet_key" id="tdomf_spam_akismet_key" size="8" value="<?php echo $tdomf_spam_akismet_key; ?>" />
