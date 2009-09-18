@@ -131,7 +131,7 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
 }
 
 function tdomf_stripslashes_deep($array) {
-    if (get_magic_quotes_gpc()) {
+    #if (get_magic_quotes_gpc()) { <- requried in wp 2.8.x even with magic quotes off
         if(is_array($array)) {
             return array_map('tdomf_stripslashes_deep', $array);
         } else {
@@ -141,11 +141,18 @@ function tdomf_stripslashes_deep($array) {
                 $array = tdomf_stripslashes_deep($array);
                 $array = join("\n",$array);
             } else {
-                $array = stripslashes($array);
-                return str_replace("\\'","'",$array);
+                if (get_magic_quotes_gpc()) {
+                  $array = stripslashes($array);
+                  return str_replace("\\'","'",$array);
+                } else {
+                  // when magic quotes is off, wordpress 2.8.x adds slashes
+                  // to ' and " but not to \
+                  $array = str_replace("\\'","'",$array);
+                  $array = str_replace('\\"','"',$array);
+                }
             }
         }
-    }
+    #}
     return $array;
 }
 

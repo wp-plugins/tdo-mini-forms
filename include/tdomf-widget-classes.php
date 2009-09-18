@@ -1744,13 +1744,13 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
             }
             
             if($opts[$this->prefix.'protect-magic-quotes']) {
-                if(get_magic_quotes_gpc()) {
+                #if(get_magic_quotes_gpc()) { <- this is not limited to magic quotes being on!
                     /* Wordpress 2.8.x adds slashes to ' and " but not to 
                      * other back slashes. Passing the protected content to post update
                      * works fine then for ' and " but not for slashes. Need to protect
                      * slashes before passing it through 'the_content' */
                     $output = str_replace('\\','\\\\',$output);
-                }
+                #}
             }
         }
         
@@ -1914,7 +1914,7 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
             
             if($opts[$this->prefix.'filter'] == 'the_content' ) {
                 if($opts[$this->prefix.'protect-magic-quotes']) {
-                    if(get_magic_quotes_gpc()) {
+                    #if(get_magic_quotes_gpc()) { <- this is not limited to magic quotes being on!
                         /* Wordpress 2.8.x: 'the_content' filter adds slashes to ' and " but not 
                          * to other slashes. Major pain when your doing you're best to keep 
                          * it unnecessary slash clean! */
@@ -1923,7 +1923,7 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
                         # but sometimes it donesn't convert one or two (but still adds slashes)
                         $output = str_replace("\\'","'",$output);
                         # I've also seen it "steal" some but not all stand alone backslashes - nothing I can do about it!
-                    }
+                    #}
                 }
             }
         }
@@ -1952,10 +1952,10 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         }
         if($opts[$this->prefix.'filter'] == 'the_content' ) {
            if($opts[$this->prefix.'protect-magic-quotes']) {
-               if(get_magic_quotes_gpc()) {
+               #if(get_magic_quotes_gpc()) {
                   $output .= "\t".'$temp_text = preg_replace(\'/\\\\\\&\\#(\\d*)\\;/\',\'&#$1;\',$temp_text);'."\n";
                   $output .= "\t".'$temp_text = str_replace("\\\\\'","\'",$temp_text);'."\n";
-               }
+               #}
            }
         }
         $output .= "\t?>\n";
@@ -2161,13 +2161,13 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
             } 
 
             if($opts[$this->prefix.'protect-magic-quotes']) {
-                if(get_magic_quotes_gpc()) {
+                #if(get_magic_quotes_gpc()) { <- this is not limited to magic quotes being on!
                     /* Wordpress 2.8.x adds slashes to ' and " but not to 
                      * other back slashes. Passing the protected content to post update
                      * works fine then for ' and " but not for slashes. Need to protect
                      * slashes before passing it through 'the_content' */
                     $output = str_replace('\\','\\\\',$output);
-                }
+                #}
             }
             
             if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'post') 

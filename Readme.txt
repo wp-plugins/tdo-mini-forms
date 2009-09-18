@@ -2,9 +2,9 @@
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
-Requires at least: 2.7.1
-Tested up to: 2.8.1
-Stable Tag: 0.13.4
+Requires at least: 2.8
+Tested up to: 2.8.4
+Stable Tag: 0.13.5
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
@@ -396,6 +396,12 @@ Also thanks to everyone who donated and offered feedback and testing!
 
 
 == Changelog ==
+
+= 0.13.5 =
+* Previous recent versions prevented people from enabling spam. The code waswritten in such a way that the spam protection had to be enabled before spam protection could be enabled!
+* Replaced the usage of $_REQUEST with $_POST in form hacker. Not sure if it'll have any impact on the form-hacker-reset problem but it should be safer
+* Have tested and fixed extra slashes being added on WP 2.8.x builds with and without magic quotes turned on. 
+* Refactored Custom Field, Content, Excerpt widgets and created a common  textfield and textarea (as part of the fix for magic quotes). This allows me to add new features to multiple widgets at a time. 
 
 = 0.13.4 =
 * "Warnings on post": errors appear about "post.php". I left some unfinished code in an action which was breaking one of the wordpress functions. 

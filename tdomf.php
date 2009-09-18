@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.13.4
+Version: 0.13.5
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -37,12 +37,11 @@ Author URI: http://thedeadone.net
 // - Replaced the usage of $_REQUEST with $_POST in form hacker. Not sure if
 //     it'll have any impact on the form-hacker-reset problem but it should
 //     be safer
-// - Quotes now seem to be added in form hacker with latest WP. Fixed on a 
-//     "WAMP" setup. Must test on a different setup.
-//
-// v0.13.4
-// - "Warnings on post", errors appear about "post.php". I left some unfinished
-//     code in an action which was breaking one of the wordpress functions. 
+// - Have tested and fixed extra slashes being added on WP 2.8.x builds with and
+//     without magic quotes turned on. 
+// - Refactored Custom Field, Content, Excerpt widgets and created a common
+//     textfield and textarea (as part of the fix for magic quotes). This allows
+//     me to add new features to multiple widgets at a time. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -108,37 +107,6 @@ Other
 */
 
 /*
-Magic Quotes for 0.13.4:
-
-Wordpress 2.8.2
-+++++++++++++++
-
-Magic Quotes: ON
-================
-                  Title | Content
-AJAX: On
---------          
-New-Post-Preview: FAIL  | FAIL
-New-Post-Submit : FAIL  | FAIL   
-
-AJAX: Off
----------
-New-Post-Preview: OK    | FAIL
-New-Post-Submit : OK    | OK
-
-Magic Quotes: OFF
-=================
-
-AJAX: On
---------
-New-Post-Preview: OK    | FAIL
-New-Post-Submit : OK    | OK
-
-AJAX: Off
----------
-New-Post-Preview: OK    | FAIL
-New-Post-Submit : OK    | OK
-
 Magic Quotes for 0.13.5:
 
 Wordpress 2.8.2
@@ -165,22 +133,22 @@ Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
 
 Magic Quotes: OFF
 =================
-Widget Screen    :
-Form Hacker      :
+Widget Screen    : OK
+Form Hacker      : OK
 
 [AJAX: On]         Title | Content | Excerpt | CF: TextArea | CF: TextField
 --------------------------------------------------------------------------          
-New-Post-Preview : 
-New-Post-Submit  : 
-Edit-Post-Preview: 
-Edit-Post-Submit :
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
 
 [AJAX: Off]        Title | Content | Excerpt | CF: TextArea | CF: TextField
 --------------------------------------------------------------------------
-New-Post-Preview : 
-New-Post-Submit  :
-Edit-Post-Preview: 
-Edit-Post-Submit :
+New-Post-Preview : OK    | OK      | OK      | OK           | OK
+New-Post-Submit  : OK    | OK      | OK      | OK           | OK
+Edit-Post-Preview: OK    | OK      | N/A     | N/A          | N/A
+Edit-Post-Submit : OK    | OK      | N/A     | N/A          | N/A
 
 */
 

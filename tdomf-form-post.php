@@ -90,7 +90,7 @@ if($tdomf_verify == false || $tdomf_verify == 'default') {
 }
 
 function tdomf_stripslashes_deep($array) {
-    if (get_magic_quotes_gpc()) {
+    #if (get_magic_quotes_gpc()) { <- requried in wp 2.8.x even with magic quotes off
         if(is_array($array)) {
             return array_map('tdomf_stripslashes_deep', $array);
         } else {
@@ -104,7 +104,7 @@ function tdomf_stripslashes_deep($array) {
                 return str_replace("\\'","'",$array);
             }
         }
-    }
+    #}
     return $array;
 }
 
