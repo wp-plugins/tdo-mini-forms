@@ -1330,9 +1330,13 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         $defs = array( $this->prefix.'size' => 30,
                        $this->prefix.'required' => false, 
                        $this->prefix.'title' => "Text",
-                       $this->prefix.'restrict-type' => 'text', #email, url, @todo timedate
+                       $this->prefix.'restrict-type' => 'text', #email, url, number, @todo timedate
                        $this->prefix.'validate-url' => false,
                        $this->prefix.'validate-email' => false,
+                       $this->prefix.'number-decimal' => true,
+                       $this->prefix.'number-start' => false,
+                       $this->prefix.'number-end' => false,
+                       $this->prefix.'number-js' => false, 
                        $this->prefix.'restrict-tags' => false,
                        $this->prefix.'allowable-tags' => "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>",
                        $this->prefix.'char-limit' => 0,
@@ -1377,6 +1381,68 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
                 $output .= sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$opts[$this->prefix.'char-limit'])."<br/>";
             }
         
+        } else if($opts[$this->prefix.'restrict-type'] == 'number') {
+            
+            if($opts[$this->prefix.'number-js']) {
+                // borrowed js from http://snippets.dzone.com/posts/show/5223
+            
+                $output .= '<script type="text/javascript">'."\n"; 
+                $output .= '//<!-- [CDATA['."\n";
+                
+                $output .= 'function '.$this->prepJSCode($this->prefix).'tf_numbersonly(e) {'."\n";
+                $output .= "\t".'var key; var keychar;'."\n";
+                $output .= "\t".'if (window.event) {'."\n";
+                $output .= "\t\t".'key = window.event.keyCode;'."\n";
+                $output .= "\t".'}'."\n";
+                $output .= "\t".'else if (e) {'."\n";
+                $output .= "\t\t".'key = e.which;'."\n";
+                $output .= "\t\t".'}'."\n";
+                $output .= "\t".'else {'."\n";
+                $output .= "\t\t".'return true;'."\n";
+                $output .= "\t".'}'."\n";
+                $output .= "\t".'keychar = String.fromCharCode(key);'."\n";
+                
+                $output .= "\t".'if ((key==null) || (key==0) || (key==8) ||  (key==9) || (key==13) || (key==27) ) {'."\n";
+                $output .= "\t\t".'return true;'."\n";
+                $output .= "\t".'}'."\n";
+                $output .= "\t".'else if ((("0123456789").indexOf(keychar) > -1)) {'."\n";
+                $output .= "\t\t".'return true;'."\n";
+                $output .= "\t".'}'."\n";
+                if($opts[$this->prefix.'number-start'] === false || $opts[$this->prefix.'number-start'] < 0) {
+                    $output .= "\t".'else if (keychar == "-") { '."\n";
+                    $output .= "\t\t".'return true;'."\n";
+                    $output .= "\t".'}'."\n";
+                }
+                if($opts[$this->prefix.'number-decimal']) {
+                    $output .= "\t".'else if (keychar == ".") { '."\n";
+                    $output .= "\t\t".'return true;'."\n";
+                    $output .= "\t".'}'."\n";
+                }
+                $output .= "\t".'return false;'."\n";
+                $output .= '}'."\n";
+                
+                $output .= '//]] -->'."\n";
+                $output .= '</script>'."\n"; 
+            }
+            
+            if($opts[$this->prefix.'number-decimal']) {
+                if($opts[$this->prefix.'number-start'] !== false && $opts[$this->prefix.'number-end'] !== false) {
+                    $output .= sprintf(__("<small>Number: %f to %f </small>","tdomf"),$opts[$this->prefix.'number-start'],$opts[$this->prefix.'number-end'])."<br/>";
+                } else if($opts[$this->prefix.'number-start'] !== false) {
+                    $output .= sprintf(__("<small>Number: Greater than %f</small>","tdomf"),$opts[$this->prefix.'number-start'])."<br/>";
+                } else if($opts[$this->prefix.'number-end'] !== false) {
+                    $output .= sprintf(__("<small>Number: Smaller than %f</small>","tdomf"),$opts[$this->prefix.'number-end'])."<br/>";
+                }
+            } else {
+                if($opts[$this->prefix.'number-start'] !== false && $opts[$this->prefix.'number-end'] !== false) {
+                    $output .= sprintf(__("<small>Number: %d - %d </small>","tdomf"),$opts[$this->prefix.'number-start'],$opts[$this->prefix.'number-end'])."<br/>";
+                } else if($opts[$this->prefix.'number-start'] !== false) {
+                    $output .= sprintf(__("<small>Number: Greater than %d</small>","tdomf"),$opts[$this->prefix.'number-start'])."<br/>";
+                } else if($opts[$this->prefix.'number-end'] !== false) {
+                    $output .= sprintf(__("<small>Number: Smaller than %d</small>","tdomf"),$opts[$this->prefix.'number-end'])."<br/>";
+                }
+            }
+            
         }
         
         if($opts[$this->prefix.'restrict-type'] == 'email') {
@@ -1387,7 +1453,18 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         
         // textfield
         
-        $output .= '<input type="text" title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" name="'.$this->prefix.'tf" id="'.$this->prefix.'tf" size="'.$opts[$this->prefix.'size'].'" value="'.htmlentities($text,ENT_QUOTES,get_bloginfo('charset')).'" />';
+        $output .= '<input ';
+        if($opts[$this->prefix.'restrict-type'] != 'number' || !$opts[$this->prefix.'number-js']) {
+            $output .= 'type="text" ';
+        }
+        $output .= 'title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" ';
+        $output .= 'name="'.$this->prefix.'tf" id="'.$this->prefix.'tf" ';
+        $output .= 'size="'.$opts[$this->prefix.'size'].'" ';
+        $output .= 'value="'.htmlentities($text,ENT_QUOTES,get_bloginfo('charset')).'" ';
+        if($opts[$this->prefix.'restrict-type'] == 'number' && $opts[$this->prefix.'number-js']) {
+            $output .= 'onKeyPress="return '.$this->prepJSCode($this->prefix).'tf_numbersonly(event)" ';
+        }
+        $output .= '/>';
         
         // post: nothing
         
@@ -1429,6 +1506,66 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
               $output .= "\t\t".sprintf(__("<small>Max Character Limit: %d</small>","tdomf"),$opts[$this->prefix.'char-limit'])."\n\t\t<br/>\n";
             }
         
+        } else if($opts[$this->prefix.'restrict-type'] == 'number') {
+            
+            if($opts[$this->prefix.'number-js']) {
+            
+                $output .= "\t\t".'<script type="text/javascript">'."\n"; 
+                $output .= "\t\t".'//<!-- [CDATA['."\n";
+                
+                $output .= "\t\t".'function '.$this->prepJSCode($this->prefix).'tf_numbersonly(e) {'."\n";
+                $output .= "\t\t"."\t".'var key; var keychar;'."\n";
+                $output .= "\t\t"."\t".'if (window.event) {'."\n";
+                $output .= "\t\t"."\t\t".'key = window.event.keyCode;'."\n";
+                $output .= "\t\t"."\t".'}'."\n";
+                $output .= "\t\t"."\t".'else if (e) {'."\n";
+                $output .= "\t\t"."\t\t".'key = e.which;'."\n";
+                $output .= "\t\t"."\t\t".'}'."\n";
+                $output .= "\t\t"."\t".'else {'."\n";
+                $output .= "\t\t"."\t\t".'return true;'."\n";
+                $output .= "\t\t"."\t".'}'."\n";
+                $output .= "\t\t"."\t".'keychar = String.fromCharCode(key);'."\n";
+                
+                $output .= "\t\t"."\t".'if ((key==null) || (key==0) || (key==8) ||  (key==9) || (key==13) || (key==27) ) {'."\n";
+                $output .= "\t\t"."\t\t".'return true;'."\n";
+                $output .= "\t\t"."\t".'}'."\n";
+                $output .= "\t\t"."\t".'else if ((("0123456789").indexOf(keychar) > -1)) {'."\n";
+                $output .= "\t\t"."\t\t".'return true;'."\n";
+                $output .= "\t\t"."\t".'}'."\n";
+                if($opts[$this->prefix.'number-start'] === false || $opts[$this->prefix.'number-start'] < 0) {
+                    $output .= "\t\t"."\t".'else if (keychar == "-") { '."\n";
+                    $output .= "\t\t"."\t\t".'return true;'."\n";
+                    $output .= "\t\t"."\t".'}'."\n";
+                }
+                if($opts[$this->prefix.'number-decimal']) {
+                    $output .= "\t\t"."\t".'else if (keychar == ".") { '."\n";
+                    $output .= "\t\t"."\t\t".'return true;'."\n";
+                    $output .= "\t\t"."\t".'}'."\n";
+                }
+                $output .= "\t\t"."\t".'return false;'."\n";
+                $output .= "\t\t".'}'."\n";
+                
+                $output .= "\t\t".'//]] -->'."\n";
+                $output .= "\t\t".'</script>'."\n"; 
+            }
+            
+            if($opts[$this->prefix.'number-decimal']) {
+                if($opts[$this->prefix.'number-start'] !== false && $opts[$this->prefix.'number-end'] !== false) {
+                    $output .= "\t\t".sprintf(__("<small>Number: %f to %f </small>","tdomf"),$opts[$this->prefix.'number-start'],$opts[$this->prefix.'number-end'])."<br/>";
+                } else if($opts[$this->prefix.'number-start'] !== false) {
+                    $output .= "\t\t".sprintf(__("<small>Number: Greater than %f</small>","tdomf"),$opts[$this->prefix.'number-start'])."<br/>";
+                } else if($opts[$this->prefix.'number-end'] !== false) {
+                    $output .= "\t\t".sprintf(__("<small>Number: Smaller than %f</small>","tdomf"),$opts[$this->prefix.'number-end'])."<br/>";
+                }
+            } else {
+                if($opts[$this->prefix.'number-start'] !== false && $opts[$this->prefix.'number-end'] !== false) {
+                    $output .= "\t\t".sprintf(__("<small>Number: %d - %d </small>","tdomf"),$opts[$this->prefix.'number-start'],$opts[$this->prefix.'number-end'])."<br/>";
+                } else if($opts[$this->prefix.'number-start'] !== false) {
+                    $output .= "\t\t".sprintf(__("<small>Number: Greater than %d</small>","tdomf"),$opts[$this->prefix.'number-start'])."<br/>";
+                } else if($opts[$this->prefix.'number-end'] !== false) {
+                    $output .= "\t\t".sprintf(__("<small>Number: Smaller than %d</small>","tdomf"),$opts[$this->prefix.'number-end'])."<br/>";
+                }
+            }
         }
         
         if($opts[$this->prefix.'restrict-type'] == 'email') {
@@ -1439,8 +1576,19 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         
         // textfield
         
-        $output .= "\t\t".'<input type="text" title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" size="'.$opts[$this->prefix.'size'].'" name="'.$this->prefix.'tf" id="'.$this->prefix.'tf" value="<?php echo htmlentities($temp_text,ENT_QUOTES,get_bloginfo(\'charset\')); ?>" />';
-
+        $output .= "\t\t".'<input ';
+        if($opts[$this->prefix.'restrict-type'] != 'number' || !$opts[$this->prefix.'number-js']) {
+            $output .= 'type="text" ';
+        }
+        $output .= 'title="'.htmlentities($opts[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')).'" ';
+        $output .= 'name="'.$this->prefix.'tf" id="'.$this->prefix.'tf" ';
+        $output .= 'size="'.$opts[$this->prefix.'size'].'" ';
+        $output .= 'value="<?php echo htmlentities($temp_text,ENT_QUOTES,get_bloginfo(\'charset\')); ?>"';
+        if($opts[$this->prefix.'restrict-type'] == 'number' && $opts[$this->prefix.'number-js']) {
+            $output .= 'onKeyPress="return '.$this->prepJSCode($this->prefix).'tf_numbersonly(event)" ';
+        }
+        $output .= '/>';
+        
         // post: nothing
         
         return $output;
@@ -1494,6 +1642,18 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         return $output; 
     }
     
+    function updateOptsFloatOrBoolean($options,$name,$show,$hide)
+    {
+        if($this->useOpts($name,$show,$hide) && isset($_POST[$name])) {
+            if(empty($_POST[$name])) {
+                $options[$name] = false;
+            } else {
+                $options[$name] = floatval($_POST[$name]);
+            }
+        }
+        return $options;
+    }
+    
     function control($options,$form_id,$show=false,$hide=false)
     {
         if((is_array($show) && empty($show))) {
@@ -1517,6 +1677,10 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         $retOptions = $this->updateOptsString($retOptions,$this->prefix.'restrict-type',$show,$hide);
         $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-url',$show,$hide);
         $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-email',$show,$hide);
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'number-js',$show,$hide);
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'number-decimal',$show,$hide);
+        $retOptions = $this->updateOptsFloatOrBoolean($retOptions,$this->prefix.'number-start',$show,$hide);
+        $retOptions = $this->updateOptsFloatOrBoolean($retOptions,$this->prefix.'number-end',$show,$hide);
         
         $options = wp_parse_args($retOptions, $options);
         
@@ -1595,6 +1759,33 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
     <?php } ?>
     
     <br/>
+    
+<input type="radio" name="<?php echo $this->prefix; ?>restrict-type" id="<?php echo $this->prefix; ?>restrict-type" value="number"
+<?php if($options[$this->prefix.'restrict-type'] == 'number') { ?>checked<?php } ?> /> <?php _e("Number","tdomf"); ?> <br/>
+    
+    <?php if($this->useOpts($this->prefix.'number-start',$show,$hide)) { ?>
+        <label for="<?php echo $this->prefix; ?>number-start" style="line-height:35px;"><?php _e("Lowest number allowed <i>(leave blank for no limit)</i>:","tdomf"); ?></label>
+        <input type="textfield" name="<?php echo $this->prefix; ?>number-start" id="<?php echo $this->prefix; ?>number-start" value="<?php if($options[$this->prefix.'number-start'] !== false) { echo htmlentities($options[$this->prefix.'number-start'],ENT_QUOTES,get_bloginfo('charset')); } ?>" />
+<br/>
+    <?php } ?>
+
+    <?php if($this->useOpts($this->prefix.'number-end',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>'number-end" style="line-height:35px;"><?php _e("Highest number allowed <i>(leave blank for no limit)</i>:","tdomf"); ?></label>
+        <input type="textfield" name="<?php echo $this->prefix; ?>number-end" id="<?php echo $this->prefix; ?>number-end" value="<?php if($options[$this->prefix.'number-end'] !== false) { echo htmlentities($options[$this->prefix.'number-end'],ENT_QUOTES,get_bloginfo('charset')); } ?>" />
+<br/>        
+    <?php } ?>
+    
+    <?php if($this->useOpts($this->prefix.'number-js',$show,$hide)) { ?>
+        <input type="checkbox" name="<?php echo $this->prefix; ?>number-js" id="<?php echo $this->prefix; ?>number-js" <?php if($options[$this->prefix.'number-js']) echo "checked"; ?> >
+        <label for="<?php echo $this->prefix; ?>number-js" style="line-height:35px;"><?php _e("Include Javascript checking code","tdomf"); ?></label
+    <?php } ?>
+    
+    <?php if($this->useOpts($this->prefix.'number-decimal',$show,$hide)) { ?>
+        <input type="checkbox" name="<?php echo $this->prefix; ?>number-decimal" id="<?php echo $this->prefix; ?>number-decimal" <?php if($options[$this->prefix.'number-decimal']) echo "checked"; ?> >
+        <label for="<?php echo $this->prefix; ?>number-decimal" style="line-height:35px;"><?php _e("Allow decimal numbers","tdomf"); ?></label
+    <?php } ?>
+    
+    <br/>
 
   <?php }
         return $options;
@@ -1633,6 +1824,12 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
                         $output .= sprintf(__("You must specify a vaild email address for %s.","tdomf"),$opts[$this->prefix.'title']);
                     } else {
                         $output .= __("You must specify a valid email.","tdomf");
+                    }     
+                } else if($opts[$this->prefix.'restrict-type'] == 'number') {
+                 if(!empty($opts[$this->prefix.'title'])) {
+                        $output .= sprintf(__("You must specify a number for %s.","tdomf"),$opts[$this->prefix.'title']);
+                    } else {
+                        $output .= __("You must specify a number.","tdomf");
                     }                    
                 } else {
                     #$opts[$this->prefix.'restrict-type'] == 'text'
@@ -1646,7 +1843,7 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         }
         
                 
-        // is it a real email or url
+        // is it a real email, url or number
         
         if(empty($output) && $opts[$this->prefix.'restrict-type'] != 'text') {
             if($opts[$this->prefix.'restrict-type'] == 'url') {
@@ -1672,6 +1869,46 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
                       $output .= sprintf(__("The email address \"%s\" for %s does not seem to be correct.","tdomf"),$text,$opts[$this->prefix.'title']);
                     } else {
                       $output .= sprintf(__("The email address \"%s\" does not seem to be correct.","tdomf"),$text);
+                    }
+                }
+            } else if($opts[$this->prefix.'restrict-type'] == 'number') {
+                if(is_numeric($text)) {
+                    if($opts[$this->prefix.'number-decimal']) {
+                        $number = floatval($text);
+                        if($opts[$this->prefix.'number-start'] !== false && $number < $opts[$this->prefix.'number-start']) {
+                            if(!empty($opts[$this->prefix.'title'])) {
+                                $output .= sprintf(__("%f for %s is too low. It must be equal to or greater than %f.","tdomf"),$number,$opts[$this->prefix.'title'],$opts[$this->prefix.'number-start']);
+                            } else {
+                                $output .= sprintf(__("%f is too low. It must be equal to or greater than %f.","tdomf"),$text,$opts[$this->prefix.'number-start']);
+                            }
+                        } else if($opts[$this->prefix.'number-end'] !== false && $number > $opts[$this->prefix.'number-end']) {
+                            if(!empty($opts[$this->prefix.'title'])) {
+                                $output .= sprintf(__("%f for %s is too high. It must be equal to or less than %f.","tdomf"),$text,$opts[$this->prefix.'title'],$opts[$this->prefix.'number-start']);
+                            } else {
+                                $output .= sprintf(__("%f is too high. It must be equal to or less than %f.","tdomf"),$text,$opts[$this->prefix.'number-start']);
+                            }                        
+                        }
+                    } else {
+                        $number = intval($text);
+                        if($opts[$this->prefix.'number-start'] !== false && $number < $opts[$this->prefix.'number-start']) {
+                            if(!empty($opts[$this->prefix.'title'])) {
+                                $output .= sprintf(__("%d for %s is too low. It must be equal to or greater than %d.","tdomf"),$number,$opts[$this->prefix.'title'],$opts[$this->prefix.'number-start']);
+                            } else {
+                                $output .= sprintf(__("%d is too low. It must be equal to or greater than %d.","tdomf"),$text,$opts[$this->prefix.'number-start']);
+                            }
+                        } else if($opts[$this->prefix.'number-end'] !== false && $number > $opts[$this->prefix.'number-end']) {
+                            if(!empty($opts[$this->prefix.'title'])) {
+                                $output .= sprintf(__("%d for %s is too high. It must be equal to or less than %d.","tdomf"),$text,$opts[$this->prefix.'title'],$opts[$this->prefix.'number-start']);
+                            } else {
+                                $output .= sprintf(__("%d is too high. It must be equal to or less than %d.","tdomf"),$text,$opts[$this->prefix.'number-start']);
+                            }                        
+                        }
+                    }
+                } else if(trim($text) != ""){
+                    if(!empty($opts[$this->prefix.'title'])) {
+                      $output .= sprintf(__("\"%s\" for %s is not a valid number.","tdomf"),$text,$opts[$this->prefix.'title']);
+                    } else {
+                      $output .= sprintf(__("\"%s\" is not a valid number.","tdomf"),$text);
                     }
                 }
             }
@@ -1727,30 +1964,41 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         }
         
         if($text != false) {
-            $output = $text;
             
-            if($opts[$this->prefix.'restrict-type'] == 'text') {
-
-                if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
-                    $output = strip_tags($output,$options['allowable-tags']);
+            if($opts[$this->prefix.'restrict-type'] == 'number') {
+                
+                if($opts[$this->prefix.'number-decimal']) {
+                    $output = floatval($text);
+                } else {
+                    $output = intval($text);
                 }
-            }
-            
-            if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'post') 
-                && !empty($opts[$this->prefix.'filter'])) {
-               tdomf_log_message("textfield: <pre>" . htmlentities(var_export($opts,true)) . "</pre>");
-               tdomf_log_message("textfield: applying " . $opts[$this->prefix.'filter'] . " to input for " . $this->prefix);
-                $output = apply_filters($opts[$this->prefix.'filter'], $output);
-            }
-            
-            if($opts[$this->prefix.'protect-magic-quotes']) {
-                #if(get_magic_quotes_gpc()) { <- this is not limited to magic quotes being on!
-                    /* Wordpress 2.8.x adds slashes to ' and " but not to 
-                     * other back slashes. Passing the protected content to post update
-                     * works fine then for ' and " but not for slashes. Need to protect
-                     * slashes before passing it through 'the_content' */
-                    $output = str_replace('\\','\\\\',$output);
-                #}
+                
+            } else {
+                $output = $text;
+                
+                if($opts[$this->prefix.'restrict-type'] == 'text') {
+    
+                    if($opts[$this->prefix.'allowable-tags'] != "" && $opts[$this->prefix.'restrict-tags']) {
+                        $output = strip_tags($output,$options['allowable-tags']);
+                    }
+                }
+                
+                if(($opts[$this->prefix.'use-filter'] === true || $opts[$this->prefix.'use-filter'] == 'post') 
+                    && !empty($opts[$this->prefix.'filter'])) {
+                   tdomf_log_message("textfield: <pre>" . htmlentities(var_export($opts,true)) . "</pre>");
+                   tdomf_log_message("textfield: applying " . $opts[$this->prefix.'filter'] . " to input for " . $this->prefix);
+                    $output = apply_filters($opts[$this->prefix.'filter'], $output);
+                }
+                
+                if($opts[$this->prefix.'protect-magic-quotes']) {
+                    #if(get_magic_quotes_gpc()) { <- this is not limited to magic quotes being on!
+                        /* Wordpress 2.8.x adds slashes to ' and " but not to 
+                         * other back slashes. Passing the protected content to post update
+                         * works fine then for ' and " but not for slashes. Need to protect
+                         * slashes before passing it through 'the_content' */
+                        $output = str_replace('\\','\\\\',$output);
+                    #}
+                }
             }
         }
         
@@ -2178,5 +2426,586 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         return $output;
     }
 }
+
+/** 
+* Utility class for any widget using a Hidden input
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0
+* @since 0.13.6
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/ 
+class TDOMF_WidgetFieldHidden extends TDOMF_WidgetField {
+    
+    function TDOMF_WidgetFieldHidden($prefix)
+    {
+        parent::TDOMF_WidgetField($prefix);
+    }
+    
+    function getOptions($opts) {
+        $defs = array( $this->prefix.'default-value' => "",
+                       $this->prefix.'value-php' => false);
+        $opts = wp_parse_args($opts, $defs);
+        return $opts;
+    }
+    
+    function form($args,$opts)
+    {
+        $value = $opts[$this->prefix.'default-value'];
+        if($opts[$this->prefix.'value-php']) {
+            #tdomf_log_message('Executing "'.$value.'" ...');
+            // execute any PHP code in the value    
+            ob_start();
+            extract($args,EXTR_PREFIX_INVALID,"tdomf_");
+            $value = @eval($value);
+            $value = ob_get_contents();
+            ob_end_clean();
+        }
+        
+        $output = '<input type="hidden" id="'.$this->prefix.'h" name="'.$this->prefix.'h" id="'.$this->prefix.'h" value="'.htmlentities($value,ENT_QUOTES,get_bloginfo('charset')).'" />'."\n";
+        
+        return $output;
+    }
+    
+    function formHack($args,$opts)
+    {
+        $value = $opts[$this->prefix.'default-value'];
+        
+        $output = "\t\t".'<input type="hidden" id="'.$this->prefix.'h" name="'.$this->prefix.'h" id="'.$this->prefix.'h" value="';
+        if($opts[$this->prefix.'value-php']) {
+            $output .= '<?php '.$value.' ?>';
+        } else {
+            $output .= htmlentities($value,ENT_QUOTES,get_bloginfo('charset'));
+        }
+        $output .= '" />'."\n";
+        
+        return $output;
+    }
+    
+    function preview($args,$opts,$original_field_name=false)
+    {
+        if(isset($args[$this->prefix.'h'])) {
+            $output = $args[$this->prefix.'h'];
+        } else if($original_field_name != false && isset($args[$original_field_name])) {
+            $output = $args[$original_field_name];
+        } else {
+            tdomf_log_message("Hidden: can't get any input for preview!",TDOMF_LOG_ERROR);
+        }
+
+        return $output;
+    }
+    
+    function previewHack($args,$opts,$original_field_name=false)
+    {
+        $output = "\t<?php echo \$post_args['".$this->prefix."h']; ?>";
+        return $output; 
+    }
+    
+    function control($options,$form_id,$show=false,$hide=false)
+    {
+        if((is_array($show) && empty($show))) {
+            # nothing to do if show list is empty
+            return array();
+        }
+        
+        // prepare options!
+        
+        $retOptions = array();        
+        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-value',$show,$hide);     
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'value-php',$show,$hide);
+                 
+        $options = wp_parse_args($retOptions, $options);
+        
+        if($this->useOpts($this->prefix.'default-value',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>default-value" style="line-height:35px;"><?php _e("Default Value:","tdomf"); ?></label>
+<input type="text" title="true" size="30" name="<?php echo $this->prefix; ?>default-value" id="<?php echo $this->prefix; ?>default-value" value="<?php echo htmlentities($options[$this->prefix.'default-value'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<br/>
+        <?php if($this->useOpts($this->prefix.'value-php',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>value-php" style="line-height:35px;"><?php _e("Treat default value as code (php)","tdomf"); ?></label>
+<input type="checkbox" name="<?php echo $this->prefix; ?>value-php" id="<?php echo $this->prefix; ?>value-php" <?php if($options[$this->prefix.'value-php']) echo "checked"; ?> >
+<br/>
+       <?php } ?>
+  <?php }
+  
+        return $options;
+    }
+    
+    function validate($args,$opts,$preview=false,$original_field_name=false) {
+        
+        $output = "";
+        $input = false;
+
+        // grab the input because we're going to test it
+        
+        $input = false;
+        if(empty($output)) {
+            if(isset($args[$this->prefix.'h'])) {
+                $input = $args[$this->prefix.'h'];
+            } else if($original_field_name != false && isset($args[$original_field_name])) {
+                $input = $args[$original_field_name];
+            } else {
+                $output .= __("ERROR: Form is invalid. Please check TDO Mini Forms admin.","tdomf");
+            }
+        }
+        
+        // eh? What other tests can we do?
+        
+        return $output;
+    }
+    
+    function post($args,$opts,$original_field_name=false)
+    {
+        if(isset($args[$this->prefix.'h']))
+        {
+            $output = $args[$this->prefix.'h'];
+        } else if($original_field_name != false && isset($args[$original_field_name])) {
+            $output = $args[$original_field_name];
+        }
+        return $output;
+    }
+}
+
+/** 
+* Utility class for any widget using a Checkbox input
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0
+* @since 0.13.6
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/ 
+class TDOMF_WidgetFieldCheckBox extends TDOMF_WidgetField {
+    
+    function TDOMF_WidgetFieldCheckBox($prefix)
+    {
+        parent::TDOMF_WidgetField($prefix);
+    }
+    
+    function getOptions($opts) {
+        $defs = array( $this->prefix.'required' => false,
+                       $this->prefix.'required-value' => true,
+                       $this->prefix.'default-value' => true,
+                       $this->prefix.'text' => '');
+        $opts = wp_parse_args($opts, $defs);
+        return $opts;
+    }
+    
+    function form($args,$opts)
+    {
+        $value = $opts[$this->prefix.'default-value'];
+        if(isset($args[$this->prefix.'cb'])) { 
+            $value = $args[$this->prefix.'cb'];
+        }
+        
+        $output .= '<input type="checkbox" name="'.$this->prefix.'cb" id="'.$this->prefix.'cb"';
+        if($value){ $output .= ' checked '; }
+        $output .= '/> ';
+        
+        if(!empty($opts[$this->prefix.'text'])) {
+            $output .= '<label for="'.$this->prefix.'cb"';
+            if($opts[$this->prefix.'required']) {
+                $output .= ' class="required">'.sprintf(__('%s (Required)','tdomf'),$opts[$this->prefix.'text']);
+            } else {
+                $output .= '>'.$opts[$this->prefix.'text'];
+            }
+            $output .= '</label>'."\n";
+        } else {
+            $output .= "\n";
+        }
+        
+        return $output;
+    }
+    
+    function formHack($args,$opts)
+    {
+        $output = "";
+
+        $defval = ($opts[$this->prefix.'default-value']) ? "true" : "false" ;  
+        
+        $output = "\t\t<?php \$temp_value = $defval; ".'if(isset($post_args["'.$this->prefix.'cb"])) {'."\n";
+           $output .= "\t\t\t".'$temp_value = true;'."\n";
+        $output .= "\t\t".'} ?>'."\n";
+        
+        $output .= '<input type="checkbox" name="'.$this->prefix.'cb" id="'.$this->prefix.'cb"';
+        $output .= "<?php if(\$temp_value){ ?> checked <?php } ?>";
+        $output .= '/> ';
+        
+        if(!empty($opts[$this->prefix.'text'])) {
+            $output .= '<label for="'.$this->prefix.'cb"';
+            if($opts[$this->prefix.'required']) {
+                $output .= ' class="required">'.sprintf(__('%s (Required)','tdomf'),$opts[$this->prefix.'text']);
+            } else {
+                $output .= '>'.$opts[$this->prefix.'text'];
+            }
+            $output .= '</label>'."\n";
+        } else {
+            $output .= "\n";
+        }
+       
+        return $output;
+    }
+    
+    function preview($args,$opts,$original_field_name=false)
+    {
+        $value = $opts[$this->prefix.'default-value'];
+        if(isset($args[$this->prefix.'cb'])) {
+            $value = true;
+        } else if($original_field_name != false && isset($args[$original_field_name])) {
+            $value = true;
+        } 
+        $value = ($value) ? __("Checked",'tdomf') : __("Unchecked",'tdomf') ;
+        
+        if(!empty($opts[$this->prefix.'text'])) {
+            $output = "<b>".sprintf(__("%s: ","tdomf"),$opts[$this->prefix.'text'])."</b>".$output;
+        } 
+        
+        return $output;
+    }
+    
+    function previewHack($args,$opts,$original_field_name=false)
+    {
+        if(!empty($opts[$this->prefix.'text'])) {
+            $output .= "\t\t".'<b>'.sprintf(__("%s: ","tdomf"),$opts[$this->prefix.'text']).'</b> '."\n";
+        } 
+        $output .= "\t\t".'<?php if(isset($post_args["'.$this->prefix.'cb"])) {'."\n";
+        $output .= "\t\t\t".'echo "'.__("Checked",'tdomf').'";'."\n";
+        $output .= "\t\t".'} else {'."\n";
+        $output .= "\t\t\t".'echo "'.__("Unchecked",'tdomf').'";'."\n";
+        $output .= "\t\t".'} ?>'."\n";
+        
+        return $output;
+    }
+    
+    function validate($args,$opts,$preview=false,$original_field_name=false) {
+        
+        $output = "";
+        $input = false;
+
+        // grab the input because we're going to test it
+        
+        $input = false;
+        if(empty($output)) {
+            if(isset($args[$this->prefix.'cb'])) {
+                $input = true;
+            } else if($original_field_name != false && isset($args[$original_field_name])) {
+                $input = true;
+            } 
+        }
+        
+        // required check
+        
+        if($opts[$this->prefix.'required']) {
+            if($input == $opts[$this->prefix.'default-value']) {
+                if($input) {
+                    if(!empty($opts[$this->prefix.'text'])) {
+                        $output .= sprintf(__('You must uncheck "%s".','tdomf'),$opts[$this->prefix.'text']);
+                    } else {
+                        $output .= __('You must uncheck the box!','tdomf');
+                    }
+                } else {
+                    if(!empty($opts[$this->prefix.'text'])) {
+                        $output .= sprintf(__('You must check "%s".','tdomf'),$opts[$this->prefix.'text']);
+                    } else {
+                        $output .= __('You must check the box!','tdomf');
+                    }     
+                }
+            }
+        }
+        
+        return $output;
+    }
+    
+    function post($args,$opts,$original_field_name=false)
+    {
+        $output = false;
+        if(empty($output)) {
+            if(isset($args[$this->prefix.'cb'])) {
+                $output = true;
+            } else if($original_field_name != false && isset($args[$original_field_name])) {
+                $output = true;
+            } 
+        }
+        return $output;
+    }
+    
+    function control($options,$form_id,$show=false,$hide=false)
+    {
+        if((is_array($show) && empty($show))) {
+            # nothing to do if show list is empty
+            return array();
+        }
+
+        // prepare options!
+        
+        $retOptions = array();
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'default-value',$show,$hide);
+        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'text',$show,$hide);
+        
+        $options = wp_parse_args($retOptions, $options);
+        
+        // Display control panel for this textfield
+        
+        if($this->useOpts($this->prefix.'required',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>required" style="line-height:35px;"><?php _e("Required (the user must select the opposite of the default setting)","tdomf"); ?></label> 
+<input type="checkbox" name="<?php echo $this->prefix; ?>required" id="<?php echo $this->prefix; ?>required" <?php if($options[$this->prefix.'required']) echo "checked"; ?> >
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'default-value',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>default-value" style="line-height:35px;"><?php _e("Default Setting","tdomf"); ?></label> 
+<input type="checkbox" name="<?php echo $this->prefix; ?>default-value" id="<?php echo $this->prefix; ?>default-value" <?php if($options[$this->prefix.'default-value']) echo "checked"; ?> >
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'text',$show,$hide)) { ?>
+            <label for="<?php echo $this->prefix; ?>title" style="line-height:35px;"><?php _e("Text:","tdomf"); ?></label>
+<input type="textfield" name="<?php echo $this->prefix; ?>text" id="<?php echo $this->prefix; ?>text" value="<?php echo htmlentities($options[$this->prefix.'text'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<br/>
+  <?php }
+
+        return $options;
+    }
+    
+}
+
+/** 
+* Utility class for any widget using a Select Group
+* 
+* @author Mark Cunningham <tdomf@thedeadone.net> 
+* @version 1.0
+* @since 0.13.6
+* @access public 
+* @copyright Mark Cunningham
+* 
+*/ 
+class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
+    
+    # http://dropdown-check-list.googlecode.com/svn/trunk/demo.html (dropdown select list)
+    
+     function TDOMF_WidgetFieldCheckBox($prefix)
+    {
+        parent::TDOMF_WidgetField($prefix);
+    }
+    
+    function getOptions($opts) {
+        $defs = array( $this->prefix.'size' => 1,
+                       $this->prefix.'required' => false,
+                       $this->prefix.'default-selected' => array(),
+                       $this->prefix.'values' => array(), # two dimensional array: option-text value
+                       $this->prefix.'multiple-selection' => false,
+                       $this->prefix.'dropdown-checklist' => false, # requires: multiple selection
+                       $this->prefix.'title' => '');
+        $opts = wp_parse_args($opts, $defs);
+        return $opts;
+    }
+    
+    function form($args,$opts)
+    {
+
+        // settings
+        
+        $select_defaults = $opts[$this->prefix.'default-selected'];
+        if(isset($args[$this->prefix.'s'])){
+            $select_defaults = $args[$this->prefix.'s'];
+            if(!is_array($select_defaults)) {
+                $select_defaults = array( $select_defaults );
+            }
+        } 
+
+        // title
+        
+        if(!empty($opts[$this->prefix.'title'])) {
+           
+            $output .= '<label for="'.$this->prefix.'s"';
+            if($opts[$this->prefix.'required']) {
+                $output .=  ' class="required"';
+            } 
+            $output .= '>';
+
+            if($options['required']) {
+                $output .= sprintf(__('%s (Required)','tdomf'),$opts[$this->prefix.'title']);
+            } else {
+                $output .= $opts[$this->prefix.'title'];
+            }
+            $output .= '</label><br/>'."\n";
+        }    
+        
+        // select
+        
+        if($opts[$this->prefix.'multiple-selection']) {
+            $output .= '<select name="'.$this->prefix.'[]" id="'.$this->prefix.'[]" size="'.$opts['size'].'" multiple="multiple" >';
+        } else {
+            $output .= '<select name="'.$this->prefix.'" id="'.$this->prefix.'" size="'.$opts['size'].'" >';
+        }
+
+        if(!empty($opts[$this->prefix.'values'])) {
+            foreach($opts[$this->prefix.'values'] as $value => $text) {
+                if(trim($text) != "" && trim($value) != "") {
+                    $output .= '<option value="'.$value.'"';
+                    if(in_array($value,$select_defaults)) {
+                        $output .= ' selected=\'selected\'';
+                    }
+                    $output .= '> '.$text.'</option>'."\n"; 
+                }
+            }
+        }
+        
+        $output .= "</select>";
+    
+        return $output;
+    }
+    
+    function formHack($args,$opts)
+    {
+        // defaults
+        
+        $output = "\t\t".'<?php $temp_values = array(';
+        if(is_array($opts[$this->prefix.'default-selected'])) {
+            $first = true;
+            foreach($opts[$this->prefix.'default-selected'] as $value) {
+                $value = str_replace('"','\\"',$value);
+                if($first) { $first = false; }
+                else { $output .= ','; }
+                $output .= '"'.$value.'"';
+            }
+        }
+        $output = ');'."\n";
+
+        // current values
+           
+        $output .= "\t\t".'if(isset($post_args["'.$this->prefix.'s"])){'."\n";
+        $output .= "\t\t\t".'$temp_values = $post_args["'.$this->prefix.'s"];'."\n\t\t".'}'."\n";
+        $output .= "\t\t".'if(!is_array($temp_values)) {'."\n";
+        $output .= "\t\t\t".'$temp_values = array( $temp_values );'."\n\t\t".'}'."\n";
+        
+        $output .= "\t\t".'?>'."\n";
+        
+        // title
+        
+        if(!empty($opts[$this->prefix.'title'])) {
+           
+            $output .= '<label for="'.$this->prefix.'s"';
+            if($opts[$this->prefix.'required']) {
+                $output .=  ' class="required"';
+            } 
+            $output .= '>';
+
+            if($options['required']) {
+                $output .= sprintf(__('%s (Required)','tdomf'),$opts[$this->prefix.'title']);
+            } else {
+                $output .= $opts[$this->prefix.'title'];
+            }
+            $output .= '</label><br/>'."\n";
+        }    
+        
+        // select
+        
+        if($opts[$this->prefix.'multiple-selection']) {
+            $output .= '<select name="'.$this->prefix.'[]" id="'.$this->prefix.'[]" size="'.$opts['size'].'" multiple="multiple" >';
+        } else {
+            $output .= '<select name="'.$this->prefix.'" id="'.$this->prefix.'" size="'.$opts['size'].'" >';
+        }
+
+        if(!empty($opts[$this->prefix.'values'])) {
+            foreach($opts[$this->prefix.'values'] as $value => $text) {
+                if(trim($text) != "" && trim($value) != "") {
+                    $output .= '<option value="'.$value.'"';
+                    $output .= '<?php if(in_array($value,$temp_values)) { ?>';
+                        $output .= ' selected=\'selected\'';
+                    $output .= '<?php } ?>';
+                    $output .= '> '.$text.'</option>'."\n"; 
+                }
+            }
+        }
+        
+        $output .= "</select>";
+    
+        return $output;
+    }
+    
+    function preview($args,$opts,$original_field_name=false)
+    {
+        $output = "";
+  
+        $value = false;
+        if(isset($args[$this->prefix.'s'])){
+            $value = $args[$this->prefix.'s'];
+        } else if(isset($args[$original_field_name])) {
+            $value = $args[$original_field_name];
+        } else {
+             tdomf_log_message("Select: can't get any input for preview!",TDOMF_LOG_ERROR);
+        }
+        
+        if($value) {
+            
+            // prepare value
+            
+            if(is_array($value)) {
+                $first = true;
+                foreach($value as $v) {
+                    if(isset($opts[$this->prefix.'values'][$v])) {
+                        if($first){ $first = false; }
+                        else { $output .= ", "; }
+                        $output .= $opts[$this->prefix.'values'][$v];
+                    }
+                }
+            } else if(isset($opts[$this->prefix.'values'][$value])){
+                $output = $opts[$this->prefix.'values'][$value];
+            }
+            
+            // format output
+            
+            if(!empty($output)) {
+                if(!empty($opts[$this->prefix.'title'])) {
+                    $output = "<b>".sprintf(__("%s: ","tdomf"),$opts[$this->prefix.'title'])."</b>".$output;
+                } 
+            } else {
+                tdomf_log_message("Select: values are bad for preview!",TDOMF_LOG_ERROR);
+            }
+        }
+        
+        return $output;
+    }
+    
+    function previewHack($args,$opts,$original_field_name=false)
+    {
+        $output = "\t".'<?php $temp_values = "";'."\n";
+        $output = "\t".'if(isset($post_args["'.$this->prefix.'s"])){'."\n";
+        $output = "\t".'$temp_value = $post_args["'.$this->prefix.'s"]; '."\n";
+        
+        $output = "\t".'if(is_array($temp_value)) {'."\n";
+        $output = "\t\t".'$first = true;'."\n";
+        $output = "\t\t".'foreach($temp_value as $v) {'."\n";
+        #$output = "\t\t\t".'if(isset($opts[$this->prefix.'values'][$v])) {'."\n";
+        #$output = "\t\t".'if($first){ $first = false; }'."\n";
+        #$output = "\t\t".'else { $output .= ", "; }'."\n";
+        #$output = "\t\t".'$output .= $opts[$this->prefix.'values'][$v];'."\n";
+        #output = "\t\t".'}'."\n";
+        $output = "\t\t".'}'."\n";
+        #$output = "\t".'} else if(isset($opts[$this->prefix.'values'][$value])){'."\n";
+        #$output = "\t".'$output = $opts[$this->prefix.'values'][$value];'."\n";
+        #$output = "\t".'}'."\n";
+        
+        /* 
+            // format output
+            
+            if(!empty($output)) {
+                if(!empty($opts[$this->prefix.'title'])) {
+                    $output = "<b>".sprintf(__("%s: ","tdomf"),$opts[$this->prefix.'title'])."</b>".$output;
+                } 
+            } else {
+                tdomf_log_message("Select: values are bad for preview!",TDOMF_LOG_ERROR);
+            }
+        }*/
+        
+        return $output;
+    }
+    
+}
+
+# @todo RadioGroup
+# @todo CheckBoxGroup
 
 ?>

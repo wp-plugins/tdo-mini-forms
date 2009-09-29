@@ -1314,7 +1314,7 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
 		ajaxProgressStop$form_id_safe();
 	}
 	function tdomfRedirect$form_id_safe(url) {
-		ajaxProgressStop$form_id_safe();
+		//ajaxProgressStop$form_id_safe();
 		window.location = url;
 	}
 	//]] -->
@@ -1387,7 +1387,7 @@ EOT;
   } else {
       # use message id as re-direct because we *know* where this will appear on a non-hacked form
       #$redirect_url = $_SERVER['REQUEST_URI'].'#tdomf_form'.$form_id;
-      $redirect_url = $_SERVER['REQUEST_URI']."#tdomf_form${form_id_safe}_message";
+      $redirect_url =  esc_url( $_SERVER['REQUEST_URI']."#tdomf_form${form_id_safe}_message" );
   }
   $form .= "\t<div><input type='hidden' id='redirect' name='redirect' value='$redirect_url' /></div>\n";
   

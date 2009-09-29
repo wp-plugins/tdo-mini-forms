@@ -43,6 +43,17 @@ Author URI: http://thedeadone.net
 //     textfield and textarea (as part of the fix for magic quotes). This allows
 //     me to add new features to multiple widgets at a time. 
 //
+// v0.13.6
+// - "Number" option in TDOMFTextField (and therefore Custom Fields widget)
+// - Add some new checks to form hacker to catch the bug. Was able to reproduce
+//    it and it seems PHP has some problems with non-latin types being converted
+//    into database. Why doesn't this show up elsewhere in Wordpress?
+// - Removed usage of '_SERVER' in backend (or if not possible, added esc_url
+//    wrapper)
+// - Modified AJAX to prevent double submits
+// - Refactored "Hidden" field as TDOMFWidgetFieldHidden and it now allows 
+//    PHP code to be executed
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -291,9 +302,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "51");
+define("TDOMF_BUILD", "52");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13.4");
+define("TDOMF_VERSION", "0.13.5");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -789,6 +800,7 @@ function tdomf_new_features() {
       $features .= "<li>".__("<b>Special revision page for comparing revisions created by TDOMF</b>","tdomf")."</li>";
   }
   // 51 = 0.13.4
+  // 52 = 0.13.5
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

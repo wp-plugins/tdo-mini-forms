@@ -432,6 +432,7 @@ function tdomf_set_option_widget($key,$value,$form_id = 1) {
 }
 
 function tdomf_set_option_form($key,$value,$form_id = 1) {
+  #tdomf_log_message("tdomf_set_option_form for $key");
   if($key == TDOMF_OPTION_NAME) {
     global $wpdb;
     $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
@@ -440,7 +441,9 @@ function tdomf_set_option_form($key,$value,$form_id = 1) {
               WHERE form_id = '".$wpdb->escape($form_id)."'";
     return $wpdb->query($query);
   } else {
+    #tdomf_log_message("tdomf_set_option_form: value: <pre>" . htmlentities($value,ENT_COMPAT,get_bloginfo('charset')) . "</pre>");
     $options = array( $key => $value);
+    #tdomf_log_message("tdomf_set_option_form: value: <pre>" . htmlentities(var_export($options,true),ENT_COMPAT,get_bloginfo('charset')) . "</pre>");
     return tdomf_set_options_form($options,$form_id);
   }
 }
@@ -915,9 +918,11 @@ function tdomf_copy_form($form_id) {
 }
 
 function tdomf_set_options_form($options,$form_id = 1) {
+  #tdomf_log_message("tdomf_set_options_form for form $form_id");
   global $wpdb;
   $defaults = tdomf_get_options_form($form_id);
   if(empty($defaults)) {
+        tdomf_log_message("tdomf_set_options_form: Constructing defaults");
         $defaults = array( TDOMF_OPTION_DESCRIPTION => '',
                            TDOMF_OPTION_CREATEDPAGES => false,
                            TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS => true,
@@ -930,12 +935,19 @@ function tdomf_set_options_form($options,$form_id = 1) {
                            TDOMF_OPTION_FROM_EMAIL => '',
                            TDOMF_OPTION_FORM_ORDER => false);
   }
+  #tdomf_log_message("tdomf_set_options_form: defaults: <pre>".htmlentities(var_export($defaults,true),ENT_COMPAT,get_bloginfo('charset'))."</pre>");
+  #tdomf_log_message("tdomf_set_options_form: options: <pre>".htmlentities(var_export($options,true),ENT_COMPAT,get_bloginfo('charset'))."</pre>");
+  #tdomf_log_message("tdomf_set_options_form: Preparing data");
   $options = wp_parse_args($options,$defaults);
   $options = maybe_serialize($options);
+  #if(DB_CHARSET == 'utf8') {
+  #    $options = utf8_encode($options);
+  #}
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $query = "UPDATE $table_name 
             SET form_options = '".$wpdb->escape($options)."'
             WHERE form_id = '".$wpdb->escape($form_id)."'";
+  #tdomf_log_message("tdomf_set_options_form: query: <pre>".htmlentities($query,ENT_COMPAT,get_bloginfo('charset'))."</pre>");
   return $wpdb->query($query);
 }
 
@@ -969,6 +981,7 @@ function tdomf_get_widgets_form($form_id) {
 }
 
 function tdomf_get_options_form($form_id = 1) {
+  tdomf_log_message("tdomf_get_options_form for from $form_id");
   global $wpdb;
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $query = "SELECT form_options 

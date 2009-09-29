@@ -112,7 +112,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
              }
              $output .= "</p>";
          } else {
-            $our_uri = $_SERVER['REQUEST_URI'];
+            $our_uri = esc_url($_SERVER['REQUEST_URI']);
             $login_uri = get_bloginfo('wpurl').'/wp-login.php?redirect_to='.$our_uri;
             $reg_uri = get_bloginfo('wpurl').'/wp-register.php?redirect_to='.$our_uri;
                

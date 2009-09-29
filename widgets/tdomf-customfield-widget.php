@@ -173,7 +173,7 @@ function tdomf_widget_customfields_hack($args,$params) {
   if($options['type'] == 'textfield') {
     return tdomf_widget_customfields_textfield_hack($args,$number,$options);
   } else if($options['type'] == 'hidden') {
-    return tdomf_widget_customfields_hidden($args,$number,$options);
+    return tdomf_widget_customfields_hidden_hack($args,$number,$options);
   } else if($options['type'] == 'textarea') {
     return tdomf_widget_customfields_textarea_hack($args,$number,$options);
   } else if($options['type'] == 'checkbox') {
@@ -201,6 +201,8 @@ function tdomf_widget_customfields_preview($args,$params) {
       $output .= tdomf_widget_customfields_textfield_preview($args,$number,$options);
     } else if($options['type'] == 'textarea') {
       $output .= tdomf_widget_customfields_textarea_preview($args,$number,$options);
+    } else if($options['type'] == 'hidden') {
+      $output .= tdomf_widget_customfields_hidden_preview($args,$number,$options);
     } else if($options['type'] == 'checkbox') {
       $output .= tdomf_widget_customfields_checkbox_preview($args,$number,$options);
     } else if($options['type'] == 'select') {
@@ -323,6 +325,8 @@ function tdomf_widget_customfields_control($form_id,$params) {
        $newoptions = tdomf_widget_customfields_textfield_control_handler($number,$newoptions);
      } else if($newoptions['type'] == 'textarea') {
        $newoptions = tdomf_widget_customfields_textarea_control_handler($number,$newoptions);
+     } else if($newoptions['type'] == 'hidden') {
+       $newoptions = tdomf_widget_customfields_hidden_control_handler($number,$newoptions);
      } else if($newoptions['type'] == 'checkbox') {
        $newoptions = tdomf_widget_customfields_checkbox_control_handler($number,$newoptions);
      } else if($newoptions['type'] == 'select') {
@@ -626,13 +630,20 @@ function tdomf_widget_customfields_textfield_preview($args,$number,$options) {
   extract($args);
   
   $prefix = 'customfields-tf-'.$number.'-';
-  $textarea = new TDOMF_WidgetFieldTextField($prefix);
+  $textfield = new TDOMF_WidgetFieldTextField($prefix);
   
   # update options
   $options = tdomf_widget_customfields_textfield_default_options($number,$options);
   
-  $output = $textarea->preview($args,$options);
-  
+  /*$output = $textfield->preview($args,$options,"customfields-textfield-$number");*/
+  if($options['append'] && trim($options['format']) != "") {
+    $value = $textfield->post($args,$options,"customfields-textfield-$number");
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $output = trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
+  } else {
+    $output = $textfield->preview($args,$options,"customfields-textfield-$number");
+  }
+
   return $before_widget.$output.$after_widget;
 }
 
@@ -645,7 +656,7 @@ function tdomf_widget_customfields_textfield_validate($args,$number,$options) {
   # update options
   $options = tdomf_widget_customfields_textfield_default_options($number,$options);
   
-  $output = $textfield->validate($args,$options);
+  $output = $textfield->validate($args,$options,"customfields-textfield-$number");
   
   // return output if any
   if($output != "") {
@@ -690,24 +701,134 @@ function tdomf_widget_customfields_textfield_adminemail($args,$number,$options) 
 //                                                   Custom Field as a Hidden //
 ////////////////////////////////////////////////////////////////////////////////
 
+function tdomf_widget_customfields_hidden_default_options($number,$options) 
+{
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+
+  # defval (aka default-value) are common to all
+    
+  if(isset($options['defval'])) {
+      $options[$prefix.'default-value'] = $options['defval'];
+  }
+  
+  # grab default widget field options
+  
+  $options = $hidden->getOptions($options);
+  
+  return $options;
+}
+
 function tdomf_widget_customfields_hidden($args,$number,$options) {
-  $value = htmlentities($options['defval'],ENT_NOQUOTES,get_bloginfo('charset'));
-  $output = "\t\t<div><input type=\"hidden\" name=\"customfields-hidden-$number\" id=\"customfields-hidden-$number\" value=\"".htmlentities($value,ENT_QUOTES,get_bloginfo('charset'))."\" /></div>\n";
+    
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+    
+  # update options
+  $options = tdomf_widget_customfields_hidden_default_options($number,$options);
+  
+  $output = $hidden->form($args,$options);
+  
+  return $output;
+}
+
+function tdomf_widget_customfields_hidden_hack($args,$number,$options) {
+    
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+    
+  # update options
+  $options = tdomf_widget_customfields_hidden_default_options($number,$options);
+  
+  $output = $hidden->formHack($args,$options);
+  
   return $output;
 }
 
 function tdomf_widget_customfields_hidden_post($args,$number,$options) {
+
   extract($args);
-  add_post_meta($post_ID,$options['key'],$args["customfields-hidden-$number"]);
+  
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_hidden_default_options($number,$options);
+  
+  $text = $hidden->post($args,$options,"customfields-hidden-$number");
+   
+  add_post_meta($post_ID,$options['key'],$text);
+  
   return NULL;
+}
+
+function tdomf_widget_customfields_hidden_control_handler($number,$options) {
+  
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+  
+  # hidden ones
+  
+  $options = tdomf_widget_customfields_hidden_default_options($number,$options);
+
+  # now update
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $hidden->control($options,false);
+  ob_end_clean();
+  
+  # make sure to copy 'common' ones back
+  
+  if(isset($options[$prefix.'default-value'])) {
+      $options['defval'] = $options[$prefix.'default-value'];
+  }
+
+  return $options;
+}                     
+
+function tdomf_widget_customfields_hidden_preview($args,$number,$options) {
+  extract($args);
+  
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_hidden_default_options($number,$options);
+  
+  $value = $hidden->preview($args,$options);
+  
+  if($options['append'] && trim($options['format']) != "") {
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
+  } else {
+    if($options['title'] != "") {
+      $output .= $before_title.$options['title'].$after_title;
+    }
+    $output .= $value;
+  }
+  
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_hidden_control($number,$options){ 
   $output  = "<h3>".__("Hidden","tdomf")."</h3>";
-  $output .= "<label for=\"customfields-defval-$number\">";
-  $output .= __("Value:","tdomf")."<br/>";
-  $output .= "<input type=\"text\" size=\"40\" id=\"customfields-defval-$number\" name=\"customfields-defval-$number\" value=\"".htmlentities($options['defval'],ENT_QUOTES,get_bloginfo('charset'))."\" />";
-  $output .= "</label><br/><br/>";
+  
+  $prefix = 'customfields-h-'.$number.'-';
+  $hidden = new TDOMF_WidgetFieldHidden($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_hidden_default_options($number,$options);
+  
+  $tashow = array($prefix.'default-value',
+                  $prefix.'value-php');
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $hidden->control($options,false,$tashow);
+  $output .= ob_get_contents();
+  ob_end_clean();
+  
   return $output;
 }
 
@@ -902,7 +1023,7 @@ function tdomf_widget_customfields_textarea_validate($args,$number,$options) {
   # update options
   $options = tdomf_widget_customfields_textarea_default_options($number,$options);
   
-  $output = $textarea->validate($args,$options);
+  $output = $textarea->validate($args,$options,"customfields-textarea-$number");
   
   // return output if any
   if($output != "") {
@@ -951,8 +1072,16 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
   # update options
   $options = tdomf_widget_customfields_textarea_default_options($number,$options);
   
-  $output = $textarea->preview($args,$options);
+  /*$output = $textarea->preview($args,$options,"customfields-textarea-$number");*/
   
+  if($options['append'] && trim($options['format']) != "") {
+    $value = $textarea->post($args,$options,"customfields-textarea-$number");
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $output = trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
+  } else {
+    $output = $textarea->preview($args,$options,"customfields-textarea-$number");
+  }
+    
   return $before_widget.$output.$after_widget;
 }
 
@@ -960,10 +1089,58 @@ function tdomf_widget_customfields_textarea_preview($args,$number,$options) {
 //                                                 Custom Field as a Checkbox //
 ////////////////////////////////////////////////////////////////////////////////
 
+function tdomf_widget_customfields_checkbox_default_options($number,$options) 
+{
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
+
+  # title, required and defval are common to all
+    
+  if(isset($options['title'])) {
+      $options[$prefix.'text'] = $options['title'];
+  }
+  
+  if(isset($options['required'])) {
+      $options[$prefix.'required'] = $options['required'];
+  }
+  
+  if(isset($options['defval'])) {
+      $options[$prefix.'default-value'] = $options['defval'];
+  }
+   
+  # grab default widget field options
+  
+  $options = $checkbox->getOptions($options);
+  
+  return $options;
+}
+
 function tdomf_widget_customfields_checkbox_control_handler($number,$options) {
-  $options['required'] = isset($_POST["customfields-cb-required-$number"]);
-  $options['defval'] = isset($_POST["customfields-cb-defval-$number"]);
-  $options['required-value'] = isset($_POST["customfields-required-value-$number"]);
+  
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckbox($prefix);
+  
+  # checkbox ones
+  
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
+
+  # now update
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $checkbox->control($options,false);
+  ob_end_clean();
+  
+  # make sure to copy 'common' ones back
+  
+  if(isset($options[$prefix."required"])) {
+      $options['required'] = $options[$prefix.'required'];
+  }
+  
+  if(isset($options[$prefix.'default-value'])) {
+      $options['defval'] = $options[$prefix.'default-value'];
+  }
+
   return $options;
 }
 
@@ -971,21 +1148,20 @@ function tdomf_widget_customfields_checkbox_control_handler($number,$options) {
 function tdomf_widget_customfields_checkbox_control($number,$options){
   $output  = "<h3>".__("Check Box","tdomf")."</h3>";
   
-  $output .= "<label for=\"customfields-cb-required-$number\">";
-  $output .= "<input type=\"checkbox\" name=\"customfields-cb-required-$number\" id=\"customfields-cb-required-$number\"";
-  if($options['required']) { $output .= " checked "; }
-  $output .= "/> ".__("Required","tdomf")."</label><br/><Br/>";
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
   
-  $output .= "&nbsp;&nbsp;&nbsp;<label for=\"customfields-required-value-$number\">";
-  $output .= "<input type=\"checkbox\" name=\"customfields-required-value-$number\" id=\"customfields-required-value-$number\"";
-  if($options['required-value']) { $output .= " checked "; }
-  $output .= "/> ".__("Required Setting (<i>checkbox must be this value or the post cannot be submitted</i>)","tdomf")."</label><br/><Br/>";
-
-  $output .= "<label for=\"customfields-cb-defval-$number\">";
-  $output .= "<input type=\"checkbox\" name=\"customfields-cb-defval-$number\" id=\"customfields-cb-defval-$number\"";
-  if($options['defval']) { $output .= " checked "; }
-  $output .= "/> ".__("Default Setting","tdomf")."</label><br/><Br/>";
-
+  # update options
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
+  
+  $cbhide = array($prefix.'text');
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $checkbox->control($options,false,false,$cbhide);
+  $output .= ob_get_contents();
+  ob_end_clean();
+  
   return $output;
 }
   
@@ -993,90 +1169,42 @@ function tdomf_widget_customfields_checkbox_control($number,$options){
 function tdomf_widget_customfields_checkbox($args,$number,$options) {
   extract($args);
   
-  $output  = $before_widget;
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
   
-  $value = $options['defval'];
-  // only grab value if post is previewed!
-  if(isset($args["tdomf_key_$tdomf_form_id"])){
-    $value = isset($args["customfields-checkbox-$number"]);
-  }
+  # update options
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
   
-  if($options['required']) {
-    $output .= "<label for=\"customfields-checkbox-$number\" class=\"required\">";
-  } else {
-    $output .= "<label for=\"customfields-checkbox-$number\">";
-  }
-
-  $output .= "<input type=\"checkbox\" name=\"customfields-checkbox-$number\" id=\"customfields-checkbox-$number\"";
-  if($value){ $output .= " checked "; }
-  $output .= "/> ";
+  $output = $checkbox->form($args,$options);
   
-  if($options['required']) {
-    $output .= $options['title']." ".__("(Required)","tdomf");
-  } else {
-    $output .= $options['title'];
-  }
-  
-  $output .= "</label>\n";
-  
-  $output .= $after_widget;
-  return $output;
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_checkbox_hack($args,$number,$options) {
   extract($args);
   
-  $output  = $before_widget;
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
   
-  $defval = false;
-  if(isset($options['defval']) && is_bool($options['defval'])) {
-      $defval = $options['defval'];
-  }
-  $defval = ($defval) ? "true" : "false" ;  
+  # update options
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
   
-  // only grab value if post is previewed!
-  $output = "\t\t<?php \$value = $defval;\n\t\tif(isset(\$post_args['tdomf_key_$tdomf_form_id'])) { \$value = isset(\$post_args['customfields-checkbox-$number']); } ?>\n";
+  $output = $checkbox->formHack($args,$options);
   
-  if($options['required']) {
-    $output .= "\t\t<label for=\"customfields-checkbox-$number\" class=\"required\">\n";
-  } else {
-    $output .= "\t\t<label for=\"customfields-checkbox-$number\">\n";
-  }
-
-  $output .= "\t\t<input type=\"checkbox\" name=\"customfields-checkbox-$number\" id=\"customfields-checkbox-$number\"";
-  $output .= "<?php if(\$value){ ?> checked <?php } ?>";
-  $output .= "/>\n\t\t";
-  
-  if($options['required']) {
-    $output .= $options['title']." ".__("(Required)","tdomf")."\n";
-  } else {
-    $output .= $options['title']."\n";
-  }
-  
-  $output .= "\t\t</label>\n";
-  
-  $output .= $after_widget;
-  return $output;
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_checkbox_validate($args,$number,$options) {
   extract($args);
-  $output = "";
-  if($options['required']) {
-    if(!isset($args["customfields-checkbox-$number"]) && $options['required-value']){
-      if(!empty($options['title'])) {
-        $output .= sprintf(__("You must select \"%s\".","tdomf"),$options['title']);
-      } else {
-        $output .= __("You must select the checkbox!","tdomf");
-      }
-    } else if(isset($args["customfields-checkbox-$number"]) && !$options['required-value']){
-      if(!empty($options['title'])) {
-        $output .= sprintf(__("You must not select \"%s\".","tdomf"),$options['title']);
-      } else {
-        $output .= __("You must not select the checkbox!","tdomf");
-      }     
-    }
-  }
+    
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
+  
+  $output = $checkbox->validate($args,$options);
+  
   // return output if any
   if($output != "") {
     return $before_widget.$output.$after_widget;
@@ -1087,25 +1215,39 @@ function tdomf_widget_customfields_checkbox_validate($args,$number,$options) {
 
 function tdomf_widget_customfields_checkbox_post($args,$number,$options) {
   extract($args);
-  add_post_meta($post_ID,$options['key'],isset($args["customfields-checkbox-$number"]));
+  
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
+  
+  $value = $checkbox->post($args,$options,"customfields-checkbox-$number");
+   
+  add_post_meta($post_ID,$options['key'],$value);
+  
   return NULL;
 }
 
 function tdomf_widget_customfields_checkbox_preview($args,$number,$options) {
-  $value = isset($args["customfields-checkbox-$number"]);
-  extract($args);  
-  $output = $before_widget;  
+  extract($args);
+  
+  $prefix = 'customfields-cb-'.$number.'-';
+  $checkbox = new TDOMF_WidgetFieldCheckbox($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
+  
   if($options['append'] && trim($options['format']) != "") {
+    $value = $checkbox->post($args,$options,"customfields-checkbox-$number");
+    $value = ($value) ? __('Checked','tdomf') : __('Unchecked','tdomf') ;
     $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
-    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
+    $output = trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
   } else {
-    if($options['title'] != "") {
-      $output .= $before_title.$options['title'].$after_title;
-    }
-    $output .= $value;
+    $output = $checkbox->preview($args,$options,"customfields-checkbox-$number");
   }
-  $output .= $after_widget;
-  return $output;
+  
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_checkbox_adminemail($args,$number,$options) {
@@ -1185,6 +1327,7 @@ function tdomf_widget_customfields_select_control($number,$options){
         theSel.options[i] = newOpt2;
         theSel.selectedIndex = -1;
         settingString = settingString + newText + ":" + newValue + ";";
+        theSel.rows = theSel.length;
       }
       document.getElementById("customfields-s-list-values-<?php echo $number; ?>").value = settingString;
     }

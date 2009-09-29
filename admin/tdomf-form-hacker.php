@@ -165,8 +165,16 @@ function tdomf_form_hacker_actions($form_id) {
              $preview_new = stripslashes($preview_new);
           #}
           if(strpos($form_new,TDOMF_MACRO_FORMKEY) !== false) {
+            // prep form data for saving to database: it seems that some foreign/latin characters are not converted correctly
+            $form_new = iconv(get_bloginfo('charset'),get_bloginfo('charset').'//TRANSLIT',$form_new);
+            $preview_new = iconv(get_bloginfo('charset'),get_bloginfo('charset').'//TRANSLIT',$preview_new);
+            
+            // grab the other stuff
             $form_cur = trim(tdomf_generate_form($form_id,$mode));
+            $form_cur = iconv(get_bloginfo('charset'),get_bloginfo('charset').'//TRANSLIT',$form_cur);
             $preview_cur = trim(tdomf_preview_form(array('tdomf_form_id' => $form_id),$mode));
+            $preview_cur = iconv(get_bloginfo('charset'),get_bloginfo('charset').'//TRANSLIT',$preview_cur);
+            
             tdomf_set_option_form(TDOMF_OPTION_FORM_HACK,trim($form_new),$form_id);
             tdomf_set_option_form(TDOMF_OPTION_FORM_PREVIEW_HACK,trim($preview_new),$form_id);
             tdomf_set_option_form(TDOMF_OPTION_FORM_HACK_ORIGINAL,$form_cur,$form_id);
