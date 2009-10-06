@@ -1232,6 +1232,11 @@ class TDOMF_WidgetField {
         return false;
     }
     
+    function postText($args,$opts,$original_field_name=false)
+    {
+        return strval($this->post($args,$opts,$original_field_name));
+    }
+    
     /** 
      * 
      * 
@@ -2032,7 +2037,7 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
                        $this->prefix.'char-limit' => 0,
                        $this->prefix.'word-limit' => 0,
                        $this->prefix.'required' => true,
-                       $this->prefix.'use-filter' => false, # @todo all/true, preview, post, disabled/false
+                       $this->prefix.'use-filter' => false, # 'preview', 'post', true/enabled, false/disabled
                        $this->prefix.'filter' => 'the_content',
                        $this->prefix.'kses' => false,
                        $this->prefix.'default-text' => "",
@@ -2795,7 +2800,6 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
                        $this->prefix.'default-selected' => array(),
                        $this->prefix.'values' => array(), # two dimensional array: option-text value
                        $this->prefix.'multiple-selection' => false,
-                       $this->prefix.'dropdown-checklist' => false, # requires: multiple selection
                        $this->prefix.'title' => '');
         $opts = wp_parse_args($opts, $defs);
         return $opts;
@@ -2814,6 +2818,8 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
             }
         } 
 
+        $output = '';
+        
         // title
         
         if(!empty($opts[$this->prefix.'title'])) {
@@ -2835,9 +2841,9 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
         // select
         
         if($opts[$this->prefix.'multiple-selection']) {
-            $output .= '<select name="'.$this->prefix.'[]" id="'.$this->prefix.'[]" size="'.$opts['size'].'" multiple="multiple" >';
+            $output .= '<select name="'.$this->prefix.'s[]" id="'.$this->prefix.'s[]" size="'.$opts['size'].'" multiple="multiple" >';
         } else {
-            $output .= '<select name="'.$this->prefix.'" id="'.$this->prefix.'" size="'.$opts['size'].'" >';
+            $output .= '<select name="'.$this->prefix.'s" id="'.$this->prefix.'s" size="'.$opts['size'].'" >';
         }
 
         if(!empty($opts[$this->prefix.'values'])) {
@@ -2871,7 +2877,7 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
                 $output .= '"'.$value.'"';
             }
         }
-        $output = ');'."\n";
+        $output .= ');'."\n";
 
         // current values
            
@@ -2903,16 +2909,16 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
         // select
         
         if($opts[$this->prefix.'multiple-selection']) {
-            $output .= '<select name="'.$this->prefix.'[]" id="'.$this->prefix.'[]" size="'.$opts['size'].'" multiple="multiple" >';
+            $output .= '<select name="'.$this->prefix.'s[]" id="'.$this->prefix.'s[]" size="'.$opts['size'].'" multiple="multiple" >';
         } else {
-            $output .= '<select name="'.$this->prefix.'" id="'.$this->prefix.'" size="'.$opts['size'].'" >';
+            $output .= '<select name="'.$this->prefix.'s" id="'.$this->prefix.'s" size="'.$opts['size'].'" >';
         }
 
         if(!empty($opts[$this->prefix.'values'])) {
             foreach($opts[$this->prefix.'values'] as $value => $text) {
                 if(trim($text) != "" && trim($value) != "") {
                     $output .= '<option value="'.$value.'"';
-                    $output .= '<?php if(in_array($value,$temp_values)) { ?>';
+                    $output .= '<?php if(in_array("'.$value.'",$temp_values)) { ?>';
                         $output .= ' selected=\'selected\'';
                     $output .= '<?php } ?>';
                     $output .= '> '.$text.'</option>'."\n"; 
@@ -2927,7 +2933,7 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
     
     function preview($args,$opts,$original_field_name=false)
     {
-        $output = "";
+        $output = '';
   
         $value = false;
         if(isset($args[$this->prefix.'s'])){
@@ -2943,11 +2949,9 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
             // prepare value
             
             if(is_array($value)) {
-                $first = true;
                 foreach($value as $v) {
                     if(isset($opts[$this->prefix.'values'][$v])) {
-                        if($first){ $first = false; }
-                        else { $output .= ", "; }
+                        if(!empty($output)){ $output .= ", "; }
                         $output .= $opts[$this->prefix.'values'][$v];
                     }
                 }
@@ -2971,36 +2975,355 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
     
     function previewHack($args,$opts,$original_field_name=false)
     {
-        $output = "\t".'<?php $temp_values = "";'."\n";
-        $output = "\t".'if(isset($post_args["'.$this->prefix.'s"])){'."\n";
-        $output = "\t".'$temp_value = $post_args["'.$this->prefix.'s"]; '."\n";
+        $output  = "\t".'<?php $values = array('."\n";
+        foreach($opts[$this->prefix.'values'] as $key => $v) {
+            $output .= "\t\t".'\''.$key.'\' => \''.htmlentities($v,ENT_QUOTES,get_bloginfo('charset')).'\','."\n";
+        }
+        $output .= "\t".');'."\n";
+        $output .= "\t".'$temp_values = "";'."\n";
+        $output .= "\t".'if(isset($post_args["'.$this->prefix.'s"])){'."\n";
+        $output .= "\t".'$temp_value = $post_args["'.$this->prefix.'s"]; '."\n";
+        $output .= "\t".'if(is_array($temp_value)) {'."\n";
+        $output .= "\t\t".'$first = true;'."\n";
+        $output .= "\t\t".'foreach($temp_value as $v) {'."\n";
+        $output .= "\t\t\t".'if(isset($values[$v])) {'."\n";
+        $output .= "\t\t\t\t".'if($first){ $first = false; }'."\n";
+        $output .= "\t\t\t\t".'else { $temp_values .= ", "; }'."\n";
+        $output .= "\t\t\t\t".'$temp_values .= $values[$v];'."\n";
+        $output .= "\t\t\t".'}'."\n";
+        $output .= "\t\t".'}'."\n";
+        $output .= "\t".'} else if(isset($values[$temp_value])){'."\n";
+        $output .= "\t\t".'$temp_values = $values[$temp_value];'."\n";
+        $output .= "\t".'}'."\n";
         
-        $output = "\t".'if(is_array($temp_value)) {'."\n";
-        $output = "\t\t".'$first = true;'."\n";
-        $output = "\t\t".'foreach($temp_value as $v) {'."\n";
-        #$output = "\t\t\t".'if(isset($opts[$this->prefix.'values'][$v])) {'."\n";
-        #$output = "\t\t".'if($first){ $first = false; }'."\n";
-        #$output = "\t\t".'else { $output .= ", "; }'."\n";
-        #$output = "\t\t".'$output .= $opts[$this->prefix.'values'][$v];'."\n";
-        #output = "\t\t".'}'."\n";
-        $output = "\t\t".'}'."\n";
-        #$output = "\t".'} else if(isset($opts[$this->prefix.'values'][$value])){'."\n";
-        #$output = "\t".'$output = $opts[$this->prefix.'values'][$value];'."\n";
-        #$output = "\t".'}'."\n";
-        
-        /* 
-            // format output
-            
-            if(!empty($output)) {
-                if(!empty($opts[$this->prefix.'title'])) {
-                    $output = "<b>".sprintf(__("%s: ","tdomf"),$opts[$this->prefix.'title'])."</b>".$output;
-                } 
-            } else {
-                tdomf_log_message("Select: values are bad for preview!",TDOMF_LOG_ERROR);
-            }
-        }*/
+                    
+        $output .= "\t".'if(!empty($temp_values)) { ?>'."\n";
+        if(!empty($opts[$this->prefix.'title'])) {
+            $output .= '<b>'.sprintf(__('%s: ','tdomf'),$opts[$this->prefix.'title']).'</b><?php echo $temp_values; ?>'."\n";
+        } else {
+            $output .= '<?php echo $temp_values; ?>'."\n";            
+        }
+        $output .= "\t".'<?php } ?>'."\n";
         
         return $output;
+    }
+    
+    function validate($args,$opts,$preview=false,$original_field_name=false) {
+        
+        $output = "";
+        $input = false;
+
+        // grab the input because we're going to test it
+        
+        $input = false;
+        if(empty($output)) {
+            if(isset($args[$this->prefix.'s'])) {
+                $input = $args[$this->prefix.'s'];
+            } else if($original_field_name != false && isset($args[$original_field_name])) {
+                $input = $args[$this->prefix.'s'];
+            } 
+        }
+        
+        // required check
+        
+        if($input != false && $opts[$this->prefix.'required']) {
+            
+            $test = $input;
+            if(!is_array($input)) {
+                 $test = array($input);
+            } 
+            
+            if($opts[$this->prefix.'multiple-selection'] && count($test) < 1) {
+                if(!empty($opts[$this->prefix.'title'])) {
+                    $output .= sprintf(__("You must select at least one option from %s.","tdomf"),$opts[$this->prefix.'title']);
+                } else {
+                    $output .= __("You must select at least one options.","tdomf");
+                }
+            } else if($opts[$this->prefix.'multiple-selection'] && count($opts[$this->prefix.'multiple-selection']) == count($test)){
+                $diff = array_diff($opts[$this->prefix.'default-selected'],$test);
+                if(empty($test) || empty($diff)) {
+                    if(!empty($opts[$this->prefix.'title'])) {
+                        $output .= sprintf(__("You must select options from %s.","tdomf"),$opts[$this->prefix.'title']);
+                    } else {
+                        $output .= __("You must select some options.","tdomf").var_export($diff,true);
+                    }
+                }
+            }
+        }
+        
+        return $output;
+    }
+    
+    function post($args,$opts,$original_field_name=false)
+    {
+        $output = false;
+        if(empty($output)) {
+            if(isset($args[$this->prefix.'s'])) {
+                $output = $args[$this->prefix.'s'];
+            } else if($original_field_name != false && isset($args[$original_field_name])) {
+                $output = $args[$original_field_name];
+            } 
+        }
+        return $output;
+    }
+    
+    /** 
+     * Returns the "text" values instead of the raw options selected
+     * 
+     * @return Boolean 
+     * @access public 
+     */     
+    function postText($args,$opts,$original_field_name=false)
+    {
+        $output = false;
+        $input_values = $this->post($args,$opts,$original_field_name);
+        if(is_array($input_values) && !empty($input_values)) {
+           $output = "";
+           foreach($input_values as $in) {
+               if(isset($opts[$this->prefix.'values'][$in])) {
+                   if(!empty($output)) { $output .= ', '; }
+                   $output .= $opts[$this->prefix.'values'][$in];
+               }
+           }
+        } else if($input_values != false) {
+            if(isset($opts[$this->prefix.'values'][$input_values])) {
+                $output = $opts[$this->prefix.'values'][$input_values];
+            }
+        }
+        return $output;
+    }
+    
+  function control($options,$form_id,$show=false,$hide=false)
+    {
+        if((is_array($show) && empty($show))) {
+            # nothing to do if show list is empty
+            return array();
+        }
+
+        // prepare options!
+        
+        $retOptions = array();
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
+        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'multiple-selection',$show,$hide);
+        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
+        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'size',$show,$hide);
+        
+        // default-selected and values are slightly non-standard
+        
+        if($this->useOpts($this->prefix.'default-selected',$show,$hide) && isset($_POST[$this->prefix.'default-selected'])) {
+            $default_selected = $_POST[$this->prefix.'default-selected'];
+            if(!empty($_POST[$this->prefix.'default-selected'])) {
+                $default_selected = explode(';',$default_selected);
+            }
+            $retOptions[$this->prefix.'default-selected'] = $default_selected;
+        }
+        
+        if($this->useOpts($this->prefix.'values',$show,$hide) && isset($_POST[$this->prefix.'values'])) {
+            $values = $_POST[$this->prefix.'values'];
+            $values_array = array();
+            if(!empty($_POST[$this->prefix.'values'])) {
+                $values = explode(';',$values);
+                foreach($values as $v) {
+                    if(!empty($v)) {
+                        list($text,$value) = explode(':',$v);
+                        if(!empty($value) && !empty($text)) {
+                            $values_array[$value] = $text;
+                        }
+                    }
+                }
+            }
+            $retOptions[$this->prefix.'values'] = $values_array;
+        }
+        
+        $options = wp_parse_args($retOptions, $options);
+        
+        // Display control panel for this textfield
+        
+        if($this->useOpts($this->prefix.'required',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>required" style="line-height:35px;"><?php _e("Required","tdomf"); ?></label> 
+<input type="checkbox" name="<?php echo $this->prefix; ?>required" id="<?php echo $this->prefix; ?>required" <?php if($options[$this->prefix.'required']) echo "checked"; ?> >
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'size',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>size" style="line-height:35px;"><?php _e("Number of items to display","tdomf"); ?></label>
+<input type="textfield" name="<?php echo $this->prefix; ?>size" id="<?php echo $this->prefix; ?>size" value="<?php echo htmlentities($options[$this->prefix.'size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="3" />
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'multiple-selection',$show,$hide)) { ?>
+<label for="<?php echo $this->prefix; ?>multiple-selection" style="line-height:35px;"><?php _e("Allow multiple selection","tdomf"); ?></label> 
+<input type="checkbox" name="<?php echo $this->prefix; ?>multiple-selection" id="<?php echo $this->prefix; ?>multiple-selection" <?php if($options[$this->prefix.'multiple-selection']) echo "checked"; ?> >
+<br/>
+  <?php } 
+        if($this->useOpts($this->prefix.'title',$show,$hide)) { ?>
+            <label for="<?php echo $this->prefix; ?>title" style="line-height:35px;"><?php _e("Title:","tdomf"); ?></label>
+<input type="textfield" name="<?php echo $this->prefix; ?>title" id="<?php echo $this->prefix; ?>title" value="<?php echo htmlentities($options[$this->prefix.'title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<br/>
+  <?php }
+
+        if($this->useOpts($this->prefix.'values',$show,$hide) || $this->useOpts($this->prefix.'default-selected',$show,$hide)) { 
+
+            $starting_defaults_text = __('Nothing selected','tdomf');            
+            $starting_defaults = '';
+            if(is_array($options[$this->prefix.'default-selected']) && !empty($options[$this->prefix.'default-selected'])) {
+                $starting_defaults = htmlentities(implode(';',$options[$this->prefix.'default-selected']),ENT_QUOTES,get_bloginfo('charset'));
+                $starting_defaults_text = '';
+                $first = true;
+                foreach($options[$this->prefix.'default-selected'] as $v) {
+                    if(isset($options[$this->prefix.'values'][$v])) {
+                        if($first) { $first = false; }
+                        else { $starting_defaults_text .= ', '; }
+                        $starting_defaults_text .= $options[$this->prefix.'values'][$v];
+                    }
+                }
+            }
+            
+            $starting_values = '';
+            $starting_values_options = '';
+            if(is_array($options[$this->prefix.'values']) && !empty($options[$this->prefix.'values'])) {
+                foreach($options[$this->prefix.'values'] as $v => $t) {
+                    $starting_values .= $t . ':' . $v . ';';
+                    $starting_values_options .= "  <option value='$v'>$t\n";
+                }
+                $starting_values = htmlentities($starting_values,ENT_QUOTES,get_bloginfo('charset'));
+            }
+            
+            ?>
+            
+ <!-- Javascript taken (and then hacked) from http://www.mredkj.com/tutorials/tutorial006.html -->
+            
+<script type="text/javascript">
+//<![CDATA[
+<?php if($this->useOpts($this->prefix.'values',$show,$hide)) { ?> 
+function <?php echo $this->prepJSCode($this->prefix); ?>appendToSelectList() {
+    var theSel = document.getElementById("<?php echo $this->prefix; ?>s-list");
+    var newText = document.getElementById("<?php echo $this->prefix; ?>s-name").value;
+    var newValue = document.getElementById("<?php echo $this->prefix; ?>s-value").value;
+    if(newText == "" || newValue == "") {
+        alert("<?php _e("You must specify a value for Item name and Item value", "tdomf"); ?>");
+        return;
+    }
+    var settingString = "";
+    if (theSel.length == 0) {
+        var newOpt1 = new Option(newText, newValue, true, true);
+        theSel.options[0] = newOpt1;
+        theSel.selectedIndex = 0;
+        settingString = settingString + newText + ":" + newValue + ";";
+    } else {
+        var selText = new Array();
+        var selValues = new Array();
+        var i;
+        for(i=0; i<theSel.length; i++) {
+            selText[i] = theSel.options[i].text;
+            selValues[i] = theSel.options[i].value;
+            if(theSel.options[i].value == newValue) {
+                alert("<?php _e("That value already exists!", "tdomf"); ?>");
+                return;
+            }
+        }
+        for(i=0; i<theSel.length; i++)
+        {
+            var newOpt = new Option(selText[i], selValues[i], false, false);
+            theSel.options[i] = newOpt;
+            settingString = settingString + selText[i] + ":" + selValues[i] + ";";
+        }
+        //var newOpt2 = new Option(newText, newValue, true, false);
+        var newOpt2 = new Option(newText, newValue, false, false);
+        theSel.options[i] = newOpt2;
+        theSel.selectedIndex = -1;
+        settingString = settingString + newText + ":" + newValue + ";";
+        theSel.rows = theSel.length;
+    }
+    document.getElementById("<?php echo $this->prefix; ?>values").value = settingString;
+}
+function <?php echo $this->prepJSCode($this->prefix); ?>removeFromSelectList()
+{
+    var theSel = document.getElementById("<?php echo $this->prefix; ?>s-list");
+    var selIndex = theSel.selectedIndex;
+    if (selIndex != -1) {
+        theSel.options[selIndex] = null;
+        var settingString = "";
+        for(i=0; i<theSel.length; i++) {
+            settingString = settingString + theSel.options[i].text + ":" + theSel.options[i].value + ";";
+        }
+        document.getElementById("<?php echo $this->prefix; ?>values").value = settingString;
+    } else {
+        alert("<?php _e("Please select item to remove from the list!","tdomf"); ?>");
+    }
+}
+<?php } ?>
+function <?php echo $this->prepJSCode($this->prefix); ?>makeDefaultSelectList()
+{
+    var theSel = document.getElementById("<?php echo $this->prefix; ?>s-list");
+    var settingString = "";
+    var messageString = "<?php _e("Default selected options: ","tdomf"); ?>";
+    for(i=0; i<theSel.length; i++) {
+        if(theSel[i].selected) {
+            settingString = settingString + theSel.options[i].value + ";";
+            messageString = messageString + theSel.options[i].text + ", ";
+        }
+    }
+    document.getElementById("<?php echo $this->prefix; ?>default-selected").value = settingString;
+    document.getElementById("<?php echo $this->prefix; ?>s-defs-msg").innerHTML = messageString;
+}
+//]]>
+</script>
+
+<!-- encoded defaults and values @todo use jQuery serialize? -->
+
+<input type="hidden" name="<?php echo $this->prefix; ?>default-selected" id="<?php echo $this->prefix; ?>default-selected" value="<?php echo $starting_defaults; ?>" />
+<?php if($this->useOpts($this->prefix.'values',$show,$hide)) { ?>
+<input type="hidden" name="<?php echo $this->prefix; ?>values" id="<?php echo $this->prefix; ?>values" value="<?php echo $starting_values; ?>" />
+<?php } ?>
+
+<!-- list operations -->
+
+<?php if($this->useOpts($this->prefix.'values',$show,$hide)) { ?>
+<input type="button" value="<?php _e("Remove","tdomf"); ?>" onclick="<?php echo $this->prepJSCode($this->prefix); ?>removeFromSelectList();" />
+<?php } ?>
+<input type="button" value="<?php _e("Make Current Selection Default","tdomf"); ?>" onclick="<?php echo $this->prepJSCode($this->prefix); ?>makeDefaultSelectList();" />
+  
+<br/><br/>
+
+<!-- default selection -->
+
+<div id="<?php echo $this->prefix; ?>s-defs-msg" >
+  <?php printf(__("Default selected options: %s","tdomf"),$starting_defaults_text); ?>
+</div>
+  
+<!-- the list (on the left) -->
+
+<?php if($this->useOpts($this->prefix.'values',$show,$hide)) { ?>
+<div style="float:left;">
+<?php } ?>
+    <select name="<?php echo $this->prefix; ?>s-list" id="<?php echo $this->prefix; ?>s-list" size="10" multiple="multiple" >
+    <?php echo $starting_values_options; ?>
+    </select>
+<br/><br/>
+<?php if($this->useOpts($this->prefix.'values',$show,$hide)) { ?>
+</div>
+<?php } ?>
+
+<?php if($this->useOpts($this->prefix.'values',$show,$hide)) { ?>
+<!-- the new items on the right -->
+
+<div style="float:right;">
+  <label for="<?php echo $this->prefix; ?>s-name">
+  <?php _e("Name/Text of Item","tdomf"); ?></label><br/>
+  <input type="text" size="30" name="<?php echo $this->prefix; ?>s-name" id="<?php echo $this->prefix; ?>s-name" ?>
+  <br/><br/>
+  
+  <label for="<?php echo $this->prefix; ?>s-value">
+  <?php _e("Value of Item","tdomf"); ?></label><br/>
+  <input type="text" size="30" name="<?php echo $this->prefix; ?>s-value" id="<?php echo $this->prefix; ?>s-value" ?>
+  <br/><br/>
+  
+  <input type="button" value="<?php _e("Append Item","tdomf"); ?>" onclick="<?php echo $this->prepJSCode($this->prefix); ?>appendToSelectList();" />
+</div>
+<?php } ?>
+
+        <?php } 
+  
+        return $options;
     }
     
 }

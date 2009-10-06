@@ -981,7 +981,7 @@ function tdomf_get_widgets_form($form_id) {
 }
 
 function tdomf_get_options_form($form_id = 1) {
-  tdomf_log_message("tdomf_get_options_form for from $form_id");
+  #tdomf_log_message("tdomf_get_options_form for from $form_id");
   global $wpdb;
   $table_name = $wpdb->prefix . TDOMF_DB_TABLE_FORMS;
   $query = "SELECT form_options 

@@ -33,7 +33,7 @@ function tdomf_widget_customfields_append($post_ID,$options,$index,$form_id){
   $value = get_post_meta($post_ID,$options['key'],true);
   // select of course has to be a special case!
   if($options['type'] == 'select') {
-    $value = tdomf_widget_customfields_select_convert($value,$options);
+    $value = tdomf_widget_customfields_select_convert($value,$options,$index);
   }
   // we should only really care if the field is "empty" ... false is a valid setting
   if(/*!empty($value) &&*/ (!is_string($value) || trim($value) != "") )
@@ -58,9 +58,6 @@ function tdomf_widget_customfields_append($post_ID,$options,$index,$form_id){
     }
   }
 }
-
-// TODO: Add a box to allow customised formatting of custom field and 
-// automatically added it to the post content
 
 // Add a menu option to control the number of cf widgets to the bottom of the 
 // tdomf widget page
@@ -114,25 +111,12 @@ function tdomf_widget_customfields_get_options($index,$form_id) {
        $options['format'] = "<p><b>%%TITLE%%</b>: %%VALUE%%</p>";
        $options['preview'] = true;
        $options['required-value'] = true; 
-       // textfield specific
-       $options['tf-subtype'] = 'text';
-       // textarea specific
-       $options['ta-restrict-tags'] = false;
-       $options['ta-allowable-tags'] = "<p><b><em><u><strong><a><img><table><tr><td><blockquote><ul><ol><li><br><sup>";
-       $options['ta-quicktags'] = true;
-       $options['ta-content-filter'] = true;     
     }
     if(!isset($options['append'])){ $options['append'] = false; }
     if(!isset($options['format'])){ $options['format'] = "<p><b>%%TITLE%%</b>: %%VALUE%%</p>"; }
     if(!isset($options['preview'])){ $options['preview'] = true; }
     if(!isset($options['required-value'])){ $options['required-value'] = true; }
-    // select specific
-    if(!isset($options['s-multiple'])){ $options['s-multiple'] = true; }
-    if(!isset($options['s-values'])){ $options['s-values'] = "test:test"; }
-    if(!isset($options['s-defaults'])){ $options['s-defaults'] = "test"; }
-    // new textarea ones
-    if(!isset($options['ta-char-limit'])){ $options['ta-char-limit'] = 0; }
-    if(!isset($options['ta-word-limit'])){ $options['ta-word-limit'] = 0; }
+
   return $options;
 }
 
@@ -225,6 +209,8 @@ function tdomf_widget_customfields_validate($args,$preview,$params) {
     return tdomf_widget_customfields_textarea_validate($args,$number,$options);
   } else if($options['type'] == 'checkbox') {
     return tdomf_widget_customfields_checkbox_validate($args,$number,$options);
+  } else if($options['type'] == 'select') {
+    return tdomf_widget_customfields_select_validate($args,$number,$options);
   }
   
   return NULL;
@@ -459,7 +445,7 @@ function tdomf_widget_customfields_control($form_id,$params) {
 </div>
 
 <div id="customfiles-specific-select-<?php echo $number; ?>" <?php if($options['type'] == 'select') { ?> style="display:inline;" <?php } else { ?> style="display:none;" <?php } ?>>
-<?php tdomf_widget_customfields_select_control($number,$options); ?>
+<?php echo tdomf_widget_customfields_select_control($number,$options); ?>
 </div>
 
 </div>
@@ -487,7 +473,7 @@ function tdomf_widget_customfields_init($form_id,$mode){
     
     for($i = 1; $i <= $count; $i++) {
       tdomf_register_form_widget("customfields-$i","Custom Fields $i", 'tdomf_widget_customfields', array('new'), $i);
-      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 960, array('new'), $i);
+      tdomf_register_form_widget_control("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_control', 500, 1000, array('new'), $i);
       tdomf_register_form_widget_preview("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_preview', array('new'), $i);
       tdomf_register_form_widget_validate("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_validate', array('new'), $i);
       tdomf_register_form_widget_post("customfields-$i", "Custom Fields $i",'tdomf_widget_customfields_post', array('new'), $i);
@@ -866,7 +852,7 @@ function tdomf_widget_customfields_textarea_default_options($number,$options)
   
   if(isset($options['ta-quicktags'])) {
       $options[$prefix.'quicktags'] = $options['ta-quicktags'];
-      unset($options['quicktags']);
+      unset($options['ta-quicktags']);
   }
   
   if(isset($options['ta-restrict-tags'])) {
@@ -876,7 +862,7 @@ function tdomf_widget_customfields_textarea_default_options($number,$options)
   
   if(isset($options['ta-allowable-tags'])) {
       $options[$prefix.'allowable-tags'] = $options['ta-allowable-tags'];
-      unset($options['allowable-tags']);
+      unset($options['ta-allowable-tags']);
   }
   
   if(isset($options['ta-char-limit'])) {
@@ -1201,7 +1187,7 @@ function tdomf_widget_customfields_checkbox_validate($args,$number,$options) {
   $checkbox = new TDOMF_WidgetFieldCheckBox($prefix);
   
   # update options
-  $options = tdomf_widget_customfields_checkbox_default_options($number,$options);
+  $options = tdomf_widget_customfields_checkbox_default_options($number,$options,"customfields-checkbox-$number");
   
   $output = $checkbox->validate($args,$options);
   
@@ -1272,346 +1258,168 @@ function tdomf_widget_customfields_checkbox_adminemail($args,$number,$options) {
 //                                                   Custom Field as a Select //
 ////////////////////////////////////////////////////////////////////////////////
 
+function tdomf_widget_customfields_select_default_options($number,$options) 
+{
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
+
+  # title, required and rows are common to all
+    
+  if(isset($options['title'])) {
+      $options[$prefix.'title'] = $options['title'];
+  }
+  
+  if(isset($options['required'])) {
+      $options[$prefix.'required'] = $options['required'];
+  }
+
+  if(isset($options['rows'])) {
+      $options[$prefix.'size'] = $options['rows'];
+  }
+  
+  if(isset($options['s-defaults'])) {
+      $options[$prefix.'default-selected'] = split(";",$options['s-defaults']);
+      unset($options['s-defaults']);
+  }
+  
+  if(isset($options['s-multiple'])) {
+      $options[$prefix.'multiple-selection'] = $options['s-multiple'];
+      unset($options['s-multiple']);
+  }
+  
+  if(isset($options['s-values'])) {
+      $select_defaults = array();
+      if(!empty($options['s-values'])) {
+          $select_options = split(";",$options['s-values']);
+          foreach($select_options as $select_option) {
+              list($text,$value) = split(":",$select_option,2);
+              if(trim($text) != "" && trim($value) != "") {
+                  $select_defaults[$value] = $text;
+              }
+          }
+      }
+      $options[$prefix.'values'] =  $select_defaults;  
+      unset($options['s-values']);
+  }
+   
+  # grab default widget field options
+  
+  $options = $select->getOptions($options);
+  
+  return $options;
+}
+
 function tdomf_widget_customfields_select_control_handler($number,$options) {
-  $options['rows'] = intval($_POST["customfields-s-rows-$number"]); 
-  $options['s-multiple'] = isset($_POST["customfields-s-multi-$number"]);
-  $options['s-values'] = $_POST["customfields-s-list-values-$number"];
-  $options['s-defaults'] = $_POST["customfields-s-list-defaults-$number"];
+
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
+  
+  # select ones
+  
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
+
+  # now update
+  
+  # a bit of a hack but works
+  ob_start();
+  $options = $select->control($options,false);
+  ob_end_clean();
+  
+  # make sure to copy 'common' ones back
+  
+  if(isset($options[$prefix.'required'])) {
+      $options['required'] = $options[$prefix.'required'];
+  }
+  
+  if(isset($options[$prefix.'size'])) {
+      $options['rows'] = $options[$prefix.'size'];
+  }
+  
   return $options;
 }
 
 function tdomf_widget_customfields_select_control($number,$options){
-  ?>
-  
-  <h3><?php _e("Select","tdomf"); ?></h3>
 
-  <!-- Javascript taken (and then hacked) from http://www.mredkj.com/tutorials/tutorial006.html -->
+  $output = '<h3>'.__("Select","tdomf").'</h3>';
   
-  <script type="text/javascript">
-  //<![CDATA[
-    function appendToSelectList<?php echo $number; ?>() {
-      var theSel = document.getElementById("customfields-s-list-<?php echo $number; ?>");
-      var newText = document.getElementById("customfields-s-item-name-<?php echo $number; ?>").value;
-      var newValue = document.getElementById("customfields-s-item-value-<?php echo $number; ?>").value;
-      if(newText == "" || newValue == "") {
-        alert("<?php _e("You must specify a value for Item name and Item value", "tdomf"); ?>");
-        return;
-      }
-      var settingString = "";
-      if (theSel.length == 0) {
-        var newOpt1 = new Option(newText, newValue, true, true);
-        theSel.options[0] = newOpt1;
-        theSel.selectedIndex = 0;
-        settingString = settingString + newText + ":" + newValue + ";";
-      } else {
-        var selText = new Array();
-        var selValues = new Array();
-        var i;
-        for(i=0; i<theSel.length; i++)
-        {
-          selText[i] = theSel.options[i].text;
-          selValues[i] = theSel.options[i].value;
-          if(theSel.options[i].value == newValue) {
-            alert("<?php _e("That value already exists!", "tdomf"); ?>");
-            return;
-          }
-        }
-        for(i=0; i<theSel.length; i++)
-        {
-          var newOpt = new Option(selText[i], selValues[i], false, false);
-          theSel.options[i] = newOpt;
-          settingString = settingString + selText[i] + ":" + selValues[i] + ";";
-        }
-        //var newOpt2 = new Option(newText, newValue, true, false);
-        var newOpt2 = new Option(newText, newValue, false, false);
-        theSel.options[i] = newOpt2;
-        theSel.selectedIndex = -1;
-        settingString = settingString + newText + ":" + newValue + ";";
-        theSel.rows = theSel.length;
-      }
-      document.getElementById("customfields-s-list-values-<?php echo $number; ?>").value = settingString;
-    }
-    function removeFromSelectList<?php echo $number; ?>()
-    {
-      var theSel = document.getElementById("customfields-s-list-<?php echo $number; ?>");
-      var selIndex = theSel.selectedIndex;
-      if (selIndex != -1) {
-        theSel.options[selIndex] = null;
-        var settingString = "";
-        for(i=0; i<theSel.length; i++)
-        {
-          settingString = settingString + theSel.options[i].text + ":" + theSel.options[i].value + ";";
-        }
-        document.getElementById("customfields-s-list-values-<?php echo $number; ?>").value = settingString;
-      } else {
-        alert("<?php _e("Please select item to remove from the list!","tdomf"); ?>");
-      }
-    }
-    function makeDefaultSelectList<?php echo $number; ?>()
-    {
-      var theSel = document.getElementById("customfields-s-list-<?php echo $number; ?>");
-      var settingString = "";
-      var messageString = "<?php _e("Default selected options will be: ","tdomf"); ?>";
-      for(i=0; i<theSel.length; i++)
-      {
-        if(theSel[i].selected)
-        {
-          settingString = settingString + theSel.options[i].value + ";";
-          messageString = messageString + theSel.options[i].text + ", ";
-        }
-      }
-      document.getElementById("customfields-s-list-defaults-<?php echo $number; ?>").value = settingString;
-      document.getElementById("customfields-s-defs-msg-<?php echo $number; ?>").innerHTML = messageString;
-    }
-  //]]>
-  </script>
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
   
-  <input type="hidden" name="customfields-s-list-defaults-<?php echo $number; ?>" id="customfields-s-list-defaults-<?php echo $number; ?>" value="<?php echo $options['s-defaults']; ?>" />
-  <input type="hidden" name="customfields-s-list-values-<?php echo $number; ?>" id="customfields-s-list-values-<?php echo $number; ?>" value="<?php echo $options['s-values']; ?>" />
+  # update options
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
   
-  <input type="checkbox" name="customfields-s-multi-<?php echo $number; ?>" id="customfields-s-multi-<?php echo $number; ?>" <?php if($options['s-multiple']){ ?> checked <?php } ?> /> 
-  <label for="customfields-s-multi-<?php echo $number; ?>" ><?php _e("Allow multiple selections","tdomf"); ?></label>
+  $shide = array($prefix.'title');
+  # a bit of a hack but works
+  ob_start();
+  $options = $select->control($options,false,false,$shide);
+  $output .= ob_get_contents();
+  ob_end_clean();
   
-  <br/><br/>
-  
-  <label for="customfields-s-rows-<?php echo $number; ?>">
-  <?php _e("How many rows?","tdomf"); ?> 
-  <input type="text" size="5" name="customfields-s-rows-<?php echo $number; ?>" id="customfields-s-rows-<?php echo $number; ?>" value="<?php echo htmlentities($options['rows'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
-  <?php _e("<i>(1 row will create a drop down list)</i>","tdomf"); ?>
-  </label>
-  
-  <br/><br/>
-
-  <input type="button" value="<?php _e("Remove","tdomf"); ?>" onclick="removeFromSelectList<?php echo $number; ?>();" />
-  <input type="button" value="<?php _e("Make Current Selection Default","tdomf"); ?>" onclick="makeDefaultSelectList<?php echo $number; ?>();" />
-  
-  <br/><br/>
-  
-  <div id="customfields-s-defs-msg-<?php echo $number; ?>" >
-    <?php $select_options = split(";",$options['s-values']); 
-          $select_defaults = split(";",$options['s-defaults']);
-          $defs_msg = "";
-          foreach($select_defaults as $select_default) {
-            if(trim($select_default) != "" && trim($select_default) != "") {
-              foreach($select_options as $select_option) {
-                list($text,$value) = split(":",$select_option,2);
-                if($value == $select_default) {
-                  $defs_msg .= $text.", ";
-                }
-              }
-            }
-          }
-          if($defs_msg != "") { ?>
-            <?php _e("Default selected options will be: ","tdomf"); ?>
-            <?php echo $defs_msg; ?>
-    <?php } ?>
-  </div>
-  
-  <br/><br/>
-  
-  <div style="float:left;">
-  
-  <select name="customfields-s-list-<?php echo $number; ?>" id="customfields-s-list-<?php echo $number; ?>" size="10" multiple="multiple" >
-  <?php if(!empty($options['s-values'])) {
-          $select_options = split(";",$options['s-values']);
-          foreach($select_options as $select_option) {
-            list($text,$value) = split(":",$select_option,2);
-             if(trim($text) != "" && trim($value) != "") { 
-             ?><option value="<?php echo $value; ?>">
-             <?php echo $text; ?>
-             </option><?php
-             }
-          }
-        } ?>
-  </select>
-  
-  <br/><br/>
-
- </div>
- 
- <div style="float:right;">
- 
-  
-  <label for="customfields-s-item-name-<?php echo $number; ?>">
-  <?php _e("Name/Text of Item","tdomf"); ?></label><br/>
-  <input type="text" size="30" name="customfields-s-item-name-<?php echo $number; ?>" id="customfields-s-item-name-<?php echo $number; ?>" ?>
-  
-  <br/><br/>
-  
-  <label for="customfields-s-item-value-<?php echo $number; ?>">
-  <?php _e("Value of Item","tdomf"); ?></label><br/>
-  <input type="text" size="30" name="customfields-s-item-value-<?php echo $number; ?>" id="customfields-s-item-value-<?php echo $number; ?>" ?>
-  
-  <br/><br/>
-  
-  <input type="button" value="<?php _e("Append Item","tdomf"); ?>" onclick="appendToSelectList<?php echo $number; ?>();" />
-  
-  </div>
-  
-  <?php 
+  return $output;
 }
 
 function tdomf_widget_customfields_select($args,$number,$options) {
     extract($args);
   
-    $output  = $before_widget;
-
-    if($options['required']) {
-      $output .= "<label for=\"customfields-s-list-$number\" class=\"required\">";
-    } else {
-      $output .= "<label for=\"customfields-s-list-$number\">";
-    }
-    if($options['required']) {
-      $output .= $options['title']." ".__("(Required)","tdomf");
-    } else {
-      $output .= $options['title'];
-    }
-    $output .= "</label><br/>\n";
-    
-    if($options['s-multiple']) {
-      $output .= '<select name="customfields-s-list-'.$number.'[]" id="customfields-s-list-'.$number.'[]" size="'.$options['rows'].'" multiple="multiple" >';
-    } else {
-      $output .= "<select name=\"customfields-s-list-$number\" id=\"customfields-s-list-$number\" size=\"".$options['rows']."\" >\n";
-    }
-
-    $select_defaults = array();
-    if(isset($args['customfields-s-list-'.$number])){
-      $select_defaults = $args['customfields-s-list-'.$number];
-      if(!is_array($select_defaults)) {
-        $select_defaults = array( $select_defaults );
-      }
-    } else if(!empty($options['s-defaults'])) {
-      $select_defaults = split(";",$options['s-defaults']);
-    }
-    
-    if(!empty($options['s-values'])) {
-      $select_options = split(";",$options['s-values']);
-      foreach($select_options as $select_option) {
-        list($text,$value) = split(":",$select_option,2);
-        if(trim($text) != "" && trim($value) != "") {
-          $output .= " <option value=\"$value\" ";
-          if(in_array($value,$select_defaults)) {
-            $output .= "selected='selected'";
-          }
-          $output .= "> $text</option>\n"; 
-        }
-     }
-    }
-    
-    $output .= "</select>";
-    $output .= $after_widget;
-    
-    return $output;
-  }
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
+  
+  $output = $select->form($args,$options);
+  
+  return $before_widget.$output.$after_widget;
+}
 
 function tdomf_widget_customfields_select_hack($args,$number,$options) {
     extract($args);
   
-    $output  = $before_widget;
-
-    if($options['required']) {
-      $output .= "\t\t<label for=\"customfields-s-list-$number\" class=\"required\">";
-    } else {
-      $output .= "\t\t<label for=\"customfields-s-list-$number\">";
-    }
-    if($options['required']) {
-      $output .= $options['title']." ".__("(Required)","tdomf");
-    } else {
-      $output .= $options['title'];
-    }
-    $output .= "</label>\n\t\t<br/>\n";
-    
-    if($options['s-multiple']) {
-      $output .= "\t\t".'<select name="customfields-s-list-'.$number.'[]" id="customfields-s-list-'.$number.'[]" size="'.$options['rows'].'" multiple="multiple" >'."\n";
-    } else {
-      $output .= "\t\t<select name=\"customfields-s-list-$number\" id=\"customfields-s-list-$number\" size=\"".$options['rows']."\" >\n";
-    }
-
-    $select_defaults = array();
-    if(!empty($options['s-defaults'])) {
-      $select_defaults = split(";",$options['s-defaults']);
-    }
-    
-    $output .= "\t\t<?php \$value = array();\n"; 
-    $output .= "\t\tif(isset(\$post_args['customfields-s-list-$number'])) {\n";
-    $output .= "\t\t\t\$value = \$post_args['customfields-s-list-$number'];\n";
-    $output .= "\t\t\tif(!is_array(\$value)) { \$value = array( \$value ); }\n";
-    if(!empty($select_defaults)) {
-        $output .= "\t\t} else {\n";
-        $output .= "\t\t\t\$value = array( ";
-        foreach($select_defaults as $def) {
-            if(!empty($def)) {
-                $output .= '"'.str_replace("\"","\\\"",$def).'", ';
-            }
-        }
-        $output .= " );\n";
-    }
-    $output .= "\t\t} ?>\n";
-    
-    if(!empty($options['s-values'])) {
-      $select_options = split(";",$options['s-values']);
-      foreach($select_options as $select_option) {
-        list($text,$value) = split(":",$select_option,2);
-        if(trim($text) != "" && trim($value) != "") {
-          $output .= "\t\t\t<option value=\"".str_replace("\"","\\\"",$value)."\" ";
-          $output .= "<?php if(in_array(\"".str_replace("\"","\\\"",$value)."\",\$value)) { ?> selected <?php } ?>";
-          $output .= " > $text</option>\n"; 
-        }
-     }
-    }
-    
-    $output .= "\t\t</select>\n";
-    $output .= $after_widget;
-    
-    return $output;
-  }
-
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
   
+  # update options
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
   
-function tdomf_widget_customfields_select_convert($post_input,$options) {
-  $opts = split(";",$options['s-values']);
-  $message = "";
-  if(is_array($post_input)) {
-    foreach($opts as $opt) {
-        list($text,$value) = split(":",$opt,2);
-        if(in_array($value,$post_input)) {
-          $message .= $text . ", ";
-        }
-    }
-  } else {
-    foreach($opts as $opt) {
-        list($text,$value) = split(":",$opt,2);
-        if($value == $post_input) {
-          $message = $text;
-          break;
-        }
-    }
-  }
-  return $message;
+  $output = $select->formHack($args,$options);
+  
+  return $before_widget.$output.$after_widget;
 }
+
   
 function tdomf_widget_customfields_select_preview($args,$number,$options) {
-  $vals = $args["customfields-s-list-$number"];
-  $message = tdomf_widget_customfields_select_convert($vals,$options);
+  extract($args);
   
-  extract($args);  
-  $output = $before_widget;
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
+  
   if($options['append'] && trim($options['format']) != "") {
-    $fmt = tdomf_widget_customfields_gen_fmt($number,$message,$options);
-    $output .= trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));    
+    $value = $select->postText($args,$options,"customfields-s-list-$number");
+    $fmt = tdomf_widget_customfields_gen_fmt($number,$value,$options);
+    $output = trim(tdomf_prepare_string($fmt,$tdomf_form_id,$mode));
   } else {
-    if($options['title'] != "") {
-      $output .= $before_title.$options['title'].$after_title;
-    }
-    $output .= $message;
+    $output = $select->preview($args,$options,"customfields-s-list-$number");
   }
-  $output .= $after_widget;  
-  return $output;
+    
+  return $before_widget.$output.$after_widget;
 }
 
 function tdomf_widget_customfields_select_post($args,$number,$options) {
-  extract($args);
-  add_post_meta($post_ID,$options['key'],$args["customfields-s-list-$number"]);
+ extract($args);
+  
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
+  
+  $value = $select->post($args,$options,"customfields-s-list-$number");
+  
+  add_post_meta($post_ID,$options['key'],$value);
+  
   return NULL;
 }
 
@@ -1625,9 +1433,52 @@ function tdomf_widget_customfields_select_adminemail($args,$number,$options) {
   $output .= '['.$options['key'].']';
   $output .= $after_title;
   $value = get_post_meta($post_ID,$options['key'],true);
-  $output .= tdomf_widget_customfields_select_convert($value,$options);
+  $output .= tdomf_widget_customfields_select_convert($value,$options,$number);
+  #$output .= var_export($value,true);
   $output .= $after_widget;
   return $output;
+}
+
+function tdomf_widget_customfields_select_validate($args,$number,$options) {
+  extract($args);
+    
+  $prefix = 'customfields-s-'.$number.'-';
+  $select = new TDOMF_WidgetFieldSelect($prefix);
+  
+  # update options
+  $options = tdomf_widget_customfields_select_default_options($number,$options);
+  
+  $output = $select->validate($args,$options,"customfields-s-list-$number");
+  
+  // return output if any
+  if($output != "") {
+    return $before_widget.$output.$after_widget;
+  } else {
+    return NULL;
+  }
+}
+
+function tdomf_widget_customfields_select_convert($post_input,$options,$number) {
+  $values = $options['customfields-s-'.$number.'-values'];
+  $message = '';
+  if(is_array($post_input)) {
+      $first = true;
+      foreach($values as $v => $t) {
+          if(in_array($v,$post_input)) {
+            if($first) { $first = false; }
+            else { $message .= ', '; }
+            $message .= $t;
+          }
+    }
+  } else {
+    foreach($values as $v => $t) {
+        if($v == $post_input) {
+          $message = $t;
+          break;
+        }
+    }
+  }
+  return $message;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

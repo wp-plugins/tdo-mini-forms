@@ -41,7 +41,16 @@ Author URI: http://thedeadone.net
 //     without magic quotes turned on. 
 // - Refactored Custom Field, Content, Excerpt widgets and created a common
 //     textfield and textarea (as part of the fix for magic quotes). This allows
-//     me to add new features to multiple widgets at a time. 
+//     me to add new features to multiple widgets at a time.
+//
+//     id/name for some HTML elements has consquently been updated:
+//     content_content            to    content-text-ta
+//     content_title              to    content-title-tf
+//     excerpt_excerpt            to    excerpt-ta
+//     customfields-textfield-X   to    customfields-tf-X-tf
+//     customfields-textarea-X    to    customfields-ta-X-ta
+//     customfields-checkbox-X    to    customfields-cb-X-cb
+//     customfields-hidden-X      to    customfields-h-X-h 
 //
 // v0.13.6
 // - "Number" option in TDOMFTextField (and therefore Custom Fields widget)
@@ -53,6 +62,10 @@ Author URI: http://thedeadone.net
 // - Modified AJAX to prevent double submits
 // - Refactored "Hidden" field as TDOMFWidgetFieldHidden and it now allows 
 //    PHP code to be executed
+// - Select Field refactored in TDOMF Custom Field widget.
+//
+//    id/name for HTML element for Custom Fields/Select has changed:
+//    customfields-s-list-X       to    customfields-s-X-s'
 //
 ////////////////////////////////////////////////////////////////////////////////
 

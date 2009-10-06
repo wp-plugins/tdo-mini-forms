@@ -403,6 +403,16 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Have tested and fixed extra slashes being added on WP 2.8.x builds with and without magic quotes turned on. 
 * Refactored Custom Field, Content, Excerpt widgets and created a common  textfield and textarea (as part of the fix for magic quotes). This allows me to add new features to multiple widgets at a time. 
 
+Id/name for some HTML elements has consquently updated:
+
+* `content_content`            to    `content-text-ta`
+* `content_title`              to    `content-title-tf`
+* `excerpt_excerpt`            to    `excerpt-ta`
+* `customfields-textfield-X`   to    `customfields-tf-X-tf`
+* `customfields-textarea-X`    to    `customfields-ta-X-ta`
+* `customfields-checkbox-X`    to    `customfields-cb-X-cb`
+* `customfields-hidden-X`      to    `customfields-h-X-h` 
+
 = 0.13.4 =
 * "Warnings on post": errors appear about "post.php". I left some unfinished code in an action which was breaking one of the wordpress functions. 
 
