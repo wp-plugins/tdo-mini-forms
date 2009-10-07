@@ -1217,7 +1217,7 @@ class TDOMF_WidgetField {
        return "";
     }
     
-    function control($options,$form_id,$show=false,$hide=false)
+    function control($options,$form_id,$show=false,$hide=false,$save=true)
     {
         return array();
     }
@@ -1659,7 +1659,7 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
         return $options;
     }
     
-    function control($options,$form_id,$show=false,$hide=false)
+    function control($options,$form_id,$show=false,$hide=false,$save=true)
     {
         if((is_array($show) && empty($show))) {
             # nothing to do if show list is empty
@@ -1668,26 +1668,28 @@ class TDOMF_WidgetFieldTextField extends TDOMF_WidgetField {
 
         // prepare options!
         
-        $retOptions = array();
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'size',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-text',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'restrict-tags',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'allowable-tags',$show,$hide);
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'char-limit',$show,$hide);
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'word-limit',$show,$hide);
-        /*$retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'filter',$show,$hide);*/
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'restrict-type',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-url',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-email',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'number-js',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'number-decimal',$show,$hide);
-        $retOptions = $this->updateOptsFloatOrBoolean($retOptions,$this->prefix.'number-start',$show,$hide);
-        $retOptions = $this->updateOptsFloatOrBoolean($retOptions,$this->prefix.'number-end',$show,$hide);
-        
-        $options = wp_parse_args($retOptions, $options);
+        if($save) {     
+            $retOptions = array();
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'size',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-text',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'restrict-tags',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'allowable-tags',$show,$hide);
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'char-limit',$show,$hide);
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'word-limit',$show,$hide);
+            /*$retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'filter',$show,$hide);*/
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'restrict-type',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-url',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'validate-email',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'number-js',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'number-decimal',$show,$hide);
+            $retOptions = $this->updateOptsFloatOrBoolean($retOptions,$this->prefix.'number-start',$show,$hide);
+            $retOptions = $this->updateOptsFloatOrBoolean($retOptions,$this->prefix.'number-end',$show,$hide);
+            
+            $options = wp_parse_args($retOptions, $options);
+        }
         
         // Display control panel for this textfield
         
@@ -2219,7 +2221,7 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         return $output; 
     }
     
-    function control($options,$form_id,$show=false,$hide=false)
+    function control($options,$form_id,$show=false,$hide=false,$save=true)
     {
         if((is_array($show) && empty($show))) {
             # nothing to do if show list is empty
@@ -2227,23 +2229,24 @@ class TDOMF_WidgetFieldTextArea extends TDOMF_WidgetField {
         }
 
         // prepare options!
-        
-        $retOptions = array();
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'cols',$show,$hide);
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'rows',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'quicktags',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'restrict-tags',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'allowable-tags',$show,$hide);
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'char-limit',$show,$hide);
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'word-limit',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
-        /*$retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'filter',$show,$hide);*/        
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'kses',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-text',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
-                 
-        $options = wp_parse_args($retOptions, $options);
+        if($save) {
+            $retOptions = array();
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'cols',$show,$hide);
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'rows',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'quicktags',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'restrict-tags',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'allowable-tags',$show,$hide);
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'char-limit',$show,$hide);
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'word-limit',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
+            /*$retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'use-filter',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'filter',$show,$hide);*/        
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'kses',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-text',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
+                     
+            $options = wp_parse_args($retOptions, $options);
+        }
         
         // Display control panel for this textarea
         
@@ -2508,7 +2511,7 @@ class TDOMF_WidgetFieldHidden extends TDOMF_WidgetField {
         return $output; 
     }
     
-    function control($options,$form_id,$show=false,$hide=false)
+    function control($options,$form_id,$show=false,$hide=false,$save=false)
     {
         if((is_array($show) && empty($show))) {
             # nothing to do if show list is empty
@@ -2516,12 +2519,13 @@ class TDOMF_WidgetFieldHidden extends TDOMF_WidgetField {
         }
         
         // prepare options!
-        
-        $retOptions = array();        
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-value',$show,$hide);     
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'value-php',$show,$hide);
-                 
-        $options = wp_parse_args($retOptions, $options);
+        if($save) {
+            $retOptions = array();        
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'default-value',$show,$hide);     
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'value-php',$show,$hide);
+                     
+            $options = wp_parse_args($retOptions, $options);
+        }
         
         if($this->useOpts($this->prefix.'default-value',$show,$hide)) { ?>
 <label for="<?php echo $this->prefix; ?>default-value" style="line-height:35px;"><?php _e("Default Value:","tdomf"); ?></label>
@@ -2736,7 +2740,7 @@ class TDOMF_WidgetFieldCheckBox extends TDOMF_WidgetField {
         return $output;
     }
     
-    function control($options,$form_id,$show=false,$hide=false)
+    function control($options,$form_id,$show=false,$hide=false,$save=true)
     {
         if((is_array($show) && empty($show))) {
             # nothing to do if show list is empty
@@ -2744,13 +2748,14 @@ class TDOMF_WidgetFieldCheckBox extends TDOMF_WidgetField {
         }
 
         // prepare options!
-        
-        $retOptions = array();
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'default-value',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'text',$show,$hide);
-        
-        $options = wp_parse_args($retOptions, $options);
+        if($save) {
+            $retOptions = array();
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'default-value',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'text',$show,$hide);
+            
+            $options = wp_parse_args($retOptions, $options);
+        }
         
         // Display control panel for this textfield
         
@@ -3093,7 +3098,7 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
         return $output;
     }
     
-  function control($options,$form_id,$show=false,$hide=false)
+  function control($options,$form_id,$show=false,$hide=false,$save=true)
     {
         if((is_array($show) && empty($show))) {
             # nothing to do if show list is empty
@@ -3102,40 +3107,42 @@ class TDOMF_WidgetFieldSelect extends TDOMF_WidgetField {
 
         // prepare options!
         
-        $retOptions = array();
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
-        $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'multiple-selection',$show,$hide);
-        $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
-        $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'size',$show,$hide);
+        if($save) {
+            $retOptions = array();
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'required',$show,$hide);
+            $retOptions = $this->updateOptsBoolean($retOptions,$this->prefix.'multiple-selection',$show,$hide);
+            $retOptions = $this->updateOptsString($retOptions,$this->prefix.'title',$show,$hide);
+            $retOptions = $this->updateOptsInt($retOptions,$this->prefix.'size',$show,$hide);
         
-        // default-selected and values are slightly non-standard
-        
-        if($this->useOpts($this->prefix.'default-selected',$show,$hide) && isset($_POST[$this->prefix.'default-selected'])) {
-            $default_selected = $_POST[$this->prefix.'default-selected'];
-            if(!empty($_POST[$this->prefix.'default-selected'])) {
-                $default_selected = explode(';',$default_selected);
+            // default-selected and values are slightly non-standard
+            
+            if($this->useOpts($this->prefix.'default-selected',$show,$hide) && isset($_POST[$this->prefix.'default-selected'])) {
+                $default_selected = $_POST[$this->prefix.'default-selected'];
+                if(!empty($_POST[$this->prefix.'default-selected'])) {
+                    $default_selected = explode(';',$default_selected);
+                }
+                $retOptions[$this->prefix.'default-selected'] = $default_selected;
             }
-            $retOptions[$this->prefix.'default-selected'] = $default_selected;
-        }
-        
-        if($this->useOpts($this->prefix.'values',$show,$hide) && isset($_POST[$this->prefix.'values'])) {
-            $values = $_POST[$this->prefix.'values'];
-            $values_array = array();
-            if(!empty($_POST[$this->prefix.'values'])) {
-                $values = explode(';',$values);
-                foreach($values as $v) {
-                    if(!empty($v)) {
-                        list($text,$value) = explode(':',$v);
-                        if(!empty($value) && !empty($text)) {
-                            $values_array[$value] = $text;
+            
+            if($this->useOpts($this->prefix.'values',$show,$hide) && isset($_POST[$this->prefix.'values'])) {
+                $values = $_POST[$this->prefix.'values'];
+                $values_array = array();
+                if(!empty($_POST[$this->prefix.'values'])) {
+                    $values = explode(';',$values);
+                    foreach($values as $v) {
+                        if(!empty($v)) {
+                            list($text,$value) = explode(':',$v);
+                            if(!empty($value) && !empty($text)) {
+                                $values_array[$value] = $text;
+                            }
                         }
                     }
                 }
+                $retOptions[$this->prefix.'values'] = $values_array;
             }
-            $retOptions[$this->prefix.'values'] = $values_array;
+            
+            $options = wp_parse_args($retOptions, $options);
         }
-        
-        $options = wp_parse_args($retOptions, $options);
         
         // Display control panel for this textfield
         

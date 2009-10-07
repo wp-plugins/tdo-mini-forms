@@ -62,6 +62,8 @@ Author URI: http://thedeadone.net
 // - Modified AJAX to prevent double submits
 // - Refactored "Hidden" field as TDOMFWidgetFieldHidden and it now allows 
 //    PHP code to be executed
+// - Bug in TDOMFWidgetFields meant that checkbox options were getting reset
+//    when not being saved in 'Create'
 // - Select Field refactored in TDOMF Custom Field widget.
 //
 //    id/name for HTML element for Custom Fields/Select has changed:

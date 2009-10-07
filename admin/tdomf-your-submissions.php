@@ -125,7 +125,7 @@ function tdomf_show_your_submissions_menu() {
     <h2><?php _e('Your Submissions', 'tdomf') ?></h2>
     
     <?php if(in_array($_REQUEST['REMOTE_ADDR'],tdomf_get_ips_banned())) { ?>
-      <?php printf(__("You are logged on from the banned IP %s. If this is in error please contact the <a href='mailto:%s'>admins</a>.","tdomf"),$_REQUEST['REMOTE_ADDR'],get_bloginfo('admin_email')); ?>
+      <?php printf(__("You are logged on from the banned IP %s. If this is in error please contact the <a href='mailto:%s'>admins</a>.","tdomf"),$_SERVER['REMOTE_ADDR'],get_bloginfo('admin_email')); ?>
     <?php } else if($user_status == TDOMF_USER_STATUS_BANNED) { ?>
       <?php printf(__("You are banned from using this functionality on this site. If this is in error please contact the <a href='mailto:%s'>admins</a>.","tdomf"),get_bloginfo('admin_email')); ?>
     <?php } else { ?>

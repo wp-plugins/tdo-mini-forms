@@ -569,9 +569,11 @@ function tdomf_widget_customfields_textfield_control_handler($number,$options) {
 
   # now update
   
+  $tfhide = array($prefix.'title');
   # a bit of a hack but works
   ob_start();
-  $options = $textfield->control($options,false);
+  $options = $textfield->control($options,false,false,$tfhide,true);
+  $output .= ob_get_contents();
   ob_end_clean();
   
   # make sure to copy 'common' ones back
@@ -605,7 +607,7 @@ function tdomf_widget_customfields_textfield_control($number,$options){
   
   # a bit of a hack but works
   ob_start();
-  $options = $textfield->control($options,false,false,$tfhide);
+  $options = $textfield->control($options,false,false,$tfhide,false);
   $output .= ob_get_contents();
   ob_end_clean();
   
@@ -759,9 +761,12 @@ function tdomf_widget_customfields_hidden_control_handler($number,$options) {
 
   # now update
   
+  $tashow = array($prefix.'default-value',
+                  $prefix.'value-php');
   # a bit of a hack but works
   ob_start();
-  $options = $hidden->control($options,false);
+  $options = $hidden->control($options,false,$tashow,false,true);
+  $output .= ob_get_contents();
   ob_end_clean();
   
   # make sure to copy 'common' ones back
@@ -811,7 +816,7 @@ function tdomf_widget_customfields_hidden_control($number,$options){
   
   # a bit of a hack but works
   ob_start();
-  $options = $hidden->control($options,false,$tashow);
+  $options = $hidden->control($options,false,$tashow,false,false);
   $output .= ob_get_contents();
   ob_end_clean();
   
@@ -903,9 +908,19 @@ function tdomf_widget_customfields_textarea_control_handler($number,$options) {
 
   # now update
   
+  $tashow = array($prefix.'cols',
+                  $prefix.'rows',
+                  $prefix.'quicktags',
+                  $prefix.'restrict-tags',
+                  $prefix.'allowable-tags',
+                  $prefix.'char-limit',
+                  $prefix.'word-limit',
+                  $prefix.'required',
+                  $prefix.'default-text');
   # a bit of a hack but works
   ob_start();
-  $options = $textarea->control($options,false);
+  $options = $textarea->control($options,false,$tashow,false,true);
+  $output .= ob_get_contents();
   ob_end_clean();
 
   # specific to this widget/textarea
@@ -960,7 +975,7 @@ function tdomf_widget_customfields_textarea_control($number,$options){
                   $prefix.'default-text');
   # a bit of a hack but works
   ob_start();
-  $options = $textarea->control($options,false,$tashow);
+  $options = $textarea->control($options,false,$tashow,false,false);
   $output .= ob_get_contents();
   ob_end_clean();
 
@@ -1112,9 +1127,11 @@ function tdomf_widget_customfields_checkbox_control_handler($number,$options) {
 
   # now update
   
+  $cbhide = array($prefix.'text');
   # a bit of a hack but works
   ob_start();
-  $options = $checkbox->control($options,false);
+  $options = $checkbox->control($options,false,false,$cbhide,true);
+  $output .= ob_get_contents();
   ob_end_clean();
   
   # make sure to copy 'common' ones back
@@ -1144,7 +1161,7 @@ function tdomf_widget_customfields_checkbox_control($number,$options){
   
   # a bit of a hack but works
   ob_start();
-  $options = $checkbox->control($options,false,false,$cbhide);
+  $options = $checkbox->control($options,false,false,$cbhide,false);
   $output .= ob_get_contents();
   ob_end_clean();
   
@@ -1321,8 +1338,11 @@ function tdomf_widget_customfields_select_control_handler($number,$options) {
   # now update
   
   # a bit of a hack but works
+  $shide = array($prefix.'title');
+  # a bit of a hack but works
   ob_start();
-  $options = $select->control($options,false);
+  $options = $select->control($options,false,false,$shide,true);
+  $output .= ob_get_contents();
   ob_end_clean();
   
   # make sure to copy 'common' ones back
@@ -1351,7 +1371,7 @@ function tdomf_widget_customfields_select_control($number,$options){
   $shide = array($prefix.'title');
   # a bit of a hack but works
   ob_start();
-  $options = $select->control($options,false,false,$shide);
+  $options = $select->control($options,false,false,$shide,false);
   $output .= ob_get_contents();
   ob_end_clean();
   
