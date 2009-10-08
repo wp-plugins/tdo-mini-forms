@@ -18,8 +18,9 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 // Figure out the storage path for this user/ip and thusly create it
 //
 function tdomf_create_tmp_storage_path($form_id = 1) {
-  global $current_user;
-  $options = tdomf_widget_upload_get_options($form_id); 
+  global $current_user,$tdomf_widget_uploadfiles;
+  #$options = tdomf_widget_upload_get_options($form_id);
+  $options = $tdomf_widget_uploadfiles->getOptions($form_id);
   get_currentuserinfo();
   if(is_user_logged_in()) {  
     $storagepath = $options['path'].DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$form_id.DIRECTORY_SEPARATOR.$current_user->user_login;
@@ -454,469 +455,435 @@ function tdomf_upload_delete_post_files($post_ID) {
 }
 add_action('delete_post', 'tdomf_upload_delete_post_files');
 
-////////////////////////////////////////////////////////////////////////////////
-//                                           Default Widget: "Upload Files"   //
-////////////////////////////////////////////////////////////////////////////////
-
-// Required for creating images using attachments
-//
-include_once(ABSPATH . 'wp-admin/includes/admin.php');
-
-// Get Options for this widget
-//
-function tdomf_widget_upload_get_options($form_id) {
-  $options = tdomf_get_option_widget('tdomf_upload_widget',$form_id);
-    if($options == false) {
-       $options = array();
-       $options['title'] = '';
-       $options['path'] = ABSPATH.DIRECTORY_SEPARATOR.'wp-content'.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR;
-       $options['types'] = ".txt .doc .pdf .jpg .gif .zip";
-       $options['size'] = 1048576;
-       $options['min'] = 0;
-       $options['max'] = 1;
-       $options['cmd'] = "";
-       $options['attach'] = true;
-       $options['a'] = true;
-       $options['img'] = false;
-       $options['custom'] = true;
-       $options['custom-key'] = __("Download Link","tdomf");
-       $options['post-title'] = false;
-       $options['attach-a'] = false;
-       $options['attach-thumb-a'] = false;
-       $options['thumb-a'] = false;
-       $options['url'] = trailingslashit(get_bloginfo('wpurl')).'wp-content/uploads/';
-       $options['nohandler'] = true;
-    }
-    if(!isset($options['url'])){ $options['url'] = trailingslashit(get_bloginfo('wpurl')).'wp-content/uploads/'; }
-  return $options;
-}
-
-//////////////////////////////
-// Display the widget! 
-//
-function tdomf_widget_upload($args) {
-  extract($args);
-  $options = tdomf_widget_upload_get_options($tdomf_form_id);
-  
-  $output  = $before_widget;  
-  if($options['title'] != "") {
-    $output .= $before_title.$options['title'].$after_title;
-  }
-  $inline_path = TDOMF_URLPATH."tdomf-upload-inline.php"."?tdomf_form_id=".$tdomf_form_id;
-  // my best guestimate
-  $height = 160 + (intval($options['max']) * 30);
-  $output .= "<iframe id='uploadfiles_inline' name='uploadfiles_inline' frameborder='0' marginwidth='0' marginheight='0' width='100%' height='$height' src='$inline_path'></iframe>";
-  $output .= $after_widget;
-  return $output;
-}
-tdomf_register_form_widget('upload-files','Upload Files', 'tdomf_widget_upload', $modes = array('new'));
-
-//////////////////////////////
-// Post-post stuff
-//
-// Post is submitted, move files to correct area and update post with links 
-//
-function tdomf_widget_upload_post($args) {
-  global $wpdb;
-  extract($args);
-  $options = tdomf_widget_upload_get_options($tdomf_form_id);
-  $form_data = tdomf_get_form_data($tdomf_form_id);
-  
-  $modifypost = false;
-  if($options['post-title'] ||
-     $options['a'] || 
-     $options['img'] || 
-     $options['attach-a'] ||
-     $options['attach-thumb-a'] ||
-     $options['thumb-a']
-     ) {
-    // Grab existing data
-    $post = wp_get_single_post($post_ID, ARRAY_A);
-    if(!empty($post['post_content'])) {
-         $post = add_magic_quotes($post);
-    }
-    $content = $post['post_content'];
-    $title = $post['post_title'];
-    $cats = $post['post_category'];
-  }
-  
-  $filecount = 0;
-  $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
-  for($i =  0; $i < $options['max']; $i++) {
-    if(!file_exists($theirfiles[$i]['path'])) {
-      unset($theirfiles[$i]);
-    } else {
-      $filecount++;
-      // move file
-      $postdir = $options['path'].DIRECTORY_SEPARATOR.$post_ID;
-      tdomf_recursive_mkdir($postdir,TDOMF_UPLOAD_PERMS);
-      $newpath = $postdir.DIRECTORY_SEPARATOR.$theirfiles[$i]['name'];
-      if(rename($theirfiles[$i]['path'], $newpath)) {
-        
-        $newpath = realpath($newpath);
-        
-        // store info about files on post
-        //        
-        add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$i,0,true);
-        add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,$theirfiles[$i]['type'],true);
-        // escape the "path" incase it contains '\' as WP will strip these out!
-        add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,$wpdb->escape($newpath),true);
-        add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,$theirfiles[$i]['name'],true);
-        
-        tdomf_log_message( "File ".$theirfiles[$i]['name']." saved from tmp area to ".$newpath." with type ".$theirfiles[$i]['type']." for post $post_ID" );
-        
-        // Execute user command
-        //
-        if($options['cmd'] != "") {
-          $cmd_output = shell_exec ( $options['cmd'] . " " . $newpath );
-          tdomf_log_message("Executed user command on file $newpath<br/><pre>$cmd_output</pre>");
-          add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,$cmd_output,true);
-        }
-        
-        // Use direct links or wrapper
-        //
-        if($options['nohandler'] && trim($options['url']) != "") {
-          $uri = trailingslashit($options['url'])."$post_ID/".$theirfiles[$i]['name'];
-        } else {
-          $uri = trailingslashit(get_bloginfo('wpurl')).'?tdomf_download='.$post_ID.'&id='.$i;
-        }
-        
-        // Modify Post
-        //
-        
-        // modify post title
-        if($options['post-title']) {
-          $modifypost = true;
-          $title = $theirfiles[$i]['name'];
-        }
-        // add download link (inc name and file size)
-        if($options['a']) {
-          $modifypost = true;
-          $content .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")</a></p>";
-        }
-        // add image link (inc name and file size)
-        if($options['img']) {
-          $modifypost = true;
-          $content .= "<p><img src=\"$uri\" /></p>";
-        }
-        
-        // Use user-defined custom key 
-        if($options['custom'] && !empty($options['custom-key'])) {
-          add_post_meta($post_ID,$options['custom-key'],$uri);
-        }
-
-        // Insert upload as an attachment to post!
-        if($options['attach']) {
-          
-          // Create the attachment (not sure if these values are correct)
-          //
-          $attachment = array (
-           "post_content"   => "",
-           "post_title"     => $theirfiles[$i]['name'],
-           "post_name"      => sanitize_title($theirfiles[$i]['name']),
-           "post_status"    => 'inherit',
-           "post_parent"    => $post_ID,
-           "guid"           => $uri,
-           "post_type"      => 'attachment',          
-           "post_mime_type" => $theirfiles[$i]['type'],
-           "menu_order"     => $i,
-           "post_category"  => $cats,
-          );
-          $attachment_ID = wp_insert_attachment($attachment, $newpath, $post_ID);
-          
-          // Generate meta data (which includes thumbnail!)
-          // 
-          $attachment_metadata = wp_generate_attachment_metadata( $attachment_ID, $newpath );
-
-          // add link to attachment page
-          if($options['attach-a']) {
-            $content .= "<p><a href=\"".get_permalink($attachment_ID)."\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")</a></p>";
-          }
-          
-          if(tdomf_wp23()) {
-            // Did Wordpress generate a thumbnail?
-            if(isset($attachment_metadata['thumb'])) {
-               // Wordpress 2.3 uses basename and generates only the "name" of the thumb,
-               // in general it creates it in the same place as the file!
-               $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['thumb'];
-               if(file_exists($thumbpath)) {
-                  
-                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
-                  
-                  // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
-                  // if there is a thumb by using basename and the file path of the actual file
-                  // attachment
-                  //
-                  // Use direct links *or* wrapper
-                  //
-                  if($options['nohandler'] && trim($options['url']) != "") {
-                    $thumburi = $options['url']."/$post_ID/".$attachment_metadata['thumb'];
-                  } else {
-                    $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
-                  }
-                  
-                  // store a copy of the thumb uri
-                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
-                  
-                  //$attachment_metadata['thumb'] = $thumb_uri;
-                  //$attachment_metadata['thumb'] = $thumbpath;
-                  
-                  // add thumbnail link to attachment page
-                  if($options['attach-thumb-a']) {
-                    $modifypost = true;
-                    $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-                  }
-                  // add thumbnail link directly to file
-                  if($options['thumb-a']) {
-                    $modifypost = true;
-                    $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-                  }
-               } else {
-                  tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
-               }
-            }
-          } else {
-            
-            // In Wordpress 2.5 the attachment data structure is changed, 
-            // it only generates a thumbnail if it needs to...
-            if(isset($attachment_metadata['sizes']['thumbnail'])) {
-              // btw there also seems to be a "medium" size sometimes generated
-              $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['sizes']['thumbnail']['file'];
-              if(file_exists($thumbpath)) {
-                  
-                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
-                  
-                  // Use direct links *or* wrapper
-                  //
-                  if($options['nohandler'] && trim($options['url']) != "") {
-                    $thumburi = $options['url']."/$post_ID/".$attachment_metadata['sizes']['thumbnail']['file'];
-                  } else {
-                    $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
-                  }
-                  
-                  // store a copy of the thumb uri
-                  add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
-                  
-                  // add thumbnail link to attachment page
-                  if($options['attach-thumb-a']) {
-                    $modifypost = true;
-                    $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-                  }
-                  // add thumbnail link directly to file
-                  if($options['thumb-a']) {
-                    $modifypost = true;
-                    $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-                  }
-               } else {
-                  tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
-               }
-            } else if(wp_attachment_is_image($attachment_ID) && ($options['attach-thumb-a'] || $options['thumb-a'])) {
-              // Thumbnail not generated automatically, this means that the image
-              // is smaller than a thumbnail => use as thumbnail
-
-              tdomf_log_message("No thumbnail created => image is too small. Use image as thumbnail.",TDOMF_LOG_ERROR);
-              
-              $modifypost = true;
-              
-              $sizeit = "";
-              $h = get_option("thumbnail_size_h");
-              $w = get_option("thumbnail_size_w");
-              if($attachment_metadata['height'] > $h || $attachment_metadata['width'] > $w) { 
-                if($attachment_metadata['height'] > $attachment_metadata['width']) {
-                  $sizeit = " height=\"${h}px\" "; 
-                } else {
-                  $sizeit = " height=\"${w}px\" ";
-                }
-              }
-              
-              // store a the uri as a the thumburi
-              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$uri,true);
-              
-              // add thumbnail link to attachment page
-              if($options['attach-thumb-a']) {
-                 $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$uri\" $sizeit alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
-              }
-              // add just the image (no point linking to thumbnail)
-              if($options['thumb-a']) {
-                 $content .= "<p><img src=\"$uri\" $sizeit alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></p>";
-              }
-            }
-            
-          }
-          
-          // Add meta data
-          // 
-          wp_update_attachment_metadata( $attachment_ID, $attachment_metadata );
-
-          tdomf_log_message("Added " . $theirfiles[$i]['name'] . " as attachment");
-        }
-        
-      } else {
-        tdomf_log_message("Failed to move " . $theirfiles[$i]['name'] . "!",TDOMF_LOG_ERROR);
-        return $before_widget.__("Failed to move uploaded file from temporary location!","tdomf").$after_widget;
+  /** 
+   * Upload Files Widget
+   * 
+   * @author Mark Cunningham <tdomf@thedeadone.net> 
+   * @version 1.0 
+   * @since 0.13.6
+   * @access public 
+   * @copyright Mark Cunningham
+   * 
+   */ 
+  class TDOMF_WidgetUploadFiles extends TDOMF_Widget
+  {
+       /* Initilise and start widget
+       * 
+       * @access public
+       */ 
+      function TDOMF_WidgetUploadFiles() {
+          $this->enablePreview();
+          $this->enableValidate();
+          $this->enableValidatePreview();
+          $this->enablePost();
+          $this->enableAdminEmail();
+          $this->enableWidgetTitle(true,'title');
+          $this->enableControl(true,550,750);
+          $this->setInternalName('upload-files');
+          $this->setDisplayName(__('Upload Files','tdomf'));
+          $this->setOptionKey('tdomf_upload_widget');
+          $this->setModes(array('new'));
+          #$this->enableMultipleInstances(true,__('Upload Files %d','tdomf'),'tdomf_upload_widget_count',true);
+          # not applicable for non-edit version
+          /*$this->setCustomFields(array(TDOMF_KEY_DOWNLOAD_COUNT.$i,
+                                       TDOMF_KEY_DOWNLOAD_TYPE.$i,
+                                       TDOMF_KEY_DOWNLOAD_PATH.$i,
+                                       TDOMF_KEY_DOWNLOAD_NAME.$i,
+                                       TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,
+                                       TDOMF_KEY_DOWNLOAD_THUMB.$i,
+                                       TDOMF_KEY_DOWNLOAD_THUMBURI.$i));*/
+          $this->start();
       }
-    }
-  }
-  
-  if($modifypost) {
-    tdomf_log_message("Attempting to update post with file upload info");
-    $post = array (
-      "ID"                      => $post_ID,
-      "post_content"            => $content,
-      "post_title"              => $title,
-      "post_name"               => sanitize_title($title),
-    );
-    sanitize_post($post,"db");
-    wp_update_post($post);
-  }
- 
-  return NULL;
-}
-tdomf_register_form_widget_post('upload-files','Upload Files', 'tdomf_widget_upload_post', $modes = array('new'));
-
-////////////////////////////////
-// Validate uploads if possible
-//
-function tdomf_widget_upload_validate($args,$preview) {
-  extract($args);
-  $options = tdomf_widget_upload_get_options($tdomf_form_id);
-  $form_data = tdomf_get_form_data($tdomf_form_id);
-
-  if($options['min'] > 0 && !isset($form_data['uploadfiles_'.$tdomf_form_id])) {
-    return $before_widget.sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files.","tdomf"),$options['min']).$after_widget;
-  }
-  $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
-  $filecount = 0;
-  for($i =  0; $i < $options['max']; $i++) {
-    if(!file_exists($theirfiles[$i]['path'])) {
-      unset($theirfiles[$i]);
-    } else {
-      $filecount++;
-    }
-  }
-  if($filecount < $options['min']) {
-    return $before_widget.sprintf(__("You must upload a minimum of %d files.","tdomf"),$options['min']).$after_widget;
-  }
-  return NULL;
-}
-tdomf_register_form_widget_validate('upload-files','Upload Files', 'tdomf_widget_upload_validate', $modes = array('new'));
-
-//////////////////////////////
-// Preview uplaods if possible
-//
-function tdomf_widget_upload_preview($args) {
-  extract($args);
-  $options = tdomf_widget_upload_get_options($tdomf_form_id);
-  $form_data = tdomf_get_form_data($tdomf_form_id);
-
-  // preview key
-  //
-  $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
-  if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
-     $nonce_string = wp_create_nonce( 'tdomf-form-upload-preview-'.$tdomf_form_id );
-     $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $nonce_string;
-  } else if($tdomf_verify == 'none') {
-     unset($form_data["tdomf_upload_preview_key_".$tdomf_form_id]);
-  } else {
-     $upload_key = tdomf_random_string(100);
-     $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $upload_key;
-  }
-  tdomf_save_form_data($tdomf_form_id,$form_data);
- 
-  $output = $before_widget;
-  $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
-  for($i =  0; $i < $options['max']; $i++) {
-    if(file_exists($theirfiles[$i]['path'])) {
-      if(isset($form_data["tdomf_upload_preview_key_".$tdomf_form_id])) {
-         $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$form_data["tdomf_upload_preview_key_".$tdomf_form_id]."&form=".$tdomf_form_id;
-      } else {
-         $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&form=".$tdomf_form_id;
-      }
-      if($options['a']) {
-        $output .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($theirfiles[$i]['path'])).")</a></p>";
-      }
-      if($options['img']) {
-        $output .= "<p><img src=\"$uri\" /></p>";
-      }
-    }
-  }
-  $output .= $after_widget;
-  return $output;
-}
-tdomf_register_form_widget_preview('upload-files','Upload Files', 'tdomf_widget_upload_preview', $modes = array('new'));
-
-////////////////////////////////////
-// Add info on files to admin email 
-//
-function tdomf_widget_upload_adminemail($args) {
-  extract($args);
-  $options = tdomf_widget_upload_get_options($tdomf_form_id);
-  
-  $output = "";
-  for($i =  0; $i < $options['max']; $i++) {
-    $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,true);
-    if(file_exists($filepath)) {
-      $name = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,true);
-      $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
-      $size = tdomf_filesize_format(filesize($filepath));
-      $cmd = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,true);
-      $type = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,true);
-      $output .= sprintf(__("File %s was uploaded with submission.\r\nPath: %s\r\nSize: %s\r\nType: %s\r\nURL (can only be accessed by administrators until post published):\r\n%s\r\n\r\n","tdomf"),$name,$filepath,$size,$type,$uri);
-      if($cmd != false && !empty($cmd)) {
-        $output .= sprintf(__("User Command:\r\n\"%s %s\"\r\n\r\n%s\r\n\r\n","tdomf"),$options['cmd'],$filepath,$cmd);
-      }
-    }
-  }
-  if($output != "") {
-    return $before_widget.$output.$after_widget;
-  }
-  return  $before_widget.__("No files uploaded with this post!","tdomf").$after_widget;
-}
-tdomf_register_form_widget_adminemail('upload-files','Upload Files', 'tdomf_widget_upload_adminemail', $modes = array('new'));
-
-///////////////////////////////////////////////////
-// Display and handle content widget control panel 
-//
-function tdomf_widget_upload_control($form_id) {
-  $options = tdomf_widget_upload_get_options($form_id);
-  
-  // Store settings for this widget
-  if ( $_POST['upload-files-submit'] ) {
-      $newoptions = array();
-      $newoptions['title'] = $_POST['upload-files-title'];
-      $newoptions['path'] = $_POST['upload-files-path'];
-      $newoptions['types'] = $_POST['upload-files-types'];
-      $newoptions['size'] = intval($_POST['upload-files-size']);
-      $newoptions['min'] = intval($_POST['upload-files-min']);
-      $newoptions['max'] = intval($_POST['upload-files-max']);
-      $newoptions['cmd'] = $_POST['upload-files-cmd'];
-      $newoptions['attach'] = isset($_POST['upload-files-attach']);
-      $newoptions['a'] = isset($_POST['upload-files-a']);
-      $newoptions['img'] = isset($_POST['upload-files-img']);
-      $newoptions['custom'] = isset($_POST['upload-files-custom']);
-      $newoptions['custom-key'] = $_POST['upload-files-custom-key'];
-      $newoptions['post-title'] = isset($_POST['upload-files-post-title']);
-      $newoptions['attach-a'] = isset($_POST['upload-files-attach-a']);
-      $newoptions['attach-thumb-a'] = isset($_POST['upload-files-attach-thumb-a']);
-      $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a']);
-      $newoptions['url'] = $_POST['upload-files-url'];
-      $newoptions['nohandler'] = isset($_POST['upload-files-nohandler']);
       
-      if ( $options != $newoptions ) {
-        $options = $newoptions;
-        tdomf_set_option_widget('tdomf_upload_widget', $options, $form_id);
-     }
-  }
-
-   // Display control panel for this widget
+      function form($args,$options,$postfix='') {
+          extract($args);
+          $inline_path = TDOMF_URLPATH."tdomf-upload-inline.php"."?tdomf_form_id=".$tdomf_form_id;
+          // my best guestimate
+          $height = 160 + (intval($options['max']) * 30);
+          $output .= "<iframe id='uploadfiles_inline' name='uploadfiles_inline' frameborder='0' marginwidth='0' marginheight='0' width='100%' height='$height' src='$inline_path'></iframe>";
+          $output .= $after_widget;
+          return $output;
+      }
+      
+      function post($args,$options,$postfix='') {
+          global $wpdb;
+          extract($args);
+          $form_data = tdomf_get_form_data($tdomf_form_id);
   
-        ?>
-<p style="text-align:left;">
+          $modifypost = false;
+          if($options['post-title'] ||
+             $options['a'] || 
+             $options['img'] || 
+             $options['attach-a'] ||
+             $options['attach-thumb-a'] ||
+             $options['thumb-a']) {
+            // Grab existing data
+            $post = wp_get_single_post($post_ID, ARRAY_A);
+            if(!empty($post['post_content'])) {
+                $post = add_magic_quotes($post);
+            }
+            $content = $post['post_content'];
+            $title = $post['post_title'];
+            $cats = $post['post_category'];
+          }
+  
+          $filecount = 0;
+          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
+          for($i =  0; $i < $options['max']; $i++) {
+              if(!file_exists($theirfiles[$i]['path'])) {
+                  unset($theirfiles[$i]);
+              } else {
+                  $filecount++;
+                  // move file
+                  $postdir = $options['path'].DIRECTORY_SEPARATOR.$post_ID;
+                  tdomf_recursive_mkdir($postdir,TDOMF_UPLOAD_PERMS);
+                  $newpath = $postdir.DIRECTORY_SEPARATOR.$theirfiles[$i]['name'];
+                  if(rename($theirfiles[$i]['path'], $newpath)) {
+        
+                    $newpath = realpath($newpath);
+                    
+                    // store info about files on post
+                    //        
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$i,0,true);
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,$theirfiles[$i]['type'],true);
+                    // escape the "path" incase it contains '\' as WP will strip these out!
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,$wpdb->escape($newpath),true);
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,$theirfiles[$i]['name'],true);
+                    
+                    tdomf_log_message( "File ".$theirfiles[$i]['name']." saved from tmp area to ".$newpath." with type ".$theirfiles[$i]['type']." for post $post_ID" );
+                    
+                    // Execute user command
+                    //
+                    if($options['cmd'] != "") {
+                      $cmd_output = shell_exec ( $options['cmd'] . " " . $newpath );
+                      tdomf_log_message("Executed user command on file $newpath<br/><pre>$cmd_output</pre>");
+                      add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,$cmd_output,true);
+                    }
+        
+                    // Use direct links or wrapper
+                    //
+                    if($options['nohandler'] && trim($options['url']) != "") {
+                      $uri = trailingslashit($options['url'])."$post_ID/".$theirfiles[$i]['name'];
+                    } else {
+                      $uri = trailingslashit(get_bloginfo('wpurl')).'?tdomf_download='.$post_ID.'&id='.$i;
+                    }
+        
+                    // Modify Post
+                    //
+                    
+                    // modify post title
+                    if($options['post-title']) {
+                      $modifypost = true;
+                      $title = $theirfiles[$i]['name'];
+                    }
+                    // add download link (inc name and file size)
+                    if($options['a']) {
+                      $modifypost = true;
+                      $content .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")</a></p>";
+                    }
+                    // add image link (inc name and file size)
+                    if($options['img']) {
+                      $modifypost = true;
+                      $content .= "<p><img src=\"$uri\" /></p>";
+                    }
+                    
+                    // Use user-defined custom key 
+                    if($options['custom'] && !empty($options['custom-key'])) {
+                      add_post_meta($post_ID,$options['custom-key'],$uri);
+                    }
+            
+                    // Insert upload as an attachment to post!
+                    if($options['attach']) {
+                      
+                      // Create the attachment (not sure if these values are correct)
+                      //
+                      $attachment = array (
+                       "post_content"   => "",
+                       "post_title"     => $theirfiles[$i]['name'],
+                       "post_name"      => sanitize_title($theirfiles[$i]['name']),
+                       "post_status"    => 'inherit',
+                       "post_parent"    => $post_ID,
+                       "guid"           => $uri,
+                       "post_type"      => 'attachment',          
+                       "post_mime_type" => $theirfiles[$i]['type'],
+                       "menu_order"     => $i,
+                       "post_category"  => $cats,
+                      );
+                      $attachment_ID = wp_insert_attachment($attachment, $newpath, $post_ID);
+                      
+                      // Weirdly, I have to do this now to access the wp_generate_attachement_metadata 
+                      // functino from within the widget class
+                      //
+                      require_once(ABSPATH . 'wp-admin/includes/image.php');
+                      
+                      // Generate meta data (which includes thumbnail!)
+                      // 
+                      $attachment_metadata = wp_generate_attachment_metadata( $attachment_ID, $newpath );
+            
+                      // add link to attachment page
+                      if($options['attach-a']) {
+                        $content .= "<p><a href=\"".get_permalink($attachment_ID)."\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")</a></p>";
+                      }
+                      
+                      if(tdomf_wp23()) {
+                        // Did Wordpress generate a thumbnail?
+                        if(isset($attachment_metadata['thumb'])) {
+                           // Wordpress 2.3 uses basename and generates only the "name" of the thumb,
+                           // in general it creates it in the same place as the file!
+                           $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['thumb'];
+                           if(file_exists($thumbpath)) {
+                              
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                              
+                              // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
+                              // if there is a thumb by using basename and the file path of the actual file
+                              // attachment
+                              //
+                              // Use direct links *or* wrapper
+                              //
+                              if($options['nohandler'] && trim($options['url']) != "") {
+                                $thumburi = $options['url']."/$post_ID/".$attachment_metadata['thumb'];
+                              } else {
+                                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                              }
+                              
+                              // store a copy of the thumb uri
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
+                              
+                              //$attachment_metadata['thumb'] = $thumb_uri;
+                              //$attachment_metadata['thumb'] = $thumbpath;
+                              
+                              // add thumbnail link to attachment page
+                              if($options['attach-thumb-a']) {
+                                $modifypost = true;
+                                $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                              }
+                              // add thumbnail link directly to file
+                              if($options['thumb-a']) {
+                                $modifypost = true;
+                                $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                              }
+                           } else {
+                              tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
+                           }
+                        }
+                      } else {
+                        
+                        // In Wordpress 2.5 the attachment data structure is changed, 
+                        // it only generates a thumbnail if it needs to...
+                        if(isset($attachment_metadata['sizes']['thumbnail'])) {
+                          // btw there also seems to be a "medium" size sometimes generated
+                          $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['sizes']['thumbnail']['file'];
+                          if(file_exists($thumbpath)) {
+                              
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                              
+                              // Use direct links *or* wrapper
+                              //
+                              if($options['nohandler'] && trim($options['url']) != "") {
+                                $thumburi = $options['url']."/$post_ID/".$attachment_metadata['sizes']['thumbnail']['file'];
+                              } else {
+                                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                              }
+                              
+                              // store a copy of the thumb uri
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
+                              
+                              // add thumbnail link to attachment page
+                              if($options['attach-thumb-a']) {
+                                $modifypost = true;
+                                $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                              }
+                              // add thumbnail link directly to file
+                              if($options['thumb-a']) {
+                                $modifypost = true;
+                                $content .= "<p><a href=\"$uri\"><img src=\"$thumburi\" alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                              }
+                           } else {
+                              tdomf_log_message("Could not find thumbnail $thumbpath!",TDOMF_LOG_ERROR);
+                           }
+                        } else if(wp_attachment_is_image($attachment_ID) && ($options['attach-thumb-a'] || $options['thumb-a'])) {
+                          // Thumbnail not generated automatically, this means that the image
+                          // is smaller than a thumbnail => use as thumbnail
+            
+                          tdomf_log_message("No thumbnail created => image is too small. Use image as thumbnail.",TDOMF_LOG_ERROR);
+                          
+                          $modifypost = true;
+                          
+                          $sizeit = "";
+                          $h = get_option("thumbnail_size_h");
+                          $w = get_option("thumbnail_size_w");
+                          if($attachment_metadata['height'] > $h || $attachment_metadata['width'] > $w) { 
+                            if($attachment_metadata['height'] > $attachment_metadata['width']) {
+                              $sizeit = " height=\"${h}px\" "; 
+                            } else {
+                              $sizeit = " height=\"${w}px\" ";
+                            }
+                          }
+                          
+                          // store a the uri as a the thumburi
+                          add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$uri,true);
+                          
+                          // add thumbnail link to attachment page
+                          if($options['attach-thumb-a']) {
+                             $content .= "<p><a href=\"".get_permalink($attachment_ID)."\"><img src=\"$uri\" $sizeit alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></a></p>";
+                          }
+                          // add just the image (no point linking to thumbnail)
+                          if($options['thumb-a']) {
+                             $content .= "<p><img src=\"$uri\" $sizeit alt=\"".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($newpath)).")\" /></p>";
+                          }
+                        }
+                        
+                      }
+                      
+                      // Add meta data
+                      // 
+                      wp_update_attachment_metadata( $attachment_ID, $attachment_metadata );
+            
+                      tdomf_log_message("Added " . $theirfiles[$i]['name'] . " as attachment");
+                    }
+        
+                  } else {
+                      tdomf_log_message("Failed to move " . $theirfiles[$i]['name'] . "!",TDOMF_LOG_ERROR);
+                      return __("Failed to move uploaded file from temporary location!","tdomf");
+                  }
+              }
+          }
+  
+          if($modifypost) {
+            tdomf_log_message("Attempting to update post with file upload info");
+            $post = array (
+              "ID"                      => $post_ID,
+              "post_content"            => $content,
+              "post_title"              => $title,
+              "post_name"               => sanitize_title($title),
+            );
+            sanitize_post($post,"db");
+            wp_update_post($post);
+          }
+     
+          return NULL;
+      }
+      
+      function preview($args,$options,$postfix='') { 
+          extract($args);
+          $form_data = tdomf_get_form_data($tdomf_form_id);
 
-<label for="upload-files-title">
-<?php _e("Title: ","tdomf"); ?>
-<input type="textfield" id="upload-files-title" name="upload-files-title" value="<?php echo htmlentities($options['title'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
-</label><br/><br/>
+          // preview key
+          //
+          $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
+          if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
+             $nonce_string = wp_create_nonce( 'tdomf-form-upload-preview-'.$tdomf_form_id );
+             $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $nonce_string;
+          } else if($tdomf_verify == 'none') {
+             unset($form_data["tdomf_upload_preview_key_".$tdomf_form_id]);
+          } else {
+             $upload_key = tdomf_random_string(100);
+             $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $upload_key;
+          }
+          tdomf_save_form_data($tdomf_form_id,$form_data);
+ 
+          $output = '';
+          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
+          for($i =  0; $i < $options['max']; $i++) {
+            if(file_exists($theirfiles[$i]['path'])) {
+              if(isset($form_data["tdomf_upload_preview_key_".$tdomf_form_id])) {
+                 $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$form_data["tdomf_upload_preview_key_".$tdomf_form_id]."&form=".$tdomf_form_id;
+              } else {
+                 $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&form=".$tdomf_form_id;
+              }
+              if($options['a']) {
+                $output .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($theirfiles[$i]['path'])).")</a></p>";
+              }
+              if($options['img']) {
+                $output .= "<p><img src=\"$uri\" /></p>";
+              }
+            }
+          }
+          return $output;
+      }
+      
+      function validate($args,$options,$preview,$postfix='') {
+          extract($args);
+          $form_data = tdomf_get_form_data($tdomf_form_id);
+
+          if($options['min'] > 0 && !isset($form_data['uploadfiles_'.$tdomf_form_id])) {
+              return sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files.","tdomf"),$options['min']);
+          }
+          
+          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
+          $filecount = 0;
+          for($i =  0; $i < $options['max']; $i++) {
+              if(!file_exists($theirfiles[$i]['path'])) {
+                  unset($theirfiles[$i]);
+              } else {
+                  $filecount++;
+              }
+          }
+          if($filecount < $options['min']) {
+              return sprintf(__("You must upload a minimum of %d files.","tdomf"),$options['min']);
+          }
+          return NULL;
+      }
+      
+      function adminEmail($args,$options,$post_ID,$postfix='') {
+          extract($args);
+          $output = '';
+          for($i =  0; $i < $options['max']; $i++) {
+              $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,true);
+              if(file_exists($filepath)) {
+                  $name = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,true);
+                  $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
+                  $size = tdomf_filesize_format(filesize($filepath));
+                  $cmd = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,true);
+                  $type = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,true);
+                  $output .= sprintf(__("File %s was uploaded with submission.\r\nPath: %s\r\nSize: %s\r\nType: %s\r\nURL (can only be accessed by administrators until post published):\r\n%s\r\n\r\n","tdomf"),$name,$filepath,$size,$type,$uri);
+                  if($cmd != false && !empty($cmd)) {
+                    $output .= sprintf(__("User Command:\r\n\"%s %s\"\r\n\r\n%s\r\n\r\n","tdomf"),$options['cmd'],$filepath,$cmd);
+                  }
+              }
+          }
+          if($output != '') {
+              return $output;
+          }
+          return __("No files uploaded with this post!","tdomf"); 
+      }
+      
+      function control($options,$form_id,$postfixOptionKey='',$postfixInternalName='') {
+          
+           // Store settings for this widget
+          //
+          if ( $_POST[$this->internalName.'-submit'] ) {
+                  $newoptions = array();
+                  $newoptions['path'] = $_POST['upload-files-path'];
+                  $newoptions['types'] = $_POST['upload-files-types'];
+                  $newoptions['size'] = intval($_POST['upload-files-size']);
+                  $newoptions['min'] = intval($_POST['upload-files-min']);
+                  $newoptions['max'] = intval($_POST['upload-files-max']);
+                  $newoptions['cmd'] = $_POST['upload-files-cmd'];
+                  $newoptions['attach'] = isset($_POST['upload-files-attach']);
+                  $newoptions['a'] = isset($_POST['upload-files-a']);
+                  $newoptions['img'] = isset($_POST['upload-files-img']);
+                  $newoptions['custom'] = isset($_POST['upload-files-custom']);
+                  $newoptions['custom-key'] = $_POST['upload-files-custom-key'];
+                  $newoptions['post-title'] = isset($_POST['upload-files-post-title']);
+                  $newoptions['attach-a'] = isset($_POST['upload-files-attach-a']);
+                  $newoptions['attach-thumb-a'] = isset($_POST['upload-files-attach-thumb-a']);
+                  $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a']);
+                  $newoptions['url'] = $_POST['upload-files-url'];
+                  $newoptions['nohandler'] = isset($_POST['upload-files-nohandler']);
+                  $options = wp_parse_args($newoptions, $options);
+                  $this->updateOptions($options,$form_id);
+          }
+
+          // Display control panel for this widget
+          //
+          extract($options);
+          ?>
+<div>          
+<p style="text-align:left;">
+          
+          <?php $this->controlCommon($options); ?>
 
 <label for="upload-files-path" ><?php _e("Path to store uploads (should not be publically accessible):","tdomf"); ?><br/>
 <input type="textfield" size="40" id="upload-files-path" name="upload-files-path" value="<?php echo htmlentities($options['path'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
@@ -1011,8 +978,39 @@ function tdomf_widget_upload_control($form_id) {
 </label>
 
 </p>
-        <?php 
-}
-tdomf_register_form_widget_control('upload-files','Upload Files', 'tdomf_widget_upload_control', 550, 750, $modes = array('new'));
+</div> <?php          
+      }
+            
+      function getOptions($form_id,$postfix='') {
+    
+          $defaults = array(   'path' => ABSPATH.DIRECTORY_SEPARATOR.'wp-content'.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.'tdomf',
+                               'types' => ".txt .doc .pdf .jpg .gif .zip",
+                               'size' => 1048576,
+                               'min' => 0,
+                               'max' => 1,                               'cmd' => '',
+                               'attach' => true,
+                               'a' => true,
+                               'img' => false,
+                               'custom' => true,
+                               'custom-key' => __("Download Link","tdomf"),
+                               'post-title' => false,
+                               'attach-a' => false,
+                               'post-thumb-a' => false,
+                               'thumb-a' => false,
+                               'url' => trailingslashit(get_bloginfo('wpurl')).'wp-content/uploads/tdomf/',
+                               'nohandler' => true
+                               );
+          $options = TDOMF_Widget::getOptions($form_id); 
+          $options = wp_parse_args($options, $defaults);
+          
+          return $options;
+      }
+      
+  }
 
+  // Create and start the widget
+  //
+  global $tdomf_widget_uploadfiles;
+  $tdomf_widget_uploadfiles = new TDOMF_WidgetUploadFiles();
+  
 ?>

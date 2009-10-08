@@ -64,6 +64,8 @@ Author URI: http://thedeadone.net
 //    PHP code to be executed
 // - Bug in TDOMFWidgetFields meant that checkbox options were getting reset
 //    when not being saved in 'Create'
+// - Upload Files Widget refactored into Widget Class. Should be completely
+//    compatible with existing setups
 // - Select Field refactored in TDOMF Custom Field widget.
 //
 //    id/name for HTML element for Custom Fields/Select has changed:
@@ -684,11 +686,11 @@ require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-template-functi
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-spam.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-form.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-classes.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
-require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-classes.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-options.php');

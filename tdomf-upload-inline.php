@@ -107,7 +107,8 @@ if(!in_array("upload-files",tdomf_get_widget_order($form_id))) {
 
 // Grab options for uploads
 //
-$options = tdomf_widget_upload_get_options($form_id);
+#$options = tdomf_widget_upload_get_options($form_id);
+$options = $tdomf_widget_uploadfiles->getOptions($form_id);
 
 // Placeholder for error messages
 //
@@ -129,7 +130,7 @@ if(isset($form_data['uploadfiles_'.$form_id])) {
   $sessioncount = 0;
   $mysessionfiles = $form_data['uploadfiles_'.$form_id];
   for($i =  0; $i < $options['max']; $i++) {
-    if(!file_exists($mysessionfiles[$i]['path'])) {
+    if(/*isset($mysessionfiles[$i]['path']) &&*/ !file_exists($mysessionfiles[$i]['path'])) {
       unset($mysessionfiles[$i]);
     } else {
       $sessioncount++;
@@ -221,7 +222,7 @@ if($all_good) {
     // Recount
     $sessioncount = 0;
     for($i =  0; $i < $options['max']; $i++) {
-      if(file_exists($mysessionfiles[$i]['path'])) {
+      if(/*isset($mysessionfiles[$i]['path']) &&*/ file_exists($mysessionfiles[$i]['path'])) {
         $sessioncount++;
       }
     }
