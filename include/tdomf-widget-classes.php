@@ -673,8 +673,11 @@ class TDOMF_Widget {
                add_action('tdomf_generate_form_start',array($this,'_multipleInstancesInit'),10,2);
                add_action('tdomf_create_post_start',array($this,'_multipleInstancesInit'),10,2);
                add_action('tdomf_control_form_start',array($this,'_multipleInstancesInit'),10,2);
+               add_action('tdomf_preview_form_start',array($this,'_multipleInstancesInit'),10,2);
+               add_action('tdomf_validate_form_start',array($this,'_multipleInstancesInit'), 10, 2);
                add_action('tdomf_control_form_start',array($this,'_multipleInstancesHandler'),10,2);
                add_action('tdomf_widget_page_bottom',array($this,'_multipleInstancesForm'),10,2);
+               add_action('tdomf_upload_inline_form_start',array($this,'_multipleInstancesInit'),10,2);
                
                // for multiple instances, init is handled in _multipleInstancesInit function
                
@@ -777,7 +780,7 @@ class TDOMF_Widget {
         extract($args);
         $postfix = $this->getPostfixFromParams($params);
         $options =  $this->getOptions($tdomf_form_id,$postfix);
-    
+        
         $output = "";    
         $widget_output = $this->preview($args,$options,$postfix);
         if($widget_output && !empty($widget_output)) {
@@ -904,8 +907,10 @@ class TDOMF_Widget {
                 $newoptions['tdomf-preview-hack'] = isset($_POST[$this->internalName.$postfixOptionKey.'-tdomf-preview-hack']);
             }
             if ( $options != $newoptions ) {
+                $options = wp_parse_args($newoptions, $options,$postfixOptionKey);
                 $this->updateOptions($options,$form_id,$postfixOptionKey);
-                $options = $newoptions;
+                #$this->updateOptions($options,$form_id,$postfixOptionKey);
+                #$options = $newoptions;
             }
         }
         $this->control($options,$form_id,$postfixOptionKey,$postfixInternalName);
@@ -926,7 +931,7 @@ class TDOMF_Widget {
      * @access public
      */    
     function controlCommon($options,$postfix='') {
-
+        
         if($this->widgetTitle) { ?>
 <label for="<?php echo $this->internalName.$postfix; ?>-tdomf-title" style="line-height:35px;"><?php _e("Widget Title: ","tdomf"); ?></label>
 <input type="textfield" id="<?php echo $this->internalName.$postfix; ?>-title" name="<?php echo $this->internalName.$postfix; ?>-tdomf-title" value="<?php echo htmlentities($options[$this->widgetTitleKey],ENT_QUOTES,get_bloginfo('charset')); ?>" /></label>

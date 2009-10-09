@@ -218,7 +218,7 @@ function tdomf_db_create_tables() {
                user_id              bigint(20)   NOT NULL default '0',
                ip                   varchar(100) NOT NULL default '0',
                state                varchar(20)  NOT NULL default 'unapproved',
-               data                 longtext     NOT NULL default '',
+               data                 longtext,
                PRIMARY KEY          (edit_id),
                KEY post_id          (post_id),
                KEY form_id          (form_id)

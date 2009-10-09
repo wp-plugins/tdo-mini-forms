@@ -94,12 +94,10 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
       $banned_ips = get_option(TDOMF_BANNED_IPS);
       if($banned_ips != false && !empty($banned_ips) && strstr($banned_ips,';') !== FALSE) {
         $banned_ips = split(";",$banned_ips);
-        foreach($banned_ips as $banned_ip) {
-            if($banned_ip == $ip) {
-               tdomf_log_message("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
-               return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id);
-            }
-         }
+        if(in_array($ip,$banned_ips)) {
+           tdomf_log_message("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
+           return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id);
+        }
       }
   } else {
       // WTF? What are we to do in this case?

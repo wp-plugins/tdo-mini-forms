@@ -17,10 +17,10 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 // Figure out the storage path for this user/ip and thusly create it
 //
-function tdomf_create_tmp_storage_path($form_id = 1) {
+function tdomf_create_tmp_storage_path($form_id = 1,$index='') {
   global $current_user,$tdomf_widget_uploadfiles;
   #$options = tdomf_widget_upload_get_options($form_id);
-  $options = $tdomf_widget_uploadfiles->getOptions($form_id);
+  $options = $tdomf_widget_uploadfiles->getOptions($form_id,$index);
   get_currentuserinfo();
   if(is_user_logged_in()) {  
     $storagepath = $options['path'].DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$form_id.DIRECTORY_SEPARATOR.$current_user->user_login;
@@ -347,27 +347,29 @@ function tdomf_upload_preview_handler(){
    $id = $_GET['tdomf_upload_preview'];
    $form_id = intval($_GET['form']);
    $form_data = tdomf_get_form_data($form_id); 
+   $index = '';
+   if(isset($_GET['index'])) { $index = $_GET['index']; }
    
    $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
    if($tdomf_verify == false || $tdomf_verify == 'default') {
      $key = $_GET['key'];
-      if($form_data['tdomf_upload_preview_key_'.$form_id] != $key) {
+      if($form_data['tdomf_upload_preview_key_'.$form_id.'_'.$index] != $key) {
         return;
       }
    } else if($tdomf_verify == 'wordpress_nonce' && 
-             !wp_verify_nonce($_GET['key'],'tdomf-form-upload-preview-'.$form_id)) {
+             !wp_verify_nonce($_GET['key'],'tdomf-form-upload-preview-'.$form_id.'-'.$index)) {
     return;
   }
    
-   if(!isset($form_data['uploadfiles_'.$form_id][$id])) {
+   if(!isset($form_data['uploadfiles_'.$form_id.'_'.$index][$id])) {
      tdomf_log_message("(preview) No file with that id! $id",TDOMF_LOG_ERROR);
      return;
    }
       
-   $filepath = $form_data['uploadfiles_'.$form_id][$id]['path'];
+   $filepath = $form_data['uploadfiles_'.$form_id.'_'.$index][$id]['path'];
    if(!empty($filepath)) {
 
-     $type = $form_data['uploadfiles_'.$form_id][$id]['type'];
+     $type = $form_data['uploadfiles_'.$form_id.'_'.$index][$id]['type'];
      
      // Check if file exists
      //
@@ -455,6 +457,12 @@ function tdomf_upload_delete_post_files($post_ID) {
 }
 add_action('delete_post', 'tdomf_upload_delete_post_files');
 
+#@todo Widget titles
+#@todo Admin Email
+#@todo Track instance's upload files in custom field
+#@todo Delete only uploaded/attached files
+#@todo Attachment URL (wp2.8)
+
   /** 
    * Upload Files Widget
    * 
@@ -483,7 +491,7 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
           $this->setDisplayName(__('Upload Files','tdomf'));
           $this->setOptionKey('tdomf_upload_widget');
           $this->setModes(array('new'));
-          #$this->enableMultipleInstances(true,__('Upload Files %d','tdomf'),'tdomf_upload_widget_count',true);
+          $this->enableMultipleInstances(true,__('Upload Files %d','tdomf'),'tdomf_upload_widget_count',true);
           # not applicable for non-edit version
           /*$this->setCustomFields(array(TDOMF_KEY_DOWNLOAD_COUNT.$i,
                                        TDOMF_KEY_DOWNLOAD_TYPE.$i,
@@ -497,12 +505,20 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
       
       function form($args,$options,$postfix='') {
           extract($args);
-          $inline_path = TDOMF_URLPATH."tdomf-upload-inline.php"."?tdomf_form_id=".$tdomf_form_id;
+          $inline_path = TDOMF_URLPATH."tdomf-upload-inline.php"."?tdomf_form_id=".$tdomf_form_id.'&index='.$postfix;
           // my best guestimate
           $height = 160 + (intval($options['max']) * 30);
           $output .= "<iframe id='uploadfiles_inline' name='uploadfiles_inline' frameborder='0' marginwidth='0' marginheight='0' width='100%' height='$height' src='$inline_path'></iframe>";
           $output .= $after_widget;
           return $output;
+      }
+      
+      function getFreeIndexPostMeta($post_ID,$name,$i) {
+          if(get_post_meta($post_ID,$name.$i,true) != false) {
+              for(;get_post_meta($post_ID,$name.$i,true) == false;$i++);
+              return $i;
+          }
+          return $i;
       }
       
       function post($args,$options,$postfix='') {
@@ -528,7 +544,7 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
           }
   
           $filecount = 0;
-          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
+          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id.'_'.$postfix];
           for($i =  0; $i < $options['max']; $i++) {
               if(!file_exists($theirfiles[$i]['path'])) {
                   unset($theirfiles[$i]);
@@ -542,13 +558,16 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
         
                     $newpath = realpath($newpath);
                     
+                    // to support multiple files, we have to avoid clashes without instances
+                    $j = $this->getFreeIndexPostMeta($post_ID,TDOMF_KEY_DOWNLOAD_PATH,$i);
+                    
                     // store info about files on post
                     //        
-                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$i,0,true);
-                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,$theirfiles[$i]['type'],true);
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_COUNT.$j,0,true);
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$j,$theirfiles[$i]['type'],true);
                     // escape the "path" incase it contains '\' as WP will strip these out!
-                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,$wpdb->escape($newpath),true);
-                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,$theirfiles[$i]['name'],true);
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$j,$wpdb->escape($newpath),true);
+                    add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$j,$theirfiles[$i]['name'],true);
                     
                     tdomf_log_message( "File ".$theirfiles[$i]['name']." saved from tmp area to ".$newpath." with type ".$theirfiles[$i]['type']." for post $post_ID" );
                     
@@ -633,7 +652,7 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                            $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['thumb'];
                            if(file_exists($thumbpath)) {
                               
-                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$j,$thumbpath,true);
                               
                               // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
                               // if there is a thumb by using basename and the file path of the actual file
@@ -644,11 +663,11 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                               if($options['nohandler'] && trim($options['url']) != "") {
                                 $thumburi = $options['url']."/$post_ID/".$attachment_metadata['thumb'];
                               } else {
-                                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$j.'&thumb';
                               }
                               
                               // store a copy of the thumb uri
-                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$j,$thumburi,true);
                               
                               //$attachment_metadata['thumb'] = $thumb_uri;
                               //$attachment_metadata['thumb'] = $thumbpath;
@@ -676,18 +695,18 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                           $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['sizes']['thumbnail']['file'];
                           if(file_exists($thumbpath)) {
                               
-                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$i,$thumbpath,true);
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$j,$thumbpath,true);
                               
                               // Use direct links *or* wrapper
                               //
                               if($options['nohandler'] && trim($options['url']) != "") {
                                 $thumburi = $options['url']."/$post_ID/".$attachment_metadata['sizes']['thumbnail']['file'];
                               } else {
-                                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i.'&thumb';
+                                $thumburi = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$j.'&thumb';
                               }
                               
                               // store a copy of the thumb uri
-                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$thumburi,true);
+                              add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$j,$thumburi,true);
                               
                               // add thumbnail link to attachment page
                               if($options['attach-thumb-a']) {
@@ -722,7 +741,7 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                           }
                           
                           // store a the uri as a the thumburi
-                          add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$i,$uri,true);
+                          add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMBURI.$j,$uri,true);
                           
                           // add thumbnail link to attachment page
                           if($options['attach-thumb-a']) {
@@ -766,31 +785,32 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
       }
       
       function preview($args,$options,$postfix='') { 
+          
           extract($args);
           $form_data = tdomf_get_form_data($tdomf_form_id);
-
+          
           // preview key
           //
           $tdomf_verify = get_option(TDOMF_OPTION_VERIFICATION_METHOD);
           if($tdomf_verify == 'wordpress_nonce' && function_exists('wp_create_nonce')) {
-             $nonce_string = wp_create_nonce( 'tdomf-form-upload-preview-'.$tdomf_form_id );
-             $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $nonce_string;
+             $nonce_string = wp_create_nonce( 'tdomf-form-upload-preview-'.$tdomf_form_id.'-'.$postfix );
+             $form_data["tdomf_upload_preview_key_".$tdomf_form_id.'_'.$postfix] = $nonce_string;
           } else if($tdomf_verify == 'none') {
-             unset($form_data["tdomf_upload_preview_key_".$tdomf_form_id]);
+             unset($form_data["tdomf_upload_preview_key_".$tdomf_form_id.'_'.$postfix]);
           } else {
              $upload_key = tdomf_random_string(100);
-             $form_data["tdomf_upload_preview_key_".$tdomf_form_id] = $upload_key;
+             $form_data["tdomf_upload_preview_key_".$tdomf_form_id.'_'.$postfix] = $upload_key;
           }
           tdomf_save_form_data($tdomf_form_id,$form_data);
  
           $output = '';
-          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
+          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id.'_'.$postfix];
           for($i =  0; $i < $options['max']; $i++) {
             if(file_exists($theirfiles[$i]['path'])) {
-              if(isset($form_data["tdomf_upload_preview_key_".$tdomf_form_id])) {
-                 $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$form_data["tdomf_upload_preview_key_".$tdomf_form_id]."&form=".$tdomf_form_id;
+              if(isset($form_data["tdomf_upload_preview_key_".$tdomf_form_id.'_'.$postfix])) {
+                 $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&key=".$form_data["tdomf_upload_preview_key_".$tdomf_form_id.'_'.$postfix]."&form=".$tdomf_form_id.'&index='.$postfix;
               } else {
-                 $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&form=".$tdomf_form_id;
+                 $uri = get_bloginfo('wpurl').'/?tdomf_upload_preview='.$i."&form=".$tdomf_form_id.'&index='.$postfix;
               }
               if($options['a']) {
                 $output .= "<p><a href=\"$uri\">".$theirfiles[$i]['name']." (".tdomf_filesize_format(filesize($theirfiles[$i]['path'])).")</a></p>";
@@ -807,11 +827,15 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
           extract($args);
           $form_data = tdomf_get_form_data($tdomf_form_id);
 
-          if($options['min'] > 0 && !isset($form_data['uploadfiles_'.$tdomf_form_id])) {
-              return sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files.","tdomf"),$options['min']);
+          if($options['min'] > 0 && !isset($form_data['uploadfiles_'.$tdomf_form_id.'_'.$postfix])) {
+              if(!empty($options['title'])) {
+                  return sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files for %s.","tdomf"),$options['min'],$options['title']);
+              } else {
+                  return sprintf(__("No files have been uploaded yet. You must upload a minimum of %d files.","tdomf"),$options['min']);
+              }
           }
           
-          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id];
+          $theirfiles = $form_data['uploadfiles_'.$tdomf_form_id.'_'.$postfix];
           $filecount = 0;
           for($i =  0; $i < $options['max']; $i++) {
               if(!file_exists($theirfiles[$i]['path'])) {
@@ -821,7 +845,11 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
               }
           }
           if($filecount < $options['min']) {
-              return sprintf(__("You must upload a minimum of %d files.","tdomf"),$options['min']);
+              if(!empty($options['title'])) {
+                  return sprintf(__("You must upload a minimum of %d files for %s.","tdomf"),$options['min'],$options['title']);
+              } else {
+                  return sprintf(__("You must upload a minimum of %d files.","tdomf"),$options['min']);
+              }
           }
           return NULL;
       }
@@ -853,27 +881,27 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
           
            // Store settings for this widget
           //
-          if ( $_POST[$this->internalName.'-submit'] ) {
+          if ( $_POST[$this->internalName.$postfixInternalName.'-submit'] ) {
                   $newoptions = array();
-                  $newoptions['path'] = $_POST['upload-files-path'];
-                  $newoptions['types'] = $_POST['upload-files-types'];
-                  $newoptions['size'] = intval($_POST['upload-files-size']);
-                  $newoptions['min'] = intval($_POST['upload-files-min']);
-                  $newoptions['max'] = intval($_POST['upload-files-max']);
-                  $newoptions['cmd'] = $_POST['upload-files-cmd'];
-                  $newoptions['attach'] = isset($_POST['upload-files-attach']);
-                  $newoptions['a'] = isset($_POST['upload-files-a']);
-                  $newoptions['img'] = isset($_POST['upload-files-img']);
-                  $newoptions['custom'] = isset($_POST['upload-files-custom']);
-                  $newoptions['custom-key'] = $_POST['upload-files-custom-key'];
-                  $newoptions['post-title'] = isset($_POST['upload-files-post-title']);
-                  $newoptions['attach-a'] = isset($_POST['upload-files-attach-a']);
-                  $newoptions['attach-thumb-a'] = isset($_POST['upload-files-attach-thumb-a']);
-                  $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a']);
-                  $newoptions['url'] = $_POST['upload-files-url'];
-                  $newoptions['nohandler'] = isset($_POST['upload-files-nohandler']);
-                  $options = wp_parse_args($newoptions, $options);
-                  $this->updateOptions($options,$form_id);
+                  $newoptions['path'] = $_POST['upload-files-path-'.$postfixInternalName];
+                  $newoptions['types'] = $_POST['upload-files-types-'.$postfixInternalName];
+                  $newoptions['size'] = intval($_POST['upload-files-size-'.$postfixInternalName]);
+                  $newoptions['min'] = intval($_POST['upload-files-min-'.$postfixInternalName]);
+                  $newoptions['max'] = intval($_POST['upload-files-max-'.$postfixInternalName]);
+                  $newoptions['cmd'] = $_POST['upload-files-cmd-'.$postfixInternalName];
+                  $newoptions['attach'] = isset($_POST['upload-files-attach-'.$postfixInternalName]);
+                  $newoptions['a'] = isset($_POST['upload-files-a-'.$postfixInternalName]);
+                  $newoptions['img'] = isset($_POST['upload-files-img-'.$postfixInternalName]);
+                  $newoptions['custom'] = isset($_POST['upload-files-custom-'.$postfixInternalName]);
+                  $newoptions['custom-key'] = $_POST['upload-files-custom-key-'.$postfixInternalName];
+                  $newoptions['post-title'] = isset($_POST['upload-files-post-title-'.$postfixInternalName]);
+                  $newoptions['attach-a'] = isset($_POST['upload-files-attach-a-'.$postfixInternalName]);
+                  $newoptions['attach-thumb-a'] = isset($_POST['upload-files-attach-thumb-a-'.$postfixInternalName]);
+                  $newoptions['thumb-a'] = isset($_POST['upload-files-thumb-a-'.$postfixInternalName]);
+                  $newoptions['url'] = $_POST['upload-files-url-'.$postfixInternalName];
+                  $newoptions['nohandler'] = isset($_POST['upload-files-nohandler-'.$postfixInternalName]);
+                  $options = wp_parse_args($newoptions, $options,$postfixOptionKey);
+                  $this->updateOptions($options,$form_id,$postfixOptionKey);
           }
 
           // Display control panel for this widget
@@ -885,96 +913,96 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
           
           <?php $this->controlCommon($options); ?>
 
-<label for="upload-files-path" ><?php _e("Path to store uploads (should not be publically accessible):","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-path" name="upload-files-path" value="<?php echo htmlentities($options['path'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<label for="upload-files-path-<?php echo $postfixInternalName; ?>" ><?php _e("Path to store uploads (should not be publically accessible):","tdomf"); ?><br/>
+<input type="textfield" size="40" id="upload-files-path-<?php echo $postfixInternalName; ?>" name="upload-files-path-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['path'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
-<label for="upload-files-types" ><?php _e("Allowed File Types:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-types" name="upload-files-types" value="<?php echo htmlentities($options['types'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<label for="upload-files-types-<?php echo $postfixInternalName; ?>" ><?php _e("Allowed File Types:","tdomf"); ?><br/>
+<input type="textfield" size="40" id="upload-files-types-<?php echo $postfixInternalName; ?>" name="upload-files-types-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['types'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
-<label for="upload-files-post-title">
-<input type="checkbox" name="upload-files-post-title" id="upload-files-post-title" <?php if($options['post-title']) echo "checked"; ?> >
+<label for="upload-files-post-title-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-post-title-<?php echo $postfixInternalName; ?>" id="upload-files-post-title-<?php echo $postfixInternalName; ?>" <?php if($options['post-title']) echo "checked"; ?> >
 <?php _e("Use filename as post title (as long as the content widget doesn't set it)","tdomf"); ?>
 </label><br/><br/>
 
-<label for="upload-files-size">
-<input type="textfield" name="upload-files-size" id="upload-files-size" value="<?php echo htmlentities($options['size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="10" />
+<label for="upload-files-size-<?php echo $postfixInternalName; ?>">
+<input type="textfield" name="upload-files-size-<?php echo $postfixInternalName; ?>" id="upload-files-size-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['size'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="10" />
 <?php printf(__("Max File Size in bytes. Example: 1024 = %s, 1048576 = %s","tdomf"),tdomf_filesize_format(1024),tdomf_filesize_format(1048576)); ?> 
 </label><br/><br/>
 
-<input type="textfield" name="upload-files-min" id="upload-files-min" value="<?php echo htmlentities($options['min'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
-<label for="upload-files-min"><?php _e("Minimum File Uploads <i>(0 indicates file uploads optional)</i>","tdomf"); ?></label><br/>
+<input type="textfield" name="upload-files-min-<?php echo $postfixInternalName; ?>" id="upload-files-min-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['min'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
+<label for="upload-files-min-<?php echo $postfixInternalName; ?>"><?php _e("Minimum File Uploads <i>(0 indicates file uploads optional)</i>","tdomf"); ?></label><br/>
 
-<input type="textfield" name="upload-files-max" id="upload-files-max" value="<?php echo htmlentities($options['max'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
-<label for="upload-files-sax"><?php _e("Maximum File Uploads","tdomf"); ?></label><br/>
+<input type="textfield" name="upload-files-max-<?php echo $postfixInternalName; ?>" id="upload-files-max-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['max'],ENT_QUOTES,get_bloginfo('charset')); ?>" size="2" />
+<label for="upload-files-max-<?php echo $postfixInternalName; ?>"><?php _e("Maximum File Uploads","tdomf"); ?></label><br/>
 
 
 <br/>
 
-<label for="upload-files-nohandler">
-<input type="checkbox" name="upload-files-nohandler" id="upload-files-nohandler" <?php if($options['nohandler']) echo "checked"; ?> >
+<label for="upload-files-nohandler-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-nohandler-<?php echo $postfixInternalName; ?>" id="upload-files-nohandler-<?php echo $postfixInternalName; ?>" <?php if($options['nohandler']) echo "checked"; ?> >
 <?php _e("Do not use TDOMF handler for URL of download","tdomf"); ?>
 </label><br/>
 
-&nbsp;&nbsp;&nbsp;<label for="upload-files-url" ><?php _e("URL of uploaded file area:","tdomf"); ?><br/>
-&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url" name="upload-files-url" value="<?php echo htmlentities($options['url'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+&nbsp;&nbsp;&nbsp;<label for="upload-files-url-<?php echo $postfixInternalName; ?>" ><?php _e("URL of uploaded file area:","tdomf"); ?><br/>
+&nbsp;&nbsp;&nbsp;<input type="textfield" size="40" id="upload-files-url-<?php echo $postfixInternalName; ?>" name="upload-files-url-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['url'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 <br/><br/>
 
-<label for="upload-files-cmd" ><?php _e("Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-cmd" name="upload-files-cmd" value="<?php echo htmlentities($options['cmd'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<label for="upload-files-cmd-<?php echo $postfixInternalName; ?>" ><?php _e("Command to execute on file after file uploaded successfully (result will be added to log). Leave blank to do nothing:","tdomf"); ?><br/>
+<input type="textfield" size="40" id="upload-files-cmd-<?php echo $postfixInternalName; ?>" name="upload-files-cmd-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['cmd'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label><br/><br/>
 
-<label for="upload-files-attach">
-<input type="checkbox" name="upload-files-attach" id="upload-files-attach" <?php if($options['attach']) echo "checked"; ?> >
+<label for="upload-files-attach-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-attach-<?php echo $postfixInternalName; ?>" id="upload-files-attach-<?php echo $postfixInternalName; ?>" <?php if($options['attach']) echo "checked"; ?> >
 <?php _e("Insert Uploaded Files as Attachments on post (this will also generate a thumbnail using Wordpress core if upload is an image)","tdomf"); ?>
 </label><br/>
 
 &nbsp;&nbsp;&nbsp;
 
 <label for="upload-files-attach-a">
-<input type="checkbox" name="upload-files-attach-a" id="upload-files-attach-a" <?php if($options['attach-a']) echo "checked"; ?> >
+<input type="checkbox" name="upload-files-attach-a-<?php echo $postfixInternalName; ?>" id="upload-files-attach-a-<?php echo $postfixInternalName; ?>" <?php if($options['attach-a']) echo "checked"; ?> >
 <?php _e("Add link to Attachment page to post content","tdomf"); ?>
 </label><br/>
 
 &nbsp;&nbsp;&nbsp;
 
-<label for="upload-files-attach-thumb-a">
-<input type="checkbox" name="upload-files-attach-thumb-a" id="upload-files-attach-thumb-a" <?php if($options['attach-thumb-a']) echo "checked"; ?> >
+<label for="upload-files-attach-thumb-a-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-attach-thumb-a-<?php echo $postfixInternalName; ?>" id="upload-files-attach-thumb-a-<?php echo $postfixInternalName; ?>" <?php if($options['attach-thumb-a']) echo "checked"; ?> >
 <?php _e("Add thumbnail link to Attachment page to post content (if thumbnail avaliable)","tdomf"); ?>
 </label><br/>
 
 &nbsp;&nbsp;&nbsp;
 
-<label for="upload-files-thumb-a">
-<input type="checkbox" name="upload-files-thumb-a" id="upload-files-thumb-a" <?php if($options['thumb-a']) echo "checked"; ?> >
+<label for="upload-files-thumb-a-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-thumb-a-<?php echo $postfixInternalName; ?>" id="upload-files-thumb-a-<?php echo $postfixInternalName; ?>" <?php if($options['thumb-a']) echo "checked"; ?> >
 <?php _e("Add thumbnail as download link to post content (if thumbnail avaliable)","tdomf"); ?>
 </label><br/>
 
        
 <br/>
 
-<label for="upload-files-a">
-<input type="checkbox" name="upload-files-a" id="upload-files-a" <?php if($options['a']) echo "checked"; ?> >
+<label for="upload-files-a-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-a-<?php echo $postfixInternalName; ?>" id="upload-files-a-<?php echo $postfixInternalName; ?>" <?php if($options['a']) echo "checked"; ?> >
 <?php _e("Add download link to post content","tdomf"); ?>
 </label><br/>
 
-<label for="upload-files-img">
-<input type="checkbox" name="upload-files-img" id="upload-files-img" <?php if($options['img']) echo "checked"; ?> >
+<label for="upload-files-img-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-img-<?php echo $postfixInternalName; ?>" id="upload-files-img-<?php echo $postfixInternalName; ?>" <?php if($options['img']) echo "checked"; ?> >
 <?php _e("Add download link as image tag to post content","tdomf"); ?>
 </label><br/>
 
 <br/>
 
-<label for="upload-files-custom">
-<input type="checkbox" name="upload-files-custom" id="upload-files-custom" <?php if($options['custom']) echo "checked"; ?> >
+<label for="upload-files-custom-<?php echo $postfixInternalName; ?>">
+<input type="checkbox" name="upload-files-custom-<?php echo $postfixInternalName; ?>" id="upload-files-custom-<?php echo $postfixInternalName; ?>" <?php if($options['custom']) echo "checked"; ?> >
 <?php _e("Add Download Link as custom value","tdomf"); ?>
 </label><br/>
 
-<label for="upload-files-custom-key" ><?php _e("Name of Custom Key:","tdomf"); ?><br/>
-<input type="textfield" size="40" id="upload-files-custom-key" name="upload-files-custom-key" value="<?php echo htmlentities($options['custom-key'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
+<label for="upload-files-custom-key-<?php echo $postfixInternalName; ?>" ><?php _e("Name of Custom Key:","tdomf"); ?><br/>
+<input type="textfield" size="40" id="upload-files-custom-key-<?php echo $postfixInternalName; ?>" name="upload-files-custom-key-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['custom-key'],ENT_QUOTES,get_bloginfo('charset')); ?>" />
 </label>
 
 </p>
@@ -987,7 +1015,8 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                                'types' => ".txt .doc .pdf .jpg .gif .zip",
                                'size' => 1048576,
                                'min' => 0,
-                               'max' => 1,                               'cmd' => '',
+                               'max' => 1,                               
+                               'cmd' => '',
                                'attach' => true,
                                'a' => true,
                                'img' => false,
@@ -1000,7 +1029,7 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                                'url' => trailingslashit(get_bloginfo('wpurl')).'wp-content/uploads/tdomf/',
                                'nohandler' => true
                                );
-          $options = TDOMF_Widget::getOptions($form_id); 
+          $options = TDOMF_Widget::getOptions($form_id,$postfix); 
           $options = wp_parse_args($options, $defaults);
           
           return $options;
