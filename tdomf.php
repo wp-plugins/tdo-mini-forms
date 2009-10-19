@@ -66,10 +66,16 @@ Author URI: http://thedeadone.net
 //    when not being saved in 'Create'
 // - Upload Files Widget refactored into Widget Class. Should be completely
 //    compatible with existing setups
+// - Upload Files Widget extended to support Multiple Instances (thanks to
+//    being refactored into a Widget Class)
+// - Upload Files Widget now tracks the files it uploads and only deletes those
+//    when a post is removed. Before it would delete the folder however this 
+//    could lead to a false-positive and delete non-TDOMF unintentionally.
 // - Select Field refactored in TDOMF Custom Field widget.
 //
-//    id/name for HTML element for Custom Fields/Select has changed:
-//    customfields-s-list-X       to    customfields-s-X-s'
+//    id/name for HTML element for some Custom Fields has changed:
+//    customfields-s-list-X       to    customfields-s-X-s
+//    customfields-hidden-X       to    customfields-h-X-h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -579,6 +585,11 @@ define('TDOMF_DEBUG_AKISMET_FAKE_SPAM', false); // set to true to get Akismet to
 define('TDOMF_DEBUG_FAKE_SPAM', false); // set to true to ignore akismet and treat everything as spam
 define('TDOMF_KEY_FIELDS', "_tdomf_fields");
 define('TDOMF_KEY_CUSTOM_FIELDS', "_tdomf_custom_fields");
+
+//////////
+// 0.13.6
+
+define('TDOMF_KEY_UPLOADED_FILES','_tdomf_uploaded_files');
 
 //////////////////////////////////////////////////
 // loading text domain for language translation

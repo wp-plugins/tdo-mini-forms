@@ -437,31 +437,70 @@ function tdomf_deltree($path) {
 // Delete files associated with a post when a post is deleted
 //
 function tdomf_upload_delete_post_files($post_ID) {
-  // get first file, if it exists. Get directory. Delete directory and contents.
-  $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.'0',true);
-  
- // A full windows path uses ":" compared to unix
-  if(eregi(':', $filepath)) {
-      // if it's a full windows path, check to see if it contains '\' or '/'
-      if(strpos('\\', $path) === false && strpos('/', $path) === false) {
-          tdomf_log_message("Invalid windows path: $filepath - do nothing. Files will have to be deleted manually for deleted post $post_ID.",TDOMF_LOG_ERROR);
-          return;
+    
+  $files = get_post_meta($post_ID,TDOMF_KEY_UPLOADED_FILES,true);
+  if($files == false || !is_array($files)) {
+      // use old method, which is a bit dangerous but hey...
+      
+      // get first file, if it exists. Get directory. Delete directory and contents.
+      $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.'0',true);
+      
+     // A full windows path uses ":" compared to unix
+      if(eregi(':', $filepath)) {
+          // if it's a full windows path, check to see if it contains '\' or '/'
+          if(strpos('\\', $path) === false && strpos('/', $path) === false) {
+              tdomf_log_message("Invalid windows path: $filepath - do nothing. Files will have to be deleted manually for deleted post $post_ID.",TDOMF_LOG_ERROR);
+              return;
+          }
+      }
+      
+      // 
+      $dirpath = dirname($filepath);
+      if(file_exists($dirpath)) {
+        tdomf_deltree($dirpath);
+      }
+  } else if(!empty($files)){
+      // use new method, only delete actual files uploaded/created
+      
+      #tdomf_log_message( "Upload List for Post #$post_ID: <pre>".var_export($files,true)."</pre>" );
+      
+      tdomf_log_message("There are files on $post_ID. Will delete them now");
+      foreach($files as $widget_id => $widget_files) {
+          if(is_array($widget_files) && !empty($widget_files)) {
+              tdomf_log_message("There are " . count($widget_files) . " recorded for instances $widget_id");
+              $dirpath = false;
+              foreach($widget_files as $widget_file) {
+                  if(file_exists($widget_file)) {
+                      tdomf_log_message("Attempting to delete <i>$widget_file</i>");
+                      if(!$dirpath){ $dirpath = dirname($widget_file); }
+                      unlink($widget_file);
+                  } else {
+                      tdomf_log_message("$widget_file does not exist!",TDOMF_LOG_ERROR);
+                  }
+              }
+              if($dirpath && file_exists($dirpath)) {
+                  // check if any files still there and if so, delete it!
+                  tdomf_log_message("All files uploaded by instances $widget_id should be deleted. Check if directy <i>$dirpath</i> is empty...");
+                  $leftovers = glob($dirpath . DIRECTORY_SEPARATOR . '*');
+                  if(empty($leftovers)) {
+                      tdomf_log_message("Deleting <i>$dirpath</i>...");
+                      tdomf_deltree($dirpath);
+                  } else if($leftovers === false) {
+                      tdomf_log_message("There was an error checking <i>$dirpath</i> if it contained files",TDOMF_LOG_ERROR);
+                  } else {
+                      tdomf_log_message("<i>$dirpath</i> is not empty. Contains: " . explode(",",$leftovers));
+                  }
+              } else {
+                  tdomf_log_message("Invalid directory!", TDOMF_LOG_ERROR);
+              }
+          } else {
+              tdomf_log_message("List of files may be corrupt!",TDOMF_LOG_ERROR);
+          }
       }
   }
-  
-  // 
-  $dirpath = dirname($filepath);
-  if(file_exists($dirpath)) {
-    tdomf_deltree($dirpath);
-  }
+  //else { nothing to do! }
 }
 add_action('delete_post', 'tdomf_upload_delete_post_files');
-
-#@todo Widget titles
-#@todo Admin Email
-#@todo Track instance's upload files in custom field
-#@todo Delete only uploaded/attached files
-#@todo Attachment URL (wp2.8)
 
   /** 
    * Upload Files Widget
@@ -521,6 +560,35 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
           return $i;
       }
       
+      function addToFileList($post_ID,$widget_id,$filepath) {
+          global $wpdb;
+          if(empty($widget_id)) { $widget_id = 1; }
+          $files = get_post_meta($post_ID,TDOMF_KEY_UPLOADED_FILES,true);
+          if(!is_array($files)) {
+            $files = array();
+            $files[$widget_id] = array( $wpdb->escape($filepath) );
+            #tdomf_log_message( "Upload List for Post #$post_ID (1st file added): <pre>".var_export($files,true)."</pre>" );
+            add_post_meta($post_ID,TDOMF_KEY_UPLOADED_FILES,$files,true);
+          } else {
+            if(isset($files[$widget_id])){
+                $files[$widget_id][] = $filepath;
+            } else {
+                $files[$widget_id] = array( $filepath );
+            }
+            // Protect content (adding it to custom field will strip \ if the are in the file name!)
+            // Have to do this every time we save the field
+            foreach($files as $id => $filelist) {
+                $newfilelist = array();
+                foreach($filelist as $f) {
+                    $newfilelist[] = $wpdb->escape($f);
+                }
+                $files[$id] = $newfilelist;
+            }
+            #tdomf_log_message( "Upload List for Post #$post_ID so far: <pre>".var_export($files,true)."</pre>" );
+            update_post_meta($post_ID,TDOMF_KEY_UPLOADED_FILES,$files);
+          }
+      }
+      
       function post($args,$options,$postfix='') {
           global $wpdb;
           extract($args);
@@ -568,6 +636,10 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                     // escape the "path" incase it contains '\' as WP will strip these out!
                     add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$j,$wpdb->escape($newpath),true);
                     add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$j,$theirfiles[$i]['name'],true);
+                   
+                    // keep a list of the uploaded/created files
+                    //
+                    $this->addToFileList($post_ID,$postfix,$newpath);
                     
                     tdomf_log_message( "File ".$theirfiles[$i]['name']." saved from tmp area to ".$newpath." with type ".$theirfiles[$i]['type']." for post $post_ID" );
                     
@@ -628,7 +700,12 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                        "menu_order"     => $i,
                        "post_category"  => $cats,
                       );
-                      $attachment_ID = wp_insert_attachment($attachment, $newpath, $post_ID);
+                      
+                      // I dont' know if this is a wp2.8 thing, but you have to
+                      // URI for it to be properly handled as an attachment, yet... 
+                      // how does it know where to generate the thumbs?
+                      
+                      $attachment_ID = wp_insert_attachment($attachment, /*$wpdb->escape($newpath)*/ $uri, $post_ID);
                       
                       // Weirdly, I have to do this now to access the wp_generate_attachement_metadata 
                       // functino from within the widget class
@@ -653,6 +730,10 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                            if(file_exists($thumbpath)) {
                               
                               add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$j,$thumbpath,true);
+                              
+                              // add to list
+                              //
+                              $this->addToFileList($post_ID,$postfix,$thumbpath);
                               
                               // WARNING: Don't modify the 'thumb' as this is used by Wordpress to know
                               // if there is a thumb by using basename and the file path of the actual file
@@ -690,13 +771,26 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
                         
                         // In Wordpress 2.5 the attachment data structure is changed, 
                         // it only generates a thumbnail if it needs to...
+                        
+                        // Medium sized images can also sometimes be created, make a note of it
+                        //
+                        if(isset($attachment_metadata['sizes']['medium'])) {
+                            $medpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['sizes']['medium']['file'];
+                            if(file_exists($medpath)) {
+                                  $this->addToFileList($post_ID,$postfix,$medpath);
+                            }
+                        }
+                        
                         if(isset($attachment_metadata['sizes']['thumbnail'])) {
-                          // btw there also seems to be a "medium" size sometimes generated
                           $thumbpath = $postdir.DIRECTORY_SEPARATOR.$attachment_metadata['sizes']['thumbnail']['file'];
                           if(file_exists($thumbpath)) {
                               
                               add_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_THUMB.$j,$thumbpath,true);
                               
+                              // add to list
+                              //
+                              $this->addToFileList($post_ID,$postfix,$thumbpath);
+                             
                               // Use direct links *or* wrapper
                               //
                               if($options['nohandler'] && trim($options['url']) != "") {
@@ -856,25 +950,66 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
       
       function adminEmail($args,$options,$post_ID,$postfix='') {
           extract($args);
+
           $output = '';
-          for($i =  0; $i < $options['max']; $i++) {
-              $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,true);
-              if(file_exists($filepath)) {
-                  $name = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,true);
-                  $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
-                  $size = tdomf_filesize_format(filesize($filepath));
-                  $cmd = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,true);
-                  $type = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,true);
-                  $output .= sprintf(__("File %s was uploaded with submission.\r\nPath: %s\r\nSize: %s\r\nType: %s\r\nURL (can only be accessed by administrators until post published):\r\n%s\r\n\r\n","tdomf"),$name,$filepath,$size,$type,$uri);
-                  if($cmd != false && !empty($cmd)) {
-                    $output .= sprintf(__("User Command:\r\n\"%s %s\"\r\n\r\n%s\r\n\r\n","tdomf"),$options['cmd'],$filepath,$cmd);
+          
+          $widget_id = $postfix;
+          if(empty($widget_id)) { $widget_id = 1; }
+          $files = get_post_meta($post_ID,TDOMF_KEY_UPLOADED_FILES,true);
+          if(is_array($files) && is_array($files[$widget_id])) {
+            $files = $files[$widget_id];
+            foreach($files as $filepath) {
+                $filepath = @realpath($filepath);
+                if(file_exists($filepath)) {
+                    // now scan custom fields for specific info on this file path
+                    for($i =  0; $i < $options['max']; $i++) {
+                        $test = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,true);
+                        $test = @realpath($test);
+                        if($filepath == $test) {
+                            break;
+                        }
+                    }
+                    if($i >= $options['max']) {
+                        tdomf_log_message('Upload Files Widget.adminEmail(): can\'t find details of '.$filepath.' (it may be a auto-generated thumbnail)');
+                        $size = tdomf_filesize_format(filesize($filepath));
+                        $output .= sprintf(__("A file was uploaded/generated with submission.\r\nPath: %s\r\nSize: %s\r\n\r\n","tdomf"),$filepath,$size);
+                    } else {
+                        $name = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,true);
+                        $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
+                        $size = tdomf_filesize_format(filesize($filepath));
+                        $cmd = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,true);
+                        $type = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,true);
+                        $output .= sprintf(__("File %s was uploaded with submission.\r\nPath: %s\r\nSize: %s\r\nType: %s\r\nURL (can only be accessed by administrators until post published):\r\n%s\r\n\r\n","tdomf"),$name,$filepath,$size,$type,$uri);
+                        if($cmd != false && !empty($cmd)) {
+                            $output .= sprintf(__("User Command:\r\n\"%s %s\"\r\n\r\n%s\r\n\r\n","tdomf"),$options['cmd'],$filepath,$cmd);
+                        }
+                    }
+                } else {
+                    tdomf_log_message('Upload Files Widget.adminEmail(): File '.$filepath.' does not actually exist!',TDOMF_LOG_ERROR);
+                }
+            }
+          } else {
+              // use old method
+              for($i =  0; $i < $options['max']; $i++) {
+                  $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.$i,true);
+                  if(file_exists($filepath)) {
+                      $name = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_NAME.$i,true);
+                      $uri = get_bloginfo('wpurl').'/?tdomf_download='.$post_ID.'&id='.$i;
+                      $size = tdomf_filesize_format(filesize($filepath));
+                      $cmd = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_CMD_OUTPUT.$i,true);
+                      $type = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_TYPE.$i,true);
+                      $output .= sprintf(__("File %s was uploaded with submission.\r\nPath: %s\r\nSize: %s\r\nType: %s\r\nURL (can only be accessed by administrators until post published):\r\n%s\r\n\r\n","tdomf"),$name,$filepath,$size,$type,$uri);
+                      if($cmd != false && !empty($cmd)) {
+                        $output .= sprintf(__("User Command:\r\n\"%s %s\"\r\n\r\n%s\r\n\r\n","tdomf"),$options['cmd'],$filepath,$cmd);
+                      }
                   }
               }
           }
+          
           if($output != '') {
               return $output;
           }
-          return __("No files uploaded with this post!","tdomf"); 
+          return __("No files uploaded with this post/widget!","tdomf"); 
       }
       
       function control($options,$form_id,$postfixOptionKey='',$postfixInternalName='') {
@@ -911,7 +1046,7 @@ add_action('delete_post', 'tdomf_upload_delete_post_files');
 <div>          
 <p style="text-align:left;">
           
-          <?php $this->controlCommon($options); ?>
+          <?php $this->controlCommon($options,$postfixOptionKey); ?>
 
 <label for="upload-files-path-<?php echo $postfixInternalName; ?>" ><?php _e("Path to store uploads (should not be publically accessible):","tdomf"); ?><br/>
 <input type="textfield" size="40" id="upload-files-path-<?php echo $postfixInternalName; ?>" name="upload-files-path-<?php echo $postfixInternalName; ?>" value="<?php echo htmlentities($options['path'],ENT_QUOTES,get_bloginfo('charset')); ?>" />

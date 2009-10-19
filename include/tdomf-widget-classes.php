@@ -897,7 +897,7 @@ class TDOMF_Widget {
         $options = $this->getOptions($form_id,$postfixOptionKey);
                 
         if ( $_POST[$this->internalName.$postfixOptionKey.'-submit'] ) {
-            if($this->widgetTitle) {
+            if($this->widgetTitle && isset($_POST[$this->internalName.$postfixOptionKey.'-tdomf-title'])) {
                 $newoptions[$this->widgetTitleKey] = $_POST[$this->internalName.$postfixOptionKey.'-tdomf-title'];
             }
             if($this->hack) {
@@ -1022,7 +1022,8 @@ class TDOMF_Widget {
      function _adminError($form_id,$params=array()) {
         $postfix = $this->getPostfixFromParams($params);
         $options = $this->getOptions($form_id,$postfix);
-        return $this->adminError($options,$form_id,$postfix);
+        $output = $this->adminError($options,$form_id,$postfix);
+        return $output;
      }
      
     /** 
