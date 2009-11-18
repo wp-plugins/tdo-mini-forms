@@ -36,13 +36,13 @@ function tdomf_show_log_menu() {
     <table border="0"><tr>
 
     <td>
-    <form method="post" action="<?php /* echo $_SERVER[REQUEST_URI]; */ ?>">
+    <form method="post" action="<?php /* echo $_SERVER['REQUEST_URI']; */ ?>">
     <input type="submit" name="refresh" value="Refresh" />
     </form>
     </td>
 
     <td>
-    <form method="post" action="<?php /* echo $_SERVER[REQUEST_URI]; */ ?>">
+    <form method="post" action="<?php /* echo $_SERVER['REQUEST_URI']; */ ?>">
     <input type="hidden" name="action" value="clear" />
     <input type="submit" name="clear" value="Empty Log" />
     <?php if(function_exists('wp_nonce_field')){ wp_nonce_field('tdomf-log-empty'); } ?>

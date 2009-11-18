@@ -88,7 +88,7 @@ function tdomf_get_post_time( $d = 'U', $gmt = false, $post ) { // returns times
 // include form style sheet on page
 //
 function tdomf_show_your_submissions_admin_head() {
-   if(preg_match('/page=tdomf_your_submissions/',$_SERVER[REQUEST_URI])) {
+   if(preg_match('/page=tdomf_your_submissions/',$_SERVER['REQUEST_URI'])) {
    ?>
    <link rel="stylesheet" href="<?php echo TDOMF_URLPATH; ?>tdomf-style-form.css" type="text/css" media="screen" />
    <?php

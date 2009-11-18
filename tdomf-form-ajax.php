@@ -137,7 +137,7 @@ function tdomf_stripslashes_deep($array) {
         } else {
             // check if the string has new lines!
             if(strpos($array,"\n") !== false) {
-                $array = split("\n",$array);
+                $array = explode("\n",$array);
                 $array = tdomf_stripslashes_deep($array);
                 $array = join("\n",$array);
             } else {

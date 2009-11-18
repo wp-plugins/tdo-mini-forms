@@ -25,7 +25,7 @@ function tdomf_form_admin_head() {
    do_action('tdomf_control_form_start',$form_id,$mode);
    $widgets = tdomf_filter_widgets($mode,$tdomf_form_widgets);
    $widgets_control = tdomf_filter_widgets($mode,$tdomf_form_widgets_control);
-   if(preg_match('/tdomf_show_form_menu/',$_SERVER[REQUEST_URI])) {
+   if(preg_match('/tdomf_show_form_menu/',$_SERVER['REQUEST_URI'])) {
 ?>
    <?php if(tdomf_wp23() && function_exists('wp_admin_css')) {
             wp_admin_css( 'css/widgets' ); 

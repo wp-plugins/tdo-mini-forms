@@ -72,7 +72,7 @@ function tdomf_get_ips_banned($offset = 0, $limit = 0) {
     $banned_ips = get_option(TDOMF_BANNED_IPS);
     if($banned_ips == false) { $banned_ips = array(); }
     else { 
-      $banned_ips = split( ";", $banned_ips);
+      $banned_ips = explode( ";", $banned_ips);
       sort($banned_ips);
       if($limit > 0 || $offset > 0) {
         if($limit <= 0) {
@@ -602,7 +602,7 @@ function tdomf_manage_handler() {
            if($banned_ips == false) {
               $banned_ips = "";
            } else {
-              $banned_ips_array = split( ";", $banned_ips);
+              $banned_ips_array = explode( ";", $banned_ips);
            }
            foreach($ips as $ip) {
              if(!in_array($ip,$banned_ips_array)) {
@@ -622,7 +622,7 @@ function tdomf_manage_handler() {
         if(!empty($ips)) {
            $banned_ips = get_option(TDOMF_BANNED_IPS);
            if($banned_ips) {
-             $banned_ips = split( ";", $banned_ips);
+             $banned_ips = explode( ";", $banned_ips);
              $updated_banned_ips = "";
              foreach($banned_ips as $banned_ip) {
                 if(!in_array($banned_ip,$ips) && !empty($banned_ip) ) {
@@ -646,7 +646,7 @@ function tdomf_manage_handler() {
               if($banned_ips == false) {
                 $banned_ips = $ip.";";
               } else {
-                if(!in_array($ip,split( ";", $banned_ips))) {
+                if(!in_array($ip,explode( ";", $banned_ips))) {
                    $banned_ips .= $ip.";";
                 }
               }
@@ -658,7 +658,7 @@ function tdomf_manage_handler() {
               check_admin_referer('tdomf-reset-ip_'.$ip);
               $banned_ips = get_option(TDOMF_BANNED_IPS);
               if($banned_ips == false) { $banned_ips = array(); }
-              else { $banned_ips = split( ";", $banned_ips); }
+              else { $banned_ips = explode( ";", $banned_ips); }
               $updated_banned_ips = "";
               foreach($banned_ips as $banned_ip) {
                 if($banned_ip != $ip && !empty($banned_ip) ) {

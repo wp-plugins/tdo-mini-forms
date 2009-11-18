@@ -922,7 +922,7 @@ function tdomf_set_options_form($options,$form_id = 1) {
   global $wpdb;
   $defaults = tdomf_get_options_form($form_id);
   if(empty($defaults)) {
-        tdomf_log_message("tdomf_set_options_form: Constructing defaults");
+        #tdomf_log_message("tdomf_set_options_form: Constructing defaults");
         $defaults = array( TDOMF_OPTION_DESCRIPTION => '',
                            TDOMF_OPTION_CREATEDPAGES => false,
                            TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS => true,

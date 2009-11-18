@@ -151,7 +151,7 @@ if(isset($form_data['uploadfiles_'.$form_id.'_'.$index])) {
 
 // Allowed file extensions (used when file is uploaded and in javascript)
 //
-$allowed_exts = split(" ",strtolower($options['types']));
+$allowed_exts = explode(" ",strtolower($options['types']));
 
 // Only do actions if key is good!
 //

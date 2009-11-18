@@ -32,7 +32,7 @@ function tdomf_get_all_users_count() {
 function tdomf_edit_post_panel_admin_head() {
   global $post;
   // don't show on new post/page
-  if($post->ID > 0) {
+  if(is_object($post) && $post->ID > 0) {
       $edit_count = tdomf_get_edits(array('post_id' => $post->ID, 'count' => true));
       // Wordpress 2.5 introduced add_meta_box
       if(function_exists('add_meta_box')) {

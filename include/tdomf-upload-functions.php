@@ -235,9 +235,9 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
             if( ini_get('safe_mode_include_dir') != NULL ){
               $include_dirs = ini_get('safe_mode_include_dir');
               if($isWin) {
-                $include_dirs = split(";",$include_dirs);
+                $include_dirs = explode(";",$include_dirs);
               } else {
-                $include_dirs = split(":",$include_dirs);
+                $include_dirs = explode(":",$include_dirs);
               }
               if(!empty($include_dirs)) {
                 foreach($include_dirs as $inc_dir){
@@ -286,9 +286,9 @@ function tdomf_recursive_mkdir($path, $mode = 0777) {
             $open_basedir_match = false;
             $op_dirs = ini_get('open_basedir');
             if($isWin) {
-              $op_dirs = split(";",$op_dirs);
+              $op_dirs = explode(";",$op_dirs);
             } else {
-              $op_dirs = split(":",$op_dirs);
+              $op_dirs = explode(":",$op_dirs);
             }
             if(!empty($op_dirs)) {
               foreach($op_dirs as $inc_dir){
@@ -445,19 +445,21 @@ function tdomf_upload_delete_post_files($post_ID) {
       // get first file, if it exists. Get directory. Delete directory and contents.
       $filepath = get_post_meta($post_ID,TDOMF_KEY_DOWNLOAD_PATH.'0',true);
       
-     // A full windows path uses ":" compared to unix
-      if(eregi(':', $filepath)) {
-          // if it's a full windows path, check to see if it contains '\' or '/'
-          if(strpos('\\', $path) === false && strpos('/', $path) === false) {
-              tdomf_log_message("Invalid windows path: $filepath - do nothing. Files will have to be deleted manually for deleted post $post_ID.",TDOMF_LOG_ERROR);
-              return;
+      if(!empty($filepath)) {
+         // A full windows path uses ":" compared to unix
+          if(strpos($filepath,':') !== false) {
+              // if it's a full windows path, check to see if it contains '\' or '/'
+              if(strpos($path,'\\') === false && strpos($path,'/') === false) {
+                  tdomf_log_message("Invalid windows path: $filepath - do nothing. Files will have to be deleted manually for deleted post $post_ID.",TDOMF_LOG_ERROR);
+                  return;
+              }
           }
-      }
-      
-      // 
-      $dirpath = dirname($filepath);
-      if(file_exists($dirpath)) {
-        tdomf_deltree($dirpath);
+          
+          // 
+          $dirpath = dirname($filepath);
+          if(file_exists($dirpath)) {
+            tdomf_deltree($dirpath);
+          }
       }
   } else if(!empty($files)){
       // use new method, only delete actual files uploaded/created

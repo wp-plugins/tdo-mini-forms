@@ -96,7 +96,7 @@ function tdomf_stripslashes_deep($array) {
         } else {
             // check if the string has new lines!
             if(strpos($array,"\n") !== false) {
-                $array = split("\n",$array);
+                $array = explode("\n",$array);                    
                 $array = tdomf_stripslashes_deep($array);
                 $array = join("\n",$array);
             } else {
@@ -125,6 +125,7 @@ tdomf_fixslashesargs();
 //
 $save_post_info = FALSE;
 $hide_form = true;
+$publish = false;
 if($message == NULL) {
   
   if($is_edit) {
