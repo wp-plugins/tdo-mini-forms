@@ -141,6 +141,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           $this->enablePost();
           $this->enableAdminEmail();
           $this->enableAdminError();
+          $this->setDisplayName(__('Custom Field','tdomf'));
           $this->enableMultipleInstances(true,__('Custom Fields %d','tdomf'),'tdomf_customfields_widget_count',false);
           $this->enableControl(true,500, 1000);
           $this->setInternalName('customfields','-');
