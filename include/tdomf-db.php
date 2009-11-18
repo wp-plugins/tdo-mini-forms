@@ -218,7 +218,7 @@ function tdomf_db_create_tables() {
                user_id              bigint(20)   NOT NULL default '0',
                ip                   varchar(100) NOT NULL default '0',
                state                varchar(20)  NOT NULL default 'unapproved',
-               data                 longtext     NOT NULL default '',
+               data                 longtext,
                PRIMARY KEY          (edit_id),
                KEY post_id          (post_id),
                KEY form_id          (form_id)
@@ -922,7 +922,7 @@ function tdomf_set_options_form($options,$form_id = 1) {
   global $wpdb;
   $defaults = tdomf_get_options_form($form_id);
   if(empty($defaults)) {
-        tdomf_log_message("tdomf_set_options_form: Constructing defaults");
+        #tdomf_log_message("tdomf_set_options_form: Constructing defaults");
         $defaults = array( TDOMF_OPTION_DESCRIPTION => '',
                            TDOMF_OPTION_CREATEDPAGES => false,
                            TDOMF_OPTION_INCLUDED_YOUR_SUBMISSIONS => true,

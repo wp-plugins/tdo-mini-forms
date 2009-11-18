@@ -2,9 +2,9 @@
 Contributors: the_dead_one
 Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
-Requires at least: 2.8
-Tested up to: 2.8.4
-Stable Tag: 0.13.5
+Requires at least: 2.8.6
+Tested up to: 2.8.6
+Stable Tag: 0.13.6
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
@@ -12,7 +12,7 @@ This plugin can add themed custom posting and editing forms to your website that
 
 This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
-**Version 0.13.3 includes updated to the moderation screen, a plugin specific revision page and syntax highlighting for the form hacker and messages. **
+**The biggest change in version 0.13.6 is the ability to use Custom Fields in an Edit Form (i.e. allow Custom Field editing). It even keeps revision history of Custom Fields to allow for moderation and reverting to previous versions. Additionally a Custom Field TextField can be restricted to a number and the Custom Field Hidden can execute php code. Check the Changelog for a full list of changes.**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/), [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -118,7 +118,7 @@ Here are some useful topics from the [Support Forms]( http://thedeadone.net/foru
 * [Hacking TDOMF to redirect to a custom URL]( http://thedeadone.net/forum/?p=3131#comment-4402 )
 * [Creating your own validation routine]( http://thedeadone.net/forum/?p=2224#comment-4315 )
 * [How to add and process you're own inputs on a form]( http://thedeadone.net/forum/?p=1905#comment-4093 )
-* [Figure the category using alphanumeric categorizations from title of post and add it] ( http://thedeadone.net/forum/?p=1618#comment-3611 )
+* [Figure the category using alphanumeric categorizations from title of post and add it]( http://thedeadone.net/forum/?p=1618#comment-3611 )
 * [Dynamically displaying a form based on a checkbox]( http://thedeadone.net/forum/?p=1458#comment-3484 )
 * [Additional Default Categories]( http://thedeadone.net/forum/?p=334#comment-2637 )
 * [Potential Solution to not Saving Hacked Forms]( http://thedeadone.net/forum/?p=1230#comment-2571 )
@@ -390,14 +390,36 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Bug: No image preview when using attachment options
 * Bug with AJAX and slashes
 * Bug: Widget configuration panels not showing up
-* Investigate: tinymce conflict with AJAX form
-* Investigate: upload-link error
-* Investigate: Bug with post times
-
+* To be investigated: tinymce conflict with AJAX form
+* To be investigated: upload-link error
+* To be investigated: Bug with post times
+* Custom Field history is not stored in reivions edits (can't compare with older revisions/edits)
 
 == Changelog ==
 
+= 0.13.6 =
+
+* "Number" option in TDOMFTextField (and therefore Custom Fields widget)
+* Add some new checks to form hacker to catch the bug. Was able to reproduce it and it seems PHP has some problems with non-latin types being converted into database. Why doesn't this show up elsewhere in Wordpress?
+* Removed usage of '_SERVER' in backend (or if not possible, added esc_url wrapper)
+* Modified AJAX to prevent double submits
+* Refactored "Hidden" field as TDOMFWidgetFieldHidden and it now allows PHP code to be executed
+* Bug in TDOMFWidgetFields meant that checkbox options were getting reset when not being saved in 'Create'
+* Upload Files Widget refactored into Widget Class. Should be completely compatible with existing setups
+* Upload Files Widget extended to support Multiple Instances (thanks to being refactored into a Widget Class)
+* Upload Files Widget now tracks the files it uploads and only deletes those when a post is removed. Before it would delete the folder however this could lead to a false-positive and delete non-TDOMF unintentionally.
+* Imported some code improvements from [DD32](http://dd32.id.au/2009/11/01/youre-doing-it-wrong-2/)
+* Select Field refactored in TDOMF Custom Field widget.
+* Custom field widget now supports edit mode! Includes revision history for each edit with the ability to revert
+* Select field on Custom Field widget for Select Field, is no longer shrunk
+
+Id/name for some HTML elements has consquently updated:
+
+* `customfields-s-list-X`       to    `customfields-s-X-s` (where X is an numeric id)
+* `customfields-hidden-X`       to    `customfields-h-X-h` (where X is an numeric id)
+
 = 0.13.5 =
+
 * Previous recent versions prevented people from enabling spam. The code waswritten in such a way that the spam protection had to be enabled before spam protection could be enabled!
 * Replaced the usage of $_REQUEST with $_POST in form hacker. Not sure if it'll have any impact on the form-hacker-reset problem but it should be safer
 * Have tested and fixed extra slashes being added on WP 2.8.x builds with and without magic quotes turned on. 
@@ -408,15 +430,17 @@ Id/name for some HTML elements has consquently updated:
 * `content_content`            to    `content-text-ta`
 * `content_title`              to    `content-title-tf`
 * `excerpt_excerpt`            to    `excerpt-ta`
-* `customfields-textfield-X`   to    `customfields-tf-X-tf`
-* `customfields-textarea-X`    to    `customfields-ta-X-ta`
-* `customfields-checkbox-X`    to    `customfields-cb-X-cb`
-* `customfields-hidden-X`      to    `customfields-h-X-h` 
+* `customfields-textfield-X`   to    `customfields-tf-X-tf` (where X is an numeric id)
+* `customfields-textarea-X`    to    `customfields-ta-X-ta` (where X is an numeric id)
+* `customfields-checkbox-X`    to    `customfields-cb-X-cb` (where X is an numeric id)
+* `customfields-hidden-X`      to    `customfields-h-X-h`   (where X is an numeric id)
 
 = 0.13.4 =
+
 * "Warnings on post": errors appear about "post.php". I left some unfinished code in an action which was breaking one of the wordpress functions. 
 
 = 0.13.3 =
+
 * Added filtering to the moderation screen. Can filter by user or ip and/or by form
 * Enabled the syntax code highlighting on Form Hacker (and messages)
 * Added new built in wordpress diff as a diff render for form diffs
@@ -424,6 +448,7 @@ Id/name for some HTML elements has consquently updated:
 * TDOMF Revision page (supports fields and custom fields)
 
 = 0.13.2 =
+
 * Fixed extra slashes in AJAX preview of submit forms
 * Scheduled post count incorrect
 * Shortcut links on moderation screen incorrect
@@ -438,11 +463,13 @@ Id/name for some HTML elements has consquently updated:
 * Wordpress 2.8 compatibility
 
 = 0.13.1 =
+
 * Fixed "Notify" and "Auto-Respond" widgets as theses were preventing not logged in users from accessing forms
 * Removed "public static" from class definitions as they are not part of php4.
 * Hacker replacements buggered - affected Upload Files widget
 
 = 0.13 =
+
 * Corrected TDOMF_FULLPATH to use WP_PLUGIN_DIR instead of absolute path
 * Fixed '$' not working in preview
 * Fixed characters getting eaten up in preview
@@ -451,6 +478,7 @@ Id/name for some HTML elements has consquently updated:
 * Forms to edit posts and pages
 
 = 0.12.7 = 
+
 * Form Hacker did not use FORMID so when you copied a form, it would break
 * Updated widget classes (may "break" existing forms)
 * Added a "link" to the Auto Respond Email widget that allows users to set a custom field on a post. Can be used to verify if the user email is valid.
@@ -458,6 +486,7 @@ Id/name for some HTML elements has consquently updated:
 * Fixed post queuing. This was broken in two ways. The date/time calculation was wrong and now has been updated based on generousily donated code from [Adam Selvidge]( http://www.myconfinedspace.com/ ). Second a change in Wordpress 2.7 meant that setting the future status was being ignored when the post was being published.
 
 = 0.12.6 =
+
 * Hopefully, finally fixed additionally slashes being added to the content.
 * Bug with 2.5 and breaking wp-comments.php file
 * Bug with file uploads and accidentially displaying an error when no error exists and therefore causing the form to break.
@@ -475,6 +504,7 @@ Id/name for some HTML elements has consquently updated:
 * Initial Widget Class 
 
 = 0.12.5 =
+
 * A "link" to the thumbnail is stored on the post using TDOMF_KEY_DOWNLOAD_THUMBURI key.
 * Excerpt Widget
 * Comments Management Widget
@@ -488,6 +518,7 @@ Id/name for some HTML elements has consquently updated:
 * Tags Widget now has options for default tags, required and to disable user adding tags
 
 = 0.12.4 =
+
 * Solved "$post_ID == 0" problem. See ( http://thedeadone.net/forum/?p=325#comment-1446 )
 * Added some error checking around cookie session info
 * Stopped multiple revisions from being created on post submit
@@ -510,6 +541,7 @@ Id/name for some HTML elements has consquently updated:
 * Fixed a small bug in the widgets page, where if the page was localised fully, drag and drop would not work.
 
 =  0.12.3 = 
+
 * Bug in tdomf-msgs.php that would occur for unregistered users only
 * Auto Respond Email widget
 * Small mistake in whoami widget hack, "email" title used for webpage field
@@ -522,9 +554,11 @@ Id/name for some HTML elements has consquently updated:
 * Custom Field summary was not appearing in admin emails
 
 = 0.12.2 =
+
 * Broken code got into v0.12.1 in the rush to get the patch for the security risk out.
 
 = 0.12.1 =
+
 * Hacked messages could only be saved for Form ID 1.
 * Gravatars in Top Submitters
 * Fixed Category Widget radio button for Checkboxes doesn't work in Firefox
@@ -532,6 +566,7 @@ Id/name for some HTML elements has consquently updated:
 * Security risk with Custom Fields fixed.
 
 = 0.12 =
+
 * AJAX (with fallback support)
 * Small bug in that validation widgets were not being called properly if they use the action "tdomf_validate_form_start" (such as any multiple instant widgets like 1 Question Capatcha and the Image Capatcha. Same also for preview.
 * Redirect to published post option
@@ -545,6 +580,7 @@ Id/name for some HTML elements has consquently updated:
 * New Template Tags: tdomf_get_the_submitter_email and tdomf_the_submitter_email
 
 = 0.11.1 =
+
 * Using a dollar sign plus a value in a input field would cause the first two digits to disappear - now fixed.
 * Fixed a mistake in the post scheduling, GMT offset would kick in if time greater than an hour
 * Added times and list of scheduled posts to Your Submissions
@@ -552,6 +588,7 @@ Id/name for some HTML elements has consquently updated:
 * Added a pot file and removed the po file.
 
 = 0.11 = 
+
 * Fixed a small behaviour issue in generate form where it would keep the preview, even after reloading the page!
 * Integreted with Akismet for Spam protection
 * Fixed an issue with "get category" widget where it would forget it's settings occasionally
@@ -564,10 +601,12 @@ Id/name for some HTML elements has consquently updated:
 * Top Submitter Theme Widget
 
 = 0.10.4 =
+
 * Fixed a bug that made TDOMF incompatible with PHP5 (see uniqid)
 * Fixed a bug where some widgets were not making it to the form when the form is generated. This was a mistake in the "modes" support added in v0.10.3.
 
 = 0.10.3 =
+
 * Fixed a bug in the random_string generator: it did not validate input and I've been using a value that's too big (which meant it could return 0)
 * Widgets now support "modes" which means widgets can be filtered per form type. Right now that means widgets that don't support pages will not appear, if the form is for submitting pages. 
 * Can now choose how to verify an input form: original, wordpress nonce or none at all
@@ -575,17 +614,20 @@ Id/name for some HTML elements has consquently updated:
 * Fixed double thumbnail issue in WP2.5
 
 = 0.10.2 =
+
 * Fixed a bug if you reload the image capatcha, it would not longer verify
 * Added a flag `TDOMF_HIDE_REGISTER_GLOBAL_ERROR` in `tdomf.php` that can be set to true to hide the `register_globals` errors that get displayed.
 * WP2.5 only: Can now set a max width or height for widgets control on the Form Widgets screen.
 * Compatibily with Wordpress 2.5
 
 = 0.10.1 =
+
 * Fixed a bug when if you inserted an upload as an attachment it would overwrite the contents of the post.
 * Fix to categories widget where widget on other forms than the default  would forget it's settings at post time.
 * Custom Field widget was ignoring append format for multi-forms 
 
 = 0.10 =
+
 * Suppressed errors for is_dir and other file functions just in case of open_basedir settings!
 * Use "get_bloginfo('charset')" in htmlentities in widget control. Hopefully this will finally resolve the issues with foreign lanaguage characters
 * Multiple Form Support
@@ -596,6 +638,7 @@ Id/name for some HTML elements has consquently updated:
 * Update the "Freecap" Image Captcha so that the files get included in the release zip Wordpress creates.
 
 = 0.9.4 = 
+
 * Added "Set Category from get variables" widget
 * If moderation turned off, when post published, redirect to published post page.
 * Fixed Custom Field widget javascript. Now works properly in Firefox (why does Firefox break on code that works in Opera and IE all the time?)
@@ -608,6 +651,7 @@ Id/name for some HTML elements has consquently updated:
 * Fixed Bug when multiple notifications to submitter when post is edited after approval
 
 = 0.9.3 = 
+
 * Fixed customfield textfield control radio group in Firefox
 * Fixed customfield textfield ignoring size option
 * Fixed customfield textarea putting magic quotes on HTML
@@ -634,6 +678,7 @@ Id/name for some HTML elements has consquently updated:
 * Added po file for translation
 
 = 0.9.2 =
+
 * Potential fix for the never-ending "session_start" problem. Using template_redirect instead of get_header. 
 * New Suppress Error Messages (works to a point)
 * Warnings about register_globals added
@@ -643,12 +688,14 @@ Id/name for some HTML elements has consquently updated:
 * Fixed 1-q captcha widget not accepting quotes (")
 
 = 0.9.1 =
+
 * Fixed a javascript error in Quicktags that blocked it from working on Mozilla
 * Fixed the admin notification email as the Wordpress cache for the custom fields for posts was being forgotten so the admin email did not contain information about IP and uploaded files.
 * A define was missing from tdomf v0.9: TDOMF_KEY_DOWNLOAD_THUMB
 * Spelling mistake fixed in "Your Submissions"
 
 = 0.9 =
+
 * Updated Upload Files: if a file is added as attachment, Wordpress will generate a thumbnail if the file is an image.
 * New Upload File Options: You can now automatically have a link added to your post that goes to the attachment page (can even use the thumbnail if it exists). Additionally, if the thumbnail exists, can insert a direct link to file using the thumbnail).
 * Uploads added as attachments will inherit the categories of the post (but remember the order of widgets is important so if the categories get modified after the upload widget has done it's biz, these changes won't be affected to the attachments)
@@ -663,12 +710,14 @@ Id/name for some HTML elements has consquently updated:
 * Fixed a bug when deleting a post with uploaded files on PHP4 or less
 
 = 0.8 =
+
 * Upload Feature added
 * Widgets can now append information to the email sent to moderators
 * Tag Widget: allow submitters to add tags to their submissions
 * Categories Widget: First run of the categories widget.
 
 = 0.72 = 
+
 * Date is not set when post is published. This was okay in WP2.2.
 * Comments are getting automatically closed (even if default is open). This was okay in WP2.2.
 * widget.css in admin menu has moved in WP2.3. This is no longer compatible with WP2.2.
@@ -678,9 +727,11 @@ Id/name for some HTML elements has consquently updated:
 * If you happen to use as your database prefix "tdomf_", and then if you uninstall on WP2.3, it would delete critical options and bugger up your wordpress install.
 
 = 0.71 =
+
 * Two small mistakes seemed to have wiggled into the files before 0.7 was released. Still getting the hang of SVN I guess.
 
 = 0.7 =
+
 * New "Overview" page
 * Move the various admin pages to it's own submenu
 * Updated Edit Post Panel (uses built in AJAX-SACK)
@@ -706,32 +757,39 @@ Id/name for some HTML elements has consquently updated:
 * "I agree" widget: user must check a checkbox before post will be accepted.
 
 = 0.6 =
+
 * Options Menu: Control access to form based on roles
 * Options Menu: Control who gets notified to approve posts by role.
 * Options Menu: Default author is now chosen by login name instead of username
 * Javascript code only included as necessary (i.e. not in every header)
 
 = 0.5 =
+
 * Tested on Windows based host
 * Chinese text does not get mangled
 * Post Edit Panel now works properly on Firefox (and does not prevent posting).
 
 = 0.4 =
+
 * New template tags: tdomf_get_submitter and tdomf_the_submitter.
 * The plugin should work on Windows based servers
 * A TDOMF panel on the edit post page
 * Posts can now be very long (no 250 word limit)
 
 = 0.3 =
+
 * Ported to Wordpress 2.1.2.
 
 = 0.2 =
+
 * Fixed bug: If default author had rights to post, anon posts would be automatically published.
 * Replaced the word "download" used in messages to the user.
 * Added a "webpage" field when posting anonymously.
 
 = 0.1 =
+
 * Initial Release with basic features
 
 = Preview: 21 November 2006 =
+
 * Preview Release, only on wordpress.org/support forums.

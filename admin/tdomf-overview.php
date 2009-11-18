@@ -7,7 +7,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 
 function tdomf_overview_admin_head() {
    global $wp_version;
-   if(tdomf_wp25() && preg_match('/page=tdo-mini-forms/',$_SERVER[REQUEST_URI])) {
+   if(tdomf_wp25() && preg_match('/page=tdo-mini-forms/',$_SERVER['REQUEST_URI'])) {
    ?>
    <style type="text/css">
       #zeitgeist {

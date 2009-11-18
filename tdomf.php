@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.13.5
+Version: 0.13.6
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -25,32 +25,15 @@ Author URI: http://thedeadone.net
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+/* - Permalink Widget also modifies comment link!
+   - Move common form options into two sets of arrays (code/speed improvement)
+   - Make Wordpress 2.9/latest only 
+   - Option to add a comment with what changed */
+
 ////////////////////////////////////////////////////////////////////////////////
 // Version History
 //
 // See readme.txt
-//
-// v0.13.5
-// - Previous recent versions prevented people from enabling spam. The code was
-//     written in such a way that the spam protection had to be enabled before
-//     spam protection could be enabled!
-// - Replaced the usage of $_REQUEST with $_POST in form hacker. Not sure if
-//     it'll have any impact on the form-hacker-reset problem but it should
-//     be safer
-// - Have tested and fixed extra slashes being added on WP 2.8.x builds with and
-//     without magic quotes turned on. 
-// - Refactored Custom Field, Content, Excerpt widgets and created a common
-//     textfield and textarea (as part of the fix for magic quotes). This allows
-//     me to add new features to multiple widgets at a time.
-//
-//     id/name for some HTML elements has consquently been updated:
-//     content_content            to    content-text-ta
-//     content_title              to    content-title-tf
-//     excerpt_excerpt            to    excerpt-ta
-//     customfields-textfield-X   to    customfields-tf-X-tf
-//     customfields-textarea-X    to    customfields-ta-X-ta
-//     customfields-checkbox-X    to    customfields-cb-X-cb
-//     customfields-hidden-X      to    customfields-h-X-h 
 //
 // v0.13.6
 // - "Number" option in TDOMFTextField (and therefore Custom Fields widget)
@@ -62,10 +45,24 @@ Author URI: http://thedeadone.net
 // - Modified AJAX to prevent double submits
 // - Refactored "Hidden" field as TDOMFWidgetFieldHidden and it now allows 
 //    PHP code to be executed
+// - Bug in TDOMFWidgetFields meant that checkbox options were getting reset
+//    when not being saved in 'Create'
+// - Upload Files Widget refactored into Widget Class. Should be completely
+//    compatible with existing setups
+// - Upload Files Widget extended to support Multiple Instances (thanks to
+//    being refactored into a Widget Class)
+// - Upload Files Widget now tracks the files it uploads and only deletes those
+//    when a post is removed. Before it would delete the folder however this 
+//    could lead to a false-positive and delete non-TDOMF unintentionally.
+// - Imported some code improvements from [DD32](http://dd32.id.au/2009/11/01/youre-doing-it-wrong-2/)
 // - Select Field refactored in TDOMF Custom Field widget.
+// - Custom field widget now supports edit mode! Includes revision history for
+//    each edit with the ability to revert
+// - Select field on Custom Field widget for Select Field, is no longer shrunk
 //
-//    id/name for HTML element for Custom Fields/Select has changed:
-//    customfields-s-list-X       to    customfields-s-X-s'
+//    id/name for HTML element for some Custom Fields has changed:
+//    customfields-s-list-X       to    customfields-s-X-s
+//    customfields-hidden-X       to    customfields-h-X-h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -131,7 +128,7 @@ Other
 */
 
 /*
-Magic Quotes for 0.13.5:
+Magic Quotes for 0.13.5 (pre cf editing):
 
 Wordpress 2.8.2
 +++++++++++++++
@@ -315,9 +312,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "52");
+define("TDOMF_BUILD", "53");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13.5");
+define("TDOMF_VERSION", "0.13.6");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -435,7 +432,7 @@ define("TDOMF_DB_TABLE_WIDGETS", "tdomf_table_widgets");
 define("TDOMF_HIDE_REGISTER_GLOBAL_ERROR", false);
 
 define('TDOMF_OPTION_WIDGET_MAX_WIDTH',"tdomf_form_widget_max_width");
-define('TDOMF_OPTION_WIDGET_MAX_LENGTH',"tdomf_form_widget_max_length");
+define('TDOMF_OPTION_WIDGET_MAX_HEIGHT',"tdomf_form_widget_max_height");
 
 //////////////////
 // 0.10.3 Settings
@@ -576,6 +573,11 @@ define('TDOMF_DEBUG_FAKE_SPAM', false); // set to true to ignore akismet and tre
 define('TDOMF_KEY_FIELDS', "_tdomf_fields");
 define('TDOMF_KEY_CUSTOM_FIELDS', "_tdomf_custom_fields");
 
+//////////
+// 0.13.6
+
+define('TDOMF_KEY_UPLOADED_FILES','_tdomf_uploaded_files');
+
 //////////////////////////////////////////////////
 // loading text domain for language translation
 //
@@ -634,7 +636,7 @@ function tdomf_add_menus()
     /*}*/
 
     // Options
-    add_submenu_page( TDOMF_FOLDER , __('Options', 'tdomf'), __('Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
+    add_submenu_page( TDOMF_FOLDER , __('Plugin Options', 'tdomf'), __('Plugin Options', 'tdomf'), 'manage_options', 'tdomf_show_options_menu', 'tdomf_show_options_menu');
     //
     // Form Options
     add_submenu_page( TDOMF_FOLDER , __('Form Options', 'tdomf'), __('Form Options', 'tdomf'), 'manage_options', 'tdomf_show_form_options_menu', 'tdomf_show_form_options_menu');
@@ -647,6 +649,18 @@ function tdomf_add_menus()
     //
     // Form Export
     add_submenu_page( TDOMF_FOLDER , __('Form Export', 'tdomf'), __('Form Export', 'tdomf'), 'manage_options', 'tdomf_show_form_export_menu', 'tdomf_show_form_export_menu');
+    /*//
+    // Form Options
+    add_submenu_page( TDOMF_FOLDER , __('Form Options', 'tdomf'), __('Forms', 'tdomf'), 'manage_options', 'tdomf_show_form_options_menu', 'tdomf_show_form_options_menu');
+    //
+    // Form Widgets
+    add_submenu_page( 'admin.php' , __('Form Creator', 'tdomf'), __('Form Creator', 'tdomf'), 'manage_options', 'tdomf_show_form_menu', 'tdomf_show_form_menu');
+    //
+    // Form Hacker
+    add_submenu_page( 'admin.php' , __('Form Hacker', 'tdomf'), __('Form Hacker', 'tdomf'), 'manage_options', 'tdomf_show_form_hacker', 'tdomf_show_form_hacker');
+    //
+    // Form Export
+    add_submenu_page( 'admin.php' , __('Form Export', 'tdomf'), __('Form Export', 'tdomf'), 'manage_options', 'tdomf_show_form_export_menu', 'tdomf_show_form_export_menu');*/
     //
     // Moderation Queue
     if(tdomf_is_moderation_in_use()) {
@@ -670,36 +684,51 @@ function tdomf_add_menus()
     if(get_option(TDOMF_OPTION_YOUR_SUBMISSIONS)) {
       add_submenu_page('profile.php', 'Your Submissions', 'Your Submissions', 0, 'tdomf_your_submissions', 'tdomf_show_your_submissions_menu');
     }
+    
+    // Restoring old behaviour that Wordpress 2.8 took away for this page
+    //
+    add_submenu_page( 'admin.php', __('Revisions','tdomf'), __('Revisions','tdomf'), 'manage_options' ,TDOMF_FOLDER . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'tdomf-revision.php' );
 }
 
 //////////////////////////////////
 // Load the rest of the plugin! //
 //////////////////////////////////
 
+// These files are required for basic functions
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-log-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-template-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-spam.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-form.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-notify.php');
+require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-classes.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-upload-functions.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-theme-widgets.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
-require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-widget-classes.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-options.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-export.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
+
+// Only need this pages if you're modifying the plugin
+if(is_admin()) {
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-options.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-export.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-options.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-form.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-log.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-moderation.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-export.php');
+}
+// This file contains some admin test like functions for user/ip trust/ban checks
+// @todo Move utility functions from here into a non-admin file
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
-require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-export.php');
+
+// The "Your Submissions" can be user by normal users
+if(is_user_logged_in()) {
+    require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
+}
 
 /////////////////////////
 // What's new since... //
@@ -814,6 +843,14 @@ function tdomf_new_features() {
   }
   // 51 = 0.13.4
   // 52 = 0.13.5
+  // 53 = 0.13.6
+  if($last_version < 53) {
+      $features .= "<li>".__("<b>Custom Field widget for Edit Forms</b>","tdomf")."</li>";
+      $features .= "<li>".__("<b>Restrict Custom Field Text Field to a number</b>","tdomf")."</li>";
+      $features .= "<li>".__("<b>Execute PHP code in Custom Field Hidden Field</b>","tdomf")."</li>";
+      $features .= "<li>".__("<b>Custom Fields modified by TDOMF Forms are stored in revision history</b>","tdomf")."</li>";      
+      $features .= "<li>".__("<b>Allow multiple instances of the Upload Files widget</b>","tdomf")."</li>";
+  }
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";
@@ -828,6 +865,8 @@ function tdomf_new_features() {
 
 function tdomf_init(){
 
+  // Update/upgrade options!
+    
   // Pre 0.7 or a fresh install!
   if(get_option(TDOMF_VERSION_CURRENT) == false)
   {
@@ -839,7 +878,7 @@ function tdomf_init(){
     add_option(TDOMF_OPTION_TRUST_COUNT,-1);
     add_option(TDOMF_OPTION_YOUR_SUBMISSIONS,true);
     add_option(TDOMF_OPTION_WIDGET_MAX_WIDTH,500);
-    add_option(TDOMF_OPTION_WIDGET_MAX_LENGTH,400);
+    add_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT,400);
   }
 
   // Pre 0.9.3 (beta)/16
@@ -850,7 +889,7 @@ function tdomf_init(){
   // Pre WP 2.5/0.10.2
   if(intval(get_option(TDOMF_VERSION_CURRENT)) < 26) {
     add_option(TDOMF_OPTION_WIDGET_MAX_WIDTH,500);
-    add_option(TDOMF_OPTION_WIDGET_MAX_LENGTH,400);
+    add_option(TDOMF_OPTION_WIDGET_MAX_HEIGHT,400);
   }
 
   if(get_option(TDOMF_OPTION_VERIFICATION_METHOD) == false) {
@@ -884,7 +923,12 @@ function tdomf_init(){
   }
 }
 
-tdomf_db_create_tables();
+// Tables should only be created by admin
+if(is_admin()) {
+    tdomf_db_create_tables();
+}
+
+// Must load widgets for everyone, otherwise forms will not work
 tdomf_load_widgets();
 
 ?>

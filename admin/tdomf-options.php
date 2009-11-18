@@ -10,7 +10,7 @@ add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_sh
 function tdomf_options_admin_head() {
     global $wp_version;
     /* add style options and start tabs for options page */
-    if(preg_match('/tdomf_show_options_menu/',$_SERVER[REQUEST_URI])) { ?>
+    if(preg_match('/tdomf_show_options_menu/',$_SERVER['REQUEST_URI'])) { ?>
            
            <style>
             .ui-tabs-nav {

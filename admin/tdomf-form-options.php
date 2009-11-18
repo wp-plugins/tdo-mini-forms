@@ -12,7 +12,7 @@ add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_sh
 function tdomf_form_options_admin_head() {
     global $wp_version;
     /* add style options and start tabs for options page */
-    if(preg_match('/tdomf_show_form_options_menu/',$_SERVER[REQUEST_URI])) { ?>
+    if(preg_match('/tdomf_show_form_options_menu/',$_SERVER['REQUEST_URI'])) { ?>
            
            <style>
             .ui-tabs-nav {
@@ -125,7 +125,7 @@ function tdomf_get_all_caps() {
       
       // filter out tdomf caps that were added
       foreach($capnames as $key => $cap) {
-          if(substr($cap,TDOMF_CAPABILITY_CAN_SEE_FORM,strlen(TDOMF_CAPABILITY_CAN_SEE_FORM)) == TDOMF_CAPABILITY_CAN_SEE_FORM) {
+          if(substr($cap,intval(TDOMF_CAPABILITY_CAN_SEE_FORM),strlen(TDOMF_CAPABILITY_CAN_SEE_FORM)) == TDOMF_CAPABILITY_CAN_SEE_FORM) {
               unset($capnames[$key]);
           }
       }
@@ -1339,7 +1339,7 @@ function tdomf_handle_form_options_actions() {
         if(isset($_REQUEST['tdomf_access_users_list'])) {
            $user_names = trim($_REQUEST['tdomf_access_users_list']);
            if(!empty($user_names)) {
-               $user_names = split(' ',$user_names);
+               $user_names = explode(' ',$user_names);
                foreach($user_names as $user_name) {
                    if(!empty($user_name)) {
                        if(($userdata = get_userdatabylogin($user_name)) != false) {
@@ -1373,7 +1373,7 @@ function tdomf_handle_form_options_actions() {
       
       $save = true;
       $tdomf_admin_emails = $_POST['tdomf_admin_emails'];
-      $emails = split(',',$tdomf_admin_emails);
+      $emails = explode(',',$tdomf_admin_emails);
       foreach($emails as $email) {
           if(!empty($email)) {
               if(!tdomf_check_email_address($email)) {

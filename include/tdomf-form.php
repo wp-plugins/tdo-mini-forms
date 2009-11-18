@@ -89,16 +89,19 @@ function tdomf_check_permissions_form($form_id = 1, $post_id = false, $check_pen
 
   // IP banned
   //
-  $ip =  $_SERVER['REMOTE_ADDR'];
-  $banned_ips = get_option(TDOMF_BANNED_IPS);
-  if($banned_ips != false) {
-  	$banned_ips = split(";",$banned_ips);
-  	foreach($banned_ips as $banned_ip) {
-		if($banned_ip == $ip) {
-           tdomf_log_message_extra("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
+  if(isset($_SERVER['REMOTE_ADDR'])) {
+      $ip = $_SERVER['REMOTE_ADDR'];
+      $banned_ips = get_option(TDOMF_BANNED_IPS);
+      if($banned_ips != false && !empty($banned_ips) && strstr($banned_ips,';') !== FALSE) {
+        $banned_ips = explode(";",$banned_ips);
+        if(in_array($ip,$banned_ips)) {
+           tdomf_log_message("Banned ip $ip tried to submit a post!",TDOMF_LOG_ERROR);
            return tdomf_get_message_instance(TDOMF_OPTION_MSG_PERM_BANNED_IP,$form_id);
-		}
-	 }
+        }
+      }
+  } else {
+      // WTF? What are we to do in this case?
+      tdomf_log_message("Could not get IP of visitor!",TDOMF_LOG_ERROR);
   }
 
   $edit_form = tdomf_get_option_form(TDOMF_OPTION_FORM_EDIT,$form_id); 
@@ -378,6 +381,7 @@ function tdomf_preview_form($args,$mode=false) {
    if(strpos($mode,'-hack') !== false) {
        $hack = true;
    }
+   $edit = false;
    if(strpos($mode,'edit-') !== false) {
       $edit = true;
   }
@@ -386,6 +390,11 @@ function tdomf_preview_form($args,$mode=false) {
   $post_id = false;
   if($edit && isset($args['tdomf_post_id'])) {
      $post_id = intval($args['tdomf_post_id']);
+  }
+  
+  // flag as preview
+  if(strpos($mode,'-preview') === false) {
+      $mode .= '-preview';
   }
   
    do_action('tdomf_preview_form_start',$form_id,$mode);
@@ -491,10 +500,12 @@ function tdomf_validate_form($args,$preview = false) {
    
    // Set mode of page
    if(tdomf_get_option_form(TDOMF_OPTION_SUBMIT_PAGE,$form_id)) {
-     $mode = "new-page";
+     $mode = 'new-page-validate';
    } else {
-     $mode = "new-post";
+     $mode = 'new-post-validate';
    }
+   if($preview) { $mode .= '-preview'; }
+   
    do_action('tdomf_validate_form_start',$form_id,$mode);
    $widgets = tdomf_filter_widgets($mode, $tdomf_form_widgets_validate);
 
@@ -575,13 +586,14 @@ function tdomf_update_post($form_id,$mode,$args) {
    
    tdomf_log_message("Attempting to update post $post_id based on input");
       
+   $user_id = false;
    $can_publish = false;
    if(!tdomf_get_option_form(TDOMF_OPTION_MODERATION,$form_id)) {
        $can_publish = true;
    } else if(is_user_logged_in()) {
        $user_id = $current_user->ID;
        if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-         $testuser = new WP_User($user_id,$user->user_login);
+         $testuser = new WP_User($user_id,$current_user->user_login);
          $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
          if($user_status == TDOMF_USER_STATUS_TRUSTED) {
              tdomf_log_message("User is trusted => will auto-publish.",TDOMF_LOG_GOOD);
@@ -614,6 +626,29 @@ function tdomf_update_post($form_id,$mode,$args) {
        if($current_revision_id != NULL) {
            wp_delete_revision($current_revision_id);
            $current_revision_id = NULL;
+       }
+   } 
+   
+   if($revision_id) {
+       // we need to backup the custom field info on the post
+       $customFields = get_post_meta($post_id, TDOMF_KEY_CUSTOM_FIELDS, true);
+       if(!empty($customFields) && is_array($customFields)) {
+            foreach ( $customFields as $key => $title ) {
+                $value = get_post_meta($post_id, $key, true);
+                // Must use TDOMF's version of udpate post meta as this allows
+                // revisions to hold custom fields
+                TDOMF_Widget::updatePostMeta($current_revision_id, $key, $value);
+                TDOMF_Widget::updatePostMeta($revision_id, $key, $value);
+            }
+       } else {
+            $customFieldKeys = get_post_custom_keys($post_id);
+            foreach ( $customFieldKeys as $key ) {
+                $value = get_post_meta($post_id, $key, true);
+                // Must use TDOMF's version of udpate post meta as this allows
+                // revisions to hold custom fields
+                TDOMF_Widget::updatePostMeta($current_revision_id, $key, $value);
+                TDOMF_Widget::updatePostMeta($revision_id, $key, $value);
+            }
        }
    }
    
@@ -657,7 +692,7 @@ function tdomf_update_post($form_id,$mode,$args) {
                            'HTTP_REFERER' => $_SERVER['HTTP_REFERER'] );
        
        $edit_user_id = 0;
-       if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
+       if($user_id !== false && $user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
            tdomf_log_message("Logging default submitter info (user $user_id) for this post update for $post_id");
            $edit_user_id = $user_id;
            update_usermeta($user_id, TDOMF_KEY_FLAG, true);
@@ -666,7 +701,7 @@ function tdomf_update_post($form_id,$mode,$args) {
        
        $edit_user_ip = 0;
        if(isset($args['ip'])) {
-           tdomf_log_message("Logging default ip $ip for this post update for $post_id");
+           tdomf_log_message("Logging ip " . $args['ip'] ." for this post update for $post_id");
            $edit_user_ip = $args['ip'];
        }
        
@@ -787,7 +822,7 @@ function tdomf_update_post($form_id,$mode,$args) {
    
    // hook
    //
-   do_action('tdomf_create_post_end',$post_ID,$form_id,$mode);
+   do_action('tdomf_create_post_end',$post_id,$form_id,$mode);
    
    return $returnVal;
 }
@@ -915,7 +950,7 @@ function tdomf_create_post($args) {
    foreach($widget_order as $w) {
     if(isset($widgets[$w])) {
       $temp_message = call_user_func($widgets[$w]['cb'],$widget_args,$widgets[$w]['params']);
-      if($temp_message != NULL && trim($temp_message) != ""){
+      if($temp_message != NULL && trim(strval($temp_message)) != ""){
         $message .= $temp_message;
       }
 	  }
@@ -956,7 +991,7 @@ function tdomf_create_post($args) {
          tdomf_log_message("Moderation is disabled. Publishing $post_ID!");
          $publish_now = true;
      } else if($user_id != get_option(TDOMF_DEFAULT_AUTHOR)) {
-         $testuser = new WP_User($user_id,$user->user_login);
+         $testuser = new WP_User($user_id, $current_user->user_login);
          $user_status = get_usermeta($user_id,TDOMF_KEY_STATUS);
          if($user_status == TDOMF_USER_STATUS_TRUSTED) {
              tdomf_log_message("User is trusted. Publishing $post_ID!");
@@ -1116,7 +1151,7 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
         return $form;
       }
   }
-
+  
   do_action('tdomf_generate_form_start',$form_id,$mode);
 
   // initilise some variables
@@ -1128,6 +1163,29 @@ function tdomf_generate_form($form_id = 1,$mode = false,$post_id = false) {
   }
   $form = "";
     
+  // we need to tag the mode if it's after a "preview", check if there is
+  // there is any $_POST input for the form
+  //
+  if(isset($form_data['tdomf_form_post_'.$form_id])) {
+       
+      // Now to make sure, lets check if the preview button was pressed
+      //
+      // Hate doubling up work here, but need form_id_safe early for this check
+      // Will leave the form_id_safe code that exists later in, in case this 
+      // check fails
+      //
+      if($edit && $post_id) {
+          $form_id_safe = $form_id.'_'.$post_id;
+      } else {
+          $form_id_safe = $form_id;
+      }
+      // Was the preview button pressed?
+      if(isset($form_data['tdomf_form_post_'.$form_id]['tdomf_form'.$form_id_safe.'_preview'])) {
+          $mode .= '-preview';
+          #$form_data['tdomf_form_post_'.$form_id]['tdomf_form'.$form_id_safe.'_preview']['mode'] = $mode;
+      }
+  }
+  
   // handle hacked forms
   //
   if(!$hack) {
@@ -1598,10 +1656,29 @@ function tdomf_post_delete_cleanup($post_id) {
 }
 add_action('delete_post', 'tdomf_post_delete_cleanup');
 
-/*function tdomf_form_revision_fields($fields){
-    // eh? how do I check what post this is?
-    return $fields;
+// With the latest Wordpress (2.8.5), Custom Fields for revisions are no longer
+// stored, so the custom field widget hacks a bit and adds the field to the 
+// revision instead of the post (bypassing this check)
+//
+// However, we need to copy the Custom Fields on a revision to the 
+// main post when a revision is restored
+//
+function tdomf_revision_restore_action($post_ID,$revision_ID) {
+    // the custom fields list is only on the main post
+    $customFields = get_post_meta($post_ID, TDOMF_KEY_CUSTOM_FIELDS, true);
+    tdomf_log_message('tdomf_revision_restore_action(' . $post_ID . ', ' . $revision_ID .'): <pre>' . htmlentities(var_export($customFields,true)) . '</pre>');
+    if(!empty($customFields) && is_array($customFields)) {
+            foreach ( $customFields as $key => $title ) {
+                // as of WP 2.8.5, get_post_meta works on revisions as well as
+                // post ids
+                $value = get_post_meta($revision_ID, $key, true);
+                update_post_meta($post_ID, $key, $value);
+                tdomf_log_message('tdomf_revision_restore_action(' . $post_ID . ', ' . $revision_ID .'): updating ' . $key . ' with value <pre>' . htmlentities(var_export($value,true)) . '</pre>' );
+            }
+    }
 }
-add_filter('_wp_post_revision_fields', 'tdomf_form_revision_fields');*/
+add_action('wp_restore_post_revision', 'tdomf_revision_restore_action',10,2);
+
+// @todo Do we need to support wp_delete_post_revision?
 
 ?>

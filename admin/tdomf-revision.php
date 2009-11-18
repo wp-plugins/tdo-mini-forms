@@ -128,7 +128,9 @@ if(current_user_can('manage_options')) { ?>
           if(is_array($customFields) && !empty($customFields)) {
               foreach($customFields as $field => $title) {
                   $left_field = get_post_meta($left_revision->ID, $field, true);
+                  if(is_array($left_field)) { $left_field = var_export($left_field,true); }
                   $right_field = get_post_meta($right_revision->ID, $field, true);
+                  if(is_array($right_field)) { $right_field = var_export($right_field,true); }
                   if($render == 'wp') {
                       if ( $content = wp_text_diff( $left_field, $right_field ) ) {
                           $identical = false;
