@@ -339,20 +339,26 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
               $edit_data = tdomf_get_data_edit($edit_id);
               if(isset($whoami_name)) {
                   $edit_data[TDOMF_KEY_NAME] = tdomf_protect_input($whoami_name);
+              } else {
+                  $whoami_name = "";
               }
               if(isset($whoami_webpage)) {
                   $edit_data[TDOMF_KEY_WEB] = $whoami_webpage;
+              } else {
+                  $whoami_webpage = "";
               }
               if(isset($whoami_email)) {
                   $edit_data[TDOMF_KEY_EMAIL] = $whoami_email;
+              } else {
+                  $whoami_email = "";
               }
               if(is_user_logged_in()) {
                   if($current_user->ID != get_option(TDOMF_DEFAULT_AUTHOR)){
                    $edit_data[TDOMF_KEY_USER_ID] = $current_user->ID;
                    $edit_data[TDOMF_KEY_USER_NAME] = $current_user->user_login;
                    $edit_data[TDOMF_KEY_NAME] = $current_user->display_name;
-                   $edit_data[TDOMF_KEY_EMAIL] = $user->user_email;
-                   $edit_data[TDOMF_KEY_WEB] = $user->user_url;
+                   $edit_data[TDOMF_KEY_EMAIL] = $current_user->user_email;
+                   $edit_data[TDOMF_KEY_WEB] = $current_user->user_url;
                    update_usermeta($current_user->ID, TDOMF_KEY_FLAG, true);
                   }
               }            
@@ -360,20 +366,26 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
           } else {
               if(isset($whoami_name)) {
                   add_post_meta($post_ID, TDOMF_KEY_NAME, tdomf_protect_input($whoami_name), true);
+              } else {
+                  $whoami_name = "";
               }
               if(isset($whoami_webpage)) {
                   add_post_meta($post_ID, TDOMF_KEY_WEB, $whoami_webpage, true);
+              } else {
+                  $whoami_webpage = "";
               }
               if(isset($whoami_email)) {
                   add_post_meta($post_ID, TDOMF_KEY_EMAIL, $whoami_email, true);
+              } else {
+                  $whoami_email = "";
               }
               if(is_user_logged_in()) {
                   if($current_user->ID != get_option(TDOMF_DEFAULT_AUTHOR)){
                    add_post_meta($post_ID, TDOMF_KEY_USER_ID, $current_user->ID, true);
                    add_post_meta($post_ID, TDOMF_KEY_USER_NAME, $current_user->user_login, true);
                    add_post_meta($post_ID, TDOMF_KEY_NAME, $current_user->display_name, true);
-                   add_post_meta($post_ID, TDOMF_KEY_EMAIL, $user->user_email, true);
-                   add_post_meta($post_ID, TDOMF_KEY_WEB, $user->user_url, true);
+                   add_post_meta($post_ID, TDOMF_KEY_EMAIL, $current_user->user_email, true);
+                   add_post_meta($post_ID, TDOMF_KEY_WEB, $current_user->user_url, true);
                    update_usermeta($current_user->ID, TDOMF_KEY_FLAG, true);
                   }
               }

@@ -89,7 +89,7 @@ if(class_exists('GeoMashup')) {
                   # fill up the 'location' object with values set 
                   # pre-preview!
                   if(isset($geo_mashup_location)) {
-                        list($lat,$lng) = split(',',$geo_mashup_location);
+                        list($lat,$lng) = explode(',',$geo_mashup_location);
                         $current_location = array( );
                         $current_location['lat'] = trim( $lat );
                         $current_location['lng'] = trim( $lng );

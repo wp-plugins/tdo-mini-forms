@@ -218,7 +218,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
                                 'excerpt-required',
                                 'excerpt-title',
                                 'excerpt-default-text');
-          $taoptions = $this->textarea->control($options, $form_id, $tashow); 
+          $taoptions = $this->textarea->control($options, $form_id, $tashow, false, $_POST[$this->internalName.'-submit']); 
           if( $_POST[$this->internalName.'-submit'] ) {
               $options = wp_parse_args($taoptions, $options);
               $this->updateOptions($options,$form_id);

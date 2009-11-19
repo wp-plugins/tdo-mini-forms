@@ -140,13 +140,13 @@ function tdomf_widget_categories($args,$params) {
   if(isset($args["categories$postfix"])) {
     $defcat = $args["categories$postfix"];
   } else if(isset($options['include']) && !empty($options['include'])) {
-    $includes = split(',',$options['include']);
+    $includes = explode(',',$options['include']);
     if(!empty($includes)){
         $defcat = $includes[0];
     }
   } else {
     // check if defcat is in the exclude list:
-    $excludes = split(',',$options['exclude']);
+    $excludes = explode(',',$options['exclude']);
     if(in_array($defcat,$excludes)) {
         // need to pick a "new" default
         $cats = get_categories(array( 'exclude' => $options['exclude'],
@@ -186,7 +186,7 @@ function tdomf_widget_categories($args,$params) {
    
   $excludes = $options['exclude'];
   if(!empty($options['include'])) {
-      $includes = split(',',trim($options['include']));
+      $includes = explode(',',trim($options['include']));
       $excludes = "";
       $cats = get_categories(array('hide_empty' => false, 
                                    'order'      => $options['order'],
@@ -679,7 +679,7 @@ function tdomf_widget_categories_admin_error($form_id,$params) {
 
   $output = "";  
   if(!empty($options['include'])) {
-      $includes = split(',',trim($options['include']));
+      $includes = explode(',',trim($options['include']));
       $cats = get_categories(array('hide_empty' => false ));
       $real_cats = array();
       foreach($cats as $cat) {
@@ -699,7 +699,7 @@ function tdomf_widget_categories_admin_error($form_id,$params) {
           $output .= sprintf(__('<b>Warning</b>: Categories %s set as include categories in Widget "Categories #%d" are not valid categories!','tdomf'),$not_real_cats,$number);
       }
   } else {
-      $excludes = split(',',$options['exclude']);
+      $excludes = explode(',',$options['exclude']);
       $cats = get_categories(array( 'exclude' => $options['exclude'],
                                     'hide_empty' => false ));
       if(empty($cats)) {

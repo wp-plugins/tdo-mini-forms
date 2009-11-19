@@ -444,10 +444,11 @@ function tdomf_notify_poster_rejected($post_id) {
        tdomf_log_message_extra("tdomf_notify_poster_rejected: post $post_id is a revision -- do nothing.");
        return $post_id;
    }
+
+   $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true);
    
    tdomf_log_message_extra("tdomf_notify_poster_rejected: $email");
 
-   $email = get_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL, true); 
    delete_post_meta($post_id, TDOMF_KEY_NOTIFY_EMAIL);
 
    if(get_post_meta($post_id,TDOMF_KEY_SPAM,true)) {

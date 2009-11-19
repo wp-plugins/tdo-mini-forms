@@ -116,11 +116,11 @@ function tdomf_get_log($limit=0){
         return $log;
      } else {
         // limit the log to the last $limit lines
-        $lines=split("\n",$log);
+        $lines=explode("\n",$log);
         $lines=array_reverse($lines);
         $limited_log = join("\n",array_slice($lines,0,$limit));
         // undo reverse
-        $lines=split("\n",$limited_log);
+        $lines=explode("\n",$limited_log);
         $lines=array_reverse($lines);
         $limited_log = join("\n",$lines);
         // pass back limited, correctly ordered log
@@ -128,6 +128,15 @@ function tdomf_get_log($limit=0){
      }
   }
   return "The log is currently empty!";
+}
+
+function tdomf_print_var($var) {
+    echo "<pre>".htmlentities(var_export($var,true))."</pre>";
+}
+
+function tdomf_print_backtrace() {
+    $funcs = debug_backtrace();
+    tdomf_print_var($funcs);
 }
 
 ?>

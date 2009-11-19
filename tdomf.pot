@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/tdo-mini-forms\n"
-"POT-Creation-Date: 2009-09-18 09:07+0000\n"
+"POT-Creation-Date: 2009-11-18 13:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 
 #: admin/tdomf-edit-form.php:16 admin/tdomf-edit-post-panel.php:41
 #: admin/tdomf-edit-post-panel.php:46 admin/tdomf-edit-post-panel.php:247
-#: admin/tdomf-form-hacker.php:269 admin/tdomf-form-options.php:10
-#: admin/tdomf-options.php:8 tdomf.php:609
+#: admin/tdomf-form-hacker.php:277 admin/tdomf-form-options.php:10
+#: admin/tdomf-options.php:8 tdomf.php:635
 msgid "TDO Mini Forms"
 msgstr ""
 
@@ -76,16 +76,16 @@ msgstr ""
 msgid "TDO Mini Forms Revisions"
 msgstr ""
 
-#: admin/tdomf-edit-post-panel.php:90 admin/tdomf-revision.php:239
-#: admin/tdomf-revision.php:259 admin/tdomf-revision.php:337
+#: admin/tdomf-edit-post-panel.php:90 admin/tdomf-revision.php:241
+#: admin/tdomf-revision.php:261 admin/tdomf-revision.php:339
 msgid "d F, Y @ H:i"
 msgstr ""
 
-#: admin/tdomf-edit-post-panel.php:97 admin/tdomf-revision.php:264
+#: admin/tdomf-edit-post-panel.php:97 admin/tdomf-revision.php:266
 msgid " [Pending]"
 msgstr ""
 
-#: admin/tdomf-edit-post-panel.php:99 admin/tdomf-revision.php:266
+#: admin/tdomf-edit-post-panel.php:99 admin/tdomf-revision.php:268
 msgid " [Spam]"
 msgstr ""
 
@@ -95,10 +95,10 @@ msgstr ""
 
 #: admin/tdomf-edit-post-panel.php:104 admin/tdomf-edit-post-panel.php:108
 #: admin/tdomf-edit-post-panel.php:124 admin/tdomf-manage.php:323
-#: admin/tdomf-moderation.php:673 admin/tdomf-moderation.php:717
-#: admin/tdomf-moderation.php:721 admin/tdomf-moderation.php:737
-#: admin/tdomf-revision.php:271 admin/tdomf-revision.php:275
-#: admin/tdomf-revision.php:292
+#: admin/tdomf-moderation.php:672 admin/tdomf-moderation.php:716
+#: admin/tdomf-moderation.php:720 admin/tdomf-moderation.php:736
+#: admin/tdomf-revision.php:273 admin/tdomf-revision.php:277
+#: admin/tdomf-revision.php:294
 msgid "N/A"
 msgstr ""
 
@@ -106,8 +106,8 @@ msgstr ""
 msgid " using "
 msgstr ""
 
-#: admin/tdomf-edit-post-panel.php:132 admin/tdomf-moderation.php:748
-#: admin/tdomf-revision.php:300
+#: admin/tdomf-edit-post-panel.php:132 admin/tdomf-moderation.php:747
+#: admin/tdomf-revision.php:302
 #, php-format
 msgid "Form #%d: %s"
 msgstr ""
@@ -151,7 +151,7 @@ msgid "Name"
 msgstr ""
 
 #: admin/tdomf-edit-post-panel.php:324 admin/tdomf-edit-post-panel.php:328
-#: include/tdomf-widget-classes.php:1580
+#: include/tdomf-widget-classes.php:1852
 msgid "Email"
 msgstr ""
 
@@ -292,23 +292,23 @@ msgstr ""
 msgid "Render Type"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:83 admin/tdomf-revision.php:204
+#: admin/tdomf-form-hacker.php:83 admin/tdomf-revision.php:206
 msgid "Wordpress"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:87 admin/tdomf-revision.php:205
+#: admin/tdomf-form-hacker.php:87 admin/tdomf-revision.php:207
 msgid "Default"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:91 admin/tdomf-revision.php:206
+#: admin/tdomf-form-hacker.php:91 admin/tdomf-revision.php:208
 msgid "Unified"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:95 admin/tdomf-revision.php:207
+#: admin/tdomf-form-hacker.php:95 admin/tdomf-revision.php:209
 msgid "Inline"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:99 admin/tdomf-revision.php:208
+#: admin/tdomf-form-hacker.php:99 admin/tdomf-revision.php:210
 msgid "Context"
 msgstr ""
 
@@ -327,242 +327,242 @@ msgid ""
 "need to scroll a lot left to see the other form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:175
+#: admin/tdomf-form-hacker.php:183
 #, php-format
 msgid ""
 "No <code>%s</code> is included in one of your forms! Hacked form not saved."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:179
+#: admin/tdomf-form-hacker.php:187
 msgid "Hacked Form Saved."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:187
+#: admin/tdomf-form-hacker.php:195
 msgid "Reset Hacked Forms."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:220
+#: admin/tdomf-form-hacker.php:228
 msgid "Messages Updated."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:239
+#: admin/tdomf-form-hacker.php:247
 msgid "Messages Reset."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:256
+#: admin/tdomf-form-hacker.php:264
 msgid "Error Dismissed."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:323 tdomf.php:622
+#: admin/tdomf-form-hacker.php:331 tdomf.php:648
 msgid "Form Hacker"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:326
+#: admin/tdomf-form-hacker.php:334
 #, php-format
 msgid "Invalid Form ID %s specified!"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:328
+#: admin/tdomf-form-hacker.php:336
 msgid "No Form ID specified!"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:353
+#: admin/tdomf-form-hacker.php:361
 #, php-format
 msgid "Form Hacker for Form %d: \"%s\""
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:355
+#: admin/tdomf-form-hacker.php:363
 #, php-format
 msgid "Message Hacker for Form %d: \"%s\""
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:379
+#: admin/tdomf-form-hacker.php:387
 msgid ""
 "You can use this page to modify any messages outputed from TDOMF for your "
 "form. From here you can change the post published messages, post held in "
 "moderation, etc. etc."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:382
+#: admin/tdomf-form-hacker.php:390
 msgid "Enable Code Syntax Highlighting..."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:384
+#: admin/tdomf-form-hacker.php:392
 msgid "Disable Code Syntax Highlighting..."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:389
+#: admin/tdomf-form-hacker.php:397
 msgid ""
 "PHP code can be included in the hacked messages. Also TDOMF will "
 "automatically expand these macro strings:"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:391 admin/tdomf-form-hacker.php:533
+#: admin/tdomf-form-hacker.php:399 admin/tdomf-form-hacker.php:541
 #: widgets/tdomf-text-widget.php:114
 #, php-format
 msgid "<code>%s</code> - User name of the currently logged in user"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:392 admin/tdomf-form-hacker.php:534
+#: admin/tdomf-form-hacker.php:400 admin/tdomf-form-hacker.php:542
 #: widgets/tdomf-text-widget.php:115
 #, php-format
 msgid "<code>%s</code> - IP of the current visitor"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:393 admin/tdomf-form-hacker.php:537
+#: admin/tdomf-form-hacker.php:401 admin/tdomf-form-hacker.php:545
 #: widgets/tdomf-text-widget.php:116
 #, php-format
 msgid "<code>%s</code> - The ID of the current form (which is currently %d)"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:394 admin/tdomf-form-hacker.php:538
+#: admin/tdomf-form-hacker.php:402 admin/tdomf-form-hacker.php:546
 #: widgets/tdomf-text-widget.php:117
 #, php-format
 msgid "<code>%s</code> - Name of the Form (set in options)"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:395 admin/tdomf-form-hacker.php:539
+#: admin/tdomf-form-hacker.php:403 admin/tdomf-form-hacker.php:547
 #: widgets/tdomf-text-widget.php:118
 #, php-format
 msgid "<code>%s</code> - Form Description (set in options)"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:396
+#: admin/tdomf-form-hacker.php:404
 #, php-format
 msgid "<code>%s</code> - Submission Errors"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:398
+#: admin/tdomf-form-hacker.php:406
 #, php-format
 msgid "<code>%s</code> - URL of Post/Page being edited"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:399
+#: admin/tdomf-form-hacker.php:407
 #, php-format
 msgid "<code>%s</code> - Original Submission Date"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:400
+#: admin/tdomf-form-hacker.php:408
 #, php-format
 msgid "<code>%s</code> - Original Submission Time"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:401
+#: admin/tdomf-form-hacker.php:409
 #, php-format
 msgid "<code>%s</code> - Title of Post/Page being edited"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:403
+#: admin/tdomf-form-hacker.php:411
 #, php-format
 msgid "<code>%s</code> - URL of Submission"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:404
+#: admin/tdomf-form-hacker.php:412
 #, php-format
 msgid "<code>%s</code> - Date of Submission"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:405
+#: admin/tdomf-form-hacker.php:413
 #, php-format
 msgid "<code>%s</code> - Time of Submission"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:406
+#: admin/tdomf-form-hacker.php:414
 #, php-format
 msgid "<code>%s</code> - Title of Submission"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:417 admin/tdomf-form-hacker.php:515
-#: admin/tdomf-form-hacker.php:551 admin/tdomf-form-hacker.php:614
+#: admin/tdomf-form-hacker.php:425 admin/tdomf-form-hacker.php:523
+#: admin/tdomf-form-hacker.php:559 admin/tdomf-form-hacker.php:622
 msgid "Save &raquo;"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:418 admin/tdomf-form-hacker.php:516
-#: admin/tdomf-form-hacker.php:552 admin/tdomf-form-hacker.php:615
+#: admin/tdomf-form-hacker.php:426 admin/tdomf-form-hacker.php:524
+#: admin/tdomf-form-hacker.php:560 admin/tdomf-form-hacker.php:623
 msgid "Reset &raquo;"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:422
+#: admin/tdomf-form-hacker.php:430
 msgid "Contribution Approved"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:422
+#: admin/tdomf-form-hacker.php:430
 msgid "Submission Published"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:428
+#: admin/tdomf-form-hacker.php:436
 msgid "Submission Queued"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:434
+#: admin/tdomf-form-hacker.php:442
 msgid "Contribution is Spam"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:434
+#: admin/tdomf-form-hacker.php:442
 msgid "Submission is Spam"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:440
+#: admin/tdomf-form-hacker.php:448
 msgid "Contribution awaiting Moderation"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:440
+#: admin/tdomf-form-hacker.php:448
 msgid "Submission awaiting Moderation"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:445
+#: admin/tdomf-form-hacker.php:453
 msgid "Contribution contains Errors"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:445
+#: admin/tdomf-form-hacker.php:453
 msgid "Submission contains Errors"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:449
+#: admin/tdomf-form-hacker.php:457
 msgid "Banned User"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:453
+#: admin/tdomf-form-hacker.php:461
 msgid "Banned IP"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:459
+#: admin/tdomf-form-hacker.php:467
 msgid "Throttled Submission"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:465
+#: admin/tdomf-form-hacker.php:473
 msgid "Denied User"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:471
+#: admin/tdomf-form-hacker.php:479
 msgid "Banned Unregistered User"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:480
+#: admin/tdomf-form-hacker.php:488
 msgid "'Edit Post' Link Text"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:486
+#: admin/tdomf-form-hacker.php:494
 msgid "Invalid Post for Form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:490
+#: admin/tdomf-form-hacker.php:498
 msgid "Invalid Form for Post"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:494
+#: admin/tdomf-form-hacker.php:502
 msgid "Locked Post"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:500
+#: admin/tdomf-form-hacker.php:508
 msgid "Spam Edit on Post"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:506
+#: admin/tdomf-form-hacker.php:514
 msgid "Unapproved Edit on Post"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:525
+#: admin/tdomf-form-hacker.php:533
 msgid ""
 "You can use this page to hack the generated HTML code for your form without "
 "modifing the code of TDOMF. Please only do this if you know what you are "
@@ -570,13 +570,13 @@ msgid ""
 "etc. etc."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:527
+#: admin/tdomf-form-hacker.php:535
 msgid ""
 "Do not modify or remove the \"name\" and \"id\" attributes of fields as this "
 "is what the widgets and TDOMF use to get input values for processing"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:529
+#: admin/tdomf-form-hacker.php:537
 #, php-format
 msgid ""
 "Every time a form is generated, it creates a unique key. If you hack the "
@@ -584,23 +584,23 @@ msgid ""
 "the form. TDOMF will replace this string with the unique key."
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:531
+#: admin/tdomf-form-hacker.php:539
 msgid ""
 "PHP code can be included in the hacked form. Also TDOMF will automatically "
 "expand these macro strings:"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:535
+#: admin/tdomf-form-hacker.php:543
 #, php-format
 msgid "<code>%s</code> - The form's unique key"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:536
+#: admin/tdomf-form-hacker.php:544
 #, php-format
 msgid "<code>%s</code> - The current URL of the form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:540
+#: admin/tdomf-form-hacker.php:548
 #, php-format
 msgid ""
 "<code>%s</code> - Form Output (such as preview, errors, etc.). This is "
@@ -608,49 +608,49 @@ msgid ""
 "tdomf_form_preview for preview)"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:541
+#: admin/tdomf-form-hacker.php:549
 #, php-format
 msgid ""
 "<code>%swidget-name%s</code> - Original, unmodified output from 'widget-name'"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:557
+#: admin/tdomf-form-hacker.php:565
 msgid "Core Form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:567
+#: admin/tdomf-form-hacker.php:575
 msgid "You can diff the hacked form to see what you have changed"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:569
+#: admin/tdomf-form-hacker.php:577
 msgid "Diff Hacked Form with Current Form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:572
+#: admin/tdomf-form-hacker.php:580
 msgid "Diff Hacked Form with Previous Form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:573
+#: admin/tdomf-form-hacker.php:581
 msgid "Diff Current Form with Previous Form"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:584
+#: admin/tdomf-form-hacker.php:592
 msgid "Form Preview"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:592
+#: admin/tdomf-form-hacker.php:600
 msgid "You can diff the hacked preview to see what you have changed"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:594
+#: admin/tdomf-form-hacker.php:602
 msgid "Diff Hacked Preview with Current Preview"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:597
+#: admin/tdomf-form-hacker.php:605
 msgid "Diff Hacked Preview with Previous Preview"
 msgstr ""
 
-#: admin/tdomf-form-hacker.php:598
+#: admin/tdomf-form-hacker.php:606
 msgid "Diff Current Preview with Previous Preview"
 msgstr ""
 
@@ -685,7 +685,7 @@ msgid "Editing"
 msgstr ""
 
 #: admin/tdomf-form-options.php:188 admin/tdomf-moderation.php:428
-#: tdomf.php:629 tdomf.php:632
+#: tdomf.php:667 tdomf.php:670
 msgid "Moderation"
 msgstr ""
 
@@ -965,7 +965,7 @@ msgid "registered user"
 msgstr ""
 
 #: admin/tdomf-form-options.php:939 admin/tdomf-manage.php:486
-#: admin/tdomf-revision.php:225
+#: admin/tdomf-revision.php:227
 msgid "IP"
 msgstr ""
 
@@ -987,7 +987,7 @@ msgstr ""
 msgid "(%d) Only %d %s submissions/contributions per %s %s"
 msgstr ""
 
-#: admin/tdomf-form-options.php:957 widgets/tdomf-customfield-widget.php:1242
+#: admin/tdomf-form-options.php:957 include/tdomf-widget-classes.php:3423
 msgid "Remove"
 msgstr ""
 
@@ -1012,8 +1012,8 @@ msgstr ""
 
 #: admin/tdomf-form-options.php:1028 admin/tdomf-form-options.php:1032
 #: admin/tdomf-form-options.php:1081 admin/tdomf-form-options.php:1127
-#: admin/tdomf-form-options.php:1131 admin/tdomf-moderation.php:630
-#: admin/tdomf-moderation.php:781 admin/tdomf-revision.php:315
+#: admin/tdomf-form-options.php:1131 admin/tdomf-moderation.php:629
+#: admin/tdomf-moderation.php:780 admin/tdomf-revision.php:317
 msgid "Delete"
 msgstr ""
 
@@ -1037,7 +1037,7 @@ msgstr ""
 msgid "Included on the 'Your Submissions' page!"
 msgstr ""
 
-#: admin/tdomf-form-options.php:1060 tdomf.php:613
+#: admin/tdomf-form-options.php:1060
 msgid "Options"
 msgstr ""
 
@@ -1546,7 +1546,7 @@ msgstr ""
 msgid "Show All"
 msgstr ""
 
-#: admin/tdomf-moderation.php:511 admin/tdomf-moderation.php:903
+#: admin/tdomf-moderation.php:511 admin/tdomf-moderation.php:902
 #, php-format
 msgid "Form #%d"
 msgstr ""
@@ -1564,7 +1564,7 @@ msgid "Submitted"
 msgstr ""
 
 #: admin/tdomf-moderation.php:531 admin/tdomf-moderation.php:545
-#: admin/tdomf-moderation.php:641 include/tdomf-msgs.php:152
+#: admin/tdomf-moderation.php:640 include/tdomf-msgs.php:152
 msgid "Edit"
 msgstr ""
 
@@ -1584,428 +1584,428 @@ msgstr ""
 msgid "Uploaded Files: "
 msgstr ""
 
-#: admin/tdomf-moderation.php:615
+#: admin/tdomf-moderation.php:614
 msgid "Publish this submission now"
 msgstr ""
 
-#: admin/tdomf-moderation.php:615 admin/tdomf-moderation.php:621
+#: admin/tdomf-moderation.php:614 admin/tdomf-moderation.php:620
 msgid "Publish Now"
 msgstr ""
 
-#: admin/tdomf-moderation.php:620
+#: admin/tdomf-moderation.php:619
 msgid "Add submission to publish queue"
 msgstr ""
 
-#: admin/tdomf-moderation.php:620
+#: admin/tdomf-moderation.php:619
 msgid "Queue"
 msgstr ""
 
-#: admin/tdomf-moderation.php:621
+#: admin/tdomf-moderation.php:620
 msgid "Publish submission now"
 msgstr ""
 
-#: admin/tdomf-moderation.php:624
+#: admin/tdomf-moderation.php:623
 msgid "Publish submission"
 msgstr ""
 
-#: admin/tdomf-moderation.php:624
+#: admin/tdomf-moderation.php:623
 msgid "Publish"
 msgstr ""
 
-#: admin/tdomf-moderation.php:628
+#: admin/tdomf-moderation.php:627
 msgid "Set submission to draft/unmoderated status."
 msgstr ""
 
-#: admin/tdomf-moderation.php:628
+#: admin/tdomf-moderation.php:627
 msgid "Un-publish"
 msgstr ""
 
-#: admin/tdomf-moderation.php:630
+#: admin/tdomf-moderation.php:629
 #, php-format
 msgid ""
 "You are about to delete this post \\'%s\\'\n"
 " \\'Cancel\\' to stop, \\'OK\\' to delete."
 msgstr ""
 
-#: admin/tdomf-moderation.php:632
+#: admin/tdomf-moderation.php:631
 msgid "Unlock submission so it can be edited."
 msgstr ""
 
-#: admin/tdomf-moderation.php:632
+#: admin/tdomf-moderation.php:631
 msgid "Unlock"
 msgstr ""
 
-#: admin/tdomf-moderation.php:634
+#: admin/tdomf-moderation.php:633
 msgid "Lock submission from being edited."
 msgstr ""
 
-#: admin/tdomf-moderation.php:634
+#: admin/tdomf-moderation.php:633
 msgid "Lock"
 msgstr ""
 
-#: admin/tdomf-moderation.php:637
+#: admin/tdomf-moderation.php:636
 #, php-format
 msgid "View '%s'"
 msgstr ""
 
-#: admin/tdomf-moderation.php:637 admin/tdomf-moderation.php:775
-#: admin/tdomf-moderation.php:776
+#: admin/tdomf-moderation.php:636 admin/tdomf-moderation.php:774
+#: admin/tdomf-moderation.php:775
 msgid "View"
 msgstr ""
 
-#: admin/tdomf-moderation.php:639
+#: admin/tdomf-moderation.php:638
 #, php-format
 msgid "Preview '%s'"
 msgstr ""
 
-#: admin/tdomf-moderation.php:639 include/tdomf-form.php:1448
+#: admin/tdomf-moderation.php:638 include/tdomf-form.php:1506
 msgid "Preview"
 msgstr ""
 
-#: admin/tdomf-moderation.php:641
+#: admin/tdomf-moderation.php:640
 msgid "Edit this submission"
 msgstr ""
 
-#: admin/tdomf-moderation.php:646
+#: admin/tdomf-moderation.php:645
 #, php-format
 msgid ""
 "You are about to flag this submission \\'%s\\' as spam\n"
 " \\'Cancel\\' to stop, \\'OK\\' to delete."
 msgstr ""
 
-#: admin/tdomf-moderation.php:646 admin/tdomf-moderation.php:760
-#: admin/tdomf-moderation.php:795 admin/tdomf-moderation.php:809
-#: admin/tdomf-revision.php:322
+#: admin/tdomf-moderation.php:645 admin/tdomf-moderation.php:759
+#: admin/tdomf-moderation.php:794 admin/tdomf-moderation.php:808
+#: admin/tdomf-revision.php:324
 msgid "Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:649 admin/tdomf-moderation.php:793
-#: admin/tdomf-revision.php:320
+#: admin/tdomf-moderation.php:648 admin/tdomf-moderation.php:792
+#: admin/tdomf-revision.php:322
 msgid "Not Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:681 admin/tdomf-moderation.php:744
+#: admin/tdomf-moderation.php:680 admin/tdomf-moderation.php:743
 msgid "Unknown or deleted form"
 msgstr ""
 
-#: admin/tdomf-moderation.php:685
+#: admin/tdomf-moderation.php:684
 #, php-format
 msgid "Form #%d: %s</a>"
 msgstr ""
 
-#: admin/tdomf-moderation.php:692 admin/tdomf-moderation.php:697
-#: admin/tdomf-moderation.php:751 admin/tdomf-your-submissions.php:168
+#: admin/tdomf-moderation.php:691 admin/tdomf-moderation.php:696
+#: admin/tdomf-moderation.php:750 admin/tdomf-your-submissions.php:168
 #: admin/tdomf-your-submissions.php:187 admin/tdomf-your-submissions.php:216
 #: admin/tdomf-your-submissions.php:235
 msgid "Y/m/d"
 msgstr ""
 
-#: admin/tdomf-moderation.php:754
+#: admin/tdomf-moderation.php:753
 msgid "Unapproved"
 msgstr ""
 
-#: admin/tdomf-moderation.php:757
+#: admin/tdomf-moderation.php:756
 msgid "Approved"
 msgstr ""
 
-#: admin/tdomf-moderation.php:779
+#: admin/tdomf-moderation.php:778
 msgid "Revert"
 msgstr ""
 
-#: admin/tdomf-moderation.php:782 admin/tdomf-revision.php:316
+#: admin/tdomf-moderation.php:781 admin/tdomf-revision.php:318
 msgid "Approve"
 msgstr ""
 
-#: admin/tdomf-moderation.php:785 admin/tdomf-moderation.php:787
-#: admin/tdomf-moderation.php:788 admin/tdomf-revision.php:210
+#: admin/tdomf-moderation.php:784 admin/tdomf-moderation.php:786
+#: admin/tdomf-moderation.php:787 admin/tdomf-revision.php:212
 msgid "Compare"
 msgstr ""
 
-#: admin/tdomf-moderation.php:793 admin/tdomf-revision.php:320
+#: admin/tdomf-moderation.php:792 admin/tdomf-revision.php:322
 msgid "Flag contributation as not being spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:795 admin/tdomf-revision.php:322
+#: admin/tdomf-moderation.php:794 admin/tdomf-revision.php:324
 msgid "Flag contributation as being spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:795 admin/tdomf-revision.php:322
+#: admin/tdomf-moderation.php:794 admin/tdomf-revision.php:324
 msgid ""
 "You are about to flag this contribution as spam\n"
 " \\'Cancel\\' to stop, \\'OK\\' to delete."
 msgstr ""
 
-#: admin/tdomf-moderation.php:813
+#: admin/tdomf-moderation.php:812
 msgid "Draft"
 msgstr ""
 
-#: admin/tdomf-moderation.php:816
+#: admin/tdomf-moderation.php:815
 msgid "Published"
 msgstr ""
 
-#: admin/tdomf-moderation.php:819
+#: admin/tdomf-moderation.php:818
 msgid "Scheduled"
 msgstr ""
 
-#: admin/tdomf-moderation.php:825
+#: admin/tdomf-moderation.php:824
 msgid " (Spam)"
 msgstr ""
 
-#: admin/tdomf-moderation.php:826
+#: admin/tdomf-moderation.php:825
 msgid " [Locked]"
 msgstr ""
 
-#: admin/tdomf-moderation.php:847
+#: admin/tdomf-moderation.php:846
 msgid "Bulk Actions"
 msgstr ""
 
-#: admin/tdomf-moderation.php:849
+#: admin/tdomf-moderation.php:848
 msgid "Publish Submissions (Now)"
 msgstr ""
 
-#: admin/tdomf-moderation.php:852
+#: admin/tdomf-moderation.php:851
 msgid "Publish/Queue Submissions"
 msgstr ""
 
-#: admin/tdomf-moderation.php:855
+#: admin/tdomf-moderation.php:854
 msgid "Un-publish Submissions"
 msgstr ""
 
-#: admin/tdomf-moderation.php:857
+#: admin/tdomf-moderation.php:856
 msgid "Delete Submissions"
 msgstr ""
 
-#: admin/tdomf-moderation.php:859
+#: admin/tdomf-moderation.php:858
 msgid "Unlock Submissions"
 msgstr ""
 
-#: admin/tdomf-moderation.php:862
+#: admin/tdomf-moderation.php:861
 msgid "Lock Submissions"
 msgstr ""
 
-#: admin/tdomf-moderation.php:865
+#: admin/tdomf-moderation.php:864
 msgid "Mark Submissions as Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:868
+#: admin/tdomf-moderation.php:867
 msgid "Mark Submissions as Not Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:871
+#: admin/tdomf-moderation.php:870
 msgid "Recheck Submssions for Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:874
+#: admin/tdomf-moderation.php:873
 msgid "Approve Edits"
 msgstr ""
 
-#: admin/tdomf-moderation.php:877
+#: admin/tdomf-moderation.php:876
 msgid "Revert Edits"
 msgstr ""
 
-#: admin/tdomf-moderation.php:880
+#: admin/tdomf-moderation.php:879
 msgid "Delete Edits"
 msgstr ""
 
-#: admin/tdomf-moderation.php:883
+#: admin/tdomf-moderation.php:882
 msgid "Mark Edits as Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:886
+#: admin/tdomf-moderation.php:885
 msgid "Mark Edits as not Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:889
+#: admin/tdomf-moderation.php:888
 msgid "Recheck Edits for Spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:892
+#: admin/tdomf-moderation.php:891
 msgid "Apply"
 msgstr ""
 
-#: admin/tdomf-moderation.php:901
+#: admin/tdomf-moderation.php:900
 msgid "Show All Forms"
 msgstr ""
 
-#: admin/tdomf-moderation.php:930
+#: admin/tdomf-moderation.php:929
 msgid "Submissions deleted. "
 msgstr ""
 
-#: admin/tdomf-moderation.php:955
+#: admin/tdomf-moderation.php:954
 #, php-format
 msgid "Marked these submissions as spam: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:958
+#: admin/tdomf-moderation.php:957
 #, php-format
 msgid "Marked these submissions as not spam: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:967
+#: admin/tdomf-moderation.php:966
 #, php-format
 msgid "Deleted submissions: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:982
+#: admin/tdomf-moderation.php:981
 #, php-format
 msgid "Attempted to published these submissions immediately: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:997
+#: admin/tdomf-moderation.php:996
 #, php-format
 msgid "Attempted to publish or queue these submissions: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1006
+#: admin/tdomf-moderation.php:1005
 #, php-format
 msgid "Attempted to un-publish theses submissions: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1019
+#: admin/tdomf-moderation.php:1018
 #, php-format
 msgid "Marked these submissions as spam: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1033
+#: admin/tdomf-moderation.php:1032
 #, php-format
 msgid "Marked these submissions as not spam: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1048
+#: admin/tdomf-moderation.php:1047
 #, php-format
 msgid "Locked these posts/pages from editing: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1063
+#: admin/tdomf-moderation.php:1062
 #, php-format
 msgid "Unlocked these posts/pages: %s"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1086
+#: admin/tdomf-moderation.php:1085
 #, php-format
 msgid "Marked last contribution on these submissions as spam: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1089
+#: admin/tdomf-moderation.php:1088
 #, php-format
 msgid "Marked last contribution on these submissions as not spam: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1113
+#: admin/tdomf-moderation.php:1112
 #, php-format
 msgid "Approved contributions on these submissions: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1134
+#: admin/tdomf-moderation.php:1133
 #, php-format
 msgid "Latest contribution on these submissions have been reverted: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1159
+#: admin/tdomf-moderation.php:1158
 #, php-format
 msgid "Latest contribution on these submissions have been deleted: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1175
+#: admin/tdomf-moderation.php:1174
 #, php-format
 msgid "Latest contribution on these submissions have been marked as spam: %s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1192
+#: admin/tdomf-moderation.php:1191
 #, php-format
 msgid ""
 "Latest contribution on these submissions have been marked as not being spam: "
 "%s."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1198
+#: admin/tdomf-moderation.php:1197
 #, php-format
 msgid "Unrecognised bulk action %s,"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1215 admin/tdomf-moderation.php:1225
+#: admin/tdomf-moderation.php:1214 admin/tdomf-moderation.php:1224
 #, php-format
 msgid "Published post <a href=\"%s\">%d</a>."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1233
+#: admin/tdomf-moderation.php:1232
 #, php-format
 msgid "Unpublished post %d."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1242
+#: admin/tdomf-moderation.php:1241
 #, php-format
 msgid "Post %d flagged as spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1244
+#: admin/tdomf-moderation.php:1243
 #, php-format
 msgid ""
 "Did not flag post %d as being spam as it is already flagged appropriately."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1254
+#: admin/tdomf-moderation.php:1253
 #, php-format
 msgid "Post %d flagged as not being spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1256
+#: admin/tdomf-moderation.php:1255
 #, php-format
 msgid ""
 "Did not flag post %d as not being spam as it is already flagged "
 "appropriately."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1266
+#: admin/tdomf-moderation.php:1265
 #, php-format
 msgid "Post %d is now locked from editing"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1268
+#: admin/tdomf-moderation.php:1267
 #, php-format
 msgid "Post %d is already locked from editing."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1277
+#: admin/tdomf-moderation.php:1276
 #, php-format
 msgid "Post %d is now unlocked."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1279
+#: admin/tdomf-moderation.php:1278
 #, php-format
 msgid "Post %d is already unlocked."
 msgstr ""
 
-#: admin/tdomf-moderation.php:1301
+#: admin/tdomf-moderation.php:1300
 #, php-format
 msgid ""
 "Contribution to <a href=\"%s\">Post %d</a> has been approved and published"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1304 admin/tdomf-moderation.php:1320
-#: admin/tdomf-moderation.php:1343 admin/tdomf-moderation.php:1357
-#: admin/tdomf-moderation.php:1371
+#: admin/tdomf-moderation.php:1303 admin/tdomf-moderation.php:1319
+#: admin/tdomf-moderation.php:1342 admin/tdomf-moderation.php:1356
+#: admin/tdomf-moderation.php:1370
 #, php-format
 msgid "Invalid action %s or invalid edit identifier %d!"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1317
+#: admin/tdomf-moderation.php:1316
 #, php-format
 msgid ""
 "Contribution to <a href=\"%s\">Post %d</a> has reverted to previous revision"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1340
+#: admin/tdomf-moderation.php:1339
 #, php-format
 msgid "Contribution to <a href=\"%s\">Post %d</a> has deleted"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1354
+#: admin/tdomf-moderation.php:1353
 #, php-format
 msgid "Contribution to <a href=\"%s\">Post %d</a> has been flagged as spam"
 msgstr ""
 
-#: admin/tdomf-moderation.php:1368
+#: admin/tdomf-moderation.php:1367
 #, php-format
 msgid ""
 "Contribution to <a href=\"%s\">Post %d</a> has been flagged as not being spam"
@@ -2429,7 +2429,7 @@ msgstr ""
 msgid "New Features in %s for you"
 msgstr ""
 
-#: admin/tdomf-overview.php:108 tdomf.php:639
+#: admin/tdomf-overview.php:108 tdomf.php:677
 msgid "Log"
 msgstr ""
 
@@ -2645,51 +2645,51 @@ msgstr ""
 msgid "TDO Mini Forms Revisions for \"%s\" (post id: %d, edit id: %d)"
 msgstr ""
 
-#: admin/tdomf-revision.php:65 admin/tdomf-revision.php:180
+#: admin/tdomf-revision.php:65 admin/tdomf-revision.php:182
 msgid "These edits are identical."
 msgstr ""
 
-#: admin/tdomf-revision.php:188 include/tdomf-theme-widgets.php:280
+#: admin/tdomf-revision.php:190 include/tdomf-theme-widgets.php:280
 msgid "Title"
 msgstr ""
 
-#: admin/tdomf-revision.php:192 widgets/tdomf-content-widget.php:59
+#: admin/tdomf-revision.php:194 widgets/tdomf-content-widget.php:59
 msgid "Content"
 msgstr ""
 
-#: admin/tdomf-revision.php:221
+#: admin/tdomf-revision.php:223
 msgid "Edit ID"
 msgstr ""
 
-#: admin/tdomf-revision.php:222
+#: admin/tdomf-revision.php:224
 msgid "Date Created"
 msgstr ""
 
-#: admin/tdomf-revision.php:223
+#: admin/tdomf-revision.php:225
 msgid "Author"
 msgstr ""
 
-#: admin/tdomf-revision.php:224
+#: admin/tdomf-revision.php:226
 msgid "Form"
 msgstr ""
 
-#: admin/tdomf-revision.php:227
+#: admin/tdomf-revision.php:229
 msgid "Actions"
 msgstr ""
 
-#: admin/tdomf-revision.php:239
+#: admin/tdomf-revision.php:241
 msgid "[Current]"
 msgstr ""
 
-#: admin/tdomf-revision.php:311
+#: admin/tdomf-revision.php:313
 msgid "Diff"
 msgstr ""
 
-#: admin/tdomf-revision.php:313
+#: admin/tdomf-revision.php:315
 msgid "Rollback"
 msgstr ""
 
-#: admin/tdomf-revision.php:337
+#: admin/tdomf-revision.php:339
 msgid "[Original]"
 msgstr ""
 
@@ -2697,100 +2697,100 @@ msgstr ""
 msgid "Deleting Options... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:67 admin/tdomf-uninstall.php:90
-#: admin/tdomf-uninstall.php:107 admin/tdomf-uninstall.php:119
-#: admin/tdomf-uninstall.php:140 admin/tdomf-uninstall.php:155
-#: admin/tdomf-uninstall.php:169 admin/tdomf-uninstall.php:181
-#: admin/tdomf-uninstall.php:208 admin/tdomf-uninstall.php:230
+#: admin/tdomf-uninstall.php:66 admin/tdomf-uninstall.php:89
+#: admin/tdomf-uninstall.php:106 admin/tdomf-uninstall.php:118
+#: admin/tdomf-uninstall.php:139 admin/tdomf-uninstall.php:154
+#: admin/tdomf-uninstall.php:168 admin/tdomf-uninstall.php:180
+#: admin/tdomf-uninstall.php:207 admin/tdomf-uninstall.php:229
 msgid "DONE"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:71
+#: admin/tdomf-uninstall.php:70
 msgid "Resetting role capabilities... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:94
+#: admin/tdomf-uninstall.php:93
 msgid "Deleting Widget Options (or at least the ones I can find!)... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:110 admin/tdomf-uninstall.php:184
+#: admin/tdomf-uninstall.php:109 admin/tdomf-uninstall.php:183
 msgid "FAIL"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:115
+#: admin/tdomf-uninstall.php:114
 msgid "Deleting Database Tables... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:129
+#: admin/tdomf-uninstall.php:128
 msgid ""
 "Removing posts submitted or managed by TDO Mini Forms (this may take a few "
 "minutes depending on the number of posts)... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:146
+#: admin/tdomf-uninstall.php:145
 msgid "Attempting to delete any users created by TDOMF... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:161
+#: admin/tdomf-uninstall.php:160
 msgid ""
 "Removing info from remaining users (this may take a few minutes depending on "
 "number of users)... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:177
+#: admin/tdomf-uninstall.php:176
 #, php-format
 msgid "Deleting Form %d... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:200
+#: admin/tdomf-uninstall.php:199
 msgid ""
 "Removing info from all users (this may take a few minutes depending on "
 "number of users)... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:214
+#: admin/tdomf-uninstall.php:213
 msgid ""
 "Removing info from all posts (this may take a few minutes depending on "
 "number of posts)... "
 msgstr ""
 
-#: admin/tdomf-uninstall.php:241
+#: admin/tdomf-uninstall.php:240
 msgid "Uninstall TDO Mini Forms"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:254 admin/tdomf-uninstall.php:261
-#: admin/tdomf-uninstall.php:274
+#: admin/tdomf-uninstall.php:253 admin/tdomf-uninstall.php:260
+#: admin/tdomf-uninstall.php:273
 msgid "Final step to complete uninstall: Deactivate TDO Mini Forms Plugin"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:266
+#: admin/tdomf-uninstall.php:265
 msgid ""
 "You are about to do some potentially critical things to Wordpress. Please "
 "only proceed if you happy with the risks."
 msgstr ""
 
-#: admin/tdomf-uninstall.php:267
+#: admin/tdomf-uninstall.php:266
 msgid "Are you really really sure you want to proceed?"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:280
+#: admin/tdomf-uninstall.php:279
 msgid ""
 "From here you can uninstall and remove some or all of TDO Mini Form's "
 "options and information."
 msgstr ""
 
-#: admin/tdomf-uninstall.php:284
+#: admin/tdomf-uninstall.php:283
 msgid ""
 "You can simply remove just the settings/options. This will preserve "
 "submitter information on posts and users if you re-enable TDO Mini Forms "
 "later."
 msgstr ""
 
-#: admin/tdomf-uninstall.php:285
+#: admin/tdomf-uninstall.php:284
 msgid "Remove Options"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:289
+#: admin/tdomf-uninstall.php:288
 msgid ""
 "This removes <i>nearly everything</i>. Any posts submitted, users created or "
 "pages created are not removed. However submitted posts are stripped of any "
@@ -2798,11 +2798,11 @@ msgid ""
 "previousily submitted will not turn up as submitted posts any more."
 msgstr ""
 
-#: admin/tdomf-uninstall.php:290
+#: admin/tdomf-uninstall.php:289
 msgid "Uninstall Nearly Everything!"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:294
+#: admin/tdomf-uninstall.php:293
 msgid ""
 "This removes <b>everything</b>. It is advised to backup your database before "
 "proceeding as posts, pages and users will be deleted. All posts submitted by "
@@ -2812,7 +2812,7 @@ msgid ""
 "used TDO Mini Forms!"
 msgstr ""
 
-#: admin/tdomf-uninstall.php:295
+#: admin/tdomf-uninstall.php:294
 msgid "Uninstall Everything!!!!"
 msgstr ""
 
@@ -2939,59 +2939,59 @@ msgstr ""
 msgid "Imported from default form"
 msgstr ""
 
-#: include/tdomf-db.php:879
+#: include/tdomf-db.php:882
 #, php-format
 msgid "Copy of %s"
 msgstr ""
 
-#: include/tdomf-form.php:477
+#: include/tdomf-form.php:486
 msgid "Error! Could not generate a preview!"
 msgstr ""
 
-#: include/tdomf-form.php:480
+#: include/tdomf-form.php:489
 #, php-format
 msgid "This is a preview of your contribution:%s\n"
 msgstr ""
 
-#: include/tdomf-form.php:482
+#: include/tdomf-form.php:491
 #, php-format
 msgid "This is a preview of your submission:%s\n"
 msgstr ""
 
-#: include/tdomf-form.php:861
+#: include/tdomf-form.php:896
 msgid "TDOMF ERROR: Failed to create post! $post_ID == 0"
 msgstr ""
 
-#: include/tdomf-form.php:1070
+#: include/tdomf-form.php:1105
 #, php-format
 msgid "Form %d does not exist."
 msgstr ""
 
-#: include/tdomf-form.php:1251
+#: include/tdomf-form.php:1309
 msgid "TDOMF: ERROR with AJAX request."
 msgstr ""
 
-#: include/tdomf-form.php:1330
+#: include/tdomf-form.php:1388
 msgid "Please wait a moment while your submission is processed..."
 msgstr ""
 
-#: include/tdomf-form.php:1454
+#: include/tdomf-form.php:1512
 msgid "Send"
 msgstr ""
 
-#: include/tdomf-form.php:1524
+#: include/tdomf-form.php:1582
 msgid ""
 "ERROR: <a href=\"http://www.google.com/search?client=opera&rls=en&q=php"
 "+session_start&sourceid=opera&ie=utf-8&oe=utf-8\">session_start()</a> has "
 "not been called yet!"
 msgstr ""
 
-#: include/tdomf-form.php:1525 include/tdomf-hacks.php:71
+#: include/tdomf-form.php:1583 include/tdomf-hacks.php:71
 #: include/tdomf-hacks.php:98
 msgid "This may be due to..."
 msgstr ""
 
-#: include/tdomf-form.php:1529
+#: include/tdomf-form.php:1587
 #, php-format
 msgid ""
 "Your theme does not use the get_header template tag. You can confirm this by "
@@ -3000,14 +3000,14 @@ msgid ""
 "the beginning of %s."
 msgstr ""
 
-#: include/tdomf-form.php:1533
+#: include/tdomf-form.php:1591
 msgid ""
 "Another Plugin conflicts with TDOMF. To confirm this, disable all your "
 "plugins and then renable only TDOMF. If this error disappears than another "
 "plugin is causing the problem."
 msgstr ""
 
-#: include/tdomf-form.php:1541
+#: include/tdomf-form.php:1599
 msgid ""
 "ERROR: <a href=\"http://ie2.php.net/register_globals\"><i>register_globals</"
 "i></a> is enabled in your PHP environment!"
@@ -3445,20 +3445,20 @@ msgstr ""
 msgid "You can moderate all edits from %s\n"
 msgstr ""
 
-#: include/tdomf-notify.php:548 include/tdomf-notify.php:572
+#: include/tdomf-notify.php:549 include/tdomf-notify.php:573
 msgid "Do you wish to be notified when your post is approved (or rejected)?"
 msgstr ""
 
-#: include/tdomf-notify.php:551 include/tdomf-notify.php:576
+#: include/tdomf-notify.php:552 include/tdomf-notify.php:577
 #: widgets/tdomf-autorespondemail-widget.php:80
 msgid "Email for notification:"
 msgstr ""
 
-#: include/tdomf-notify.php:596
+#: include/tdomf-notify.php:597
 msgid "You must specify a valid email address to send the notification to."
 msgstr ""
 
-#: include/tdomf-notify.php:633
+#: include/tdomf-notify.php:634
 #, php-format
 msgid ""
 "This is just a quick email to notify you that your post has been approved "
@@ -3466,32 +3466,32 @@ msgid ""
 "\n"
 msgstr ""
 
-#: include/tdomf-notify.php:634 include/tdomf-notify.php:639
+#: include/tdomf-notify.php:635 include/tdomf-notify.php:640
 msgid "Best Regards"
 msgstr ""
 
-#: include/tdomf-notify.php:638
+#: include/tdomf-notify.php:639
 #, php-format
 msgid ""
 "We are sorry to inform you that your post \"%s\" has been rejected.\n"
 "\n"
 msgstr ""
 
-#: include/tdomf-notify.php:643
+#: include/tdomf-notify.php:644
 #, php-format
 msgid "[%s] Your entry \"%s\" has been approved!"
 msgstr ""
 
-#: include/tdomf-notify.php:646
+#: include/tdomf-notify.php:647
 #, php-format
 msgid "[%s] Your entry \"%s\" has been rejected! :("
 msgstr ""
 
-#: include/tdomf-notify.php:681
+#: include/tdomf-notify.php:682
 msgid "Submission Approved Email"
 msgstr ""
 
-#: include/tdomf-notify.php:685
+#: include/tdomf-notify.php:686
 msgid "Submission Rejected Email"
 msgstr ""
 
@@ -3597,25 +3597,52 @@ msgstr ""
 msgid "Default URL (can leave blank):"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:482
-msgid "Download Link"
+#: include/tdomf-upload-functions.php:532
+msgid "Upload Files"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:756
+#: include/tdomf-upload-functions.php:535
+#, php-format
+msgid "Upload Files %d"
+msgstr ""
+
+#: include/tdomf-upload-functions.php:863
 msgid "Failed to move uploaded file from temporary location!"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:786
+#: include/tdomf-upload-functions.php:928
+#, php-format
+msgid ""
+"No files have been uploaded yet. You must upload a minimum of %d files for %"
+"s."
+msgstr ""
+
+#: include/tdomf-upload-functions.php:930
 #, php-format
 msgid "No files have been uploaded yet. You must upload a minimum of %d files."
 msgstr ""
 
-#: include/tdomf-upload-functions.php:798
+#: include/tdomf-upload-functions.php:945
+#, php-format
+msgid "You must upload a minimum of %d files for %s."
+msgstr ""
+
+#: include/tdomf-upload-functions.php:947
 #, php-format
 msgid "You must upload a minimum of %d files."
 msgstr ""
 
-#: include/tdomf-upload-functions.php:864
+#: include/tdomf-upload-functions.php:977
+#, php-format
+msgid ""
+"A file was uploaded/generated with submission.\r\n"
+"Path: %s\r\n"
+"Size: %s\r\n"
+"\r\n"
+msgstr ""
+
+#: include/tdomf-upload-functions.php:984
+#: include/tdomf-upload-functions.php:1003
 #, php-format
 msgid ""
 "File %s was uploaded with submission.\r\n"
@@ -3627,7 +3654,8 @@ msgid ""
 "\r\n"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:866
+#: include/tdomf-upload-functions.php:986
+#: include/tdomf-upload-functions.php:1005
 #, php-format
 msgid ""
 "User Command:\r\n"
@@ -3637,91 +3665,88 @@ msgid ""
 "\r\n"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:873
-msgid "No files uploaded with this post!"
+#: include/tdomf-upload-functions.php:1014
+msgid "No files uploaded with this post/widget!"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:917
-#: widgets/tdomf-comments-widget.php:343
-#: widgets/tdomf-subscribe-to-comments-widget.php:241
-#: widgets/tdomf-tags-widget.php:113
-msgid "Title: "
-msgstr ""
-
-#: include/tdomf-upload-functions.php:921
+#: include/tdomf-upload-functions.php:1053
 msgid "Path to store uploads (should not be publically accessible):"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:925
+#: include/tdomf-upload-functions.php:1057
 msgid "Allowed File Types:"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:931
+#: include/tdomf-upload-functions.php:1063
 msgid ""
 "Use filename as post title (as long as the content widget doesn't set it)"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:936
+#: include/tdomf-upload-functions.php:1068
 #, php-format
 msgid "Max File Size in bytes. Example: 1024 = %s, 1048576 = %s"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:940
+#: include/tdomf-upload-functions.php:1072
 msgid "Minimum File Uploads <i>(0 indicates file uploads optional)</i>"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:943
+#: include/tdomf-upload-functions.php:1075
 msgid "Maximum File Uploads"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:950
+#: include/tdomf-upload-functions.php:1082
 msgid "Do not use TDOMF handler for URL of download"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:953
+#: include/tdomf-upload-functions.php:1085
 msgid "URL of uploaded file area:"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:959
+#: include/tdomf-upload-functions.php:1091
 msgid ""
 "Command to execute on file after file uploaded successfully (result will be "
 "added to log). Leave blank to do nothing:"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:965
+#: include/tdomf-upload-functions.php:1097
 msgid ""
 "Insert Uploaded Files as Attachments on post (this will also generate a "
 "thumbnail using Wordpress core if upload is an image)"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:972
+#: include/tdomf-upload-functions.php:1104
 msgid "Add link to Attachment page to post content"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:979
+#: include/tdomf-upload-functions.php:1111
 msgid ""
 "Add thumbnail link to Attachment page to post content (if thumbnail "
 "avaliable)"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:986
+#: include/tdomf-upload-functions.php:1118
 msgid "Add thumbnail as download link to post content (if thumbnail avaliable)"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:994
+#: include/tdomf-upload-functions.php:1126
 msgid "Add download link to post content"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:999
+#: include/tdomf-upload-functions.php:1131
 msgid "Add download link as image tag to post content"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:1006
+#: include/tdomf-upload-functions.php:1138
 msgid "Add Download Link as custom value"
 msgstr ""
 
-#: include/tdomf-upload-functions.php:1009
+#: include/tdomf-upload-functions.php:1141
 msgid "Name of Custom Key:"
+msgstr ""
+
+#: include/tdomf-upload-functions.php:1161
+msgid "Download Link"
 msgstr ""
 
 #: include/tdomf-widget-classes.php:337
@@ -3729,211 +3754,443 @@ msgstr ""
 msgid "How many %s widgets would you like?"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:931
+#: include/tdomf-widget-classes.php:936
 msgid "Widget Title: "
 msgstr ""
 
-#: include/tdomf-widget-classes.php:937
+#: include/tdomf-widget-classes.php:942
 msgid "This widget can be modified in the form hacker"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:942
+#: include/tdomf-widget-classes.php:947
 msgid "This widget's preview can be modified in the form hacker"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1361 include/tdomf-widget-classes.php:1413
-#: include/tdomf-widget-classes.php:1808 include/tdomf-widget-classes.php:1849
+#: include/tdomf-widget-classes.php:1471 include/tdomf-widget-classes.php:1596
+#: include/tdomf-widget-classes.php:2169 include/tdomf-widget-classes.php:2210
 #, php-format
 msgid "%s (Required):"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1363 include/tdomf-widget-classes.php:1415
-#: include/tdomf-widget-classes.php:1810 include/tdomf-widget-classes.php:1851
-#: include/tdomf-widget-classes.php:1932 include/tdomf-widget-classes.php:1963
+#: include/tdomf-widget-classes.php:1473 include/tdomf-widget-classes.php:1598
+#: include/tdomf-widget-classes.php:2171 include/tdomf-widget-classes.php:2212
+#: include/tdomf-widget-classes.php:2293 include/tdomf-widget-classes.php:2324
 #, php-format
 msgid "%s:"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1371 include/tdomf-widget-classes.php:1423
-#: include/tdomf-widget-classes.php:1816 include/tdomf-widget-classes.php:1856
+#: include/tdomf-widget-classes.php:1481 include/tdomf-widget-classes.php:1606
+#: include/tdomf-widget-classes.php:2177 include/tdomf-widget-classes.php:2217
 #, php-format
 msgid "<small>Allowable Tags: %s</small>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1374 include/tdomf-widget-classes.php:1426
-#: include/tdomf-widget-classes.php:1819 include/tdomf-widget-classes.php:1859
+#: include/tdomf-widget-classes.php:1484 include/tdomf-widget-classes.php:1609
+#: include/tdomf-widget-classes.php:2180 include/tdomf-widget-classes.php:2220
 #, php-format
 msgid "<small>Max Word Limit: %d</small>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1377 include/tdomf-widget-classes.php:1429
-#: include/tdomf-widget-classes.php:1822 include/tdomf-widget-classes.php:1862
+#: include/tdomf-widget-classes.php:1487 include/tdomf-widget-classes.php:1612
+#: include/tdomf-widget-classes.php:2183 include/tdomf-widget-classes.php:2223
 #, php-format
 msgid "<small>Max Character Limit: %d</small>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1383 include/tdomf-widget-classes.php:1435
+#: include/tdomf-widget-classes.php:1536 include/tdomf-widget-classes.php:1660
+#, php-format
+msgid "<small>Number: %f to %f </small>"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1538 include/tdomf-widget-classes.php:1662
+#, php-format
+msgid "<small>Number: Greater than %f</small>"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1540 include/tdomf-widget-classes.php:1664
+#, php-format
+msgid "<small>Number: Smaller than %f</small>"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1544 include/tdomf-widget-classes.php:1668
+#, php-format
+msgid "<small>Number: %d - %d </small>"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1546 include/tdomf-widget-classes.php:1670
+#, php-format
+msgid "<small>Number: Greater than %d</small>"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1548 include/tdomf-widget-classes.php:1672
+#, php-format
+msgid "<small>Number: Smaller than %d</small>"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1555 include/tdomf-widget-classes.php:1678
 #: widgets/tdomf-autorespondemail-widget.php:58
-#: widgets/tdomf-whoami-widget.php:139 widgets/tdomf-whoami-widget.php:448
+#: widgets/tdomf-whoami-widget.php:139 widgets/tdomf-whoami-widget.php:460
 msgid "Email:"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1385 include/tdomf-widget-classes.php:1437
+#: include/tdomf-widget-classes.php:1557 include/tdomf-widget-classes.php:1680
 msgid "URL:"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1473 include/tdomf-widget-classes.php:1491
+#: include/tdomf-widget-classes.php:1727 include/tdomf-widget-classes.php:1745
+#: include/tdomf-widget-classes.php:2793 include/tdomf-widget-classes.php:2804
+#: include/tdomf-widget-classes.php:3100 include/tdomf-widget-classes.php:3136
 #, php-format
 msgid "%s: "
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1526 include/tdomf-widget-classes.php:1998
-#: widgets/tdomf-customfield-widget.php:977
-#: widgets/tdomf-whoami-widget.php:192 widgets/tdomf-whoami-widget.php:196
-#: widgets/tdomf-whoami-widget.php:200
+#: include/tdomf-widget-classes.php:1798 include/tdomf-widget-classes.php:2360
+#: include/tdomf-widget-classes.php:3279 widgets/tdomf-whoami-widget.php:192
+#: widgets/tdomf-whoami-widget.php:196 widgets/tdomf-whoami-widget.php:200
 msgid "Required"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1533
+#: include/tdomf-widget-classes.php:1805
 msgid "Size"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1538 include/tdomf-widget-classes.php:2048
+#: include/tdomf-widget-classes.php:1810 include/tdomf-widget-classes.php:2410
+#: include/tdomf-widget-classes.php:3294
 #: widgets/tdomf-categories-widget.php:372
-#: widgets/tdomf-customfield-widget.php:343
+#: widgets/tdomf-customfield-widget.php:781
 msgid "Title:"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1543
+#: include/tdomf-widget-classes.php:1815
 msgid "Default Text:"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1548 include/tdomf-widget-classes.php:2010
+#: include/tdomf-widget-classes.php:1820 include/tdomf-widget-classes.php:2372
 msgid "Character Limit <i>(0 indicates no limit)</i>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1553 include/tdomf-widget-classes.php:2015
+#: include/tdomf-widget-classes.php:1825 include/tdomf-widget-classes.php:2377
 msgid "Word Limit <i>(0 indicates no limit)</i>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1558 include/tdomf-widget-classes.php:2031
+#: include/tdomf-widget-classes.php:1830 include/tdomf-widget-classes.php:2393
 msgid "Restrict Tags"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1561 include/tdomf-widget-classes.php:2034
+#: include/tdomf-widget-classes.php:1833 include/tdomf-widget-classes.php:2396
 msgid "Allowable Tags"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1577 widgets/tdomf-text-widget.php:35
+#: include/tdomf-widget-classes.php:1849 widgets/tdomf-text-widget.php:35
 msgid "Text"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1584
+#: include/tdomf-widget-classes.php:1856
 msgid "Validate <i>(checks if email domain exists)</i>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1590
+#: include/tdomf-widget-classes.php:1862
 msgid "URL"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1594
+#: include/tdomf-widget-classes.php:1866
 msgid "Validate <i>(checks if URL exists)</i>"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1617 include/tdomf-widget-classes.php:2077
+#: include/tdomf-widget-classes.php:1872
+msgid "Number"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1875
+msgid "Lowest number allowed <i>(leave blank for no limit)</i>:"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1881
+msgid "Highest number allowed <i>(leave blank for no limit)</i>:"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1888
+msgid "Include Javascript checking code"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1893
+msgid "Allow decimal numbers"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1916 include/tdomf-widget-classes.php:2439
+#: include/tdomf-widget-classes.php:2669
 msgid "ERROR: Form is invalid. Please check TDO Mini Forms admin."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1627
+#: include/tdomf-widget-classes.php:1926
 #, php-format
 msgid "You must specify a vaild URL for %s."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1629
+#: include/tdomf-widget-classes.php:1928
 msgid "You must specify a valid URL."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1633
+#: include/tdomf-widget-classes.php:1932
 #, php-format
 msgid "You must specify a vaild email address for %s."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1635
+#: include/tdomf-widget-classes.php:1934
 msgid "You must specify a valid email."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1640 include/tdomf-widget-classes.php:2086
+#: include/tdomf-widget-classes.php:1938
+#, php-format
+msgid "You must specify a number for %s."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1940
+msgid "You must specify a number."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1945 include/tdomf-widget-classes.php:2448
 #, php-format
 msgid "You must specify some %s."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1642 include/tdomf-widget-classes.php:2088
+#: include/tdomf-widget-classes.php:1947 include/tdomf-widget-classes.php:2450
 msgid "You must specify some text."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1655
+#: include/tdomf-widget-classes.php:1960
 #, php-format
 msgid "The URL \"%s\" for %s does not look correct."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1657
+#: include/tdomf-widget-classes.php:1962
 #, php-format
 msgid "The URL \"%s\" does not look correct."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1663
+#: include/tdomf-widget-classes.php:1968
 msgid "The URL doesn't doesnt seem to exist."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1665
+#: include/tdomf-widget-classes.php:1970
 #, php-format
 msgid "The link doesn't doesnt seem to exist. Returned %d error code."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1672
+#: include/tdomf-widget-classes.php:1977
 #, php-format
 msgid "The email address \"%s\" for %s does not seem to be correct."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1674
+#: include/tdomf-widget-classes.php:1979
 #, php-format
 msgid "The email address \"%s\" does not seem to be correct."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1691 include/tdomf-widget-classes.php:2119
+#: include/tdomf-widget-classes.php:1988
+#, php-format
+msgid "%f for %s is too low. It must be equal to or greater than %f."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1990
+#, php-format
+msgid "%f is too low. It must be equal to or greater than %f."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1994
+#, php-format
+msgid "%f for %s is too high. It must be equal to or less than %f."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:1996
+#, php-format
+msgid "%f is too high. It must be equal to or less than %f."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2003
+#, php-format
+msgid "%d for %s is too low. It must be equal to or greater than %d."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2005
+#, php-format
+msgid "%d is too low. It must be equal to or greater than %d."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2009
+#, php-format
+msgid "%d for %s is too high. It must be equal to or less than %d."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2011
+#, php-format
+msgid "%d is too high. It must be equal to or less than %d."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2017
+#, php-format
+msgid "\"%s\" for %s is not a valid number."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2019
+#, php-format
+msgid "\"%s\" is not a valid number."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2036 include/tdomf-widget-classes.php:2481
 #, php-format
 msgid "You have exceeded the max character length by %d characters for %s."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1693 include/tdomf-widget-classes.php:2121
+#: include/tdomf-widget-classes.php:2038 include/tdomf-widget-classes.php:2483
 #, php-format
 msgid "You have exceeded the max character length by %d characters."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1706 include/tdomf-widget-classes.php:2134
+#: include/tdomf-widget-classes.php:2051 include/tdomf-widget-classes.php:2496
 #, php-format
 msgid "You have exceeded the max word count by %d words for %s."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:1708 include/tdomf-widget-classes.php:2136
+#: include/tdomf-widget-classes.php:2053 include/tdomf-widget-classes.php:2498
 #, php-format
 msgid "You have exceeded the max word count by %d words."
 msgstr ""
 
-#: include/tdomf-widget-classes.php:2005
+#: include/tdomf-widget-classes.php:2367
 msgid "Use Quicktags"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:2020
+#: include/tdomf-widget-classes.php:2382
 msgid "Cols"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:2024
+#: include/tdomf-widget-classes.php:2386
 msgid "Rows"
 msgstr ""
 
-#: include/tdomf-widget-classes.php:2053
+#: include/tdomf-widget-classes.php:2415
 msgid "Default Text"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2642
+msgid "Default Value:"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2646
+msgid "Treat default value as code (php)"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2739 include/tdomf-widget-classes.php:2770
+#: include/tdomf-widget-classes.php:2968 include/tdomf-widget-classes.php:3036
+#, php-format
+msgid "%s (Required)"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2790 include/tdomf-widget-classes.php:2807
+#: widgets/tdomf-customfield-widget.php:738
+msgid "Checked"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2790 include/tdomf-widget-classes.php:2809
+msgid "Unchecked"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2837
+#, php-format
+msgid "You must uncheck \"%s\"."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2839
+msgid "You must uncheck the box!"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2843
+#, php-format
+msgid "You must check \"%s\"."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2845
+msgid "You must check the box!"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2887
+msgid "Required (the user must select the opposite of the default setting)"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2892
+msgid "Default Setting"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:2897 widgets/tdomf-text-widget.php:123
+msgid "Text:"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3172
+#, php-format
+msgid "You must select at least one option from %s."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3174
+msgid "You must select at least one options."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3180
+#, php-format
+msgid "You must select options from %s."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3182
+msgid "You must select some options."
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3284
+msgid "Number of items to display"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3289
+msgid "Allow multiple selection"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3302
+msgid "Nothing selected"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3340
+msgid "You must specify a value for Item name and Item value"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3357
+msgid "That value already exists!"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3388
+msgid "Please select item to remove from the list!"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3397
+msgid "Default selected options: "
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3426
+msgid "Make Current Selection Default"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3435
+#, php-format
+msgid "Default selected options: %s"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3457
+msgid "Name/Text of Item"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3462
+msgid "Value of Item"
+msgstr ""
+
+#: include/tdomf-widget-classes.php:3466
+msgid "Append Item"
 msgstr ""
 
 #: tdomf-form-ajax.php:43 tdomf-form-post.php:36
@@ -3988,299 +4245,328 @@ msgid ""
 "Then try submitting your post again."
 msgstr ""
 
-#: tdomf-upload-inline.php:189
+#: tdomf-upload-inline.php:201
 #, php-format
 msgid "Could not move uploaded file %s to storage area!<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:193
+#: tdomf-upload-inline.php:205
 #, php-format
 msgid "Files with %s extensions are forbidden.<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:199
+#: tdomf-upload-inline.php:211
 #, php-format
 msgid "Sorry but %s was too big. It exceeded the server configuration.<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:202
+#: tdomf-upload-inline.php:214
 #, php-format
 msgid ""
 "Sorry but %s was too big. It was greater than %s. It exceeded the configured "
 "maximum.<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:205
+#: tdomf-upload-inline.php:217
 #, php-format
 msgid "Sorry but only part of %s was uploaded.<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:208
+#: tdomf-upload-inline.php:220
 msgid "Sorry file does not exist.<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:211
+#: tdomf-upload-inline.php:223
 #, php-format
 msgid "Upload of %s failed for an unknown reason. (%s)<br/>"
 msgstr ""
 
-#: tdomf-upload-inline.php:281
+#: tdomf-upload-inline.php:293
 #, php-format
 msgid "The file must be of type %s!"
 msgstr ""
 
-#: tdomf-upload-inline.php:292
+#: tdomf-upload-inline.php:304
 #, php-format
 msgid "File %s has a bad extension and cannot be upload!"
 msgstr ""
 
-#: tdomf-upload-inline.php:316
+#: tdomf-upload-inline.php:329
 msgid ""
 "Your files will be kept on the server for 1 hour. You must submit your post "
 "before then."
 msgstr ""
 
-#: tdomf-upload-inline.php:320
+#: tdomf-upload-inline.php:333
 #, php-format
 msgid "Max File Size: %s"
 msgstr ""
 
-#: tdomf-upload-inline.php:321
+#: tdomf-upload-inline.php:334
 #, php-format
 msgid "Allowable File Types: %s"
 msgstr ""
 
-#: tdomf-upload-inline.php:327
+#: tdomf-upload-inline.php:340
 #, php-format
 msgid "<i>%s</i> (%s) Uploaded"
 msgstr ""
 
-#: tdomf-upload-inline.php:334
+#: tdomf-upload-inline.php:347
 msgid "Upload: "
 msgstr ""
 
-#: tdomf-upload-inline.php:338
+#: tdomf-upload-inline.php:351
 msgid "Upload Now!"
 msgstr ""
 
-#: tdomf-upload-inline.php:341
+#: tdomf-upload-inline.php:354
 msgid "Delete All!"
 msgstr ""
 
-#: tdomf.php:616
+#: tdomf.php:639
+msgid "Plugin Options"
+msgstr ""
+
+#: tdomf.php:642
 msgid "Form Options"
 msgstr ""
 
-#: tdomf.php:619
+#: tdomf.php:645
 msgid "Form Creator"
 msgstr ""
 
-#: tdomf.php:625
+#: tdomf.php:651
 msgid "Form Export"
 msgstr ""
 
-#: tdomf.php:629
+#: tdomf.php:667
 #, php-format
 msgid "Moderation (%d)"
 msgstr ""
 
-#: tdomf.php:636
+#: tdomf.php:674
 msgid "Users and IPs"
 msgstr ""
 
-#: tdomf.php:642
+#: tdomf.php:680
 msgid "Uninstall"
 msgstr ""
 
-#: tdomf.php:694
+#: tdomf.php:690
+msgid "Revisions"
+msgstr ""
+
+#: tdomf.php:747
 #, php-format
 msgid "<a href=\"%s\">Integration with Akismet for SPAM protection</a>"
 msgstr ""
 
-#: tdomf.php:697
+#: tdomf.php:750
 #, php-format
 msgid "<a href=\"%s\">Automatically schedule approved posts!</a>"
 msgstr ""
 
-#: tdomf.php:700
+#: tdomf.php:753
 #, php-format
 msgid "<a href=\"%s\">Add submission throttling rules to your form!</a>"
 msgstr ""
 
-#: tdomf.php:705
+#: tdomf.php:758
 #, php-format
 msgid ""
 "View tdomfinfo() in <a href=\"%s\">text</a> and <a href=\"%s\">html-code</"
 "a>. Useful for copying and pasting!"
 msgstr ""
 
-#: tdomf.php:709
+#: tdomf.php:762
 #, php-format
 msgid "<a href=\"%s\">Import and export individual form settings</a>"
 msgstr ""
 
-#: tdomf.php:712
+#: tdomf.php:765
 #, php-format
 msgid "New widget for your theme: <a href=\"%s\">Top Submitters</a>"
 msgstr ""
 
-#: tdomf.php:720
+#: tdomf.php:773
 #, php-format
 msgid "<a href=\"%s\">AJAX support for forms!</a>"
 msgstr ""
 
-#: tdomf.php:723
+#: tdomf.php:776
 #, php-format
 msgid "<a href=\"%s\">Hack the appearance of your form!</a>"
 msgstr ""
 
-#: tdomf.php:726
+#: tdomf.php:779
 #, php-format
 msgid "<a href=\"%s\">Text widget updated to support macros and php code</a>"
 msgstr ""
 
-#: tdomf.php:729
+#: tdomf.php:782
 #, php-format
 msgid ""
 "<a href=\"%s\">Categories widget can now be displayed as checkboxes or radio "
 "buttons</a>"
 msgstr ""
 
-#: tdomf.php:732
+#: tdomf.php:785
 #, php-format
 msgid ""
 "<a href=\"%s\">New Widget: Append. Allows you add text to a submitted post. "
 "It can even run PHP code.</a>"
 msgstr ""
 
-#: tdomf.php:734
+#: tdomf.php:787
 msgid ""
 "New Template Tags: tdomf_get_the_submitter_email and "
 "tdomf_the_submitter_email"
 msgstr ""
 
-#: tdomf.php:740
+#: tdomf.php:793
 msgid "Auto Respond Email widget for your form"
 msgstr ""
 
-#: tdomf.php:741
+#: tdomf.php:794
 msgid "Ban User and IP links directly from the moderation email"
 msgstr ""
 
-#: tdomf.php:742
+#: tdomf.php:795
 msgid ""
 "The moderation emails that are sent for admins can now be left turned on "
 "even if moderation is turned off"
 msgstr ""
 
-#: tdomf.php:746
+#: tdomf.php:799
 msgid "Improved Error Reporting"
 msgstr ""
 
-#: tdomf.php:747
+#: tdomf.php:800
 msgid "Form toolbar on all form pages (Widgets and Form Hacker)"
 msgstr ""
 
-#: tdomf.php:748
+#: tdomf.php:801
 msgid "Include option implemented for Categories widget"
 msgstr ""
 
-#: tdomf.php:749
+#: tdomf.php:802
 msgid "Import/Export restored and improved"
 msgstr ""
 
-#: tdomf.php:750
+#: tdomf.php:803
 msgid "Default Generated Forms are now W3C compliant"
 msgstr ""
 
-#: tdomf.php:751
+#: tdomf.php:804
 msgid ""
 "Comment Notification from Submitted Posts no longer go to the Submitter "
 "unless they can modify the comments"
 msgstr ""
 
-#: tdomf.php:755
+#: tdomf.php:808
 msgid "Excerpt Widget"
 msgstr ""
 
-#: tdomf.php:756
+#: tdomf.php:809
 msgid "Comments Management Widget"
 msgstr ""
 
-#: tdomf.php:757
+#: tdomf.php:810
 msgid "Include option implemented for Categories widget (fixed)"
 msgstr ""
 
-#: tdomf.php:758
+#: tdomf.php:811
 msgid "Order by and Sort options for Categories widget"
 msgstr ""
 
-#: tdomf.php:759
+#: tdomf.php:812
 msgid "Integration with Subscribe to Comments plugin via widget"
 msgstr ""
 
-#: tdomf.php:760
+#: tdomf.php:813
 msgid "Publish now button"
 msgstr ""
 
-#: tdomf.php:761
+#: tdomf.php:814
 msgid ""
 "Specify Email Addresses instead of Roles to recieve Moderation notifications"
 msgstr ""
 
-#: tdomf.php:762
+#: tdomf.php:815
 msgid ""
 "Default tags, required and enable/disable user adding tags options for Tags "
 "widget"
 msgstr ""
 
-#: tdomf.php:766
+#: tdomf.php:819
 msgid ""
 "More powerful form access configuration. Now you can select by capability "
 "and user as well as role!"
 msgstr ""
 
-#: tdomf.php:767
+#: tdomf.php:820
 msgid "2.7 Wordpress Compatibility"
 msgstr ""
 
-#: tdomf.php:768
+#: tdomf.php:821
 msgid "Can now turn off auto-publishing of users with publishing rights"
 msgstr ""
 
-#: tdomf.php:769
+#: tdomf.php:822
 msgid "New Permalink Widget"
 msgstr ""
 
-#: tdomf.php:770
+#: tdomf.php:823
 msgid "New GeoMashup Integration Widget"
 msgstr ""
 
-#: tdomf.php:774
+#: tdomf.php:827
 msgid ""
 "Auto Respond Email widget can now provide a link to flag posts using a "
 "Custom Field"
 msgstr ""
 
-#: tdomf.php:778
+#: tdomf.php:831
 msgid "<b>You can now created forms to edit posts and pages!</b>"
 msgstr ""
 
-#: tdomf.php:783
+#: tdomf.php:836
 msgid ""
 "<b>More Spam Checking options added. Can now be configured per form!</b>"
 msgstr ""
 
-#: tdomf.php:787
+#: tdomf.php:840
 msgid "<b>Filter by user, ip and form on moderations screen</b>"
 msgstr ""
 
-#: tdomf.php:788
+#: tdomf.php:841
 msgid "<b>Enable syntax code highlighting on Form Hacker and messages</b>"
 msgstr ""
 
-#: tdomf.php:789
+#: tdomf.php:842
 msgid "<b>Special revision page for comparing revisions created by TDOMF</b>"
+msgstr ""
+
+#: tdomf.php:848
+msgid "<b>Custom Field widget for Edit Forms</b>"
+msgstr ""
+
+#: tdomf.php:849
+msgid "<b>Restrict Custom Field Text Field to a number</b>"
+msgstr ""
+
+#: tdomf.php:850
+msgid "<b>Execute PHP code in Custom Field Hidden Field</b>"
+msgstr ""
+
+#: tdomf.php:851
+msgid ""
+"<b>Custom Fields modified by TDOMF Forms are stored in revision history</b>"
+msgstr ""
+
+#: tdomf.php:852
+msgid "<b>Allow multiple instances of the Upload Files widget</b>"
 msgstr ""
 
 #: widgets/freecap/freecap_tdomf.php:64
@@ -4580,6 +4866,12 @@ msgstr ""
 msgid "Pings and Trackbacks on"
 msgstr ""
 
+#: widgets/tdomf-comments-widget.php:343
+#: widgets/tdomf-subscribe-to-comments-widget.php:241
+#: widgets/tdomf-tags-widget.php:113
+msgid "Title: "
+msgstr ""
+
 #: widgets/tdomf-comments-widget.php:347
 msgid "Overwrite Default Settings"
 msgstr ""
@@ -4630,190 +4922,106 @@ msgstr ""
 msgid "Content of Post"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:80
-msgid "Custom Fields Widgets"
+#: widgets/tdomf-customfield-widget.php:123
+msgid "Text Field"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:81
-msgid "How many Custom Fields widgets would you like?"
+#: widgets/tdomf-customfield-widget.php:124
+msgid "Hidden Field"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:291
+#: widgets/tdomf-customfield-widget.php:125
+msgid "Text Area"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:126
+msgid "Check Box"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:127
+msgid "List (Select Field)"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:144
+msgid "Custom Field"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:145
 #, php-format
-msgid ""
-"<b>Error</b>: Widget \"Custom Fields #%d\" contains an empty key. The key "
-"must be set to something and must be unique."
+msgid "Custom Fields %d"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:350
+#: widgets/tdomf-customfield-widget.php:163
+#: widgets/tdomf-customfield-widget.php:197
+msgid "true"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:163
+#: widgets/tdomf-customfield-widget.php:197
+msgid "false"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:268
+#, php-format
+msgid "Custom Field ('%s')"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:727
+msgid "Custom Field: "
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:740
+msgid "Not checked"
+msgstr ""
+
+#: widgets/tdomf-customfield-widget.php:788
 msgid "Custom Field Key:"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:352
+#: widgets/tdomf-customfield-widget.php:790
 msgid "You must specify a unique value for the Custom Field key."
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:361
+#: widgets/tdomf-customfield-widget.php:799
 msgid "Include in Preview"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:368
+#: widgets/tdomf-customfield-widget.php:806
 msgid "Append Custom Field to Post Content"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:374
+#: widgets/tdomf-customfield-widget.php:812
 msgid "Format to use:"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:376
+#: widgets/tdomf-customfield-widget.php:814
 msgid ""
 "If you enable the append option, this format will be used for preview as "
 "well. It supports the Form Hacker macros and you can use PHP code. "
 "Additional macros are listed below:"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:378
+#: widgets/tdomf-customfield-widget.php:816
 msgid "= Value of Custom Field"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:379
+#: widgets/tdomf-customfield-widget.php:817
 msgid "= Custom Field Key"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:380
+#: widgets/tdomf-customfield-widget.php:818
 msgid "= Title"
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:427
+#: widgets/tdomf-customfield-widget.php:850
 msgid "Type: "
 msgstr ""
 
-#: widgets/tdomf-customfield-widget.php:429
-#: widgets/tdomf-customfield-widget.php:606
-msgid "Text Field"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:430
-#: widgets/tdomf-customfield-widget.php:706
-msgid "Hidden"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:431
-#: widgets/tdomf-customfield-widget.php:837
-msgid "Text Area"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:432
-#: widgets/tdomf-customfield-widget.php:972
-msgid "Check Box"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:433
-#: widgets/tdomf-customfield-widget.php:1144
-msgid "Select"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:437
-msgid "Radio Group"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:677
-#: widgets/tdomf-customfield-widget.php:934
-#: widgets/tdomf-customfield-widget.php:1114
-#: widgets/tdomf-customfield-widget.php:1478
-msgid "Custom Field: "
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:708
-msgid "Value:"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:982
+#: widgets/tdomf-customfield-widget.php:912
+#, php-format
 msgid ""
-"Required Setting (<i>checkbox must be this value or the post cannot be "
-"submitted</i>)"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:987
-msgid "Default Setting"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1015
-#: widgets/tdomf-customfield-widget.php:1051
-#: widgets/tdomf-customfield-widget.php:1322
-#: widgets/tdomf-customfield-widget.php:1375
-msgid "(Required)"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1068
-#, php-format
-msgid "You must select \"%s\"."
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1070
-msgid "You must select the checkbox!"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1074
-#, php-format
-msgid "You must not select \"%s\"."
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1076
-msgid "You must not select the checkbox!"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1121
-msgid "Checked"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1123
-msgid "Not checked"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1155
-msgid "You must specify a value for Item name and Item value"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1173
-msgid "That value already exists!"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1204
-msgid "Please select item to remove from the list!"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1211
-#: widgets/tdomf-customfield-widget.php:1262
-msgid "Default selected options will be: "
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1230
-msgid "Allow multiple selections"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1235
-msgid "How many rows?"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1237
-msgid "<i>(1 row will create a drop down list)</i>"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1243
-msgid "Make Current Selection Default"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1293
-msgid "Name/Text of Item"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1299
-msgid "Value of Item"
-msgstr ""
-
-#: widgets/tdomf-customfield-widget.php:1304
-msgid "Append Item"
+"<b>Error</b>: Widget \"Custom Fields #%d\" contains an empty key. The key "
+"must be set to something and must be unique."
 msgstr ""
 
 #: widgets/tdomf-excerpt-widget.php:50
@@ -5330,10 +5538,6 @@ msgid ""
 "PHP code here and use MACROs (see list) from the Form Hacker in the output."
 msgstr ""
 
-#: widgets/tdomf-text-widget.php:123
-msgid "Text:"
-msgstr ""
-
 #: widgets/tdomf-whoami-widget.php:44
 msgid "Who Am I"
 msgstr ""
@@ -5347,7 +5551,7 @@ msgstr ""
 msgid "You can configure this form &raquo;"
 msgstr ""
 
-#: widgets/tdomf-whoami-widget.php:119 widgets/tdomf-whoami-widget.php:416
+#: widgets/tdomf-whoami-widget.php:119 widgets/tdomf-whoami-widget.php:428
 #, php-format
 msgid ""
 "We do not know who you are. Please supply your name and email address. "
@@ -5355,17 +5559,17 @@ msgid ""
 "or <a href=\"%s\">register</a> for a user account if you do not have one."
 msgstr ""
 
-#: widgets/tdomf-whoami-widget.php:126 widgets/tdomf-whoami-widget.php:428
+#: widgets/tdomf-whoami-widget.php:126 widgets/tdomf-whoami-widget.php:440
 msgid "Name:"
 msgstr ""
 
 #: widgets/tdomf-whoami-widget.php:128 widgets/tdomf-whoami-widget.php:141
-#: widgets/tdomf-whoami-widget.php:154 widgets/tdomf-whoami-widget.php:432
-#: widgets/tdomf-whoami-widget.php:452 widgets/tdomf-whoami-widget.php:473
+#: widgets/tdomf-whoami-widget.php:154 widgets/tdomf-whoami-widget.php:444
+#: widgets/tdomf-whoami-widget.php:464 widgets/tdomf-whoami-widget.php:485
 msgid " (Required)"
 msgstr ""
 
-#: widgets/tdomf-whoami-widget.php:152 widgets/tdomf-whoami-widget.php:469
+#: widgets/tdomf-whoami-widget.php:152 widgets/tdomf-whoami-widget.php:481
 msgid "Webpage:"
 msgstr ""
 

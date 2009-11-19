@@ -380,7 +380,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 <label for="content-title-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?></label>
 <input type="checkbox" name="content-title-enable" id="content-title-enable" <?php if($options['title-enable']) echo "checked"; ?> >
 
-          <?php $tfoptions = $this->textfield->control($options, $form_id, $tfshow); 
+          <?php $tfoptions = $this->textfield->control($options, $form_id, $tfshow, false, $_POST[$this->internalName.'-submit']); 
           if( $_POST[$this->internalName.'-submit'] ) {
               $options = wp_parse_args($tfoptions, $options);
               $this->updateOptions($options,$form_id);
@@ -390,7 +390,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 <label for="content-text-enable" style="line-height:35px;"><?php _e("Show","tdomf"); ?><label>
 <input type="checkbox" name="content-text-enable" id="content-text-enable" <?php if($options['text-enable']) echo "checked"; ?> >
           
-          <?php $taoptions = $this->textarea->control($options, $form_id, $tashow); 
+          <?php $taoptions = $this->textarea->control($options, $form_id, $tashow, false, $_POST[$this->internalName.'-submit']); 
           if( $_POST[$this->internalName.'-submit'] ) {
               $options = wp_parse_args($taoptions, $options);
               $this->updateOptions($options,$form_id);

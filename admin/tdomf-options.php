@@ -10,7 +10,7 @@ add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_sh
 function tdomf_options_admin_head() {
     global $wp_version;
     /* add style options and start tabs for options page */
-    if(preg_match('/tdomf_show_options_menu/',$_SERVER[REQUEST_URI])) { ?>
+    if(preg_match('/tdomf_show_options_menu/',$_SERVER['REQUEST_URI'])) { ?>
            
            <style>
             .ui-tabs-nav {
@@ -698,30 +698,6 @@ function tdomf_create_dummy_user() {
    update_option(TDOMF_DEFAULT_AUTHOR,$user_id);
    tdomf_log_message("Dummy user created for default author, user id = $user_id");
    return $user_id;
-}
-
-// Create a random string!
-// Taken from http://www.tutorialized.com/view/tutorial/PHP-Random-String-Generator/13903
-//
-function tdomf_random_string($length)
-{
-    // Error check input
-    //
-    if($length > 32) { $length = 32; }
-    if($length <= 0) { $length = 1; }
-  
-    // Generate random 32 charecter string
-    $string = md5(time());
-
-    // Position Limiting
-    $highest_startpoint = 32-$length;
-
-    // Take a random starting point in the randomly
-    // Generated String, not going any higher then $highest_startpoint
-    $tdomf_random_string = substr($string,rand(0,$highest_startpoint),$length);
-
-    return $tdomf_random_string;
-
 }
 
 // Handle actions for this form
