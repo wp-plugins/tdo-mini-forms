@@ -683,7 +683,7 @@ require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-db.php');
 require_once(TDOMF_FULLPATH.'include'.DIRECTORY_SEPARATOR.'tdomf-msgs.php');
 
 // Only need this pages if you're modifying the plugin
-if(is_admin()) {
+/*if(is_admin()) {*/
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-overview.php');
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-edit-post-panel.php');
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-options.php');
@@ -695,15 +695,15 @@ if(is_admin()) {
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-uninstall.php');
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-form-hacker.php');
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-export.php');
-}
+/*}*/
 // This file contains some admin test like functions for user/ip trust/ban checks
 // @todo Move utility functions from here into a non-admin file
 require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-manage.php');
 
 // The "Your Submissions" can be user by normal users
-if(is_user_logged_in()) {
+/*if(is_user_logged_in()) {*/
     require_once(TDOMF_FULLPATH.'admin'.DIRECTORY_SEPARATOR.'tdomf-your-submissions.php');
-}
+/*}*/
 
 /////////////////////////
 // What's new since... //
