@@ -3,7 +3,7 @@
 Plugin Name: TDO Mini Forms
 Plugin URI: http://thedeadone.net/download/tdo-mini-forms-wordpress-plugin/
 Description: This plugin allows you to add custom posting forms to your website that allows your readers (including non-registered) to submit posts.
-Version: 0.13.6
+Version: 0.13.7
 Author: Mark Cunningham
 Author URI: http://thedeadone.net
 */
@@ -35,34 +35,9 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
-// v0.13.6
-// - "Number" option in TDOMFTextField (and therefore Custom Fields widget)
-// - Add some new checks to form hacker to catch the bug. Was able to reproduce
-//    it and it seems PHP has some problems with non-latin types being converted
-//    into database. Why doesn't this show up elsewhere in Wordpress?
-// - Removed usage of '_SERVER' in backend (or if not possible, added esc_url
-//    wrapper)
-// - Modified AJAX to prevent double submits
-// - Refactored "Hidden" field as TDOMFWidgetFieldHidden and it now allows 
-//    PHP code to be executed
-// - Bug in TDOMFWidgetFields meant that checkbox options were getting reset
-//    when not being saved in 'Create'
-// - Upload Files Widget refactored into Widget Class. Should be completely
-//    compatible with existing setups
-// - Upload Files Widget extended to support Multiple Instances (thanks to
-//    being refactored into a Widget Class)
-// - Upload Files Widget now tracks the files it uploads and only deletes those
-//    when a post is removed. Before it would delete the folder however this 
-//    could lead to a false-positive and delete non-TDOMF unintentionally.
-// - Imported some code improvements from [DD32](http://dd32.id.au/2009/11/01/youre-doing-it-wrong-2/)
-// - Select Field refactored in TDOMF Custom Field widget.
-// - Custom field widget now supports edit mode! Includes revision history for
-//    each edit with the ability to revert
-// - Select field on Custom Field widget for Select Field, is no longer shrunk
-//
-//    id/name for HTML element for some Custom Fields has changed:
-//    customfields-s-list-X       to    customfields-s-X-s
-//    customfields-hidden-X       to    customfields-h-X-h
+// v0.13.7
+// - Moved 'tdomf_random_string' to a different file so that it is always 
+//    included
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -312,9 +287,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "53");
+define("TDOMF_BUILD", "54");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13.6");
+define("TDOMF_VERSION", "0.13.7");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -851,6 +826,7 @@ function tdomf_new_features() {
       $features .= "<li>".__("<b>Custom Fields modified by TDOMF Forms are stored in revision history</b>","tdomf")."</li>";      
       $features .= "<li>".__("<b>Allow multiple instances of the Upload Files widget</b>","tdomf")."</li>";
   }
+  // 54 = 0.13.7
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

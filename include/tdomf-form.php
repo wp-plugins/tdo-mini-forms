@@ -1681,4 +1681,28 @@ add_action('wp_restore_post_revision', 'tdomf_revision_restore_action',10,2);
 
 // @todo Do we need to support wp_delete_post_revision?
 
+// Create a random string!
+// Taken from http://www.tutorialized.com/view/tutorial/PHP-Random-String-Generator/13903
+//
+function tdomf_random_string($length)
+{
+    // Error check input
+    //
+    if($length > 32) { $length = 32; }
+    if($length <= 0) { $length = 1; }
+  
+    // Generate random 32 charecter string
+    $string = md5(time());
+
+    // Position Limiting
+    $highest_startpoint = 32-$length;
+
+    // Take a random starting point in the randomly
+    // Generated String, not going any higher then $highest_startpoint
+    $tdomf_random_string = substr($string,rand(0,$highest_startpoint),$length);
+
+    return $tdomf_random_string;
+
+}
+
 ?>

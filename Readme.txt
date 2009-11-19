@@ -4,13 +4,15 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.8.6
 Tested up to: 2.8.6
-Stable Tag: 0.13.6
+Stable Tag: 0.13.7
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
 == Description ==
 
 This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
+
+**0.13.7 contains a patch for sites that see a blank page after upgrading**
 
 **The biggest change in version 0.13.6 is the ability to use Custom Fields in an Edit Form (i.e. allow Custom Field editing). It even keeps revision history of Custom Fields to allow for moderation and reverting to previous versions. Additionally a Custom Field TextField can be restricted to a number and the Custom Field Hidden can execute php code. Check the Changelog for a full list of changes.**
 
@@ -396,6 +398,10 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Custom Field history is not stored in reivions edits (can't compare with older revisions/edits)
 
 == Changelog ==
+
+= 0.13.7 =
+
+* Moved 'tdomf_random_string' to a different file so that it is always included. This was causing some blogs to show only a blank page after upgrade to 0.13.6
 
 = 0.13.6 =
 
