@@ -35,9 +35,8 @@ Author URI: http://thedeadone.net
 //
 // See readme.txt
 //
-// v0.13.7
-// - Moved 'tdomf_random_string' to a different file so that it is always 
-//    included
+// v0.13.8
+// - Wordpress 3.0 compatiblity update: Updated jQuery calls in tdomf-edit-form.php
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -287,9 +286,9 @@ if(!defined('DIRECTORY_SEPARATOR')) {
 }
 
 // Build Number (must be a integer)
-define("TDOMF_BUILD", "54");
+define("TDOMF_BUILD", "55");
 // Version Number (can be text)
-define("TDOMF_VERSION", "0.13.7");
+define("TDOMF_VERSION", "0.13.8");
 
 ///////////////////////////////////////
 // 0.1 to 0.5 Settings (no longer used)
@@ -594,6 +593,13 @@ function tdomf_wp27() {
   return version_compare($wp_version,"2.7-beta3",">=");
 }
 
+
+// Is this a Wordpress >= 3.0
+//
+function tdomf_wp30() {
+  global $wp_version;
+  return version_compare($wp_version,"3.0",">=");
+}
 ///////////////////////////////////
 // Configure Backend Admin Menus //
 ///////////////////////////////////
@@ -827,6 +833,7 @@ function tdomf_new_features() {
       $features .= "<li>".__("<b>Allow multiple instances of the Upload Files widget</b>","tdomf")."</li>";
   }
   // 54 = 0.13.7
+  // 55 = 0.13.8
   
   if(!empty($features)) {
     return "<ul>".$features."</ul>";

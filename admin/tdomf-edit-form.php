@@ -11,7 +11,16 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('TDOM
 //
 function tdomf_load_edit_form_scripts() {
   // Need these scripts for drag and drop but only on this page, not every page!
-  wp_enqueue_script( 'interface' );
+  if(tdomf_wp30())
+  {
+      wp_enqueue_script( 'jquery-ui-core' );
+      wp_enqueue_script( 'jquery-ui-draggable' );
+      wp_enqueue_script( 'jquery-ui-sortable' );
+  }
+  else
+  {
+      wp_enqueue_script( 'interface' );
+  }
 }
 add_action("load-".sanitize_title(__('TDO Mini Forms', 'tdomf'))."_page_tdomf_show_form_menu","tdomf_load_edit_form_scripts");
 
@@ -147,13 +156,27 @@ function tdomf_form_admin_head() {
 	text-align: justify;
 }
 
+<?php if(tdomf_wp30()) { ?>
+#zones {
+    float: left;
+}
+<?php } ?>
+
 #palettediv {
 	border: 1px solid #bbb;
 	background-color: #f0f8ff;
 	height:auto;
+<?php if(tdomf_wp30()) { ?>
+	float: left;
+	padding: 10px;
+	padding-right: 20px;
+	margin-right: 50px;
+<?php } else { ?>
 	margin-top: 10px;
 	padding-bottom: 10px;
+<?php } ?>	
 }
+
 
 #palettediv:after, #zones:after, .dropzone:after {
 	content: ".";
@@ -182,6 +205,7 @@ function tdomf_form_admin_head() {
 	padding: 0 0 0 10px;
 }
 
+<?php if(!tdomf_wp30()) { ?>
 #palettediv .module {
 	margin-right: 10px;
 	float: left;
@@ -194,6 +218,7 @@ function tdomf_form_admin_head() {
 	width: 110px;
 	padding: 0 5px;
 }
+<?php } ?>
 
 #palettediv .popper {
 	visibility: hidden;
@@ -311,7 +336,11 @@ function tdomf_form_admin_head() {
         <?php foreach($widgets_control as $id => $w) { ?>
           jQuery('#<?php echo $id; ?>popper').click(function() {popControl('#<?php echo $id; ?>control');});
           jQuery('#<?php echo $id; ?>closer').click(function() {unpopControl('#<?php echo $id; ?>control');});
+<?php if(tdomf_wp30()) { ?>		  
+          jQuery('#<?php echo $id; ?>control').draggable({handle: '.controlhandle', zIndex: 1000});		  
+<?php } else { ?>
           jQuery('#<?php echo $id; ?>control').Draggable({handle: '.controlhandle', zIndex: 1000});
+<?php } ?>
           if ( true && window.opera )
             jQuery('#<?php echo $id; ?>control').css('border','1px solid #bbb');
         <?php } ?>
@@ -392,9 +421,14 @@ function tdomf_form_admin_head() {
 		unpopShadow();
 	}
 	function serializeAll() {
+<?php if(tdomf_wp30()) { ?>	
+		var serial1 = jQuery('ul#tdomf_form-1').sortable( "serialize", { key: "tdomf_form-1[]" } );
+		jQuery('#tdomf_form-1order').attr('value',serial1);	
+<?php } else { ?>		
 			var serial1 = jQuery.SortSerialize('tdomf_form-1');
 		jQuery('#tdomf_form-1order').attr('value',serial1.hash.replace(/widgetprefix-/g, ''));
-		}
+<?php } ?>
+	}
 	function updateAll() {
 		jQuery.map(cols, function(o) {
 			if ( jQuery('#' + o + ' li').length )
@@ -481,33 +515,44 @@ function tdomf_show_form_menu() {
       <?php if(tdomf_wp25()) { ?>
       <br/><br/>
       <?php } ?>
+
+<?php if(tdomf_wp30()) { ?>      
+      <div id="palettediv">
+        <h3>Available Widgets</h3>
+        <ul id="palette">
+            <?php foreach($widgets as $id => $w) {
+                    if ( !is_array( $widget_order ) || !in_array($id,$widget_order)) {?>
+                        <li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $w['name']; ?> <?php if(isset($widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
+            <?php } } ?>
+        </ul> <!-- palette -->
+      </div> <!-- palettediv -->      
+<?php } ?>
       
-			<div id="zones">
-							<input type="hidden" id="tdomf_form-1order" name="tdomf_form-1order" value="" />
+      <div id="zones">
+        <input type="hidden" id="tdomf_form-1order" name="tdomf_form-1order" value="" />
+            <div class="dropzone">
+                <h3>Your Form</h3>
+                    <div id="tdomf_form-1placemat" class="placemat">
+                        <span class="handle">
+                            <h4>Default Form</h4>
+                            <?php _e("Your form will be displayed using the default widget order. Dragging widgets into this box will replace the default with your customized form.","tdomf"); ?>
+                            </span>
+                    </div>
 
-				<div class="dropzone">
-					<h3>Your Form</h3>
+                    <ul id="tdomf_form-1">
+                    <?php
+                    if ( is_array( $widget_order ) ) {
+                        foreach ( $widget_order as $id ) {
+                            if(isset($widgets[$id]['name'])) { ?>
+                            <li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $widgets[$id]['name']; ?> <?php if(isset($widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
+                            <?php }
+                        }
+                    } ?>
+                    </ul>
+            </div> <!- dropzone ->
+      </div> <!-- zones -->
 
-					<div id="tdomf_form-1placemat" class="placemat">
-						<span class="handle">
-							<h4>Default Form</h4>
-							<?php _e("Your form will be displayed using the default widget order. Dragging widgets into this box will replace the default with your customized form.","tdomf"); ?></span>
-					</div>
-
-					<ul id="tdomf_form-1">
-					<?php
-					if ( is_array( $widget_order ) ) {
-						foreach ( $widget_order as $id ) {
-						    if(isset($widgets[$id]['name'])) { ?>
-							<li class="module" id="widgetprefix-<?php echo $id; ?>"><span class="handle"><?php echo $widgets[$id]['name']; ?> <?php if(isset($widgets_control[$id])) { ?><div class="popper" id="<?php echo $id; ?>popper" title="<?php _e("Configure","tdomf"); ?>">&#8801;</div><?php } ?></span></li>
-							<?php }
-						}
-					} ?>
-					</ul>
-				</div>
-
-  		</div>
-
+<?php if(!tdomf_wp30()) { ?>
 			<div id="palettediv">
 				<h3>Available Widgets</h3>
 
@@ -519,16 +564,26 @@ function tdomf_show_form_menu() {
 				<?php } } ?>
 				</ul>
 			</div>
+<?php } ?>
 
 			<script type="text/javascript">
 			// <![CDATA[
 				jQuery(document).ready(function(){
+<?php if(tdomf_wp30()) { ?>				
+								jQuery('ul#palette').sortable({
+						accept: 'module', activeclass: 'activeDraggable', opacity: 0.8, revert: true, stop: updateAll, connectWith: 'ul#tdomf_form-1'
+					});
+								jQuery('ul#tdomf_form-1').sortable({
+								        accept: 'module', activeclass: 'activeDraggable', opacity: 0.8, revert: true, stop: updateAll, connectWith: 'ul#palette'
+					});
+<?php } else { ?>	
 								jQuery('ul#palette').Sortable({
 						accept: 'module', activeclass: 'activeDraggable', opacity: 0.8, revert: true, onStop: updateAll
 					});
 								jQuery('ul#tdomf_form-1').Sortable({
 						accept: 'module', activeclass: 'activeDraggable', opacity: 0.8, revert: true, onStop: updateAll
-					});
+					});				
+<?php } ?>
 							});
 			// ]]>
 			</script>
@@ -602,7 +657,7 @@ function tdomf_handle_editformmenu_actions() {
                     tdomf_log_mem_usage(__FILE__,__LINE__);
 					tdomf_log_message_extra("Saved widget settings for form-$form_id: ".$_POST['tdomf_form-1order'],TDOMF_LOG_GOOD);
 				} else {
-					$widget_order = tdomf_get_form_widget_default_order();
+					$widget_order = tdomf_get_form_widget_default_order($form_id);
 					tdomf_set_option_form(TDOMF_OPTION_FORM_ORDER,false,$form_id);
                     tdomf_log_mem_usage(__FILE__,__LINE__);
 					tdomf_log_message("Restored default settings for form-$form_id");
