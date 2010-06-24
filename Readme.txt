@@ -14,8 +14,6 @@ This plugin allows you to add highly customisable forms that work with your Word
 
 **0.13.8 is a compatibility fix for Wordpress 3.0. If you are running a Wordpress version prior to 3.0, you do not need to upgrade.**
 
-**The biggest change in version 0.13.6 is the ability to use Custom Fields in an Edit Form (i.e. allow Custom Field editing). It even keeps revision history of Custom Fields to allow for moderation and reverting to previous versions. Additionally a Custom Field TextField can be restricted to a number and the Custom Field Hidden can execute php code. Check the Changelog for a full list of changes.**
-
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/), [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
 The plugin provides an extensive moderation view so administrators and editors can see posts and edits awaiting approval and publish or delete them. Administrators can also ban specific users and IPs from using the form. Administrators can also "Trust" specific users. This means that when they use the form, their posts are automatically published. This does not give them any other rights or permissions using the Wordpress software, it only affects usage of the form. This applies to user and IP bans as well. There is even an option to automatically trust users after so many approved submissions and edits.
