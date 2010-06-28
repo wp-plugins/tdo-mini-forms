@@ -4,7 +4,7 @@ Donate link: http://tinyurl.com/yvgcs9
 Tags: anonymous, posting, editing, users, post, form, admin, submit, submissions, unregistered users, uploads, downloads, categories, tags, custom fields, captcha, custom posting interface, plugin, custom, widget, akismet, ajax, recaptcha, subscribe-to-comments, geo-mashup
 Requires at least: 2.8.6
 Tested up to: 3.0
-Stable Tag: 0.13.8
+Stable Tag: 0.13.9
 
 This plugin can add themed custom posting and editing forms to your website that allows your readers (including non-registered) to contribute.
 
@@ -12,7 +12,7 @@ This plugin can add themed custom posting and editing forms to your website that
 
 This plugin allows you to add highly customisable forms that work with your Wordpress Theme to your website that allows non-registered users and/or subscribers (also configurable) to submit and edit posts and pages. New posts are kept in "draft" until an admin can publish them (also configurable). Likewise edits can be kept be automatically kept as revisions until an admin approves them. It can optionally use Akismet to check if submissions and contributions are spam. TDO Mini Forms can be used to create "outside-the-box" uses for Wordpress, from Contact Managers, Ad Managers, Collaborate Image Sites, Submit Links, etc.
 
-**0.13.8 is a compatibility fix for Wordpress 3.0. If you are running a Wordpress version prior to 3.0, you do not need to upgrade.**
+**0.13.9 is another compatibility fix for Wordpress 3.0. If you are running a Wordpress version prior to 3.0, you do not need to upgrade.**
 
 TDO Mini Forms has been used to turn Wordpress into a [Forum](http://thedeadone.net/software/tdo-forum-wordpress-theme/), [Contact Manager](http://www.slipfire.com/wp-crm-58.htm)!
 
@@ -396,6 +396,10 @@ Also thanks to everyone who donated and offered feedback and testing!
 * Custom Field history is not stored in reivions edits (can't compare with older revisions/edits)
 
 == Changelog ==
+
+= 0.13.9 =
+
+* The fix for the form creator page was incomplete. I had to update the "seralize" jQuery/js previousily to use the newer JQuery included with WP3.0. However this new seralize function mistakes '-' and '_' as '='. Apparently this is a feature. This meant widgets with '-' in the name like "i-agree" or "custom-field-1", would not be listed as being on the form when you save your configuration. If I was doing the edit form from scratch, I'd include jQuery with TDOMF so I wouldn't have to do maintaince code changes in the admin area.
 
 = 0.13.8 =
 

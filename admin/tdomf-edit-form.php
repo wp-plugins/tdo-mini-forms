@@ -160,6 +160,9 @@ function tdomf_form_admin_head() {
 #zones {
     float: left;
 }
+#palette {
+    min-height: 50px;
+}
 <?php } ?>
 
 #palettediv {
@@ -422,8 +425,8 @@ function tdomf_form_admin_head() {
 	}
 	function serializeAll() {
 <?php if(tdomf_wp30()) { ?>	
-		var serial1 = jQuery('ul#tdomf_form-1').sortable( "serialize", { key: "tdomf_form-1[]" } );
-		jQuery('#tdomf_form-1order').attr('value',serial1);	
+    var serial1 = jQuery('ul#tdomf_form-1').sortable( "serialize", { key: "tdomf_form-1[]", expression: "widgetprefix\-(.+)" } );
+	jQuery('#tdomf_form-1order').attr('value',serial1);	
 <?php } else { ?>		
 			var serial1 = jQuery.SortSerialize('tdomf_form-1');
 		jQuery('#tdomf_form-1order').attr('value',serial1.hash.replace(/widgetprefix-/g, ''));
@@ -518,7 +521,7 @@ function tdomf_show_form_menu() {
 
 <?php if(tdomf_wp30()) { ?>      
       <div id="palettediv">
-        <h3>Available Widgets</h3>
+        <h3>Available Widgets</h3>     
         <ul id="palette">
             <?php foreach($widgets as $id => $w) {
                     if ( !is_array( $widget_order ) || !in_array($id,$widget_order)) {?>
@@ -555,7 +558,7 @@ function tdomf_show_form_menu() {
 <?php if(!tdomf_wp30()) { ?>
 			<div id="palettediv">
 				<h3>Available Widgets</h3>
-
+				
 				<ul id="palette">
         				
 				<?php foreach($widgets as $id => $w) {
